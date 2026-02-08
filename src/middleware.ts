@@ -2,6 +2,7 @@ import createMiddleware from 'next-intl/middleware';
 import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 import { routing } from '@/i18n/routing';
+import { defaultLocale } from '@/i18n/config';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -26,7 +27,7 @@ export async function middleware(request: NextRequest) {
   const isDashboardRoute = /^\/(fr|en|he|ru)(\/(?!login|forgot-password|signup|welcome|privacy|terms).*)?$/.test(pathname);
 
   if (isDashboardRoute && !isAuthRoute && !isPublicRoute && !user) {
-    const locale = pathname.split('/')[1] || 'fr';
+    const locale = pathname.split('/')[1] || defaultLocale;
     const welcomeUrl = new URL(`/${locale}/welcome`, request.url);
     return NextResponse.redirect(welcomeUrl);
   }
@@ -34,7 +35,7 @@ export async function middleware(request: NextRequest) {
   // If logged in and trying to access auth or welcome, redirect to dashboard (allow privacy/terms)
   const isWelcome = /^\/(fr|en|he|ru)\/welcome/.test(pathname);
   if ((isAuthRoute || isWelcome) && user) {
-    const locale = pathname.split('/')[1] || 'fr';
+    const locale = pathname.split('/')[1] || defaultLocale;
     const dashboardUrl = new URL(`/${locale}`, request.url);
     return NextResponse.redirect(dashboardUrl);
   }

@@ -170,15 +170,15 @@ export default function WelcomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary to-primary-700 pt-32 pb-20 lg:pt-40 lg:pb-32">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary to-primary-700 min-h-[100svh] flex items-stretch">
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-primary-400/10 blur-3xl" />
           <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-primary-300/10 blur-3xl" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full flex items-center pt-32 pb-20 lg:pt-40 lg:pb-28">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             {/* Text content */}
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-sm text-primary-100 mb-8 backdrop-blur-sm">

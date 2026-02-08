@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance } from 'axios';
 import { createClient } from '@/lib/supabase/client';
+import { defaultLocale } from '@/i18n/config';
 
 function getApiBaseUrl(): string {
   // In the browser, only NEXT_PUBLIC_* env vars are available.
@@ -47,7 +48,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Token expired - redirect to landing page
       if (typeof window !== 'undefined') {
-        const locale = window.location.pathname.split('/')[1] || 'fr';
+        const locale = window.location.pathname.split('/')[1] || defaultLocale;
         window.location.href = `/${locale}/welcome`;
       }
     }
