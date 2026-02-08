@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Link } from '@/i18n/routing';
 import { ArrowLeft } from 'lucide-react';
+import { AuthBrandedLayout } from '@/components/auth/AuthBrandedLayout';
 
 export default function ForgotPasswordPage() {
   const t = useTranslations('auth');
@@ -31,7 +32,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div>
+    <AuthBrandedLayout>
       <div className="mb-6">
         <Link
           href="/welcome"
@@ -77,6 +78,6 @@ export default function ForgotPasswordPage() {
           </Link>
         </form>
       )}
-    </div>
+    </AuthBrandedLayout>
   );
 }

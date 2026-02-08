@@ -306,24 +306,29 @@ export default function WelcomePage() {
       </section>
 
       {/* Screenshots Gallery */}
-      <section className="py-24 lg:py-32 bg-white">
+      <section className="relative overflow-hidden py-24 lg:py-32 bg-gradient-to-br from-primary-900 via-primary to-primary-700">
+        {/* Background decorations */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-primary-400/10 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-primary-300/10 blur-3xl" />
+        </div>
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+          <div className="relative text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               {t('screenshotsTitle')}
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-lg text-primary-100/90">
               {t('screenshotsSubtitle')}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="relative grid md:grid-cols-3 gap-8">
             {screenshots.map((shot, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => setLightboxIndex(i + 1)}
-                className="group rounded-2xl overflow-hidden border border-border/50 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="group rounded-2xl overflow-hidden border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                 aria-label={t('openImage')}
               >
                 <Image src={shot.src} alt={shot.alt} width={800} height={500} className="w-full h-auto" />
