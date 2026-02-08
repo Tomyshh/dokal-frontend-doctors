@@ -16,6 +16,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
+  const tc = useTranslations('common');
   const { profile } = useAuth();
   const { data: settings, isLoading: loadingSettings } = useSettings();
   const updateSettings = useUpdateSettings();
@@ -114,10 +115,15 @@ export default function SettingsPage() {
         <div className="space-y-4">
           <Textarea label={t('about')} value={about} onChange={(e) => setAbout(e.target.value)} rows={4} />
           <Input label={t('education')} value={education} onChange={(e) => setEducation(e.target.value)} />
-          <Input label={t('languages')} value={languages} onChange={(e) => setLanguages(e.target.value)} placeholder="Français, English, עברית" />
+          <Input
+            label={t('languages')}
+            value={languages}
+            onChange={(e) => setLanguages(e.target.value)}
+            placeholder={t('languagesPlaceholder')}
+          />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input label={t('city') === 'Ville' ? 'Téléphone' : 'Phone'} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-            <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input label={tc('phone')} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <Input label={tc('email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
 
           <div className="pt-2">
@@ -143,7 +149,7 @@ export default function SettingsPage() {
           </div>
 
           <Button onClick={handleSaveProfile} loading={updateProfile.isPending}>
-            {t('city') === 'Ville' ? 'Enregistrer' : 'Save'}
+            {tc('save')}
           </Button>
         </div>
       </Card>
@@ -175,7 +181,7 @@ export default function SettingsPage() {
             <label htmlFor="reminders" className="text-sm text-gray-700">{t('remindersEnabled')}</label>
           </div>
           <Button onClick={handleSaveSettings} loading={updateSettings.isPending}>
-            {t('city') === 'Ville' ? 'Enregistrer' : 'Save'}
+            {tc('save')}
           </Button>
         </div>
       </Card>

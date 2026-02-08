@@ -11,6 +11,9 @@ import {
   ArrowRight,
   Shield,
   ChevronDown,
+  Lock,
+  FileText,
+  Mail,
 } from 'lucide-react';
 
 export default function WelcomePage() {
@@ -45,26 +48,40 @@ export default function WelcomePage() {
     { value: t('stats.satisfaction.value'), label: t('stats.satisfaction.label') },
   ];
 
+  const screenshots = [
+    { src: '/images/presentation-crm-2.png', alt: t('screenshotAlt') },
+    { src: '/images/presentation-crm-3.png', alt: t('screenshotAlt') },
+    { src: '/images/presentation-crm-4.png', alt: t('screenshotAlt') },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="absolute top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-20 mt-4">
             <Image
               src="/branding/fulllogo_transparent_nobuffer.png"
               alt="Dokal"
-              width={140}
-              height={46}
+              width={120}
+              height={40}
               priority
               className="brightness-0 invert"
             />
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-white/30 text-sm font-medium text-white hover:bg-white hover:text-primary transition-all duration-300"
-            >
-              {t('login')}
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium text-white hover:bg-white/10 transition-all duration-300"
+              >
+                {t('login')}
+              </Link>
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white text-primary text-sm font-semibold hover:bg-primary-50 transition-all duration-300 shadow-sm"
+              >
+                {t('signup')}
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -96,7 +113,7 @@ export default function WelcomePage() {
 
               <div className="mt-10 flex flex-wrap gap-4">
                 <Link
-                  href="/login"
+                  href="/signup"
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-primary font-semibold text-sm hover:bg-primary-50 transition-all duration-300 shadow-lg shadow-black/10"
                 >
                   {t('cta')}
@@ -142,7 +159,6 @@ export default function WelcomePage() {
                   priority
                 />
               </div>
-              {/* Glow effect behind image */}
               <div className="absolute -inset-4 -z-10 rounded-3xl bg-white/5 blur-xl" />
             </div>
           </div>
@@ -182,11 +198,41 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Screenshots Gallery */}
       <section className="py-24 lg:py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+              {t('screenshotsTitle')}
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              {t('screenshotsSubtitle')}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {screenshots.map((shot, i) => (
+              <div
+                key={i}
+                className="group rounded-2xl overflow-hidden border border-border/50 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
+              >
+                <Image
+                  src={shot.src}
+                  alt={shot.alt}
+                  width={800}
+                  height={500}
+                  className="w-full h-auto"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 lg:py-32 bg-gray-50/50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="relative rounded-3xl bg-gradient-to-br from-primary-900 via-primary to-primary-700 px-8 py-16 sm:px-16 sm:py-20 overflow-hidden">
-            {/* Background decoration */}
             <div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full bg-primary-400/10 blur-3xl" />
 
             <div className="relative text-center max-w-2xl mx-auto">
@@ -198,7 +244,7 @@ export default function WelcomePage() {
               </p>
               <div className="mt-10">
                 <Link
-                  href="/login"
+                  href="/signup"
                   className="inline-flex items-center gap-2 px-10 py-4 rounded-full bg-white text-primary font-semibold hover:bg-primary-50 transition-all duration-300 shadow-lg shadow-black/10"
                 >
                   {t('ctaButton')}
@@ -211,19 +257,105 @@ export default function WelcomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 py-8">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <Image
-              src="/branding/fulllogo_transparent_nobuffer.png"
-              alt="Dokal"
-              width={100}
-              height={33}
-              className="opacity-60"
-            />
+      <footer className="border-t border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            {/* Brand */}
+            <div className="md:col-span-1">
+              <Image
+                src="/branding/fulllogo_transparent_nobuffer.png"
+                alt="Dokal"
+                width={120}
+                height={40}
+              />
+              <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+                {t('footerDescription')}
+              </p>
+            </div>
+
+            {/* Product */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-4">
+                {t('footerProduct')}
+              </h4>
+              <ul className="space-y-3">
+                <li>
+                  <button
+                    onClick={() =>
+                      document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+                    }
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {t('featuresTitle')}
+                  </button>
+                </li>
+                <li>
+                  <Link href="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {t('login')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/signup" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {t('signup')}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-4">
+                {t('footerLegal')}
+              </h4>
+              <ul className="space-y-3">
+                <li>
+                  <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {t('privacyPolicy')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {t('termsOfService')}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-4">
+                {t('footerContact')}
+              </h4>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="w-4 h-4" />
+                  contact@dokal.com
+                </li>
+                <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Lock className="w-4 h-4" />
+                  {t('secureData')}
+                </li>
+                <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <FileText className="w-4 h-4" />
+                  {t('gdprCompliant')}
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
               {t('footer')}
             </p>
+            <div className="flex items-center gap-6">
+              <Link href="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                {t('privacyPolicy')}
+              </Link>
+              <Link href="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                {t('termsOfService')}
+              </Link>
+            </div>
           </div>
         </div>
       </footer>

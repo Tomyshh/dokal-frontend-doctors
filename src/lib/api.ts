@@ -45,10 +45,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired - redirect to login
+      // Token expired - redirect to landing page
       if (typeof window !== 'undefined') {
         const locale = window.location.pathname.split('/')[1] || 'fr';
-        window.location.href = `/${locale}/login`;
+        window.location.href = `/${locale}/welcome`;
       }
     }
     return Promise.reject(error);

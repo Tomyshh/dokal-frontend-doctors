@@ -98,9 +98,9 @@ export default function ReasonsPage() {
 
       <Dialog open={showDialog} onClose={() => setShowDialog(false)} title={editing ? tc('edit') : tc('add')}>
         <div className="space-y-4">
-          <Input label="Label (EN)" value={label} onChange={(e) => setLabel(e.target.value)} required />
-          <Input label="Label (FR)" value={labelFr} onChange={(e) => setLabelFr(e.target.value)} />
-          <Input label="Label (HE)" value={labelHe} onChange={(e) => setLabelHe(e.target.value)} />
+          <Input label={t('labelEn')} value={label} onChange={(e) => setLabel(e.target.value)} required />
+          <Input label={t('labelFr')} value={labelFr} onChange={(e) => setLabelFr(e.target.value)} />
+          <Input label={t('labelHe')} value={labelHe} onChange={(e) => setLabelHe(e.target.value)} />
           <div className="flex items-center gap-3">
             <input type="checkbox" id="active" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 rounded border-border text-primary" />
             <label htmlFor="active" className="text-sm text-gray-700">{tc('active')}</label>

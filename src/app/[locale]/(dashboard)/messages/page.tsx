@@ -14,6 +14,7 @@ import { cn, formatRelativeDate } from '@/lib/utils';
 
 export default function MessagesPage() {
   const t = useTranslations('messages');
+  const tc = useTranslations('common');
   const locale = useLocale();
   const { data: conversations, isLoading } = useConversations();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -39,7 +40,7 @@ export default function MessagesPage() {
               conversations.map((conv) => {
                 const name = conv.profiles
                   ? `${conv.profiles.first_name || ''} ${conv.profiles.last_name || ''}`
-                  : 'Patient';
+                  : tc('patient');
                 return (
                   <button
                     key={conv.id}
@@ -90,7 +91,7 @@ export default function MessagesPage() {
               patientName={
                 selectedConversation.profiles
                   ? `${selectedConversation.profiles.first_name || ''} ${selectedConversation.profiles.last_name || ''}`
-                  : 'Patient'
+                  : tc('patient')
               }
               patientAvatar={selectedConversation.profiles?.avatar_url}
             />
@@ -99,7 +100,7 @@ export default function MessagesPage() {
               <EmptyState
                 icon={MessageSquare}
                 title={t('conversations')}
-                description={locale === 'fr' ? 'Sélectionnez une conversation' : 'Select a conversation'}
+                description={t('selectConversation')}
               />
             </Card>
           )}

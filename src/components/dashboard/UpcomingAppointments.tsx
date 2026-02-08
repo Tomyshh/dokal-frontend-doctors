@@ -74,7 +74,11 @@ export default function UpcomingAppointments() {
                     {formatTime(appt.start_time)} - {formatTime(appt.end_time)}
                   </td>
                   <td className="py-3 px-2 text-sm text-gray-600">
-                    {appt.appointment_reasons?.label_fr || appt.appointment_reasons?.label || '-'}
+                    {locale === 'he'
+                      ? appt.appointment_reasons?.label_he || appt.appointment_reasons?.label || '-'
+                      : locale === 'fr'
+                        ? appt.appointment_reasons?.label_fr || appt.appointment_reasons?.label || '-'
+                        : appt.appointment_reasons?.label || '-'}
                   </td>
                   <td className="py-3 px-2">
                     <Badge className={getStatusColor(appt.status)}>

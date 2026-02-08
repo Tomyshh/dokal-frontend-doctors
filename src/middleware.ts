@@ -21,9 +21,9 @@ export async function middleware(request: NextRequest) {
   const { user, supabaseResponse } = await updateSession(request);
 
   // Check if it's a protected route (dashboard routes)
-  const isAuthRoute = /^\/(fr|en|he)\/(login|forgot-password)/.test(pathname);
-  const isPublicRoute = /^\/(fr|en|he)\/welcome/.test(pathname);
-  const isDashboardRoute = /^\/(fr|en|he)(\/(?!login|forgot-password|welcome).*)?$/.test(pathname);
+  const isAuthRoute = /^\/(fr|en|he|ru)\/(login|forgot-password|signup)/.test(pathname);
+  const isPublicRoute = /^\/(fr|en|he|ru)\/(welcome|privacy|terms)/.test(pathname);
+  const isDashboardRoute = /^\/(fr|en|he|ru)(\/(?!login|forgot-password|signup|welcome|privacy|terms).*)?$/.test(pathname);
 
   if (isDashboardRoute && !isAuthRoute && !isPublicRoute && !user) {
     const locale = pathname.split('/')[1] || 'fr';
@@ -31,8 +31,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(welcomeUrl);
   }
 
-  // If logged in and trying to access auth or public routes, redirect to dashboard
-  if ((isAuthRoute || isPublicRoute) && user) {
+  // If logged in and trying to access auth or welcome, redirect to dashboard (allow privacy/terms)
+  const isWelcome = /^\/(fr|en|he|ru)\/welcome/.test(pathname);
+  if ((isAuthRoute || isWelcome) && user) {
     const locale = pathname.split('/')[1] || 'fr';
     const dashboardUrl = new URL(`/${locale}`, request.url);
     return NextResponse.redirect(dashboardUrl);
@@ -52,5 +53,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/(fr|en|he)', '/(fr|en|he)/:path*'],
+  matcher: ['/', '/(fr|en|he|ru)', '/(fr|en|he|ru)/:path*'],
 };

@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { format, parseISO, isToday, isTomorrow, isYesterday, type Locale } from 'date-fns';
-import { fr, enUS, he } from 'date-fns/locale';
+import { fr, enUS, he, ru } from 'date-fns/locale';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -11,6 +11,7 @@ const localeMap: Record<string, Locale> = {
   fr,
   en: enUS,
   he,
+  ru,
 };
 
 export function formatDate(date: string | Date, formatStr: string = 'dd/MM/yyyy', locale: string = 'fr') {
@@ -25,9 +26,30 @@ export function formatTime(time: string) {
 
 export function formatRelativeDate(date: string | Date, locale: string = 'fr') {
   const d = typeof date === 'string' ? parseISO(date) : date;
-  if (isToday(d)) return locale === 'fr' ? "Aujourd'hui" : locale === 'he' ? 'היום' : 'Today';
-  if (isTomorrow(d)) return locale === 'fr' ? 'Demain' : locale === 'he' ? 'מחר' : 'Tomorrow';
-  if (isYesterday(d)) return locale === 'fr' ? 'Hier' : locale === 'he' ? 'אתמול' : 'Yesterday';
+  if (isToday(d))
+    return locale === 'fr'
+      ? "Aujourd'hui"
+      : locale === 'he'
+        ? 'היום'
+        : locale === 'ru'
+          ? 'Сегодня'
+          : 'Today';
+  if (isTomorrow(d))
+    return locale === 'fr'
+      ? 'Demain'
+      : locale === 'he'
+        ? 'מחר'
+        : locale === 'ru'
+          ? 'Завтра'
+          : 'Tomorrow';
+  if (isYesterday(d))
+    return locale === 'fr'
+      ? 'Hier'
+      : locale === 'he'
+        ? 'אתמול'
+        : locale === 'ru'
+          ? 'Вчера'
+          : 'Yesterday';
   return formatDate(d, 'dd MMM yyyy', locale);
 }
 
@@ -51,12 +73,22 @@ export function getStatusColor(status: string): string {
 
 export function getStatusLabel(status: string, locale: string = 'fr'): string {
   const labels: Record<string, Record<string, string>> = {
-    pending: { fr: 'En attente', en: 'Pending', he: 'ממתין' },
-    confirmed: { fr: 'Confirmé', en: 'Confirmed', he: 'מאושר' },
-    completed: { fr: 'Terminé', en: 'Completed', he: 'הושלם' },
-    cancelled_by_patient: { fr: 'Annulé (patient)', en: 'Cancelled (patient)', he: 'בוטל (מטופל)' },
-    cancelled_by_practitioner: { fr: 'Annulé (praticien)', en: 'Cancelled (doctor)', he: 'בוטל (רופא)' },
-    no_show: { fr: 'Absent', en: 'No show', he: 'לא הגיע' },
+    pending: { fr: 'En attente', en: 'Pending', he: 'ממתין', ru: 'В ожидании' },
+    confirmed: { fr: 'Confirmé', en: 'Confirmed', he: 'מאושר', ru: 'Подтверждено' },
+    completed: { fr: 'Terminé', en: 'Completed', he: 'הושלם', ru: 'Завершено' },
+    cancelled_by_patient: {
+      fr: 'Annulé (patient)',
+      en: 'Cancelled (patient)',
+      he: 'בוטל (מטופל)',
+      ru: 'Отменено (пациент)',
+    },
+    cancelled_by_practitioner: {
+      fr: 'Annulé (praticien)',
+      en: 'Cancelled (doctor)',
+      he: 'בוטל (רופא)',
+      ru: 'Отменено (врач)',
+    },
+    no_show: { fr: 'Absent', en: 'No show', he: 'לא הגיע', ru: 'Не явился' },
   };
   return labels[status]?.[locale] || status;
 }
@@ -66,6 +98,7 @@ export function getDayName(day: number, locale: string = 'fr'): string {
     fr: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
     en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
     he: ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'],
+    ru: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
   };
   return days[locale]?.[day] || days.fr[day];
 }

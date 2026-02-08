@@ -1,18 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
-import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Link } from '@/i18n/routing';
+import { ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -45,13 +46,35 @@ export default function LoginPage() {
   };
 
   return (
-    <Card>
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t('loginTitle')}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{t('loginSubtitle')}</p>
+    <div>
+      <div className="mb-6">
+        <Link
+          href="/welcome"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t('backToLanding')}
+        </Link>
       </div>
 
-      <form onSubmit={handleLogin} className="space-y-4">
+      <div className="text-center mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">{t('loginTitle')}</h1>
+        <p className="text-sm text-muted-foreground mt-2">{t('loginSubtitle')}</p>
+      </div>
+
+      {searchParams.get('checkEmail') === '1' && (
+        <div className="rounded-2xl bg-green-50 border border-green-200 p-4 text-sm text-green-800 mb-6">
+          {t('checkEmail')}
+        </div>
+      )}
+
+      {searchParams.get('signup') === '1' && (
+        <div className="rounded-2xl bg-green-50 border border-green-200 p-4 text-sm text-green-800 mb-6">
+          {t('accountCreated')}
+        </div>
+      )}
+
+      <form onSubmit={handleLogin} className="space-y-5">
         <Input
           id="email"
           type="email"
@@ -74,24 +97,27 @@ export default function LoginPage() {
         />
 
         {error && (
-          <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-700">
             {error}
           </div>
         )}
 
-        <Button type="submit" className="w-full" loading={loading}>
+        <Button type="submit" className="w-full rounded-full h-12" loading={loading}>
           {t('login')}
         </Button>
 
-        <div className="text-center">
+        <div className="flex items-center justify-between gap-4">
           <Link
             href="/forgot-password"
             className="text-sm text-primary hover:underline"
           >
             {t('forgotPassword')}
           </Link>
+          <Link href="/signup" className="text-sm text-primary hover:underline">
+            {t('signup')}
+          </Link>
         </div>
       </form>
-    </Card>
+    </div>
   );
 }

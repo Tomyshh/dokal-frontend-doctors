@@ -1,8 +1,9 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { getStatusLabel } from '@/lib/utils';
 
 interface AppointmentFiltersProps {
   date: string;
@@ -19,15 +20,16 @@ export default function AppointmentFilters({
 }: AppointmentFiltersProps) {
   const t = useTranslations('appointments');
   const tc = useTranslations('common');
+  const locale = useLocale();
 
   const statusOptions = [
     { value: '', label: tc('all') },
-    { value: 'pending', label: t('confirm') === 'Confirmer' ? 'En attente' : 'Pending' },
-    { value: 'confirmed', label: t('confirm') === 'Confirmer' ? 'Confirmé' : 'Confirmed' },
-    { value: 'completed', label: t('confirm') === 'Confirmer' ? 'Terminé' : 'Completed' },
-    { value: 'cancelled_by_patient', label: t('confirm') === 'Confirmer' ? 'Annulé (patient)' : 'Cancelled (patient)' },
-    { value: 'cancelled_by_practitioner', label: t('confirm') === 'Confirmer' ? 'Annulé (praticien)' : 'Cancelled (doctor)' },
-    { value: 'no_show', label: t('confirm') === 'Confirmer' ? 'Absent' : 'No show' },
+    { value: 'pending', label: getStatusLabel('pending', locale) },
+    { value: 'confirmed', label: getStatusLabel('confirmed', locale) },
+    { value: 'completed', label: getStatusLabel('completed', locale) },
+    { value: 'cancelled_by_patient', label: getStatusLabel('cancelled_by_patient', locale) },
+    { value: 'cancelled_by_practitioner', label: getStatusLabel('cancelled_by_practitioner', locale) },
+    { value: 'no_show', label: getStatusLabel('no_show', locale) },
   ];
 
   return (

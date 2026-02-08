@@ -14,6 +14,7 @@ import { formatDate } from '@/lib/utils';
 
 export default function ReviewsPage() {
   const t = useTranslations('reviews');
+  const tc = useTranslations('common');
   const locale = useLocale();
   const { data: reviews, isLoading } = useCrmReviews();
   const replyMutation = useReplyReview();
@@ -118,7 +119,7 @@ export default function ReviewsPage() {
                 {review.practitioner_reply && (
                   <div className="mt-3 ml-8 p-3 rounded-xl bg-primary-50 border border-primary-100">
                     <p className="text-xs font-medium text-primary mb-1">
-                      {locale === 'fr' ? 'Votre réponse' : 'Your reply'}
+                      {t('yourReply')}
                     </p>
                     <p className="text-sm text-gray-700">{review.practitioner_reply}</p>
                   </div>
@@ -140,7 +141,7 @@ export default function ReviewsPage() {
                             {t('reply')}
                           </Button>
                           <Button size="sm" variant="outline" onClick={() => { setReplyingTo(null); setReplyText(''); }}>
-                            {locale === 'fr' ? 'Annuler' : 'Cancel'}
+                            {tc('cancel')}
                           </Button>
                         </div>
                       </div>

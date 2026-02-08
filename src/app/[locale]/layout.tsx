@@ -9,6 +9,9 @@ import '../globals.css';
 export const metadata: Metadata = {
   title: 'Dokal CRM - Espace Praticien',
   description: 'CRM medical pour praticiens - Gerez vos rendez-vous, patients et planning',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default async function LocaleLayout({

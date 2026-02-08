@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
-import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Link } from '@/i18n/routing';
@@ -32,14 +31,25 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <Card>
-      <div className="text-center mb-6">
+    <div>
+      <div className="mb-6">
+        <Link
+          href="/welcome"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t('backToLanding')}
+        </Link>
+      </div>
+
+      <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">{t('resetPassword')}</h1>
+        <p className="text-sm text-muted-foreground mt-2">{t('loginSubtitle')}</p>
       </div>
 
       {sent ? (
         <div className="space-y-4">
-          <div className="rounded-xl bg-green-50 border border-green-200 p-4 text-sm text-green-700">
+          <div className="rounded-2xl bg-green-50 border border-green-200 p-4 text-sm text-green-700">
             {t('resetSent')}
           </div>
           <Link href="/login" className="flex items-center gap-2 text-sm text-primary hover:underline justify-center">
@@ -48,7 +58,7 @@ export default function ForgotPasswordPage() {
           </Link>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <Input
             id="email"
             type="email"
@@ -58,7 +68,7 @@ export default function ForgotPasswordPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <Button type="submit" className="w-full" loading={loading}>
+          <Button type="submit" className="w-full rounded-full h-12" loading={loading}>
             {t('sendResetLink')}
           </Button>
           <Link href="/login" className="flex items-center gap-2 text-sm text-primary hover:underline justify-center">
@@ -67,6 +77,6 @@ export default function ForgotPasswordPage() {
           </Link>
         </form>
       )}
-    </Card>
+    </div>
   );
 }

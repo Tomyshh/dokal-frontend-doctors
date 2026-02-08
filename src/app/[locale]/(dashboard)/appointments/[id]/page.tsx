@@ -18,6 +18,7 @@ import type { Appointment } from '@/types';
 export default function AppointmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const t = useTranslations('appointments');
+  const tc = useTranslations('common');
   const locale = useLocale();
 
   const { data: appointment, isLoading } = useQuery({
@@ -30,14 +31,20 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
   });
 
   if (isLoading) return <Spinner size="lg" />;
-  if (!appointment) return <div className="text-center py-12 text-muted-foreground">RDV non trouvé</div>;
+  if (!appointment) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        {t('notFound')}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-3xl">
       <Link href="/appointments">
         <Button variant="ghost" size="sm">
           <ArrowLeft className="h-4 w-4" />
-          {locale === 'fr' ? 'Retour aux rendez-vous' : 'Back to appointments'}
+          {t('backToAppointments')}
         </Button>
       </Link>
 
@@ -82,7 +89,7 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
 
           {/* Details */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase">{locale === 'fr' ? 'Détails' : 'Details'}</h3>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase">{tc('details')}</h3>
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span>{formatDate(appointment.appointment_date, 'EEEE dd MMMM yyyy', locale)}</span>

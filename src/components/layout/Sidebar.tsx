@@ -27,6 +27,7 @@ interface SidebarProps {
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const t = useTranslations('nav');
+  const ta = useTranslations('auth');
   const pathname = usePathname();
   const locale = useLocale();
   const { profile, signOut } = useAuth();
@@ -87,7 +88,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {!collapsed && (
           <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-            Menu
+            {t('menu')}
           </p>
         )}
         {mainLinks.map((link) => (
@@ -152,7 +153,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <button
               onClick={signOut}
               className="rounded-lg p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-              title="Déconnexion"
+              title={ta('logout')}
             >
               <LogOut className="h-4 w-4" />
             </button>

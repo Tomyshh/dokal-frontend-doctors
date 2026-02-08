@@ -15,11 +15,18 @@ import { Link } from '@/i18n/routing';
 export default function PatientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const t = useTranslations('patients');
+  const tc = useTranslations('common');
   const locale = useLocale();
   const { data: patient, isLoading } = usePatient(id);
 
   if (isLoading) return <Spinner size="lg" />;
-  if (!patient) return <div className="text-center py-12 text-muted-foreground">Patient non trouvé</div>;
+  if (!patient) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        {t('notFound')}
+      </div>
+    );
+  }
 
   const p = patient.profile;
 
@@ -29,7 +36,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
       <Link href="/appointments">
         <Button variant="ghost" size="sm">
           <ArrowLeft className="h-4 w-4" />
-          {locale === 'fr' ? 'Retour' : 'Back'}
+          {tc('back')}
         </Button>
       </Link>
 
@@ -200,10 +207,10 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">Date</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">{locale === 'fr' ? 'Heure' : 'Time'}</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">{locale === 'fr' ? 'Statut' : 'Status'}</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">Notes</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('date')}</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('time')}</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('status')}</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('notes')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">

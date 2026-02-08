@@ -5,12 +5,15 @@ import { createClient } from '@/lib/supabase/client';
 import type { Session, User } from '@supabase/supabase-js';
 import type { Profile } from '@/types';
 import api from '@/lib/api';
+import { useLocale } from 'next-intl';
+import { LogoutScreen } from '@/components/LogoutScreen';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  loggingOut: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -19,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   profile: null,
   loading: true,
+  loggingOut: false,
   signOut: async () => {},
 });
 
@@ -31,7 +35,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
   const supabase = createClient();
+  const locale = useLocale();
 
   useEffect(() => {
     const getSession = async () => {
@@ -75,14 +81,20 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase.auth]);
 
   const signOut = async () => {
+    setLoggingOut(true);
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setProfile(null);
+    // Small delay so the user sees the logout animation before redirect
+    setTimeout(() => {
+      window.location.href = `/${locale}/welcome`;
+    }, 1200);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, loggingOut, signOut }}>
+      {loggingOut && <LogoutScreen />}
       {children}
     </AuthContext.Provider>
   );

@@ -17,6 +17,7 @@ import type { WeeklySchedule } from '@/types';
 
 export default function SchedulePage() {
   const t = useTranslations('schedule');
+  const tc = useTranslations('common');
   const locale = useLocale();
   const { data: schedule, isLoading } = useWeeklySchedule();
   const { data: overrides, isLoading: loadingOverrides } = useScheduleOverrides();
@@ -128,7 +129,7 @@ export default function SchedulePage() {
                     {block.slot_duration_minutes} min
                   </Badge>
                   {!block.is_active && (
-                    <Badge variant="secondary">{locale === 'fr' ? 'Inactif' : 'Inactive'}</Badge>
+                    <Badge variant="secondary">{tc('inactive')}</Badge>
                   )}
                 </div>
                 <div className="flex items-center gap-1">
@@ -237,10 +238,10 @@ export default function SchedulePage() {
           />
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setShowBlockDialog(false)}>
-              {t('startTime') === 'Début' ? 'Annuler' : 'Cancel'}
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSaveBlock} loading={addBlock.isPending || updateBlock.isPending}>
-              {t('startTime') === 'Début' ? 'Enregistrer' : 'Save'}
+              {tc('save')}
             </Button>
           </div>
         </div>
@@ -291,10 +292,10 @@ export default function SchedulePage() {
           />
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setShowOverrideDialog(false)}>
-              {t('startTime') === 'Début' ? 'Annuler' : 'Cancel'}
+              {tc('cancel')}
             </Button>
             <Button onClick={handleSaveOverride} loading={upsertOverride.isPending}>
-              {t('startTime') === 'Début' ? 'Enregistrer' : 'Save'}
+              {tc('save')}
             </Button>
           </div>
         </div>

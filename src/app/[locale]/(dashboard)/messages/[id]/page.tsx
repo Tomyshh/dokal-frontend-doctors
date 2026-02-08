@@ -1,7 +1,7 @@
 'use client';
 
 import { use } from 'react';
-import { useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useConversations } from '@/hooks/useMessages';
 import { Spinner } from '@/components/ui/Spinner';
 import ChatWindow from '@/components/messages/ChatWindow';
@@ -11,7 +11,7 @@ import { Link } from '@/i18n/routing';
 
 export default function MessageDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const locale = useLocale();
+  const tc = useTranslations('common');
   const { data: conversations, isLoading } = useConversations();
 
   const conversation = conversations?.find((c) => c.id === id);
@@ -20,14 +20,14 @@ export default function MessageDetailPage({ params }: { params: Promise<{ id: st
 
   const patientName = conversation?.profiles
     ? `${conversation.profiles.first_name || ''} ${conversation.profiles.last_name || ''}`
-    : 'Patient';
+    : tc('patient');
 
   return (
     <div className="space-y-4">
       <Link href="/messages">
         <Button variant="ghost" size="sm">
           <ArrowLeft className="h-4 w-4" />
-          {locale === 'fr' ? 'Retour' : 'Back'}
+          {tc('back')}
         </Button>
       </Link>
       <div className="h-[calc(100vh-220px)]">
