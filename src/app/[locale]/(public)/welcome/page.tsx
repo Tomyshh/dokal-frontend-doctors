@@ -136,6 +136,10 @@ export default function WelcomePage() {
               priority
               className="shrink-0"
             />
+
+            <span className="absolute left-1/2 -translate-x-1/2 text-xl font-bold tracking-widest text-white uppercase select-none">
+              Dokal
+            </span>
             <div className="flex items-center gap-3">
               {/* Language Switcher */}
               <div className="relative">
