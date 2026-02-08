@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
 import { useSettings, useUpdateSettings, useUpdatePractitionerProfile } from '@/hooks/useSettings';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -13,10 +13,16 @@ import { CheckCircle2 } from 'lucide-react';
 import api from '@/lib/api';
 import type { Practitioner } from '@/types';
 import { useQuery } from '@tanstack/react-query';
+import { Select } from '@/components/ui/Select';
+import { localeNames, type Locale } from '@/i18n/config';
+import { usePathname, useRouter } from '@/i18n/routing';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
   const tc = useTranslations('common');
+  const locale = useLocale() as Locale;
+  const router = useRouter();
+  const pathname = usePathname();
   const { profile } = useAuth();
   const { data: settings, isLoading: loadingSettings } = useSettings();
   const updateSettings = useUpdateSettings();
@@ -93,6 +99,10 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 3000);
   };
 
+  const switchLocale = (newLocale: Locale) => {
+    router.replace(pathname, { locale: newLocale });
+  };
+
   if (loadingPractitioner || loadingSettings) return <Spinner size="lg" />;
 
   return (
@@ -106,6 +116,28 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+
+      {/* Interface */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('language')}</CardTitle>
+        </CardHeader>
+        <div className="space-y-4">
+          <Select
+            id="interface-language"
+            label={t('language')}
+            value={locale}
+            onChange={(e) => switchLocale(e.target.value as Locale)}
+            options={(Object.entries(localeNames) as [Locale, string][]).map(([value, label]) => ({
+              value,
+              label,
+            }))}
+          />
+          <p className="text-xs text-muted-foreground">
+            {t('languagesPlaceholder')}
+          </p>
+        </div>
+      </Card>
 
       {/* Practitioner Profile */}
       <Card>

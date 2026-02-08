@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { Dialog } from '@/components/ui/Dialog';
+import { localeNames, type Locale } from '@/i18n/config';
 import {
   CalendarCheck,
   Clock,
@@ -16,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  Globe,
   Lock,
   FileText,
   Mail,
@@ -24,6 +26,10 @@ import {
 export default function WelcomePage() {
   const t = useTranslations('landing');
   const tc = useTranslations('common');
+  const locale = useLocale() as Locale;
+  const router = useRouter();
+  const pathname = usePathname();
+  const [showLangMenu, setShowLangMenu] = useState(false);
 
   const features = [
     {
@@ -96,6 +102,11 @@ export default function WelcomePage() {
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [lightboxOpen, lightboxIndex, galleryItems.length]);
 
+  const switchLocale = (newLocale: Locale) => {
+    router.replace(pathname, { locale: newLocale });
+    setShowLangMenu(false);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -111,6 +122,36 @@ export default function WelcomePage() {
               className="brightness-0 invert"
             />
             <div className="flex items-center gap-3">
+              {/* Language Switcher */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowLangMenu(!showLangMenu)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-white hover:bg-white/10 transition-all duration-300"
+                  aria-label={tc('language')}
+                >
+                  <Globe className="h-4 w-4" />
+                  <span className="hidden sm:inline">{localeNames[locale]}</span>
+                </button>
+                {showLangMenu && (
+                  <div className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-lg border border-border py-1 min-w-[160px] z-50">
+                    {(Object.entries(localeNames) as [Locale, string][]).map(([loc, name]) => (
+                      <button
+                        key={loc}
+                        type="button"
+                        onClick={() => switchLocale(loc)}
+                        className={[
+                          'w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors',
+                          loc === locale ? 'text-primary font-medium bg-primary-50' : 'text-gray-700',
+                        ].join(' ')}
+                      >
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <Link
                 href="/login"
                 className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium text-white hover:bg-white/10 transition-all duration-300"
