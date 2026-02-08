@@ -110,9 +110,9 @@ export default function WelcomePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-50">
+      <header className="fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20 mt-6">
+          <div className="flex items-center justify-between h-20 pt-4">
             <Image
               src="/branding/fulllogo_transparent_nobuffer.png"
               alt="Dokal"
@@ -170,14 +170,14 @@ export default function WelcomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary to-primary-700 min-h-[100svh] flex items-stretch">
+      <section className="sticky top-0 relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary to-primary-700 min-h-[100svh] flex items-stretch">
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-primary-400/10 blur-3xl" />
           <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-primary-300/10 blur-3xl" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full flex items-center pt-32 pb-20 lg:pt-40 lg:pb-28">
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full flex items-center pt-28 pb-20 lg:pt-32 lg:pb-28">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             {/* Text content */}
             <div className="max-w-xl">
@@ -254,7 +254,7 @@ export default function WelcomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 lg:py-32 bg-gray-50/50">
+      <section id="features" className="relative z-10 py-24 lg:py-32 bg-gray-50/50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
@@ -287,7 +287,7 @@ export default function WelcomePage() {
       </section>
 
       {/* Screenshots Gallery */}
-      <section className="py-24 lg:py-32">
+      <section className="relative z-10 py-24 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
@@ -315,7 +315,7 @@ export default function WelcomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 lg:py-32 bg-gray-50/50">
+      <section className="relative z-10 py-24 lg:py-32 bg-gray-50/50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="relative rounded-3xl bg-gradient-to-br from-primary-900 via-primary to-primary-700 px-8 py-16 sm:px-16 sm:py-20 overflow-hidden">
             <div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full bg-primary-400/10 blur-3xl" />
@@ -342,7 +342,7 @@ export default function WelcomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white">
+      <footer className="relative z-10 border-t border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             {/* Brand */}
