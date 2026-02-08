@@ -1,0 +1,1510 @@
+openapi: 3.1.0
+info:
+  title: Dokal Backend API
+  version: 1.0.0
+  description: >
+    API REST Dokal (Express + Supabase). Authentification via JWT Supabase
+    envoyé en header `Authorization: Bearer <token>`.
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Healthcheck
+  - name: Profile
+  - name: Relatives
+  - name: Practitioners
+  - name: Appointments
+  - name: Messaging
+  - name: Health
+  - name: Notifications
+  - name: Settings
+  - name: Payments
+  - name: Reviews
+  - name: CRM
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [Healthcheck]
+      security: []
+      summary: Healthcheck
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                required: [ok]
+
+  /api/v1/profile:
+    get:
+      tags: [Profile]
+      summary: Get my profile
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    patch:
+      tags: [Profile]
+      summary: Update my profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateProfileRequest" }
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/profile/avatar:
+    post:
+      tags: [Profile]
+      summary: Upload avatar (Supabase Storage bucket `avatars`)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+              required: [avatar]
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/relatives:
+    get:
+      tags: [Relatives]
+      summary: List my relatives
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Relative" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Relatives]
+      summary: Add a relative
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddRelativeRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Relative" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/relatives/{id}:
+    delete:
+      tags: [Relatives]
+      summary: Delete a relative
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/practitioners/search:
+    get:
+      tags: [Practitioners]
+      security: []
+      summary: Search practitioners
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: specialty
+          in: query
+          schema: { type: string, format: uuid }
+        - name: city
+          in: query
+          schema: { type: string }
+        - name: lat
+          in: query
+          schema: { type: number }
+        - name: lng
+          in: query
+          schema: { type: number }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        "200":
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PractitionerSearchResult" }
+
+  /api/v1/practitioners/{id}:
+    get:
+      tags: [Practitioners]
+      security: []
+      summary: Get practitioner full profile (includes reasons, instructions, slots, reviews)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Practitioner profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PractitionerDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/practitioners/{id}/slots:
+    get:
+      tags: [Practitioners]
+      security: []
+      summary: Get available slots for a practitioner
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: Slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Slot" }
+
+  /api/v1/practitioners/{id}/reviews:
+    get:
+      tags: [Practitioners]
+      security: []
+      summary: Get practitioner reviews (paginated)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        "200":
+          description: Reviews page
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reviews:
+                    type: array
+                    items: { $ref: "#/components/schemas/Review" }
+                  total: { type: integer }
+                required: [reviews, total]
+
+  /api/v1/appointments:
+    post:
+      tags: [Appointments]
+      summary: Create appointment (booking)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateAppointmentRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                required: [id]
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/appointments/upcoming:
+    get:
+      tags: [Appointments]
+      summary: List upcoming appointments
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/appointments/past:
+    get:
+      tags: [Appointments]
+      summary: List past appointments
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/appointments/{id}:
+    get:
+      tags: [Appointments]
+      summary: Get appointment by id
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Appointment
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/appointments/{id}/cancel:
+    patch:
+      tags: [Appointments]
+      summary: Cancel appointment (patient)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cancellation_reason: { type: string, nullable: true }
+      responses:
+        "204": { description: Cancelled }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/conversations:
+    get:
+      tags: [Messaging]
+      summary: List conversations (patient or practitioner perspective)
+      responses:
+        "200":
+          description: Conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/conversations/{id}/messages:
+    get:
+      tags: [Messaging]
+      summary: Get conversation messages (cursor pagination)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+        - name: before
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Message" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      tags: [Messaging]
+      summary: Send a message
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SendMessageRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Message" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/conversations/{id}/read:
+    patch:
+      tags: [Messaging]
+      summary: Mark conversation messages as read
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204": { description: Updated }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/health/profile:
+    get:
+      tags: [Health]
+      summary: Get my health profile (teudat_zehut decrypted)
+      responses:
+        "200":
+          description: Health profile (or null)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - { $ref: "#/components/schemas/HealthProfile" }
+                  - { type: "null" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    put:
+      tags: [Health]
+      summary: Upsert my health profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpsertHealthProfileRequest" }
+      responses:
+        "200":
+          description: Updated health profile
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - { $ref: "#/components/schemas/HealthProfile" }
+                  - { type: "null" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/health/{table}:
+    get:
+      tags: [Health]
+      summary: List health items for table
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/HealthTable" }
+      responses:
+        "200":
+          description: Items
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Health]
+      summary: Add health item
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/HealthTable" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddHealthItemRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/health/{table}/{id}:
+    delete:
+      tags: [Health]
+      summary: Delete health item
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/HealthTable" }
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/notifications:
+    get:
+      tags: [Notifications]
+      summary: List notifications (max 50)
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Notification" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/notifications/unread-count:
+    get:
+      tags: [Notifications]
+      summary: Get unread notifications count
+      responses:
+        "200":
+          description: Count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: { type: integer }
+                required: [count]
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/notifications/{id}/read:
+    patch:
+      tags: [Notifications]
+      summary: Mark notification as read
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204": { description: Updated }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/notifications/read-all:
+    patch:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      responses:
+        "204": { description: Updated }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/notifications/push-tokens:
+    post:
+      tags: [Notifications]
+      summary: Register push token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterPushTokenRequest" }
+      responses:
+        "204": { description: Registered }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    delete:
+      tags: [Notifications]
+      summary: Remove push token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token: { type: string, minLength: 10 }
+              required: [token]
+      responses:
+        "204": { description: Deleted }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/settings:
+    get:
+      tags: [Settings]
+      summary: Get my settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Settings" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    patch:
+      tags: [Settings]
+      summary: Update my settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateSettingsRequest" }
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Settings" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/payments/webhook:
+    post:
+      tags: [Payments]
+      security: []
+      summary: PayMe webhook callback (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        "200":
+          description: Acknowledged
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                required: [ok]
+
+  /api/v1/payments/methods:
+    get:
+      tags: [Payments]
+      summary: List payment methods
+      responses:
+        "200":
+          description: Methods
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PaymentMethod" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Payments]
+      summary: Add payment method (stored in DB; tokenization handled by PayMe flow)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddPaymentMethodRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaymentMethod" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/payments/methods/{id}:
+    delete:
+      tags: [Payments]
+      summary: Remove payment method
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/payments/methods/{id}/default:
+    patch:
+      tags: [Payments]
+      summary: Set payment method as default
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204": { description: Updated }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/payments/create-link:
+    post:
+      tags: [Payments]
+      summary: Generate a PayMe payment link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/GeneratePaymentLinkRequest" }
+      responses:
+        "200":
+          description: PayMe response (includes payment_url if success)
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/reviews:
+    post:
+      tags: [Reviews]
+      summary: Create review (patient)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateReviewRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Review" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/reviews/{id}/reply:
+    patch:
+      tags: [Reviews]
+      summary: Reply to a review (practitioner)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                practitioner_reply: { type: string, minLength: 1 }
+              required: [practitioner_reply]
+      responses:
+        "204": { description: Updated }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/dashboard/stats:
+    get:
+      tags: [CRM]
+      summary: CRM stats (practitioner/admin)
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pending: { type: integer }
+                  confirmed: { type: integer }
+                  cancelled: { type: integer }
+                  completed: { type: integer }
+                  no_show: { type: integer }
+                required: [pending, confirmed, cancelled, completed, no_show]
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/appointments:
+    get:
+      tags: [CRM]
+      summary: CRM appointments list (filters)
+      parameters:
+        - name: date
+          in: query
+          schema: { type: string, format: date }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        "200":
+          description: Page
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  appointments:
+                    type: array
+                    items: { type: object, additionalProperties: true }
+                  total: { type: integer }
+                required: [appointments, total]
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/appointments/{id}/confirm:
+    patch:
+      tags: [CRM]
+      summary: Confirm appointment
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      responses:
+        "204": { description: Confirmed }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/appointments/{id}/cancel:
+    patch:
+      tags: [CRM]
+      summary: Cancel appointment
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cancellation_reason: { type: string, nullable: true }
+      responses:
+        "204": { description: Cancelled }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/appointments/{id}/complete:
+    patch:
+      tags: [CRM]
+      summary: Complete appointment
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                practitioner_notes: { type: string, nullable: true }
+      responses:
+        "204": { description: Completed }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/appointments/{id}/no-show:
+    patch:
+      tags: [CRM]
+      summary: Mark appointment as no-show
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      responses:
+        "204": { description: Updated }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/schedule:
+    get:
+      tags: [CRM]
+      summary: Get weekly schedule
+      responses:
+        "200":
+          description: Schedule
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [CRM]
+      summary: Add schedule block
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddScheduleRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/schedule/{id}:
+    patch:
+      tags: [CRM]
+      summary: Update schedule block
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateScheduleRequest" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [CRM]
+      summary: Delete schedule block
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      responses:
+        "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/overrides:
+    get:
+      tags: [CRM]
+      summary: List schedule overrides
+      responses:
+        "200":
+          description: Overrides
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [CRM]
+      summary: Upsert override (by practitioner_id + date)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpsertOverrideRequest" }
+      responses:
+        "200":
+          description: Upserted
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/overrides/{id}:
+    delete:
+      tags: [CRM]
+      summary: Delete override
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      responses:
+        "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/reasons:
+    get:
+      tags: [CRM]
+      summary: List appointment reasons (global + practitioner)
+      responses:
+        "200":
+          description: Reasons
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [CRM]
+      summary: Add appointment reason
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddReasonRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/reasons/{id}:
+    patch:
+      tags: [CRM]
+      summary: Update appointment reason
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateReasonRequest" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/instructions:
+    get:
+      tags: [CRM]
+      summary: List appointment instructions
+      responses:
+        "200":
+          description: Instructions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [CRM]
+      summary: Add appointment instruction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddInstructionRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/instructions/{id}:
+    patch:
+      tags: [CRM]
+      summary: Update appointment instruction
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateInstructionRequest" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/patients/{id}:
+    get:
+      tags: [CRM]
+      summary: Patient view (only if practitioner has an appointment with patient)
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      responses:
+        "200":
+          description: Patient data
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/reviews:
+    get:
+      tags: [CRM]
+      summary: List practitioner reviews
+      responses:
+        "200":
+          description: Reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Review" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/reviews/{id}/reply:
+    patch:
+      tags: [CRM]
+      summary: Reply to a review (practitioner)
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                practitioner_reply: { type: string, minLength: 1 }
+              required: [practitioner_reply]
+      responses:
+        "204": { description: Updated }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/profile:
+    patch:
+      tags: [CRM]
+      summary: Update practitioner profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdatePractitionerProfileRequest" }
+      responses:
+        "200":
+          description: Updated practitioner
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase access token
+
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: { type: object, additionalProperties: true }
+          required: [code, message]
+      required: [error]
+
+    UserRole:
+      type: string
+      enum: [patient, practitioner, admin]
+
+    SexType:
+      type: string
+      enum: [male, female, other]
+
+    RelationType:
+      type: string
+      enum: [child, parent, spouse, sibling, other]
+
+    AppointmentStatus:
+      type: string
+      enum:
+        - pending
+        - confirmed
+        - cancelled_by_patient
+        - cancelled_by_practitioner
+        - completed
+        - no_show
+
+    MessageType:
+      type: string
+      enum: [text, image, file, system]
+
+    NotificationType:
+      type: string
+      enum:
+        - appointment_request
+        - appointment_confirmed
+        - appointment_cancelled
+        - appointment_reminder
+        - new_message
+        - review_received
+
+    Profile:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        first_name: { type: string, nullable: true }
+        last_name: { type: string, nullable: true }
+        email: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        date_of_birth: { type: string, format: date, nullable: true }
+        sex: { $ref: "#/components/schemas/SexType", nullable: true }
+        city: { type: string, nullable: true }
+        avatar_url: { type: string, nullable: true }
+        role: { $ref: "#/components/schemas/UserRole" }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+      required: [id, role]
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        first_name: { type: string }
+        last_name: { type: string }
+        phone: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        date_of_birth: { type: string, nullable: true }
+        sex: { $ref: "#/components/schemas/SexType", nullable: true }
+
+    Relative:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        first_name: { type: string }
+        last_name: { type: string }
+        relation: { $ref: "#/components/schemas/RelationType" }
+        date_of_birth: { type: string, format: date, nullable: true }
+      required: [id, first_name, last_name, relation]
+
+    AddRelativeRequest:
+      type: object
+      properties:
+        first_name: { type: string, minLength: 1 }
+        last_name: { type: string, minLength: 1 }
+        relation: { $ref: "#/components/schemas/RelationType" }
+        date_of_birth: { type: string, nullable: true }
+      required: [first_name, last_name, relation]
+
+    Slot:
+      type: object
+      properties:
+        slot_date: { type: string, format: date }
+        slot_start: { type: string }
+        slot_end: { type: string }
+      required: [slot_date, slot_start, slot_end]
+
+    PractitionerSearchResult:
+      type: object
+      description: >
+        Shape returned by Supabase join selection in practitioners search.
+      additionalProperties: true
+
+    PractitionerDetail:
+      type: object
+      description: >
+        Practitioner profile plus reasons/instructions/slots/reviews.
+      additionalProperties: true
+
+    CreateAppointmentRequest:
+      type: object
+      properties:
+        practitioner_id: { type: string, format: uuid }
+        relative_id: { type: string, format: uuid, nullable: true }
+        reason_id: { type: string, format: uuid, nullable: true }
+        appointment_date: { type: string, format: date }
+        start_time: { type: string }
+        end_time: { type: string }
+        patient_address_line: { type: string, nullable: true }
+        patient_zip_code: { type: string, nullable: true }
+        patient_city: { type: string, nullable: true }
+        visited_before: { type: boolean, default: false }
+      required: [practitioner_id, appointment_date, start_time, end_time]
+
+    Message:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        sender_id: { type: string, format: uuid }
+        content: { type: string }
+        message_type: { $ref: "#/components/schemas/MessageType" }
+        is_read: { type: boolean }
+        created_at: { type: string, format: date-time }
+      required: [id, sender_id, content, message_type, is_read, created_at]
+
+    SendMessageRequest:
+      type: object
+      properties:
+        content: { type: string, minLength: 1 }
+        message_type:
+          type: string
+          enum: [text, image, file]
+          default: text
+      required: [content]
+
+    HealthProfile:
+      type: object
+      additionalProperties: true
+
+    UpsertHealthProfileRequest:
+      type: object
+      properties:
+        teudat_zehut: { type: string, nullable: true }
+        date_of_birth: { type: string, nullable: true }
+        sex: { $ref: "#/components/schemas/SexType", nullable: true }
+        blood_type: { type: string, nullable: true }
+        kupat_holim: { type: string, nullable: true }
+        kupat_member_id: { type: string, nullable: true }
+        family_doctor_name: { type: string, nullable: true }
+        emergency_contact_name: { type: string, nullable: true }
+        emergency_contact_phone: { type: string, nullable: true }
+
+    HealthTable:
+      type: string
+      enum: [conditions, medications, allergies, vaccinations]
+
+    AddHealthItemRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        reaction: { type: string, nullable: true }
+        severity: { type: string, nullable: true }
+        dosage: { type: string, nullable: true }
+        frequency: { type: string, nullable: true }
+        diagnosed_on: { type: string, nullable: true }
+        started_on: { type: string, nullable: true }
+        ended_on: { type: string, nullable: true }
+        dose: { type: string, nullable: true }
+        vaccinated_on: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+      required: [name]
+
+    Notification:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        type: { $ref: "#/components/schemas/NotificationType" }
+        title: { type: string }
+        body: { type: string }
+        data: { type: object, additionalProperties: true }
+        is_read: { type: boolean }
+        created_at: { type: string, format: date-time }
+      required: [id, type, title, body, data, is_read, created_at]
+
+    RegisterPushTokenRequest:
+      type: object
+      properties:
+        token: { type: string, minLength: 10 }
+        platform:
+          type: string
+          enum: [ios, android, web]
+      required: [token, platform]
+
+    Settings:
+      type: object
+      properties:
+        notifications_enabled: { type: boolean }
+        reminders_enabled: { type: boolean }
+        locale: { type: string }
+      required: [notifications_enabled, reminders_enabled, locale]
+
+    UpdateSettingsRequest:
+      type: object
+      properties:
+        notifications_enabled: { type: boolean }
+        reminders_enabled: { type: boolean }
+        locale: { type: string, minLength: 2, maxLength: 5 }
+
+    PaymentMethod:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        brand: { type: string }
+        last4: { type: string }
+        expiry_month: { type: integer }
+        expiry_year: { type: integer }
+        is_default: { type: boolean }
+      required: [id, brand, last4, expiry_month, expiry_year, is_default]
+
+    AddPaymentMethodRequest:
+      type: object
+      properties:
+        brand: { type: string, minLength: 1 }
+        last4: { type: string, minLength: 4, maxLength: 4 }
+        expiry_month: { type: integer, minimum: 1, maximum: 12 }
+        expiry_year: { type: integer, minimum: 2020, maximum: 2100 }
+      required: [brand, last4, expiry_month, expiry_year]
+
+    GeneratePaymentLinkRequest:
+      type: object
+      properties:
+        amount:
+          type: integer
+          description: Amount in agorot (ILS cents)
+          minimum: 1
+        description: { type: string, minLength: 1 }
+      required: [amount, description]
+
+    Review:
+      type: object
+      additionalProperties: true
+
+    CreateReviewRequest:
+      type: object
+      properties:
+        appointment_id: { type: string, format: uuid }
+        practitioner_id: { type: string, format: uuid }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string, nullable: true }
+      required: [appointment_id, practitioner_id, rating]
+
+    AddScheduleRequest:
+      type: object
+      properties:
+        day_of_week: { type: integer, minimum: 0, maximum: 6 }
+        start_time: { type: string }
+        end_time: { type: string }
+        slot_duration_minutes: { type: integer, minimum: 5, maximum: 240, default: 30 }
+        is_active: { type: boolean, default: true }
+      required: [day_of_week, start_time, end_time]
+
+    UpdateScheduleRequest:
+      type: object
+      properties:
+        start_time: { type: string }
+        end_time: { type: string }
+        slot_duration_minutes: { type: integer, minimum: 5, maximum: 240 }
+        is_active: { type: boolean }
+
+    UpsertOverrideRequest:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        is_available: { type: boolean }
+        start_time: { type: string, nullable: true }
+        end_time: { type: string, nullable: true }
+        reason: { type: string, nullable: true }
+      required: [date, is_available]
+
+    AddReasonRequest:
+      type: object
+      properties:
+        label: { type: string, minLength: 1 }
+        label_fr: { type: string, nullable: true }
+        label_he: { type: string, nullable: true }
+        sort_order: { type: integer, default: 0 }
+        is_active: { type: boolean, default: true }
+      required: [label]
+
+    UpdateReasonRequest:
+      type: object
+      properties:
+        label: { type: string }
+        label_fr: { type: string, nullable: true }
+        label_he: { type: string, nullable: true }
+        sort_order: { type: integer }
+        is_active: { type: boolean }
+
+    AddInstructionRequest:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        content: { type: string, minLength: 1 }
+        is_active: { type: boolean, default: true }
+        sort_order: { type: integer, default: 0 }
+      required: [title, content]
+
+    UpdateInstructionRequest:
+      type: object
+      properties:
+        title: { type: string }
+        content: { type: string }
+        is_active: { type: boolean }
+        sort_order: { type: integer }
+
+    UpdatePractitionerProfileRequest:
+      type: object
+      properties:
+        about: { type: string, nullable: true }
+        languages:
+          type: array
+          items: { type: string }
+          nullable: true
+        education: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        email: { type: string, format: email, nullable: true }
+        is_accepting_new_patients: { type: boolean }
+        address_line: { type: string, nullable: true }
+        zip_code: { type: string, nullable: true }
+        city: { type: string, nullable: true }
