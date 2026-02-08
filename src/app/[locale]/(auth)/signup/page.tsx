@@ -109,6 +109,7 @@ export default function SignupPage() {
         return;
       }
 
+      // Session exists — redirect to dashboard (onboarding will catch them)
       router.push(`/${locale}`);
       router.refresh();
     } catch {
@@ -278,4 +279,3 @@ export default function SignupPage() {
     </div>
   );
 }
-

@@ -21,12 +21,14 @@ export async function middleware(request: NextRequest) {
   // Update Supabase session (refresh token if needed)
   const { user, supabaseResponse } = await updateSession(request);
 
-  // Check if it's a protected route (dashboard routes)
+  // Route classification
   const isAuthRoute = /^\/(fr|en|he|ru)\/(login|forgot-password|signup)/.test(pathname);
   const isPublicRoute = /^\/(fr|en|he|ru)\/(welcome|privacy|terms)/.test(pathname);
-  const isDashboardRoute = /^\/(fr|en|he|ru)(\/(?!login|forgot-password|signup|welcome|privacy|terms).*)?$/.test(pathname);
+  const isOnboardingRoute = /^\/(fr|en|he|ru)\/subscription/.test(pathname);
+  const isDashboardRoute = /^\/(fr|en|he|ru)(\/(?!login|forgot-password|signup|welcome|privacy|terms|subscription).*)?$/.test(pathname);
 
-  if (isDashboardRoute && !isAuthRoute && !isPublicRoute && !user) {
+  // Protected routes: redirect unauthenticated users to welcome
+  if ((isDashboardRoute || isOnboardingRoute) && !isAuthRoute && !isPublicRoute && !user) {
     const locale = pathname.split('/')[1] || defaultLocale;
     const welcomeUrl = new URL(`/${locale}/welcome`, request.url);
     return NextResponse.redirect(welcomeUrl);
