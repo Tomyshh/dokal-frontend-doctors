@@ -114,12 +114,11 @@ export default function WelcomePage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-20 pt-4">
             <Image
-              src="/branding/fulllogo_transparent_nobuffer.png"
+              src="/branding/icononly_transparent.png"
               alt="Dokal"
-              width={120}
-              height={40}
+              width={44}
+              height={44}
               priority
-              className="brightness-0 invert"
             />
             <div className="flex items-center gap-3">
               {/* Language Switcher */}
