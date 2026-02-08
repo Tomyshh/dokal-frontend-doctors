@@ -116,8 +116,8 @@ export default function WelcomePage() {
             <Image
               src="/branding/icononly_transparent.png"
               alt="Dokal"
-              width={44}
-              height={44}
+              width={80}
+              height={80}
               priority
             />
             <div className="flex items-center gap-3">
@@ -127,7 +127,7 @@ export default function WelcomePage() {
                   type="button"
                   onClick={() => setShowLangMenu(!showLangMenu)}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-white hover:bg-white/10 transition-all duration-300"
-                  aria-label={tc('language')}
+                  aria-label={t('login')}
                 >
                   <Globe className="h-4 w-4" />
                   <span className="hidden sm:inline">{localeNames[locale]}</span>
