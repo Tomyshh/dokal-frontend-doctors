@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 export default async function TermsPage() {
   const t = await getTranslations('terms');
   const tl = await getTranslations('landing');
+  const ta = await getTranslations('auth');
 
   const sections = Array.from({ length: 10 }, (_, i) => i + 1);
 
@@ -16,7 +17,7 @@ export default async function TermsPage() {
         <div className="max-w-4xl mx-auto px-6 lg:px-8 py-6 flex items-center justify-between">
           <Link href="/welcome" className="flex items-center gap-2">
             <Image
-              src="/branding/fulllogo_transparent_nobuffer.png"
+              src="/branding/fulllogo.png"
               alt="Dokal"
               width={100}
               height={33}
@@ -27,7 +28,7 @@ export default async function TermsPage() {
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            {tl('login')}
+            {ta('backToLanding')}
           </Link>
         </div>
       </header>

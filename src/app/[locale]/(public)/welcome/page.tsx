@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
+import { Dialog } from '@/components/ui/Dialog';
 import {
   CalendarCheck,
   Clock,
@@ -11,6 +13,9 @@ import {
   ArrowRight,
   Shield,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  X,
   Lock,
   FileText,
   Mail,
@@ -18,6 +23,7 @@ import {
 
 export default function WelcomePage() {
   const t = useTranslations('landing');
+  const tc = useTranslations('common');
 
   const features = [
     {
@@ -54,12 +60,48 @@ export default function WelcomePage() {
     { src: '/images/presentation-crm-4.png', alt: t('screenshotAlt') },
   ];
 
+  const galleryItems = useMemo(
+    () => [{ src: '/images/presentation-crm.png', alt: t('screenshotAlt') }, ...screenshots],
+    [screenshots, t]
+  );
+
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const lightboxOpen = lightboxIndex !== null;
+
+  const closeLightbox = () => setLightboxIndex(null);
+  const prev = () => {
+    if (lightboxIndex === null) return;
+    setLightboxIndex((lightboxIndex - 1 + galleryItems.length) % galleryItems.length);
+  };
+  const next = () => {
+    if (lightboxIndex === null) return;
+    setLightboxIndex((lightboxIndex + 1) % galleryItems.length);
+  };
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prev();
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        next();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [lightboxOpen, lightboxIndex, galleryItems.length]);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="absolute top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20 mt-4">
+          <div className="flex items-center justify-between h-20 mt-6">
             <Image
               src="/branding/fulllogo_transparent_nobuffer.png"
               alt="Dokal"
@@ -149,16 +191,21 @@ export default function WelcomePage() {
 
             {/* Dashboard image */}
             <div className="relative lg:ml-8">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/30 border border-white/10">
+              <button
+                type="button"
+                onClick={() => setLightboxIndex(0)}
+                className="relative w-full rounded-2xl overflow-hidden shadow-2xl shadow-black/30 border border-white/10 hover:scale-[1.01] transition-transform duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                aria-label={t('openImage')}
+              >
                 <Image
                   src="/images/presentation-crm.png"
-                  alt="Dokal CRM Dashboard"
+                  alt={t('screenshotAlt')}
                   width={1200}
                   height={800}
                   className="w-full h-auto"
                   priority
                 />
-              </div>
+              </button>
               <div className="absolute -inset-4 -z-10 rounded-3xl bg-white/5 blur-xl" />
             </div>
           </div>
@@ -212,18 +259,15 @@ export default function WelcomePage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {screenshots.map((shot, i) => (
-              <div
+              <button
                 key={i}
-                className="group rounded-2xl overflow-hidden border border-border/50 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
+                type="button"
+                onClick={() => setLightboxIndex(i + 1)}
+                className="group rounded-2xl overflow-hidden border border-border/50 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label={t('openImage')}
               >
-                <Image
-                  src={shot.src}
-                  alt={shot.alt}
-                  width={800}
-                  height={500}
-                  className="w-full h-auto"
-                />
-              </div>
+                <Image src={shot.src} alt={shot.alt} width={800} height={500} className="w-full h-auto" />
+              </button>
             ))}
           </div>
         </div>
@@ -263,7 +307,7 @@ export default function WelcomePage() {
             {/* Brand */}
             <div className="md:col-span-1">
               <Image
-                src="/branding/fulllogo_transparent_nobuffer.png"
+                src="/branding/fulllogo.png"
                 alt="Dokal"
                 width={120}
                 height={40}
@@ -359,6 +403,59 @@ export default function WelcomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Lightbox */} 
+      <Dialog
+        open={lightboxOpen}
+        onClose={closeLightbox}
+        className="max-w-6xl bg-black text-white overflow-hidden"
+      >
+        {lightboxIndex !== null ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-white/80">
+                {lightboxIndex + 1} / {galleryItems.length}
+              </div>
+              <button
+                type="button"
+                onClick={closeLightbox}
+                className="inline-flex items-center justify-center h-10 w-10 rounded-xl hover:bg-white/10 transition-colors"
+                aria-label={tc('close')}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="relative h-[70vh] w-full rounded-xl overflow-hidden bg-black">
+              <Image
+                src={galleryItems[lightboxIndex].src}
+                alt={galleryItems[lightboxIndex].alt}
+                fill
+                sizes="(max-width: 768px) 100vw, 80vw"
+                className="object-contain"
+                priority
+              />
+
+              <button
+                type="button"
+                onClick={prev}
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm flex items-center justify-center transition-colors"
+                aria-label={tc('previous')}
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                type="button"
+                onClick={next}
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm flex items-center justify-center transition-colors"
+                aria-label={tc('next')}
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </Dialog>
     </div>
   );
 }

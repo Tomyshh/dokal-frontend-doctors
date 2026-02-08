@@ -28,6 +28,8 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "tomorrow": "Tomorrow",
+    "previous": "Previous",
+    "next": "Next",
     "details": "Details",
     "notes": "Notes",
     "patient": "Patient"
@@ -276,6 +278,7 @@
     "screenshotsTitle": "Discover the interface",
     "screenshotsSubtitle": "A preview of Dokal's key screens: appointments, schedule, messaging and more.",
     "screenshotAlt": "Dokal CRM screenshot",
+    "openImage": "Open image",
     "footerDescription": "The SaaS platform dedicated to practitioners to centralize appointments, patients and scheduling.",
     "footerProduct": "Product",
     "footerLegal": "Legal",

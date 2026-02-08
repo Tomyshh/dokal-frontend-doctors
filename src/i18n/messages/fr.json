@@ -28,6 +28,8 @@
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "tomorrow": "Demain",
+    "previous": "Précédent",
+    "next": "Suivant",
     "details": "Détails",
     "notes": "Notes",
     "patient": "Patient"
@@ -276,6 +278,7 @@
     "screenshotsTitle": "Découvrez l'interface",
     "screenshotsSubtitle": "Un aperçu des écrans clés de Dokal : rendez-vous, planning, messagerie et plus encore.",
     "screenshotAlt": "Capture d'écran de Dokal CRM",
+    "openImage": "Ouvrir l'image",
     "footerDescription": "La plateforme SaaS dédiée aux praticiens pour centraliser rendez-vous, patients et planning.",
     "footerProduct": "Produit",
     "footerLegal": "Légal",

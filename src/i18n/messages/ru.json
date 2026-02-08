@@ -28,6 +28,8 @@
     "today": "Сегодня",
     "yesterday": "Вчера",
     "tomorrow": "Завтра",
+    "previous": "Предыдущая",
+    "next": "Следующая",
     "details": "Детали",
     "notes": "Заметки",
     "patient": "Пациент"
@@ -276,6 +278,7 @@
     "screenshotsTitle": "Обзор интерфейса",
     "screenshotsSubtitle": "Предпросмотр ключевых экранов Dokal: приёмы, расписание, сообщения и многое другое.",
     "screenshotAlt": "Скриншот Dokal CRM",
+    "openImage": "Открыть изображение",
     "footerDescription": "SaaS-платформа для специалистов: приёмы, пациенты и расписание в одном месте.",
     "footerProduct": "Продукт",
     "footerLegal": "Юридическая информация",

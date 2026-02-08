@@ -28,6 +28,8 @@
     "today": "היום",
     "yesterday": "אתמול",
     "tomorrow": "מחר",
+    "previous": "הקודם",
+    "next": "הבא",
     "details": "פרטים",
     "notes": "הערות",
     "patient": "מטופל"
@@ -276,6 +278,7 @@
     "screenshotsTitle": "הכירו את הממשק",
     "screenshotsSubtitle": "תצוגה מקדימה של מסכים מרכזיים ב-Dokal: פגישות, לוח זמנים, הודעות ועוד.",
     "screenshotAlt": "צילום מסך של Dokal CRM",
+    "openImage": "פתיחת תמונה",
     "footerDescription": "פלטפורמת SaaS לרופאים לריכוז פגישות, מטופלים ולוח זמנים.",
     "footerProduct": "מוצר",
     "footerLegal": "משפטי",
