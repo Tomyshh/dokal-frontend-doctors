@@ -30,6 +30,14 @@ export default function WelcomePage() {
   const router = useRouter();
   const pathname = usePathname();
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const features = [
     {
@@ -110,15 +118,23 @@ export default function WelcomePage() {
   return (
     <div className="min-h-screen bg-primary-900">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50">
+      <header
+        className={[
+          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+          scrolled
+            ? 'bg-primary-900/80 backdrop-blur-xl shadow-lg shadow-black/10'
+            : 'bg-transparent',
+        ].join(' ')}
+      >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20 pt-4">
+          <div className="flex items-center justify-between h-20">
             <Image
               src="/branding/icononly_transparent.png"
               alt="Dokal"
-              width={80}
-              height={80}
+              width={120}
+              height={120}
               priority
+              className="shrink-0"
             />
             <div className="flex items-center gap-3">
               {/* Language Switcher */}
