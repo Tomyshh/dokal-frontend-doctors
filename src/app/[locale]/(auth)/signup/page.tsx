@@ -61,7 +61,9 @@ export default function SignupPage() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [otpRedirecting, setOtpRedirecting] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const otpSubmitInFlightRef = useRef(false);
 
   const passwordMismatch = useMemo(() => {
     return (
@@ -212,12 +214,14 @@ export default function SignupPage() {
 
   const handleVerifyOtp = async () => {
     if (!isOtpComplete) return;
+    if (otpSubmitInFlightRef.current) return;
 
     setOtpError('');
     setOtpLoading(true);
+    otpSubmitInFlightRef.current = true;
     try {
       const supabase = createClient();
-      const { error: verifyError } = await supabase.auth.verifyOtp({
+      const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
         email: form.email,
         token: otpCode,
         type: 'signup',
@@ -231,19 +235,35 @@ export default function SignupPage() {
         return;
       }
 
-      // OTP verified → session is now active → redirect to subscription page
-      router.push(`/${locale}/subscription`);
-      router.refresh();
+      // OTP verified → make sure we really have a session before redirecting.
+      // Sometimes the user is confirmed but the session cookie/storage is not ready yet.
+      let hasSession = !!verifyData?.session;
+      if (!hasSession) {
+        // Try a few times quickly to give Supabase time to persist the session.
+        for (let i = 0; i < 5 && !hasSession; i++) {
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((r) => setTimeout(r, 120));
+          // eslint-disable-next-line no-await-in-loop
+          const { data } = await supabase.auth.getSession();
+          hasSession = !!data.session;
+        }
+      }
+
+      setOtpRedirecting(true);
+      // Use a hard redirect to avoid edge cases where router navigation does not happen
+      // even though Supabase has confirmed the user.
+      window.location.assign(`/${locale}/subscription`);
     } catch {
       setOtpError(t('otpError'));
     } finally {
       setOtpLoading(false);
+      otpSubmitInFlightRef.current = false;
     }
   };
 
   // Auto-submit when all 6 digits are entered
   useEffect(() => {
-    if (isOtpComplete && !otpLoading) {
+    if (isOtpComplete && !otpLoading && !otpRedirecting) {
       handleVerifyOtp();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
