@@ -286,7 +286,10 @@
     "bullet1": "Clear and fast dashboard",
     "bullet2": "Daily appointment organization",
     "bullet3": "Centralized messaging and patient records",
-    "dashboardAlt": "Dokal dashboard preview"
+    "dashboardAlt": "Dokal dashboard preview",
+    "helpTitle": "Need help?",
+    "helpSubtitle": "Contact us and we’ll get back to you quickly.",
+    "helpContactPage": "Open the Contact page"
   },
   "landing": {
     "login": "Sign in",
@@ -343,11 +346,31 @@
     "footerContact": "Contact",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
+    "legalNotice": "Legal Notice",
+    "contactPage": "Contact",
     "secureData": "Secure and encrypted data",
     "gdprCompliant": "GDPR compliant",
     "footer": "© 2026 Dokal. All rights reserved.",
     "loggingOut": "Signing out...",
     "loggingOutMessage": "You will be redirected to the home page."
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "For any questions, support requests or information, you can reach us using the details below.",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone",
+    "addressLabel": "Address"
+  },
+  "legal": {
+    "title": "Legal Notice",
+    "intro": "The following information identifies the publisher and hosting provider of the Dokal service.",
+    "companyName": "Legal name",
+    "registrationNumber": "Registration number / registry",
+    "director": "Director / responsible person",
+    "host": "Hosting provider",
+    "address": "Address",
+    "email": "Email",
+    "phone": "Phone"
   },
   "privacy": {
     "title": "Privacy Policy",
@@ -366,9 +389,9 @@
     "section6Title": "6. Security",
     "section6Content": "We implement appropriate technical and organizational security measures to protect your data: encryption of data in transit and at rest, strict access controls, regular security audits.",
     "section7Title": "7. Your Rights",
-    "section7Content": "Under the GDPR, you have the following rights:\n\n• Right to access your personal data.\n• Right to rectify inaccurate data.\n• Right to erasure of your data.\n• Right to data portability.\n• Right to object to and restrict processing.\n\nTo exercise these rights, contact us at: privacy@dokal.com",
+    "section7Content": "Under the GDPR, you have the following rights:\n\n• Right to access your personal data.\n• Right to rectify inaccurate data.\n• Right to erasure of your data.\n• Right to data portability.\n• Right to object to and restrict processing.\n\nTo exercise these rights, contact us at: tom@dokal.life",
     "section8Title": "8. Contact",
-    "section8Content": "For any questions regarding this privacy policy, you may contact us at: privacy@dokal.com"
+    "section8Content": "For any questions regarding this privacy policy, you may contact us at: tom@dokal.life"
   },
   "terms": {
     "title": "Terms of Service",
@@ -393,7 +416,7 @@
     "section9Title": "9. Governing Law",
     "section9Content": "These Terms are governed by French law. Any dispute shall be submitted to the competent courts of Paris.",
     "section10Title": "10. Contact",
-    "section10Content": "For any questions regarding these terms, contact us at: legal@dokal.com"
+    "section10Content": "For any questions regarding these terms, contact us at: tom@dokal.life"
   },
   "specialties": {
     "generalPractice": "General practice",

@@ -21,7 +21,10 @@ import {
   Lock,
   FileText,
   Mail,
+  Phone,
+  MapPin,
 } from 'lucide-react';
+import { company } from '@/config/company';
 
 export default function WelcomePage() {
   const t = useTranslations('landing');
@@ -418,6 +421,11 @@ export default function WelcomePage() {
               </h4>
               <ul className="space-y-3">
                 <li>
+                  <Link href="/legal" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {t('legalNotice')}
+                  </Link>
+                </li>
+                <li>
                   <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     {t('privacyPolicy')}
                   </Link>
@@ -438,7 +446,19 @@ export default function WelcomePage() {
               <ul className="space-y-3">
                 <li className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Mail className="w-4 h-4" />
-                  contact@dokal.com
+                  <a href={`mailto:${company.email}`} className="hover:text-primary transition-colors" dir="ltr">
+                    {company.email}
+                  </a>
+                </li>
+                <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Phone className="w-4 h-4" />
+                  <a href={`tel:${company.phoneE164}`} className="hover:text-primary transition-colors" dir="ltr">
+                    {company.phoneE164}
+                  </a>
+                </li>
+                <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
+                  <span dir="ltr">{company.address}</span>
                 </li>
                 <li className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Lock className="w-4 h-4" />
@@ -447,6 +467,11 @@ export default function WelcomePage() {
                 <li className="flex items-center gap-2 text-sm text-muted-foreground">
                   <FileText className="w-4 h-4" />
                   {t('gdprCompliant')}
+                </li>
+                <li>
+                  <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {t('contactPage')}
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -458,6 +483,12 @@ export default function WelcomePage() {
               {t('footer')}
             </p>
             <div className="flex items-center gap-6">
+              <Link href="/contact" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                {t('contactPage')}
+              </Link>
+              <Link href="/legal" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                {t('legalNotice')}
+              </Link>
               <Link href="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors">
                 {t('privacyPolicy')}
               </Link>

@@ -3,6 +3,8 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
+import { company } from '@/config/company';
 
 export function AuthBrandedLayout({ children }: { children: ReactNode }) {
   const t = useTranslations('authLayout');
@@ -72,6 +74,34 @@ export function AuthBrandedLayout({ children }: { children: ReactNode }) {
 
             <div className="bg-white rounded-3xl shadow-2xl shadow-black/20 border border-white/20 p-8 sm:p-10">
               {children}
+
+              <div className="mt-6 pt-6 border-t border-gray-100">
+                <p className="text-sm font-medium text-gray-900">{t('helpTitle')}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{t('helpSubtitle')}</p>
+
+                <div className="mt-3 flex flex-col gap-1 text-sm">
+                  <a
+                    href={`mailto:${company.email}`}
+                    className="text-primary hover:underline w-fit"
+                    dir="ltr"
+                  >
+                    {company.email}
+                  </a>
+                  <a
+                    href={`tel:${company.phoneE164}`}
+                    className="text-primary hover:underline w-fit"
+                    dir="ltr"
+                  >
+                    {company.phoneE164}
+                  </a>
+                </div>
+
+                <div className="mt-3">
+                  <Link href="/contact" className="text-sm text-primary hover:underline">
+                    {t('helpContactPage')}
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>

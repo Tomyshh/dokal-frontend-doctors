@@ -62,6 +62,18 @@ export default async function TermsPage() {
           <p className="text-sm text-muted-foreground">{tl('footer')}</p>
           <div className="flex items-center gap-6">
             <Link
+              href="/contact"
+              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              {tl('contactPage')}
+            </Link>
+            <Link
+              href="/legal"
+              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              {tl('legalNotice')}
+            </Link>
+            <Link
               href="/privacy"
               className="text-xs text-muted-foreground hover:text-primary transition-colors"
             >
