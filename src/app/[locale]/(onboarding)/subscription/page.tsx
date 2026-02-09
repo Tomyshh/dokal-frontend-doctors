@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -75,8 +74,8 @@ function CardBrandIcon({ brand }: { brand: string | null }) {
 export default function OnboardingSubscriptionPage() {
   const t = useTranslations('subscription');
   const locale = useLocale();
-  const router = useRouter();
-  const { profile } = useAuth();
+  const { profile, refreshSubscription } = useAuth();
+  const actionInFlightRef = useRef(false);
 
   const [view, setView] = useState<View>('choice');
   const [form, setForm] = useState<CardForm>({
@@ -133,22 +132,27 @@ export default function OnboardingSubscriptionPage() {
     form.expirationDate.length === 5 &&
     form.cvv.length >= 3;
 
-  const redirectToDashboard = () => {
-    router.push(`/${locale}`);
-    router.refresh();
+  const hardRedirectToDashboard = () => {
+    // Hard redirect so that AuthProvider re-fetches everything fresh
+    window.location.assign(`/${locale}`);
   };
 
   // ─── Start free trial ──────────────────────────────────────────────
   const handleStartTrial = async () => {
+    if (actionInFlightRef.current) return;
+    actionInFlightRef.current = true;
     setError('');
     setTrialLoading(true);
     try {
       await startTrial();
+      // Refresh subscription status in the auth context so dashboard won't bounce back
+      await refreshSubscription();
       setSuccess('trial');
-      setTimeout(redirectToDashboard, 2000);
+      setTimeout(hardRedirectToDashboard, 2000);
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
       setError(axiosError?.response?.data?.error?.message || t('genericError'));
+      actionInFlightRef.current = false;
     } finally {
       setTrialLoading(false);
     }
@@ -158,6 +162,8 @@ export default function OnboardingSubscriptionPage() {
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
+    if (actionInFlightRef.current) return;
+    actionInFlightRef.current = true;
 
     setError('');
     setLoading(true);
@@ -171,11 +177,14 @@ export default function OnboardingSubscriptionPage() {
       });
 
       await subscribe({ cardId: cardResponse.card.id });
+      // Refresh subscription status in the auth context so dashboard won't bounce back
+      await refreshSubscription();
       setSuccess('subscribed');
-      setTimeout(redirectToDashboard, 2000);
+      setTimeout(hardRedirectToDashboard, 2000);
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
       setError(axiosError?.response?.data?.error?.message || t('genericError'));
+      actionInFlightRef.current = false;
     } finally {
       setLoading(false);
     }
