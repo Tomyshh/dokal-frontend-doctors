@@ -280,20 +280,7 @@
     "reasonLabel": "Libellé du motif",
     "instructionTitle": "Titre de l'instruction",
     "instructionContent": "Contenu de l'instruction",
-    "saved": "Modifications enregistrées",
-    "organization": "Organisation",
-    "organizationName": "Nom de l'organisation",
-    "organizationType": "Type",
-    "organizationTypeIndividual": "Cabinet individuel",
-    "organizationTypeClinic": "Clinique",
-    "organizationLicense": "N° de licence",
-    "organizationDescription": "Description",
-    "organizationWebsite": "Site web",
-    "organizationMembers": "Membres",
-    "organizationRole": "Rôle",
-    "organizationOwner": "Propriétaire",
-    "organizationAdmin": "Administrateur",
-    "organizationMember": "Membre"
+    "saved": "Modifications enregistrées"
   },
   "notifications": {
     "title": "Notifications",
@@ -591,3 +578,4 @@
     "other": "Autre"
   }
 }
+

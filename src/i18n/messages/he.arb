@@ -280,20 +280,7 @@
     "reasonLabel": "תיאור הסיבה",
     "instructionTitle": "כותרת ההנחיה",
     "instructionContent": "תוכן ההנחיה",
-    "saved": "השינויים נשמרו",
-    "organization": "ארגון",
-    "organizationName": "שם הארגון",
-    "organizationType": "סוג",
-    "organizationTypeIndividual": "עצמאי",
-    "organizationTypeClinic": "מרפאה",
-    "organizationLicense": "מספר רישיון",
-    "organizationDescription": "תיאור",
-    "organizationWebsite": "אתר אינטרנט",
-    "organizationMembers": "חברים",
-    "organizationRole": "תפקיד",
-    "organizationOwner": "בעלים",
-    "organizationAdmin": "מנהל",
-    "organizationMember": "חבר"
+    "saved": "השינויים נשמרו"
   },
   "notifications": {
     "title": "התראות",
@@ -591,3 +578,4 @@
     "other": "אחר"
   }
 }
+

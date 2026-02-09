@@ -22,12 +22,14 @@ export default function StatCard({
 }: StatCardProps) {
   return (
     <div className="stat-card">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground font-medium">{title}</p>
+      <div className="stat-card-row flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-muted-foreground font-medium leading-snug break-words whitespace-normal">
+            {title}
+          </p>
           <p className="text-3xl font-bold text-gray-900 mt-1">{value}</p>
           {subtitle && (
-            <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
+            <p className="text-xs text-muted-foreground mt-1 break-words whitespace-normal">{subtitle}</p>
           )}
           {trend && (
             <div className="flex items-center gap-1 mt-2">
@@ -42,7 +44,7 @@ export default function StatCard({
             </div>
           )}
         </div>
-        <div className={cn('rounded-xl p-3', iconBg)}>
+        <div className={cn('rounded-xl p-3 shrink-0', iconBg)}>
           <Icon className={cn('h-6 w-6', iconColor)} />
         </div>
       </div>

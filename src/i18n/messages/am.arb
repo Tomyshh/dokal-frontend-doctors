@@ -280,20 +280,7 @@
     "reasonLabel": "Reason label",
     "instructionTitle": "Instruction title",
     "instructionContent": "Instruction content",
-    "saved": "Changes saved",
-    "organization": "Organization",
-    "organizationName": "Organization name",
-    "organizationType": "Type",
-    "organizationTypeIndividual": "Individual practice",
-    "organizationTypeClinic": "Clinic",
-    "organizationLicense": "License number",
-    "organizationDescription": "Description",
-    "organizationWebsite": "Website",
-    "organizationMembers": "Members",
-    "organizationRole": "Role",
-    "organizationOwner": "Owner",
-    "organizationAdmin": "Admin",
-    "organizationMember": "Member"
+    "saved": "Changes saved"
   },
   "notifications": {
     "title": "Notifications",
@@ -591,3 +578,4 @@
     "other": "Other"
   }
 }
+

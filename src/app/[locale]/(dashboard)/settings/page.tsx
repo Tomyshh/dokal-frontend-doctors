@@ -8,14 +8,17 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
 import { CheckCircle2 } from 'lucide-react';
 import api from '@/lib/api';
 import type { Practitioner } from '@/types';
+import { useCrmOrganization, useUpdateOrganization } from '@/hooks/useOrganization';
 import { useQuery } from '@tanstack/react-query';
 import { Select } from '@/components/ui/Select';
 import { localeNames, type Locale } from '@/i18n/config';
 import { usePathname, useRouter } from '@/i18n/routing';
+import { Building2 } from 'lucide-react';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
@@ -27,7 +30,16 @@ export default function SettingsPage() {
   const { data: settings, isLoading: loadingSettings } = useSettings();
   const updateSettings = useUpdateSettings();
   const updateProfile = useUpdatePractitionerProfile();
+  const { data: organization, isLoading: loadingOrganization } = useCrmOrganization();
+  const updateOrganization = useUpdateOrganization();
   const [saved, setSaved] = useState(false);
+
+  // Organization form state
+  const [orgName, setOrgName] = useState('');
+  const [orgDescription, setOrgDescription] = useState('');
+  const [orgWebsite, setOrgWebsite] = useState('');
+  const [orgPhone, setOrgPhone] = useState('');
+  const [orgEmail, setOrgEmail] = useState('');
 
   // Fetch practitioner profile
   const { data: practitioner, isLoading: loadingPractitioner } = useQuery({
@@ -74,6 +86,16 @@ export default function SettingsPage() {
     }
   }, [settings]);
 
+  useEffect(() => {
+    if (organization) {
+      setOrgName(organization.name || '');
+      setOrgDescription(organization.description || '');
+      setOrgWebsite(organization.website || '');
+      setOrgPhone(organization.phone || '');
+      setOrgEmail(organization.email || '');
+    }
+  }, [organization]);
+
   const handleSaveProfile = async () => {
     await updateProfile.mutateAsync({
       about: about || null,
@@ -85,6 +107,22 @@ export default function SettingsPage() {
       zip_code: zipCode || null,
       city: city || null,
       is_accepting_new_patients: acceptingPatients,
+    });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  const handleSaveOrganization = async () => {
+    if (!organization) return;
+    await updateOrganization.mutateAsync({
+      id: organization.id,
+      data: {
+        name: orgName || undefined,
+        description: orgDescription || null,
+        website: orgWebsite || null,
+        phone: orgPhone || null,
+        email: orgEmail || null,
+      },
     });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -103,7 +141,7 @@ export default function SettingsPage() {
     router.replace(pathname, { locale: newLocale });
   };
 
-  if (loadingPractitioner || loadingSettings) return <Spinner size="lg" />;
+  if (loadingPractitioner || loadingSettings || loadingOrganization) return <Spinner size="lg" />;
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -185,6 +223,54 @@ export default function SettingsPage() {
           </Button>
         </div>
       </Card>
+
+      {/* Organization */}
+      {organization && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" />
+              {t('organization')}
+            </CardTitle>
+            <Badge className="bg-primary/10 text-primary text-xs">
+              {organization.type === 'clinic'
+                ? t('organizationTypeClinic')
+                : t('organizationTypeIndividual')}
+            </Badge>
+          </CardHeader>
+          <div className="space-y-4">
+            <Input
+              label={t('organizationName')}
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
+            />
+            <Textarea
+              label={t('organizationDescription')}
+              value={orgDescription}
+              onChange={(e) => setOrgDescription(e.target.value)}
+              rows={3}
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input label={tc('phone')} type="tel" value={orgPhone} onChange={(e) => setOrgPhone(e.target.value)} />
+              <Input label={tc('email')} type="email" value={orgEmail} onChange={(e) => setOrgEmail(e.target.value)} />
+            </div>
+            <Input
+              label={t('organizationWebsite')}
+              value={orgWebsite}
+              onChange={(e) => setOrgWebsite(e.target.value)}
+              placeholder="https://"
+            />
+            {organization.license_number && (
+              <div className="text-sm text-muted-foreground">
+                {t('organizationLicense')}: <span className="font-medium text-gray-900">{organization.license_number}</span>
+              </div>
+            )}
+            <Button onClick={handleSaveOrganization} loading={updateOrganization.isPending}>
+              {tc('save')}
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Notification Settings */}
       <Card>

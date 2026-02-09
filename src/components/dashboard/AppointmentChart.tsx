@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useCrmStats } from '@/hooks/useCrmStats';
@@ -12,6 +12,8 @@ type ChartRow = { status: string; value: number };
 
 export default function AppointmentChart() {
   const t = useTranslations('dashboard');
+  const locale = useLocale();
+  const rtl = locale === 'he';
   const now = new Date();
   const from = format(startOfMonth(now), 'yyyy-MM-dd');
   const to = format(endOfMonth(now), 'yyyy-MM-dd');
@@ -27,6 +29,37 @@ export default function AppointmentChart() {
       ]
     : [];
 
+  const yAxisTick = ({
+    x = 0,
+    y = 0,
+    payload,
+  }: {
+    // Recharts may provide string|number for coordinates depending on layout.
+    x?: string | number;
+    y?: string | number;
+    payload?: { value?: string };
+    // Allow extra fields so the signature matches Recharts tick props.
+    [key: string]: unknown;
+  }) => {
+    const value = payload?.value ?? '';
+    const xNum = typeof x === 'number' ? x : Number(x) || 0;
+    const yNum = typeof y === 'number' ? y : Number(y) || 0;
+    return (
+      <text
+        x={xNum}
+        y={yNum}
+        dy={4}
+        dx={rtl ? 8 : -8}
+        textAnchor={rtl ? 'start' : 'end'}
+        fill="#94A3B8"
+        fontSize={12}
+        style={{ direction: rtl ? 'rtl' : 'ltr', unicodeBidi: 'plaintext' }}
+      >
+        {value}
+      </text>
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -39,7 +72,12 @@ export default function AppointmentChart() {
           <Spinner />
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} barGap={6} layout="vertical" margin={{ left: 16, right: 16 }}>
+            <BarChart
+              data={data}
+              barGap={6}
+              layout="vertical"
+              margin={rtl ? { left: 16, right: 32 } : { left: 16, right: 16 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
               <XAxis type="number" tickLine={false} axisLine={false} fontSize={12} fill="#94A3B8" />
               <YAxis
@@ -48,8 +86,10 @@ export default function AppointmentChart() {
                 tickLine={false}
                 axisLine={false}
                 fontSize={12}
-                width={110}
+                width={rtl ? 150 : 110}
                 fill="#94A3B8"
+                orientation={rtl ? 'right' : 'left'}
+                tick={yAxisTick}
               />
               <Tooltip
                 contentStyle={{

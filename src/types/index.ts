@@ -26,6 +26,10 @@ export type NotificationType =
 
 export type HealthTable = 'conditions' | 'medications' | 'allergies' | 'vaccinations';
 
+// Organization enums
+export type OrganizationType = 'individual' | 'clinic';
+export type OrganizationRole = 'owner' | 'admin' | 'member';
+
 // ==========================================
 // Core Models
 // ==========================================
@@ -45,8 +49,41 @@ export interface Profile {
   updated_at: string;
 }
 
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string | null;
+  email: string | null;
+  phone: string | null;
+  address_line: string | null;
+  zip_code: string | null;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  avatar_url: string | null;
+  type: OrganizationType;
+  license_number: string | null;
+  description: string | null;
+  website: string | null;
+  owner_id: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrganizationMember {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  role: OrganizationRole;
+  joined_at: string;
+  // Joined fields
+  profiles?: Pick<Profile, 'id' | 'first_name' | 'last_name' | 'avatar_url' | 'email'>;
+}
+
 export interface Practitioner {
   id: string;
+  organization_id: string;
   specialty_id: string | null;
   address_line: string | null;
   zip_code: string | null;
@@ -67,6 +104,7 @@ export interface Practitioner {
   updated_at: string;
   profiles?: Pick<Profile, 'first_name' | 'last_name' | 'avatar_url'>;
   specialties?: Specialty;
+  organizations?: Organization;
 }
 
 export interface Specialty {
@@ -93,6 +131,7 @@ export interface Appointment {
   id: string;
   patient_id: string;
   practitioner_id: string;
+  organization_id: string | null;
   relative_id: string | null;
   reason_id: string | null;
   appointment_date: string;
@@ -113,6 +152,7 @@ export interface Appointment {
   // Joined fields
   profiles?: Pick<Profile, 'id' | 'first_name' | 'last_name' | 'phone' | 'avatar_url'>;
   practitioners?: Practitioner;
+  organizations?: Organization | null;
   appointment_reasons?: AppointmentReason | null;
   relatives?: Relative | null;
 }

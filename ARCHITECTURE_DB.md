@@ -1,6 +1,46 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+-- ── Organization Types ──
+-- organization_type: 'individual' | 'clinic'
+-- organization_role: 'owner' | 'admin' | 'member'
+
+CREATE TABLE public.organizations (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  slug text UNIQUE,
+  email text,
+  phone text,
+  address_line text,
+  zip_code text,
+  city text,
+  latitude double precision,
+  longitude double precision,
+  avatar_url text,
+  type organization_type NOT NULL DEFAULT 'individual',
+  license_number text,
+  description text,
+  website text,
+  owner_id uuid NOT NULL,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT organizations_pkey PRIMARY KEY (id),
+  CONSTRAINT organizations_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.profiles(id)
+);
+
+CREATE TABLE public.organization_members (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  organization_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  role organization_role NOT NULL DEFAULT 'member',
+  joined_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT organization_members_pkey PRIMARY KEY (id),
+  CONSTRAINT organization_members_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id) ON DELETE CASCADE,
+  CONSTRAINT organization_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
+  CONSTRAINT organization_members_org_user_unique UNIQUE (organization_id, user_id)
+);
+
 CREATE TABLE public.appointment_instructions (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   practitioner_id uuid NOT NULL,
@@ -55,11 +95,13 @@ CREATE TABLE public.appointments (
   completed_at timestamp with time zone,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  organization_id uuid,
   CONSTRAINT appointments_pkey PRIMARY KEY (id),
   CONSTRAINT appointments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
   CONSTRAINT appointments_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id),
   CONSTRAINT appointments_relative_id_fkey FOREIGN KEY (relative_id) REFERENCES public.relatives(id),
-  CONSTRAINT appointments_reason_id_fkey FOREIGN KEY (reason_id) REFERENCES public.appointment_reasons(id)
+  CONSTRAINT appointments_reason_id_fkey FOREIGN KEY (reason_id) REFERENCES public.appointment_reasons(id),
+  CONSTRAINT appointments_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
 );
 CREATE TABLE public.audit_log (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -180,10 +222,30 @@ CREATE TABLE public.payment_methods (
   expiry_month integer NOT NULL CHECK (expiry_month >= 1 AND expiry_month <= 12),
   expiry_year integer NOT NULL CHECK (expiry_year >= 2000 AND expiry_year <= 2100),
   is_default boolean NOT NULL DEFAULT false,
-  stripe_payment_method_id text,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
+  buyer_key text,
+  label text,
+  buyer_card_mask text,
   CONSTRAINT payment_methods_pkey PRIMARY KEY (id),
   CONSTRAINT payment_methods_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.payment_transactions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  subscription_id uuid,
+  payment_method_id uuid,
+  type text NOT NULL DEFAULT 'sale'::text CHECK (type = ANY (ARRAY['sale'::text, 'subscription_payment'::text, 'refund'::text])),
+  amount_agorot integer NOT NULL,
+  currency text NOT NULL DEFAULT 'ILS'::text,
+  description text,
+  payme_sale_id text,
+  status text NOT NULL DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'completed'::text, 'failed'::text, 'refunded'::text])),
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT payment_transactions_pkey PRIMARY KEY (id),
+  CONSTRAINT payment_transactions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
+  CONSTRAINT payment_transactions_subscription_id_fkey FOREIGN KEY (subscription_id) REFERENCES public.subscriptions(id),
+  CONSTRAINT payment_transactions_payment_method_id_fkey FOREIGN KEY (payment_method_id) REFERENCES public.payment_methods(id)
 );
 CREATE TABLE public.practitioner_schedule_overrides (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -213,6 +275,7 @@ CREATE TABLE public.practitioner_weekly_schedule (
 );
 CREATE TABLE public.practitioners (
   id uuid NOT NULL,
+  organization_id uuid NOT NULL,
   specialty_id uuid,
   address_line text,
   zip_code text,
@@ -231,9 +294,13 @@ CREATE TABLE public.practitioners (
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  trial_start timestamp with time zone,
+  trial_end timestamp with time zone,
+  trial_used boolean NOT NULL DEFAULT false,
   CONSTRAINT practitioners_pkey PRIMARY KEY (id),
   CONSTRAINT practitioners_id_fkey FOREIGN KEY (id) REFERENCES public.profiles(id),
-  CONSTRAINT practitioners_specialty_id_fkey FOREIGN KEY (specialty_id) REFERENCES public.specialties(id)
+  CONSTRAINT practitioners_specialty_id_fkey FOREIGN KEY (specialty_id) REFERENCES public.specialties(id),
+  CONSTRAINT practitioners_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
 );
 CREATE TABLE public.profiles (
   id uuid NOT NULL,
@@ -283,7 +350,32 @@ CREATE TABLE public.specialties (
   name_fr text,
   icon_url text,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
+  name_ru text,
+  name_en text,
+  name_am text,
+  name_es text,
   CONSTRAINT specialties_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.subscriptions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL UNIQUE,
+  payment_method_id uuid NOT NULL,
+  plan text NOT NULL DEFAULT 'monthly'::text,
+  price_agorot integer NOT NULL DEFAULT 29000,
+  status text NOT NULL DEFAULT 'active'::text CHECK (status = ANY (ARRAY['active'::text, 'cancelled'::text, 'paused'::text, 'past_due'::text, 'expired'::text])),
+  payme_sub_id text,
+  payme_sub_code text,
+  payme_sale_id text,
+  current_period_start timestamp with time zone NOT NULL DEFAULT now(),
+  current_period_end timestamp with time zone,
+  next_payment_date date,
+  cancelled_at timestamp with time zone,
+  paused_at timestamp with time zone,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT subscriptions_pkey PRIMARY KEY (id),
+  CONSTRAINT subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
+  CONSTRAINT subscriptions_payment_method_id_fkey FOREIGN KEY (payment_method_id) REFERENCES public.payment_methods(id)
 );
 CREATE TABLE public.user_settings (
   user_id uuid NOT NULL,

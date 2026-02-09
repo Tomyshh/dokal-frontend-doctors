@@ -280,20 +280,7 @@
     "reasonLabel": "Название причины",
     "instructionTitle": "Заголовок инструкции",
     "instructionContent": "Текст инструкции",
-    "saved": "Изменения сохранены",
-    "organization": "Организация",
-    "organizationName": "Название организации",
-    "organizationType": "Тип",
-    "organizationTypeIndividual": "Частная практика",
-    "organizationTypeClinic": "Клиника",
-    "organizationLicense": "Номер лицензии",
-    "organizationDescription": "Описание",
-    "organizationWebsite": "Сайт",
-    "organizationMembers": "Участники",
-    "organizationRole": "Роль",
-    "organizationOwner": "Владелец",
-    "organizationAdmin": "Администратор",
-    "organizationMember": "Участник"
+    "saved": "Изменения сохранены"
   },
   "notifications": {
     "title": "Уведомления",
@@ -591,3 +578,4 @@
     "other": "Другое"
   }
 }
+

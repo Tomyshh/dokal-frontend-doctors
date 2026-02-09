@@ -6,6 +6,8 @@ import { defaultLocale } from '@/i18n/config';
 
 const intlMiddleware = createMiddleware(routing);
 
+const LOCALE_GROUP = '(he|en|fr|ru|am|es)';
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -22,10 +24,12 @@ export async function middleware(request: NextRequest) {
   const { user, supabaseResponse } = await updateSession(request);
 
   // Route classification
-  const isAuthRoute = /^\/(fr|en|he|ru)\/(login|forgot-password|signup)/.test(pathname);
-  const isPublicRoute = /^\/(fr|en|he|ru)\/(welcome|privacy|terms)/.test(pathname);
-  const isOnboardingRoute = /^\/(fr|en|he|ru)\/subscription/.test(pathname);
-  const isDashboardRoute = /^\/(fr|en|he|ru)(\/(?!login|forgot-password|signup|welcome|privacy|terms|subscription).*)?$/.test(pathname);
+  const isAuthRoute = new RegExp(`^/${LOCALE_GROUP}/(login|forgot-password|signup)`).test(pathname);
+  const isPublicRoute = new RegExp(`^/${LOCALE_GROUP}/(welcome|privacy|terms)`).test(pathname);
+  const isOnboardingRoute = new RegExp(`^/${LOCALE_GROUP}/subscription`).test(pathname);
+  const isDashboardRoute = new RegExp(
+    `^/${LOCALE_GROUP}(/(?!login|forgot-password|signup|welcome|privacy|terms|subscription).*)?$`
+  ).test(pathname);
 
   // Protected routes: redirect unauthenticated users to welcome
   if ((isDashboardRoute || isOnboardingRoute) && !isAuthRoute && !isPublicRoute && !user) {
@@ -35,7 +39,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // If logged in and trying to access auth or welcome, redirect to dashboard (allow privacy/terms)
-  const isWelcome = /^\/(fr|en|he|ru)\/welcome/.test(pathname);
+  const isWelcome = new RegExp(`^/${LOCALE_GROUP}/welcome`).test(pathname);
   if ((isAuthRoute || isWelcome) && user) {
     const locale = pathname.split('/')[1] || defaultLocale;
     const dashboardUrl = new URL(`/${locale}`, request.url);
@@ -56,5 +60,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/(fr|en|he|ru)', '/(fr|en|he|ru)/:path*'],
+  matcher: ['/', '/(he|en|fr|ru|am|es)', '/(he|en|fr|ru|am|es)/:path*'],
 };

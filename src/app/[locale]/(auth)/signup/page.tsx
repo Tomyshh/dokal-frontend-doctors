@@ -5,6 +5,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
+import api from '@/lib/api';
+import type { RegisterPractitionerRequest } from '@/types/api';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
@@ -87,6 +89,26 @@ export default function SignupPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  /** Call backend to create profiles + practitioners + organization rows (after auth is confirmed) */
+  const registerPractitionerOnBackend = async () => {
+    const normalizedPhone = normalizeIsraelPhoneToE164(form.phone);
+    const payload: RegisterPractitionerRequest = {
+      first_name: form.firstName,
+      last_name: form.lastName,
+      email: form.email,
+      phone: normalizedPhone ?? form.phone,
+      city: form.city,
+      specialty: form.specialty,
+      license_number: form.licenseNumber,
+      address_line: form.addressLine,
+      zip_code: form.zipCode,
+      // Le backend crée automatiquement une organization de type 'individual'
+      // Pour rejoindre une clinique existante, passer organization_id
+      // Pour créer une clinique, passer organization_name + organization_type: 'clinic'
+    };
+    await api.post('/practitioners/register', payload);
+  };
+
   // ─── Resend cooldown timer ─────────────────────────────────────────
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -122,7 +144,6 @@ export default function SignupPage() {
     setLoading(true);
     try {
       const supabase = createClient();
-      const normalizedPhone = normalizeIsraelPhoneToE164(form.phone);
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -130,14 +151,6 @@ export default function SignupPage() {
           emailRedirectTo: `${window.location.origin}/${locale}/login`,
           data: {
             role: 'practitioner',
-            first_name: form.firstName,
-            last_name: form.lastName,
-            phone: normalizedPhone ?? form.phone,
-            city: form.city,
-            specialty: form.specialty,
-            license_number: form.licenseNumber,
-            address_line: form.addressLine,
-            zip_code: form.zipCode,
           },
         },
       });
@@ -147,8 +160,14 @@ export default function SignupPage() {
         return;
       }
 
-      // If session already exists (email confirmation disabled), go to subscription
+      // If session already exists (email confirmation disabled),
+      // register practitioner on backend then go to subscription
       if (data.session) {
+        try {
+          await registerPractitionerOnBackend();
+        } catch (err) {
+          console.error('Practitioner registration failed:', err);
+        }
         router.push(`/${locale}/subscription`);
         router.refresh();
         return;
@@ -247,6 +266,13 @@ export default function SignupPage() {
           const { data } = await supabase.auth.getSession();
           hasSession = !!data.session;
         }
+      }
+
+      // Register practitioner profile on backend
+      try {
+        await registerPractitionerOnBackend();
+      } catch (err) {
+        console.error('Practitioner registration failed:', err);
       }
 
       setOtpRedirecting(true);
@@ -423,7 +449,7 @@ export default function SignupPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
             {/* Row 1: Name + Email */}
             <div className="grid grid-cols-4 gap-3">
               <Input

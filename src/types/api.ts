@@ -137,6 +137,66 @@ export interface CreateCrmPatientRequest {
 }
 
 // ==========================================
+// Practitioner Registration
+// ==========================================
+
+export interface RegisterPractitionerRequest {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  city: string;
+  specialty: string;
+  license_number: string;
+  address_line: string;
+  zip_code: string;
+  // Optional: join existing clinic
+  organization_id?: string;
+  // Optional: create a new clinic
+  organization_name?: string;
+  organization_type?: 'individual' | 'clinic';
+}
+
+// ==========================================
+// Organizations
+// ==========================================
+
+export interface CreateOrganizationRequest {
+  name: string;
+  type: 'individual' | 'clinic';
+  email?: string;
+  phone?: string;
+  address_line?: string;
+  zip_code?: string;
+  city?: string;
+  license_number?: string;
+  description?: string;
+  website?: string;
+}
+
+export interface UpdateOrganizationRequest {
+  name?: string;
+  email?: string | null;
+  phone?: string | null;
+  address_line?: string | null;
+  zip_code?: string | null;
+  city?: string | null;
+  avatar_url?: string | null;
+  license_number?: string | null;
+  description?: string | null;
+  website?: string | null;
+}
+
+export interface AddOrganizationMemberRequest {
+  user_id: string;
+  role?: 'admin' | 'member';
+}
+
+export interface UpdateOrganizationMemberRequest {
+  role: 'admin' | 'member';
+}
+
+// ==========================================
 // API Error Response
 // ==========================================
 
