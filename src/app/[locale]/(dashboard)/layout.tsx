@@ -16,7 +16,7 @@ import { Clock, X } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { loading, profile, subscriptionStatus, signOut } = useAuth();
+  const { loading, user, profile, subscriptionStatus, signOut } = useAuth();
   const t = useTranslations('auth');
   const ts = useTranslations('subscription');
   const locale = useLocale();
@@ -29,21 +29,21 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     subscriptionStatus?.hasSubscription ||
     (subscriptionStatus?.trial?.isActive && (subscriptionStatus.trial.daysRemaining ?? 0) > 0);
 
-  // Redirect to onboarding if no subscription and no active trial
+  // Redirect to onboarding if we know for sure the user has no access
   useEffect(() => {
     if (loading) return;
-    if (!profile) return; // Wait for profile
+    // Must have a user + profile + subscription status all resolved
+    if (!user || !profile || subscriptionStatus === null) return;
 
-    // Only redirect practitioners who have no access
     if (
       (profile.role === 'practitioner' || profile.role === 'admin') &&
-      subscriptionStatus !== null &&
       !hasAccess
     ) {
       router.replace(`/${locale}/subscription`);
     }
-  }, [loading, profile, subscriptionStatus, hasAccess, router, locale]);
+  }, [loading, user, profile, subscriptionStatus, hasAccess, router, locale]);
 
+  // ─── Loading state ─────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -52,7 +52,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // Role check — but be lenient if profile is null (may still be loading from backend)
+  // ─── Role check ────────────────────────────────────────────────────
+  // Only block if we have a profile AND the role is wrong.
+  // If profile is null (backend unreachable / still propagating), let them through
+  // so they don't get stuck. The middleware already verified the session.
   if (profile && profile.role !== 'practitioner' && profile.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-6">
@@ -69,16 +72,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // If still waiting for subscription status to decide
-  if (subscriptionStatus !== null && !hasAccess) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
-  // Trial banner
+  // ─── Trial banner ──────────────────────────────────────────────────
   const showTrialBanner =
     !bannerDismissed &&
     subscriptionStatus?.trial?.isActive &&
