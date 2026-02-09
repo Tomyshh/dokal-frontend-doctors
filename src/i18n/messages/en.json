@@ -1,6 +1,10 @@
 {
   "common": {
     "loading": "Loading...",
+    "apiError": "API error",
+    "apiErrorWithStatus": "API error ({status})",
+    "networkError": "Network error",
+    "unexpectedError": "Something went wrong.",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -189,7 +193,15 @@
     "dateOfBirth": "Date of birth",
     "visitedBefore": "Returning patient",
     "firstVisit": "First visit",
-    "noAppointments": "No appointments"
+    "noAppointments": "No appointments",
+    "statusLabel": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelledByPatient": "Cancelled (patient)",
+      "cancelledByPractitioner": "Cancelled (practitioner)",
+      "noShow": "No show"
+    }
   },
   "schedule": {
     "title": "Schedule",
@@ -275,11 +287,17 @@
     "markAllRead": "Mark all as read",
     "noNotifications": "No notifications",
     "appointmentRequest": "Appointment request",
+    "appointmentRequestBody": "You have a new appointment request.",
     "appointmentConfirmed": "Appointment confirmed",
+    "appointmentConfirmedBody": "An appointment has been confirmed.",
     "appointmentCancelled": "Appointment cancelled",
+    "appointmentCancelledBody": "An appointment has been cancelled.",
     "appointmentReminder": "Appointment reminder",
+    "appointmentReminderBody": "Reminder: you have an upcoming appointment.",
     "newMessage": "New message",
-    "reviewReceived": "New review"
+    "newMessageBody": "You have received a new message.",
+    "reviewReceived": "New review",
+    "reviewReceivedBody": "You have received a new review."
   },
   "authLayout": {
     "subtitle": "A modern SaaS experience to manage your appointments, patients and schedule.",

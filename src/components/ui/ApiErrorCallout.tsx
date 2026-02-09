@@ -1,7 +1,13 @@
+ 'use client';
+
 import type { ReactNode } from 'react';
 import axios from 'axios';
+import { useTranslations } from 'next-intl';
 
-function getErrorDetails(error: unknown): { title: string; description?: ReactNode } {
+function getErrorDetails(
+  error: unknown,
+  t: ReturnType<typeof useTranslations>
+): { title: string; description?: ReactNode } {
   if (axios.isAxiosError(error)) {
     const status = error.response?.status;
     const url = error.config?.url;
@@ -10,10 +16,10 @@ function getErrorDetails(error: unknown): { title: string; description?: ReactNo
     const message =
       (error.response?.data as any)?.error?.message ||
       error.message ||
-      'Erreur réseau';
+      t('networkError');
 
     return {
-      title: status ? `Erreur API (${status})` : 'Erreur API',
+      title: status ? t('apiErrorWithStatus', { status }) : t('apiError'),
       description: (
         <div className="space-y-1">
           <div className="text-sm text-red-800">{message}</div>
@@ -27,17 +33,18 @@ function getErrorDetails(error: unknown): { title: string; description?: ReactNo
   }
 
   return {
-    title: 'Erreur',
+    title: t('error'),
     description: (
       <div className="text-sm text-red-800">
-        {error instanceof Error ? error.message : 'Une erreur est survenue.'}
+        {error instanceof Error ? error.message : t('unexpectedError')}
       </div>
     ),
   };
 }
 
 export function ApiErrorCallout({ error, action }: { error: unknown; action?: ReactNode }) {
-  const details = getErrorDetails(error);
+  const t = useTranslations('common');
+  const details = getErrorDetails(error, t);
 
   return (
     <div className="rounded-2xl border border-red-200 bg-red-50 p-4">

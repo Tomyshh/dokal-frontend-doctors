@@ -1,6 +1,10 @@
 {
   "common": {
     "loading": "Chargement...",
+    "apiError": "Erreur API",
+    "apiErrorWithStatus": "Erreur API ({status})",
+    "networkError": "Erreur réseau",
+    "unexpectedError": "Une erreur est survenue.",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "delete": "Supprimer",
@@ -189,7 +193,15 @@
     "dateOfBirth": "Date de naissance",
     "visitedBefore": "Déjà venu",
     "firstVisit": "Première visite",
-    "noAppointments": "Aucun rendez-vous"
+    "noAppointments": "Aucun rendez-vous",
+    "statusLabel": {
+      "pending": "En attente",
+      "confirmed": "Confirmé",
+      "completed": "Terminé",
+      "cancelledByPatient": "Annulé (patient)",
+      "cancelledByPractitioner": "Annulé (praticien)",
+      "noShow": "Absent"
+    }
   },
   "schedule": {
     "title": "Planning",
@@ -275,11 +287,17 @@
     "markAllRead": "Tout marquer comme lu",
     "noNotifications": "Aucune notification",
     "appointmentRequest": "Demande de RDV",
+    "appointmentRequestBody": "Vous avez une nouvelle demande de rendez-vous.",
     "appointmentConfirmed": "RDV confirmé",
+    "appointmentConfirmedBody": "Un rendez-vous a été confirmé.",
     "appointmentCancelled": "RDV annulé",
+    "appointmentCancelledBody": "Un rendez-vous a été annulé.",
     "appointmentReminder": "Rappel de RDV",
+    "appointmentReminderBody": "Rappel : vous avez un rendez-vous à venir.",
     "newMessage": "Nouveau message",
-    "reviewReceived": "Nouvel avis"
+    "newMessageBody": "Vous avez reçu un nouveau message.",
+    "reviewReceived": "Nouvel avis",
+    "reviewReceivedBody": "Vous avez reçu un nouvel avis."
   },
   "authLayout": {
     "subtitle": "Une expérience SaaS moderne pour gérer vos rendez-vous, vos patients et votre planning.",

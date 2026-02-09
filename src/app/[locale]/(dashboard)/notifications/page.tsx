@@ -31,6 +31,24 @@ const notifColors: Record<NotificationType, string> = {
   review_received: 'bg-yellow-50 text-yellow-600',
 };
 
+const notifTitleKey: Record<NotificationType, string> = {
+  appointment_request: 'appointmentRequest',
+  appointment_confirmed: 'appointmentConfirmed',
+  appointment_cancelled: 'appointmentCancelled',
+  appointment_reminder: 'appointmentReminder',
+  new_message: 'newMessage',
+  review_received: 'reviewReceived',
+};
+
+const notifBodyKey: Record<NotificationType, string> = {
+  appointment_request: 'appointmentRequestBody',
+  appointment_confirmed: 'appointmentConfirmedBody',
+  appointment_cancelled: 'appointmentCancelledBody',
+  appointment_reminder: 'appointmentReminderBody',
+  new_message: 'newMessageBody',
+  review_received: 'reviewReceivedBody',
+};
+
 export default function NotificationsPage() {
   const t = useTranslations('notifications');
   const locale = useLocale();
@@ -60,6 +78,8 @@ export default function NotificationsPage() {
             {notifications.map((notif) => {
               const Icon = notifIcons[notif.type] || Bell;
               const colorClass = notifColors[notif.type] || 'bg-gray-50 text-gray-600';
+              const title = notif.type in notifTitleKey ? t(notifTitleKey[notif.type]) : notif.title;
+              const body = notif.type in notifBodyKey ? t(notifBodyKey[notif.type]) : notif.body;
 
               return (
                 <div
@@ -75,7 +95,7 @@ export default function NotificationsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium text-gray-900">{notif.title}</p>
+                      <p className="text-sm font-medium text-gray-900">{title}</p>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs text-muted-foreground">
                           {formatRelativeDate(notif.created_at, locale)}
@@ -85,7 +105,7 @@ export default function NotificationsPage() {
                         )}
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{notif.body}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{body}</p>
                   </div>
                 </div>
               );

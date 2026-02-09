@@ -8,7 +8,8 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
 import { Button } from '@/components/ui/Button';
-import { formatDate, formatTime, getStatusColor, getStatusLabel } from '@/lib/utils';
+import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
+import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { ArrowLeft, Phone, Mail, MapPin, Heart, Pill, AlertTriangle, Syringe, Calendar } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
@@ -16,6 +17,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   const { id } = use(params);
   const t = useTranslations('patients');
   const tc = useTranslations('common');
+  const ta = useTranslations('appointments');
   const locale = useLocale();
   const { data: patient, isLoading } = usePatient(id);
 
@@ -222,7 +224,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                     </td>
                     <td className="py-3 px-2">
                       <Badge className={getStatusColor(appt.status)}>
-                        {getStatusLabel(appt.status, locale)}
+                        {getAppointmentStatusLabel(ta, appt.status)}
                       </Badge>
                     </td>
                     <td className="py-3 px-2 text-sm text-muted-foreground">

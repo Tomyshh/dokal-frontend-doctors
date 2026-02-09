@@ -13,8 +13,8 @@ function getApiBaseUrl(): string {
     // Avoid silently calling the frontend origin in production.
     // eslint-disable-next-line no-console
     console.warn(
-      'NEXT_PUBLIC_API_URL non défini. Le frontend utilisera une valeur par défaut. ' +
-        'Recommandé: définir NEXT_PUBLIC_API_URL (ex: https://dokal-backend.onrender.com).'
+      'NEXT_PUBLIC_API_URL is not set. The frontend will use a default value. ' +
+        'Recommended: set NEXT_PUBLIC_API_URL (e.g. https://dokal-backend.onrender.com).'
     );
   }
 

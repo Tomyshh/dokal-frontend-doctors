@@ -7,7 +7,8 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { formatTime, getStatusColor, getStatusLabel } from '@/lib/utils';
+import { formatTime, getStatusColor } from '@/lib/utils';
+import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { CalendarX } from 'lucide-react';
 import { format } from 'date-fns';
 import { Link } from '@/i18n/routing';
@@ -82,7 +83,7 @@ export default function UpcomingAppointments() {
                   </td>
                   <td className="py-3 px-2">
                     <Badge className={getStatusColor(appt.status)}>
-                      {getStatusLabel(appt.status, locale)}
+                      {getAppointmentStatusLabel(ta, appt.status)}
                     </Badge>
                   </td>
                 </tr>

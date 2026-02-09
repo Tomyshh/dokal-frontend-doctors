@@ -1,6 +1,10 @@
 {
   "common": {
     "loading": "טוען...",
+    "apiError": "שגיאת API",
+    "apiErrorWithStatus": "שגיאת API ({status})",
+    "networkError": "שגיאת רשת",
+    "unexpectedError": "אירעה שגיאה.",
     "save": "שמור",
     "cancel": "ביטול",
     "delete": "מחק",
@@ -189,7 +193,15 @@
     "dateOfBirth": "תאריך לידה",
     "visitedBefore": "מטופל חוזר",
     "firstVisit": "ביקור ראשון",
-    "noAppointments": "אין פגישות"
+    "noAppointments": "אין פגישות",
+    "statusLabel": {
+      "pending": "ממתין",
+      "confirmed": "מאושר",
+      "completed": "הושלם",
+      "cancelledByPatient": "בוטל (מטופל)",
+      "cancelledByPractitioner": "בוטל (רופא)",
+      "noShow": "לא הגיע"
+    }
   },
   "schedule": {
     "title": "לוח זמנים",
@@ -275,11 +287,17 @@
     "markAllRead": "סמן הכל כנקרא",
     "noNotifications": "אין התראות",
     "appointmentRequest": "בקשת פגישה",
+    "appointmentRequestBody": "יש לך בקשה חדשה לפגישה.",
     "appointmentConfirmed": "פגישה אושרה",
+    "appointmentConfirmedBody": "פגישה אושרה.",
     "appointmentCancelled": "פגישה בוטלה",
+    "appointmentCancelledBody": "פגישה בוטלה.",
     "appointmentReminder": "תזכורת פגישה",
+    "appointmentReminderBody": "תזכורת: יש לך פגישה קרובה.",
     "newMessage": "הודעה חדשה",
-    "reviewReceived": "ביקורת חדשה"
+    "newMessageBody": "קיבלת הודעה חדשה.",
+    "reviewReceived": "ביקורת חדשה",
+    "reviewReceivedBody": "קיבלת ביקורת חדשה."
   },
   "authLayout": {
     "subtitle": "חוויה מודרנית בסגנון SaaS לניהול פגישות, מטופלים ולוח זמנים.",

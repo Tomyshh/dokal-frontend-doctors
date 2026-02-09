@@ -3,7 +3,7 @@
 import { useTranslations, useLocale } from 'next-intl';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { getStatusLabel } from '@/lib/utils';
+import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 
 interface AppointmentFiltersProps {
   date: string;
@@ -24,12 +24,12 @@ export default function AppointmentFilters({
 
   const statusOptions = [
     { value: '', label: tc('all') },
-    { value: 'pending', label: getStatusLabel('pending', locale) },
-    { value: 'confirmed', label: getStatusLabel('confirmed', locale) },
-    { value: 'completed', label: getStatusLabel('completed', locale) },
-    { value: 'cancelled_by_patient', label: getStatusLabel('cancelled_by_patient', locale) },
-    { value: 'cancelled_by_practitioner', label: getStatusLabel('cancelled_by_practitioner', locale) },
-    { value: 'no_show', label: getStatusLabel('no_show', locale) },
+    { value: 'pending', label: getAppointmentStatusLabel(t, 'pending') },
+    { value: 'confirmed', label: getAppointmentStatusLabel(t, 'confirmed') },
+    { value: 'completed', label: getAppointmentStatusLabel(t, 'completed') },
+    { value: 'cancelled_by_patient', label: getAppointmentStatusLabel(t, 'cancelled_by_patient') },
+    { value: 'cancelled_by_practitioner', label: getAppointmentStatusLabel(t, 'cancelled_by_practitioner') },
+    { value: 'no_show', label: getAppointmentStatusLabel(t, 'no_show') },
   ];
 
   return (

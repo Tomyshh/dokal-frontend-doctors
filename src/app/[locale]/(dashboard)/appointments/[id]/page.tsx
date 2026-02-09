@@ -10,7 +10,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import AppointmentActions from '@/components/appointments/AppointmentActions';
-import { formatDate, formatTime, getStatusColor, getStatusLabel } from '@/lib/utils';
+import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
+import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { ArrowLeft, Calendar, Clock, MapPin, User, FileText } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import type { Appointment } from '@/types';
@@ -56,7 +57,7 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
             {t('title')}
           </CardTitle>
           <Badge className={getStatusColor(appointment.status)}>
-            {getStatusLabel(appointment.status, locale)}
+            {getAppointmentStatusLabel(t, appointment.status)}
           </Badge>
         </CardHeader>
 

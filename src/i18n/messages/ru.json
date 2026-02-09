@@ -1,6 +1,10 @@
 {
   "common": {
     "loading": "Загрузка...",
+    "apiError": "Ошибка API",
+    "apiErrorWithStatus": "Ошибка API ({status})",
+    "networkError": "Ошибка сети",
+    "unexpectedError": "Произошла ошибка.",
     "save": "Сохранить",
     "cancel": "Отмена",
     "delete": "Удалить",
@@ -189,7 +193,15 @@
     "dateOfBirth": "Дата рождения",
     "visitedBefore": "Повторный пациент",
     "firstVisit": "Первый визит",
-    "noAppointments": "Приёмов нет"
+    "noAppointments": "Приёмов нет",
+    "statusLabel": {
+      "pending": "В ожидании",
+      "confirmed": "Подтверждено",
+      "completed": "Завершено",
+      "cancelledByPatient": "Отменено (пациент)",
+      "cancelledByPractitioner": "Отменено (врач)",
+      "noShow": "Не явился"
+    }
   },
   "schedule": {
     "title": "Расписание",
@@ -275,11 +287,17 @@
     "markAllRead": "Отметить все как прочитанные",
     "noNotifications": "Уведомлений нет",
     "appointmentRequest": "Запрос на приём",
+    "appointmentRequestBody": "У вас новый запрос на приём.",
     "appointmentConfirmed": "Приём подтверждён",
+    "appointmentConfirmedBody": "Приём был подтверждён.",
     "appointmentCancelled": "Приём отменён",
+    "appointmentCancelledBody": "Приём был отменён.",
     "appointmentReminder": "Напоминание о приёме",
+    "appointmentReminderBody": "Напоминание: у вас скоро приём.",
     "newMessage": "Новое сообщение",
-    "reviewReceived": "Получен новый отзыв"
+    "newMessageBody": "У вас новое сообщение.",
+    "reviewReceived": "Получен новый отзыв",
+    "reviewReceivedBody": "Вы получили новый отзыв."
   },
   "authLayout": {
     "subtitle": "Современный SaaS‑опыт для управления приёмами, пациентами и расписанием.",

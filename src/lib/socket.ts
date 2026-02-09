@@ -9,8 +9,8 @@ function getSocketBaseUrl(): string {
   if (typeof window !== 'undefined' && !publicUrl) {
     // eslint-disable-next-line no-console
     console.warn(
-      'NEXT_PUBLIC_SOCKET_URL non défini. Le realtime utilisera une valeur par défaut. ' +
-        'Recommandé: définir NEXT_PUBLIC_SOCKET_URL (ex: https://dokal-backend.onrender.com).'
+      'NEXT_PUBLIC_SOCKET_URL is not set. Realtime will use a default value. ' +
+        'Recommended: set NEXT_PUBLIC_SOCKET_URL (e.g. https://dokal-backend.onrender.com).'
     );
   }
 

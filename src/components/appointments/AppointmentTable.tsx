@@ -4,7 +4,8 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import AppointmentActions from './AppointmentActions';
-import { formatDate, formatTime, getStatusColor, getStatusLabel } from '@/lib/utils';
+import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
+import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import type { Appointment } from '@/types';
 import { Link } from '@/i18n/routing';
 
@@ -80,7 +81,7 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
               </td>
               <td className="py-3 px-3">
                 <Badge className={getStatusColor(appt.status)}>
-                  {getStatusLabel(appt.status, locale)}
+                  {getAppointmentStatusLabel(t, appt.status)}
                 </Badge>
               </td>
               <td className="py-3 px-3 text-right">

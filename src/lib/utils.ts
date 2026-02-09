@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { format, parseISO, isToday, isTomorrow, isYesterday, type Locale } from 'date-fns';
+import { format, parseISO, differenceInCalendarDays, startOfDay, type Locale } from 'date-fns';
 import { fr, enUS, he, ru } from 'date-fns/locale';
 
 export function cn(...inputs: ClassValue[]) {
@@ -26,30 +26,18 @@ export function formatTime(time: string) {
 
 export function formatRelativeDate(date: string | Date, locale: string = 'fr') {
   const d = typeof date === 'string' ? parseISO(date) : date;
-  if (isToday(d))
-    return locale === 'fr'
-      ? "Aujourd'hui"
-      : locale === 'he'
-        ? 'היום'
-        : locale === 'ru'
-          ? 'Сегодня'
-          : 'Today';
-  if (isTomorrow(d))
-    return locale === 'fr'
-      ? 'Demain'
-      : locale === 'he'
-        ? 'מחר'
-        : locale === 'ru'
-          ? 'Завтра'
-          : 'Tomorrow';
-  if (isYesterday(d))
-    return locale === 'fr'
-      ? 'Hier'
-      : locale === 'he'
-        ? 'אתמול'
-        : locale === 'ru'
-          ? 'Вчера'
-          : 'Yesterday';
+  const diffDays = differenceInCalendarDays(startOfDay(d), startOfDay(new Date()));
+
+  // Use Intl.RelativeTimeFormat for fully localized labels (today/yesterday/tomorrow)
+  if (diffDays >= -1 && diffDays <= 1) {
+    try {
+      const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+      return rtf.format(diffDays, 'day');
+    } catch {
+      // Fallback if Intl.RelativeTimeFormat is not available for a locale
+    }
+  }
+
   return formatDate(d, 'dd MMM yyyy', locale);
 }
 
@@ -71,34 +59,13 @@ export function getStatusColor(status: string): string {
   return colors[status] || 'bg-gray-100 text-gray-800';
 }
 
-export function getStatusLabel(status: string, locale: string = 'fr'): string {
-  const labels: Record<string, Record<string, string>> = {
-    pending: { fr: 'En attente', en: 'Pending', he: 'ממתין', ru: 'В ожидании' },
-    confirmed: { fr: 'Confirmé', en: 'Confirmed', he: 'מאושר', ru: 'Подтверждено' },
-    completed: { fr: 'Terminé', en: 'Completed', he: 'הושלם', ru: 'Завершено' },
-    cancelled_by_patient: {
-      fr: 'Annulé (patient)',
-      en: 'Cancelled (patient)',
-      he: 'בוטל (מטופל)',
-      ru: 'Отменено (пациент)',
-    },
-    cancelled_by_practitioner: {
-      fr: 'Annulé (praticien)',
-      en: 'Cancelled (doctor)',
-      he: 'בוטל (רופא)',
-      ru: 'Отменено (врач)',
-    },
-    no_show: { fr: 'Absent', en: 'No show', he: 'לא הגיע', ru: 'Не явился' },
-  };
-  return labels[status]?.[locale] || status;
-}
-
 export function getDayName(day: number, locale: string = 'fr'): string {
-  const days: Record<string, string[]> = {
-    fr: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
-    en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-    he: ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'],
-    ru: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
-  };
-  return days[locale]?.[day] || days.fr[day];
+  // Use Intl to avoid hardcoded day names.
+  // 2024-01-07 is a Sunday. We build a date matching the requested weekday.
+  const base = new Date(Date.UTC(2024, 0, 7 + day));
+  try {
+    return new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(base);
+  } catch {
+    return new Intl.DateTimeFormat('en', { weekday: 'long' }).format(base);
+  }
 }
