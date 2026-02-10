@@ -37,7 +37,9 @@
     "next": "Следующая",
     "details": "Детали",
     "notes": "Заметки",
-    "patient": "Пациент"
+    "patient": "Пациент",
+    "firstName": "Имя",
+    "lastName": "Фамилия"
   },
   "auth": {
     "login": "Войти",
@@ -147,7 +149,8 @@
     "reasons": "Причины приёма",
     "instructions": "Инструкции перед приёмом",
     "help": "Помощь",
-    "support": "Поддержка"
+    "support": "Поддержка",
+    "team": "Команда"
   },
   "dashboard": {
     "title": "Панель управления",
@@ -170,6 +173,7 @@
     "notFound": "Приём не найден",
     "newAppointment": "Новый приём",
     "patient": "Пациент",
+    "practitioner": "Врач",
     "date": "Дата",
     "time": "Время",
     "reason": "Причина",
@@ -589,5 +593,32 @@
     "perfusionist": "Перфузионист",
     "surgicalTechnologist": "Операционный техник",
     "other": "Другое"
+  },
+  "team": {
+    "title": "Управление командой",
+    "subtitle": "Участники {name}",
+    "members": "Участники",
+    "inviteMember": "Пригласить участника",
+    "staffType": "Тип сотрудника",
+    "practitioner": "Врач",
+    "secretary": "Секретарь",
+    "orgRole": "Роль в организации",
+    "specialty": "Специальность",
+    "licenseNumber": "Номер лицензии",
+    "addressLine": "Адрес",
+    "zipCode": "Почтовый индекс",
+    "city": "Город",
+    "addressAutoOrg": "Авто (адрес клиники)",
+    "sendInvite": "Отправить приглашение",
+    "inviteSentSuccess": "Приглашение отправлено по электронной почте",
+    "memberAddedSuccess": "Участник успешно добавлен",
+    "inviteError": "Ошибка при отправке приглашения",
+    "removeMember": "Удалить",
+    "confirmRemoveTitle": "Удаление участника",
+    "confirmRemoveText": "Вы уверены, что хотите удалить {name} из команды?",
+    "promoteToAdmin": "Повысить до администратора",
+    "demoteToMember": "Понизить до участника",
+    "noMembers": "Нет участников в команде",
+    "clinicOnly": "Управление командой доступно только для клиник"
   }
 }

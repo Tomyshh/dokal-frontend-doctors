@@ -30,6 +30,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     (subscriptionStatus?.trial?.isActive && (subscriptionStatus.trial.daysRemaining ?? 0) > 0);
 
   // Redirect to onboarding if we know for sure the user has no access
+  // Secretaries don't manage their own subscription (the clinic pays)
   useEffect(() => {
     if (loading) return;
     // Must have a user + profile + subscription status all resolved
@@ -56,7 +57,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   // Only block if we have a profile AND the role is wrong.
   // If profile is null (backend unreachable / still propagating), let them through
   // so they don't get stuck. The middleware already verified the session.
-  if (profile && profile.role !== 'practitioner' && profile.role !== 'admin') {
+  if (profile && profile.role !== 'practitioner' && profile.role !== 'secretary' && profile.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-6">
         <Card className="max-w-md w-full text-center">

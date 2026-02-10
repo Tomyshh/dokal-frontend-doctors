@@ -5,9 +5,12 @@ import api from '@/lib/api';
 import type { Organization, OrganizationMember, Appointment } from '@/types';
 import type {
   UpdateOrganizationRequest,
-  AddOrganizationMemberRequest,
   UpdateOrganizationMemberRequest,
+  InviteMemberRequest,
+  InviteMemberResponse,
   CrmAppointmentsQuery,
+  CancelAppointmentRequest,
+  CompleteAppointmentRequest,
 } from '@/types/api';
 
 // ─── Current practitioner's organization ─────────────────────────────
@@ -33,6 +36,64 @@ export function useCrmOrganizationAppointments(params: CrmAppointmentsQuery) {
         { params },
       );
       return data;
+    },
+  });
+}
+
+// ─── Organization-level appointment actions (for secretaries / org admins) ──
+
+export function useOrgConfirmAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.patch(`/crm/organization/appointments/${id}/confirm`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-organization-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
+    },
+  });
+}
+
+export function useOrgCancelAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: CancelAppointmentRequest }) => {
+      await api.patch(`/crm/organization/appointments/${id}/cancel`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-organization-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
+    },
+  });
+}
+
+export function useOrgCompleteAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: CompleteAppointmentRequest }) => {
+      await api.patch(`/crm/organization/appointments/${id}/complete`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-organization-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
+    },
+  });
+}
+
+export function useOrgNoShowAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.patch(`/crm/organization/appointments/${id}/no-show`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-organization-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
     },
   });
 }
@@ -67,7 +128,7 @@ export function useUpdateOrganization() {
 
 // ─── Organization Members ─────────────────────────────────────────────
 
-/** GET /organizations/:id/members */
+/** GET /organizations/:id/members — enriched member list */
 export function useOrganizationMembers(organizationId: string | undefined) {
   return useQuery({
     queryKey: ['organization-members', organizationId],
@@ -81,8 +142,8 @@ export function useOrganizationMembers(organizationId: string | undefined) {
   });
 }
 
-/** POST /organizations/:id/members — add a member */
-export function useAddOrganizationMember() {
+/** POST /organizations/:id/invite — invite a new member (practitioner or secretary) */
+export function useInviteMember() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({
@@ -90,10 +151,10 @@ export function useAddOrganizationMember() {
       data,
     }: {
       organizationId: string;
-      data: AddOrganizationMemberRequest;
+      data: InviteMemberRequest;
     }) => {
-      const { data: result } = await api.post(
-        `/organizations/${organizationId}/members`,
+      const { data: result } = await api.post<InviteMemberResponse>(
+        `/organizations/${organizationId}/invite`,
         data,
       );
       return result;

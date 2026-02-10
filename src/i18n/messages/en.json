@@ -37,7 +37,9 @@
     "next": "Next",
     "details": "Details",
     "notes": "Notes",
-    "patient": "Patient"
+    "patient": "Patient",
+    "firstName": "First name",
+    "lastName": "Last name"
   },
   "auth": {
     "login": "Sign in",
@@ -147,7 +149,8 @@
     "reasons": "Appointment reasons",
     "instructions": "Pre-appointment instructions",
     "help": "Help",
-    "support": "Support"
+    "support": "Support",
+    "team": "Team"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -170,6 +173,7 @@
     "notFound": "Appointment not found",
     "newAppointment": "New appointment",
     "patient": "Patient",
+    "practitioner": "Practitioner",
     "date": "Date",
     "time": "Time",
     "reason": "Reason",
@@ -589,5 +593,32 @@
     "perfusionist": "Perfusionist",
     "surgicalTechnologist": "Surgical technologist",
     "other": "Other"
+  },
+  "team": {
+    "title": "Team Management",
+    "subtitle": "Members of {name}",
+    "members": "Members",
+    "inviteMember": "Invite a member",
+    "staffType": "Staff type",
+    "practitioner": "Practitioner",
+    "secretary": "Secretary",
+    "orgRole": "Organization role",
+    "specialty": "Specialty",
+    "licenseNumber": "License number",
+    "addressLine": "Address",
+    "zipCode": "Zip code",
+    "city": "City",
+    "addressAutoOrg": "Auto (clinic address)",
+    "sendInvite": "Send invitation",
+    "inviteSentSuccess": "Invitation sent by email",
+    "memberAddedSuccess": "Member added successfully",
+    "inviteError": "Error sending invitation",
+    "removeMember": "Remove",
+    "confirmRemoveTitle": "Remove member",
+    "confirmRemoveText": "Are you sure you want to remove {name} from the team?",
+    "promoteToAdmin": "Promote to admin",
+    "demoteToMember": "Demote to member",
+    "noMembers": "No members in the team",
+    "clinicOnly": "Team management is only available for clinics"
   }
 }

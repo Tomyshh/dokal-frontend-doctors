@@ -37,7 +37,9 @@
     "next": "הבא",
     "details": "פרטים",
     "notes": "הערות",
-    "patient": "מטופל"
+    "patient": "מטופל",
+    "firstName": "שם פרטי",
+    "lastName": "שם משפחה"
   },
   "auth": {
     "login": "התחברות",
@@ -147,7 +149,8 @@
     "reasons": "סיבות לפגישה",
     "instructions": "הנחיות לפני פגישה",
     "help": "עזרה",
-    "support": "תמיכה"
+    "support": "תמיכה",
+    "team": "צוות"
   },
   "dashboard": {
     "title": "לוח בקרה",
@@ -170,6 +173,7 @@
     "notFound": "הפגישה לא נמצאה",
     "newAppointment": "פגישה חדשה",
     "patient": "מטופל",
+    "practitioner": "רופא",
     "date": "תאריך",
     "time": "שעה",
     "reason": "סיבה",
@@ -589,5 +593,32 @@
     "perfusionist": "פרפוזיוניסט/ית",
     "surgicalTechnologist": "טכנאי ניתוח",
     "other": "אחר"
+  },
+  "team": {
+    "title": "ניהול צוות",
+    "subtitle": "חברי {name}",
+    "members": "חברים",
+    "inviteMember": "הזמן חבר צוות",
+    "staffType": "סוג חבר צוות",
+    "practitioner": "רופא",
+    "secretary": "מזכיר/ה",
+    "orgRole": "תפקיד בארגון",
+    "specialty": "התמחות",
+    "licenseNumber": "מספר רישיון",
+    "addressLine": "כתובת",
+    "zipCode": "מיקוד",
+    "city": "עיר",
+    "addressAutoOrg": "אוטומטי (כתובת מרפאה)",
+    "sendInvite": "שלח הזמנה",
+    "inviteSentSuccess": "ההזמנה נשלחה במייל",
+    "memberAddedSuccess": "החבר נוסף בהצלחה",
+    "inviteError": "שגיאה בשליחת ההזמנה",
+    "removeMember": "הסר",
+    "confirmRemoveTitle": "הסרת חבר",
+    "confirmRemoveText": "האם אתה בטוח שברצונך להסיר את {name} מהצוות?",
+    "promoteToAdmin": "קדם למנהל",
+    "demoteToMember": "הורד לחבר",
+    "noMembers": "אין חברים בצוות",
+    "clinicOnly": "ניהול צוות זמין רק למרפאות"
   }
 }

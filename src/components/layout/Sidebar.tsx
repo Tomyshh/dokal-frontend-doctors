@@ -1,10 +1,12 @@
 'use client';
 
+import { useMemo } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import { useTranslations, useLocale } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
+import { useCrmOrganization } from '@/hooks/useOrganization';
 import { Avatar } from '@/components/ui/Avatar';
 import { cn } from '@/lib/utils';
 import {
@@ -18,6 +20,7 @@ import {
   FileText,
   LogOut,
   ChevronLeft,
+  Users,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -31,23 +34,66 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const locale = useLocale();
   const { profile, signOut } = useAuth();
+  const { data: organization } = useCrmOrganization();
+
+  const isSecretary = profile?.role === 'secretary';
+  const isClinic = organization?.type === 'clinic';
 
   const pathnameWithoutLocale =
     pathname.startsWith(`/${locale}`) ? pathname.slice(`/${locale}`.length) || '/' : pathname;
 
-  const mainLinks = [
-    { href: '/', icon: LayoutDashboard, label: t('overview'), exact: true },
-    { href: '/schedule', icon: CalendarDays, label: t('schedule') },
-    { href: '/messages', icon: MessageSquare, label: t('messages') },
-    { href: '/appointments', icon: CalendarCheck, label: t('appointments') },
-    { href: '/reviews', icon: Star, label: t('reviews') },
-    { href: '/settings', icon: Settings, label: t('settings') },
-  ];
+  type SidebarLink = {
+    href: string;
+    icon: typeof LayoutDashboard;
+    label: string;
+    exact?: boolean;
+  };
 
-  const managementLinks = [
-    { href: '/settings/reasons', icon: ClipboardList, label: t('reasons') },
-    { href: '/settings/instructions', icon: FileText, label: t('instructions') },
-  ];
+  // Build main links based on role
+  const mainLinks = useMemo(() => {
+    const links: SidebarLink[] = [
+      { href: '/', icon: LayoutDashboard, label: t('overview'), exact: true },
+    ];
+
+    // Secretaries don't have a personal schedule
+    if (!isSecretary) {
+      links.push({ href: '/schedule', icon: CalendarDays, label: t('schedule') });
+    }
+
+    links.push(
+      { href: '/messages', icon: MessageSquare, label: t('messages') },
+      { href: '/appointments', icon: CalendarCheck, label: t('appointments') },
+    );
+
+    // Secretaries don't have reviews
+    if (!isSecretary) {
+      links.push({ href: '/reviews', icon: Star, label: t('reviews') });
+    }
+
+    links.push({ href: '/settings', icon: Settings, label: t('settings') });
+
+    return links;
+  }, [t, isSecretary]);
+
+  // Build management links based on role & organization type
+  const managementLinks = useMemo(() => {
+    const links: { href: string; icon: typeof ClipboardList; label: string }[] = [];
+
+    // Reasons & instructions are for practitioners
+    if (!isSecretary) {
+      links.push(
+        { href: '/settings/reasons', icon: ClipboardList, label: t('reasons') },
+        { href: '/settings/instructions', icon: FileText, label: t('instructions') },
+      );
+    }
+
+    // Team management for clinics
+    if (isClinic) {
+      links.push({ href: '/team', icon: Users, label: t('team') });
+    }
+
+    return links;
+  }, [t, isSecretary, isClinic]);
 
   const isActive = (href: string, exact = false) => {
     if (exact) return pathnameWithoutLocale === href;
@@ -108,28 +154,30 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         ))}
 
         {/* Management Section */}
-        <div className="pt-4">
-          {!collapsed && (
-            <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-              {t('management')}
-            </p>
-          )}
-          {managementLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'sidebar-link',
-                isActive(link.href) && 'sidebar-link-active',
-                collapsed && 'justify-center px-2'
-              )}
-              title={collapsed ? link.label : undefined}
-            >
-              <link.icon className="h-5 w-5 shrink-0" />
-              {!collapsed && <span className="truncate">{link.label}</span>}
-            </Link>
-          ))}
-        </div>
+        {managementLinks.length > 0 && (
+          <div className="pt-4">
+            {!collapsed && (
+              <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                {t('management')}
+              </p>
+            )}
+            {managementLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'sidebar-link',
+                  isActive(link.href) && 'sidebar-link-active',
+                  collapsed && 'justify-center px-2'
+                )}
+                title={collapsed ? link.label : undefined}
+              >
+                <link.icon className="h-5 w-5 shrink-0" />
+                {!collapsed && <span className="truncate">{link.label}</span>}
+              </Link>
+            ))}
+          </div>
+        )}
       </nav>
 
       {/* User Profile */}

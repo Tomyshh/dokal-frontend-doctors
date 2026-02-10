@@ -2,7 +2,7 @@
 // Enums
 // ==========================================
 
-export type UserRole = 'patient' | 'practitioner' | 'admin';
+export type UserRole = 'patient' | 'practitioner' | 'secretary' | 'admin';
 export type SexType = 'male' | 'female' | 'other';
 export type RelationType = 'child' | 'parent' | 'spouse' | 'sibling' | 'other';
 
@@ -29,6 +29,7 @@ export type HealthTable = 'conditions' | 'medications' | 'allergies' | 'vaccinat
 // Organization enums
 export type OrganizationType = 'individual' | 'clinic';
 export type OrganizationRole = 'owner' | 'admin' | 'member';
+export type StaffType = 'practitioner' | 'secretary';
 
 // ==========================================
 // Core Models
@@ -76,9 +77,14 @@ export interface OrganizationMember {
   organization_id: string;
   user_id: string;
   role: OrganizationRole;
+  staff_type: StaffType;
+  invited_by: string | null;
   joined_at: string;
   // Joined fields
-  profiles?: Pick<Profile, 'id' | 'first_name' | 'last_name' | 'avatar_url' | 'email'>;
+  profiles?: Pick<Profile, 'id' | 'first_name' | 'last_name' | 'avatar_url' | 'email' | 'phone' | 'role'>;
+  practitioner?: {
+    specialty: Pick<Specialty, 'name' | 'name_fr' | 'name_he'>;
+  } | null;
 }
 
 export interface Practitioner {

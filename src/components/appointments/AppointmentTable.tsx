@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
+import { useAuth } from '@/providers/AuthProvider';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import AppointmentActions from './AppointmentActions';
@@ -16,6 +17,10 @@ interface AppointmentTableProps {
 export default function AppointmentTable({ appointments }: AppointmentTableProps) {
   const t = useTranslations('appointments');
   const locale = useLocale();
+  const { profile } = useAuth();
+
+  // Secretaries see all org appointments → show practitioner column
+  const showPractitionerColumn = profile?.role === 'secretary';
 
   return (
     <div className="overflow-x-auto">
@@ -25,6 +30,11 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
             <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
               {t('patient')}
             </th>
+            {showPractitionerColumn && (
+              <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+                {t('practitioner')}
+              </th>
+            )}
             <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
               {t('date')}
             </th>
@@ -66,6 +76,21 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
                   </div>
                 </Link>
               </td>
+              {showPractitionerColumn && (
+                <td className="py-3 px-3">
+                  <div className="flex items-center gap-2">
+                    <Avatar
+                      src={appt.practitioners?.profiles?.avatar_url}
+                      firstName={appt.practitioners?.profiles?.first_name}
+                      lastName={appt.practitioners?.profiles?.last_name}
+                      size="xs"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {appt.practitioners?.profiles?.first_name} {appt.practitioners?.profiles?.last_name}
+                    </span>
+                  </div>
+                </td>
+              )}
               <td className="py-3 px-3 text-sm text-gray-600">
                 {formatDate(appt.appointment_date, 'dd/MM/yyyy', locale)}
               </td>

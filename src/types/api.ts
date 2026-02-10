@@ -196,6 +196,52 @@ export interface UpdateOrganizationMemberRequest {
   role: 'admin' | 'member';
 }
 
+// ── Invitation ──
+
+export interface InvitePractitionerRequest {
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  staff_type: 'practitioner';
+  org_role: 'member' | 'admin';
+  specialty: string;
+  license_number: string;
+  address_line?: string;
+  zip_code?: string;
+  city?: string;
+}
+
+export interface InviteSecretaryRequest {
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  staff_type: 'secretary';
+  org_role: 'member' | 'admin';
+}
+
+export type InviteMemberRequest = InvitePractitionerRequest | InviteSecretaryRequest;
+
+export interface InviteMemberResponse {
+  member: {
+    id: string;
+    user_id: string;
+    role: string;
+    staff_type: 'practitioner' | 'secretary';
+    joined_at: string;
+    profiles: {
+      first_name: string;
+      last_name: string;
+      email: string;
+      avatar_url: string | null;
+      role: string;
+    };
+  };
+  is_existing_user: boolean;
+  invite_sent: boolean;
+}
+
 // ==========================================
 // API Error Response
 // ==========================================

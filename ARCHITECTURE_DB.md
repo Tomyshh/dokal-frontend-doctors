@@ -1,46 +1,6 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
--- ── Organization Types ──
--- organization_type: 'individual' | 'clinic'
--- organization_role: 'owner' | 'admin' | 'member'
-
-CREATE TABLE public.organizations (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  slug text UNIQUE,
-  email text,
-  phone text,
-  address_line text,
-  zip_code text,
-  city text,
-  latitude double precision,
-  longitude double precision,
-  avatar_url text,
-  type organization_type NOT NULL DEFAULT 'individual',
-  license_number text,
-  description text,
-  website text,
-  owner_id uuid NOT NULL,
-  is_active boolean NOT NULL DEFAULT true,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT organizations_pkey PRIMARY KEY (id),
-  CONSTRAINT organizations_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.profiles(id)
-);
-
-CREATE TABLE public.organization_members (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  organization_id uuid NOT NULL,
-  user_id uuid NOT NULL,
-  role organization_role NOT NULL DEFAULT 'member',
-  joined_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT organization_members_pkey PRIMARY KEY (id),
-  CONSTRAINT organization_members_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id) ON DELETE CASCADE,
-  CONSTRAINT organization_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
-  CONSTRAINT organization_members_org_user_unique UNIQUE (organization_id, user_id)
-);
-
 CREATE TABLE public.appointment_instructions (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   practitioner_id uuid NOT NULL,
@@ -214,6 +174,42 @@ CREATE TABLE public.notifications (
   CONSTRAINT notifications_pkey PRIMARY KEY (id),
   CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );
+CREATE TABLE public.organization_members (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  organization_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  role USER-DEFINED NOT NULL DEFAULT 'member'::organization_role,
+  joined_at timestamp with time zone NOT NULL DEFAULT now(),
+  staff_type text NOT NULL DEFAULT 'practitioner'::text CHECK (staff_type = ANY (ARRAY['practitioner'::text, 'secretary'::text])),
+  invited_by uuid,
+  CONSTRAINT organization_members_pkey PRIMARY KEY (id),
+  CONSTRAINT organization_members_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id),
+  CONSTRAINT organization_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
+  CONSTRAINT organization_members_invited_by_fkey FOREIGN KEY (invited_by) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.organizations (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  slug text UNIQUE,
+  email text,
+  phone text,
+  address_line text,
+  zip_code text,
+  city text,
+  latitude double precision,
+  longitude double precision,
+  avatar_url text,
+  type USER-DEFINED NOT NULL DEFAULT 'individual'::organization_type,
+  license_number text,
+  description text,
+  website text,
+  owner_id uuid NOT NULL,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT organizations_pkey PRIMARY KEY (id),
+  CONSTRAINT organizations_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.payment_methods (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
@@ -275,7 +271,6 @@ CREATE TABLE public.practitioner_weekly_schedule (
 );
 CREATE TABLE public.practitioners (
   id uuid NOT NULL,
-  organization_id uuid NOT NULL,
   specialty_id uuid,
   address_line text,
   zip_code text,
@@ -297,6 +292,7 @@ CREATE TABLE public.practitioners (
   trial_start timestamp with time zone,
   trial_end timestamp with time zone,
   trial_used boolean NOT NULL DEFAULT false,
+  organization_id uuid NOT NULL,
   CONSTRAINT practitioners_pkey PRIMARY KEY (id),
   CONSTRAINT practitioners_id_fkey FOREIGN KEY (id) REFERENCES public.profiles(id),
   CONSTRAINT practitioners_specialty_id_fkey FOREIGN KEY (specialty_id) REFERENCES public.specialties(id),

@@ -37,7 +37,9 @@
     "next": "Suivant",
     "details": "Détails",
     "notes": "Notes",
-    "patient": "Patient"
+    "patient": "Patient",
+    "firstName": "Prénom",
+    "lastName": "Nom"
   },
   "auth": {
     "login": "Connexion",
@@ -147,7 +149,8 @@
     "reasons": "Motifs de consultation",
     "instructions": "Instructions pré-RDV",
     "help": "Aide",
-    "support": "Support"
+    "support": "Support",
+    "team": "Équipe"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -170,6 +173,7 @@
     "notFound": "Rendez-vous introuvable",
     "newAppointment": "Nouveau RDV",
     "patient": "Patient",
+    "practitioner": "Praticien",
     "date": "Date",
     "time": "Horaire",
     "reason": "Motif",
@@ -589,5 +593,32 @@
     "perfusionist": "Perfusionniste",
     "surgicalTechnologist": "Technicien en bloc opératoire",
     "other": "Autre"
+  },
+  "team": {
+    "title": "Gestion de l'équipe",
+    "subtitle": "Membres de {name}",
+    "members": "Membres",
+    "inviteMember": "Inviter un membre",
+    "staffType": "Type de membre",
+    "practitioner": "Médecin",
+    "secretary": "Secrétaire",
+    "orgRole": "Rôle dans l'organisation",
+    "specialty": "Spécialité",
+    "licenseNumber": "N° de licence",
+    "addressLine": "Adresse",
+    "zipCode": "Code postal",
+    "city": "Ville",
+    "addressAutoOrg": "Auto (adresse clinique)",
+    "sendInvite": "Envoyer l'invitation",
+    "inviteSentSuccess": "Invitation envoyée par email",
+    "memberAddedSuccess": "Membre ajouté avec succès",
+    "inviteError": "Erreur lors de l'invitation",
+    "removeMember": "Retirer",
+    "confirmRemoveTitle": "Retirer le membre",
+    "confirmRemoveText": "Voulez-vous vraiment retirer {name} de l'équipe ?",
+    "promoteToAdmin": "Promouvoir administrateur",
+    "demoteToMember": "Rétrograder en membre",
+    "noMembers": "Aucun membre dans l'équipe",
+    "clinicOnly": "La gestion d'équipe est réservée aux cliniques"
   }
 }
