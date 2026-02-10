@@ -144,7 +144,10 @@ export default function SignupPage() {
       // Pour rejoindre une clinique existante, passer organization_id
       // Pour créer une clinique, passer organization_name + organization_type: 'clinic'
     };
-    await api.post('/practitioners/register', payload);
+    console.log('[Signup] Sending practitioner registration payload:', JSON.stringify(payload, null, 2));
+    const response = await api.post('/practitioners/register', payload);
+    console.log('[Signup] Backend response:', response.status, response.data);
+    return response;
   };
 
   // ─── Resend cooldown timer ─────────────────────────────────────────
@@ -236,8 +239,16 @@ export default function SignupPage() {
       if (data.session) {
         try {
           await registerPractitionerOnBackend(synced);
-        } catch (err) {
+        } catch (err: unknown) {
           console.error('Practitioner registration failed:', err);
+          const axiosErr = err as { response?: { status?: number; data?: unknown } };
+          if (axiosErr?.response) {
+            console.error('[Signup] Backend error status:', axiosErr.response.status);
+            console.error('[Signup] Backend error data:', JSON.stringify(axiosErr.response.data, null, 2));
+          }
+          setError(t('registrationBackendError'));
+          setLoading(false);
+          return;
         }
         router.push(`/${locale}/subscription`);
         router.refresh();
@@ -342,8 +353,15 @@ export default function SignupPage() {
       // Register practitioner profile on backend
       try {
         await registerPractitionerOnBackend();
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Practitioner registration failed:', err);
+        const axiosErr = err as { response?: { status?: number; data?: unknown } };
+        if (axiosErr?.response) {
+          console.error('[Signup] Backend error status:', axiosErr.response.status);
+          console.error('[Signup] Backend error data:', JSON.stringify(axiosErr.response.data, null, 2));
+        }
+        setOtpError(t('registrationBackendError'));
+        return;
       }
 
       setOtpRedirecting(true);
