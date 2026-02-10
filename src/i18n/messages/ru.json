@@ -93,6 +93,7 @@
     "otpResend": "Отправить повторно",
     "otpResendIn": "Повторная отправка через {seconds}с",
     "otpResendError": "Не удалось отправить код. Попробуйте позже.",
+    "otpResendSuccess": "Новый код отправлен на вашу электронную почту.",
     "otpBackToForm": "Изменить данные"
   },
   "subscription": {

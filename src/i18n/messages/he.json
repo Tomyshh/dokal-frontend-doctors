@@ -93,6 +93,7 @@
     "otpResend": "שלחו שוב",
     "otpResendIn": "שליחה מחדש בעוד {seconds} שניות",
     "otpResendError": "לא ניתן לשלוח שוב. נסו מאוחר יותר.",
+    "otpResendSuccess": "קוד חדש נשלח לכתובת האימייל שלך.",
     "otpBackToForm": "עריכת הפרטים"
   },
   "subscription": {

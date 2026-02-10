@@ -62,6 +62,7 @@ export default function SignupPage() {
   const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState('');
+  const [otpSuccess, setOtpSuccess] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
   const [otpRedirecting, setOtpRedirecting] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -387,18 +388,27 @@ export default function SignupPage() {
   const handleResendOtp = async () => {
     if (resendCooldown > 0) return;
     setOtpError('');
+    setOtpSuccess('');
     try {
       const supabase = createClient();
-      const { error: resendError } = await supabase.auth.resend({
+      console.log('[Resend OTP] Calling supabase.auth.resend for:', form.email);
+      const { data: resendData, error: resendError } = await supabase.auth.resend({
         email: form.email,
         type: 'signup',
       });
+      console.log('[Resend OTP] Response data:', JSON.stringify(resendData));
+      console.log('[Resend OTP] Response error:', resendError);
       if (resendError) {
+        console.error('[Resend OTP] Error:', resendError.message, resendError);
         setOtpError(resendError.message);
         return;
       }
       setResendCooldown(60);
-    } catch {
+      setOtpSuccess(t('otpResendSuccess'));
+      // Clear success message after 5 seconds
+      setTimeout(() => setOtpSuccess(''), 5000);
+    } catch (err) {
+      console.error('[Resend OTP] Unexpected error:', err);
       setOtpError(t('otpResendError'));
     }
   };
@@ -427,6 +437,13 @@ export default function SignupPage() {
             {otpError && (
               <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-6">
                 {otpError}
+              </div>
+            )}
+
+            {/* OTP Success */}
+            {otpSuccess && (
+              <div className="rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 mb-6">
+                {otpSuccess}
               </div>
             )}
 

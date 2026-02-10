@@ -93,6 +93,7 @@
     "otpResend": "Renvoyer le code",
     "otpResendIn": "Renvoyer dans {seconds}s",
     "otpResendError": "Impossible de renvoyer le code. Réessayez plus tard.",
+    "otpResendSuccess": "Un nouveau code a été envoyé à votre adresse e-mail.",
     "otpBackToForm": "Modifier mes informations"
   },
   "subscription": {
