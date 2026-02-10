@@ -15,6 +15,7 @@ import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/Phon
 import { Link } from '@/i18n/routing';
 import { ArrowLeft, Mail, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/providers/ToastProvider';
 
 type FormState = {
   firstName: string;
@@ -37,6 +38,7 @@ export default function SignupPage() {
   const t = useTranslations('auth');
   const locale = useLocale();
   const router = useRouter();
+  const toast = useToast();
 
   const [step, setStep] = useState<Step>('form');
 
@@ -62,7 +64,6 @@ export default function SignupPage() {
   const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState('');
-  const [otpSuccess, setOtpSuccess] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
   const [otpRedirecting, setOtpRedirecting] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -388,7 +389,6 @@ export default function SignupPage() {
   const handleResendOtp = async () => {
     if (resendCooldown > 0) return;
     setOtpError('');
-    setOtpSuccess('');
     try {
       const supabase = createClient();
       console.log('[Resend OTP] Calling supabase.auth.resend for:', form.email);
@@ -400,16 +400,14 @@ export default function SignupPage() {
       console.log('[Resend OTP] Response error:', resendError);
       if (resendError) {
         console.error('[Resend OTP] Error:', resendError.message, resendError);
-        setOtpError(resendError.message);
+        toast.error(t('otpResendError'), resendError.message);
         return;
       }
       setResendCooldown(60);
-      setOtpSuccess(t('otpResendSuccess'));
-      // Clear success message after 5 seconds
-      setTimeout(() => setOtpSuccess(''), 5000);
+      toast.success(t('otpResendSuccess'));
     } catch (err) {
       console.error('[Resend OTP] Unexpected error:', err);
-      setOtpError(t('otpResendError'));
+      toast.error(t('otpResendError'));
     }
   };
 
@@ -437,13 +435,6 @@ export default function SignupPage() {
             {otpError && (
               <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-6">
                 {otpError}
-              </div>
-            )}
-
-            {/* OTP Success */}
-            {otpSuccess && (
-              <div className="rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 mb-6">
-                {otpSuccess}
               </div>
             )}
 

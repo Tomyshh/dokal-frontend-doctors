@@ -4,6 +4,7 @@ import { getMessages } from 'next-intl/server';
 import { isRtl } from '@/i18n/config';
 import AuthProvider from '@/providers/AuthProvider';
 import QueryProvider from '@/providers/QueryProvider';
+import { ToastProvider } from '@/providers/ToastProvider';
 import '../globals.css';
 
 export const metadata: Metadata = {
@@ -31,7 +32,9 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>
             <AuthProvider>
-              {children}
+              <ToastProvider>
+                {children}
+              </ToastProvider>
             </AuthProvider>
           </QueryProvider>
         </NextIntlClientProvider>
