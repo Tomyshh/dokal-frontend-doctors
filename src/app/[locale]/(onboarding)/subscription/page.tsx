@@ -13,10 +13,7 @@ import {
   Lock,
   Sparkles,
   Clock,
-  Zap,
   Users,
-  Building2,
-  BarChart3,
   Crown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -29,7 +26,7 @@ type CardForm = {
   buyerZipCode: string;
 };
 
-type View = 'plan-picker' | 'choice' | 'card-form';
+type View = 'plan-picker' | 'card-form';
 
 function formatCardNumber(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 16);
@@ -116,7 +113,7 @@ function PlanCard({
         </div>
       )}
 
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-3">
         <div>
           <h3 className="text-lg font-bold text-gray-900">
             {isClinic ? t('planClinic') : t('planIndividual')}
@@ -133,14 +130,8 @@ function PlanCard({
         </div>
       </div>
 
-      <div className="mb-4">
-        <span className="text-3xl font-extrabold text-gray-900">{price}</span>
-        <span className="text-lg font-medium text-gray-500 ml-1">₪</span>
-        <span className="text-xs text-gray-400 ml-1">/ {t('perMonth')}</span>
-      </div>
-
       {/* Badge */}
-      <div className="mb-4">
+      <div className="mb-3">
         {isClinic ? (
           <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-2.5 py-0.5">
             <Users className="h-3 w-3" />
@@ -163,6 +154,13 @@ function PlanCard({
             {t(key)}
           </div>
         ))}
+      </div>
+
+      {/* Price as small footnote reference */}
+      <div className="mt-3 pt-3 border-t border-gray-100">
+        <span className="text-[11px] text-gray-400">
+          *{price} ₪/{t('perMonth')}
+        </span>
       </div>
     </button>
   );
@@ -316,8 +314,8 @@ export default function OnboardingSubscriptionPage() {
   if (view === 'plan-picker') {
     return (
       <div>
-        {/* Header */}
-        <div className="text-center mb-8">
+        {/* Header — Trial-first messaging */}
+        <div className="text-center mb-6">
           <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
             <Sparkles className="h-7 w-7 text-primary" />
           </div>
@@ -325,8 +323,11 @@ export default function OnboardingSubscriptionPage() {
           <p className="text-sm text-muted-foreground mt-2">{t('planPickerSubtitle')}</p>
         </div>
 
+        {/* Choose plan label */}
+        <p className="text-sm font-medium text-gray-700 mb-3">{t('planPickerChoose')}</p>
+
         {/* Plan cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <PlanCard
             plan="individual"
             selected={selectedPlan === 'individual'}
@@ -341,147 +342,60 @@ export default function OnboardingSubscriptionPage() {
           />
         </div>
 
-        {/* Continue button */}
-        <Button
-          className="w-full rounded-full h-12 text-base"
-          onClick={() => setView('choice')}
-        >
-          {t('continueToPlan')} — {selectedPrice} ₪/{t('perMonth')}
-        </Button>
-      </div>
-    );
-  }
-
-  // ─── Choice View: Trial or Subscribe ───────────────────────────────
-  if (view === 'choice') {
-    return (
-      <div>
-        {/* Back to plan picker */}
-        <button
-          type="button"
-          onClick={() => { setView('plan-picker'); setError(''); }}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6"
-        >
-          <CreditCard className="h-4 w-4" />
-          {t('backToPlanPicker')}
-        </button>
-
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-            <Sparkles className="h-7 w-7 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('onboardingTitle')}</h1>
-          <p className="text-sm text-muted-foreground mt-2">{t('onboardingSubtitle')}</p>
-        </div>
-
-        {/* Selected plan summary */}
-        <div className="rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-5 mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 rounded-full px-3 py-1 mb-2">
-                {selectedPlan === 'clinic' ? (
-                  <><Building2 className="h-3 w-3" />{t('planClinic')}</>
-                ) : (
-                  <><Shield className="h-3 w-3" />{t('planIndividual')}</>
-                )}
-              </span>
-              <h3 className="text-lg font-bold text-gray-900">
-                {selectedPlan === 'clinic' ? t('planClinic') : t('planIndividual')}
-              </h3>
-              <p className="text-sm text-gray-500 mt-0.5">
-                {selectedPlan === 'clinic' ? t('planClinicDesc') : t('planIndividualDesc')}
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-3xl font-extrabold text-gray-900">
-                {selectedPrice} <span className="text-lg font-medium text-gray-500">₪</span>
-              </div>
-              <span className="text-xs text-gray-400">/ {t('perMonth')}</span>
-            </div>
-          </div>
-        </div>
-
         {/* Error */}
         {error && (
-          <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 mb-6">
+          <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 mb-4">
             {error}
           </div>
         )}
 
-        {/* Two options */}
-        <div className="space-y-4">
-          {/* Option 1: Free trial */}
-          <button
-            type="button"
-            onClick={handleStartTrial}
-            disabled={trialLoading}
-            className={cn(
-              'w-full rounded-2xl border-2 p-5 text-left transition-all',
-              'border-primary/30 bg-primary/5 hover:border-primary hover:bg-primary/10',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20',
-              'disabled:opacity-60 disabled:cursor-not-allowed'
-            )}
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                <Clock className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-gray-900">{t('trialTitle')}</h3>
-                  <span className="text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-2 py-0.5">
-                    {t('trialBadge')}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-500 mt-1">{t('trialDescription')}</p>
-                <ul className="mt-3 space-y-1.5">
-                  {(['trialBenefit1', 'trialBenefit2', 'trialBenefit3'] as const).map((key) => (
-                    <li key={key} className="flex items-center gap-2 text-xs text-gray-600">
-                      <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />
-                      {t(key)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            {trialLoading && (
-              <div className="mt-3 flex items-center justify-center">
-                <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              </div>
-            )}
-          </button>
+        {/* Start free trial CTA */}
+        <Button
+          className="w-full rounded-full h-12 text-base"
+          onClick={handleStartTrial}
+          loading={trialLoading}
+        >
+          <Clock className="h-4 w-4" />
+          {t('startFreeTrial')}
+        </Button>
 
-          {/* Divider */}
-          <div className="flex items-center gap-4">
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400 font-medium">{t('or')}</span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
-
-          {/* Option 2: Subscribe now */}
-          <button
-            type="button"
-            onClick={() => setView('card-form')}
-            className={cn(
-              'w-full rounded-2xl border-2 p-5 text-left transition-all',
-              'border-gray-200 hover:border-gray-300 hover:bg-gray-50',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20'
-            )}
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
-                <Zap className="h-5 w-5 text-gray-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-bold text-gray-900">{t('subscribeNowTitle')}</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  {t('subscribeNowDescriptionWithPrice', { price: selectedPrice })}
-                </p>
-              </div>
-            </div>
-          </button>
+        {/* Trust signals */}
+        <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
+            <Shield className="h-3 w-3 text-primary/60" />
+            {t('trialNoCreditCard')}
+          </span>
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
+            <CheckCircle2 className="h-3 w-3 text-primary/60" />
+            {t('trialNoCommitment')}
+          </span>
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
+            <Clock className="h-3 w-3 text-primary/60" />
+            {t('trialCancelAnytime')}
+          </span>
         </div>
+
+        {/* Price footnote */}
+        <p className="text-[10px] text-gray-400 text-center mt-5 leading-relaxed">
+          {t('priceFootnote', {
+            individualPrice: PLAN_PRICES_ILS.individual,
+            clinicPrice: PLAN_PRICES_ILS.clinic,
+          })}
+        </p>
+
+        {/* Secondary: subscribe directly */}
+        <div className="flex items-center gap-4 mt-5">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-[11px] text-gray-400 font-medium">{t('or')}</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+        <button
+          type="button"
+          onClick={() => setView('card-form')}
+          className="w-full mt-3 text-center text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-2"
+        >
+          {t('orSubscribeDirectly')}
+        </button>
       </div>
     );
   }
@@ -489,14 +403,14 @@ export default function OnboardingSubscriptionPage() {
   // ─── Card Form View ────────────────────────────────────────────────
   return (
     <div>
-      {/* Back to choice */}
+      {/* Back to plan picker */}
       <button
         type="button"
-        onClick={() => { setView('choice'); setError(''); }}
+        onClick={() => { setView('plan-picker'); setError(''); }}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6"
       >
         <CreditCard className="h-4 w-4" />
-        {t('backToOptions')}
+        {t('backToPlanPicker')}
       </button>
 
       {/* Header */}
