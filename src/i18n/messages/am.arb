@@ -418,7 +418,20 @@
     "gdprCompliant": "GDPR compliant",
     "footer": "© 2026 Dokal. All rights reserved.",
     "loggingOut": "Signing out...",
-    "loggingOutMessage": "You will be redirected to the home page."
+    "loggingOutMessage": "You will be redirected to the home page.",
+    "contactFormTitle": "Get in touch",
+    "contactFormSubtitle": "Interested in Dokal? Leave us your details and we'll get back to you shortly.",
+    "contactFormName": "Full name",
+    "contactFormNamePlaceholder": "Dr. John Doe",
+    "contactFormEmail": "Email",
+    "contactFormEmailPlaceholder": "john@example.com",
+    "contactFormPhone": "Phone (optional)",
+    "contactFormPhonePlaceholder": "+33 6 12 34 56 78",
+    "contactFormMessage": "Message (optional)",
+    "contactFormMessagePlaceholder": "Tell us about your practice or ask a question...",
+    "contactFormSubmit": "Send message",
+    "contactFormSuccess": "Message sent! We'll get back to you soon.",
+    "contactFormError": "Unable to send your message. Please try again."
   },
   "contact": {
     "title": "Contact",

@@ -5,6 +5,9 @@ import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { Dialog } from '@/components/ui/Dialog';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Button } from '@/components/ui/Button';
 import { localeNames, type Locale } from '@/i18n/config';
 import {
   CalendarCheck,
@@ -23,8 +26,11 @@ import {
   Mail,
   Phone,
   MapPin,
+  Send,
+  CheckCircle,
 } from 'lucide-react';
 import { company } from '@/config/company';
+import axios from 'axios';
 
 export default function WelcomePage() {
   const t = useTranslations('landing');
@@ -116,6 +122,42 @@ export default function WelcomePage() {
   const switchLocale = (newLocale: Locale) => {
     router.replace(pathname, { locale: newLocale });
     setShowLangMenu(false);
+  };
+
+  /* ── Lead contact form state ── */
+  const [leadForm, setLeadForm] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    message: '',
+  });
+  const [leadSubmitting, setLeadSubmitting] = useState(false);
+  const [leadSuccess, setLeadSuccess] = useState(false);
+  const [leadError, setLeadError] = useState(false);
+
+  const handleLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLeadSubmitting(true);
+    setLeadSuccess(false);
+    setLeadError(false);
+
+    try {
+      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000').replace(/\/+$/, '');
+      await axios.post(`${apiUrl}/api/v1/leads`, {
+        full_name: leadForm.full_name.trim(),
+        email: leadForm.email.trim(),
+        phone: leadForm.phone.trim() || null,
+        message: leadForm.message.trim() || null,
+        source: 'welcome_page',
+        locale,
+      });
+      setLeadSuccess(true);
+      setLeadForm({ full_name: '', email: '', phone: '', message: '' });
+    } catch {
+      setLeadError(true);
+    } finally {
+      setLeadSubmitting(false);
+    }
   };
 
   return (
@@ -364,6 +406,94 @@ export default function WelcomePage() {
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Lead Contact Form */}
+      <section id="contact-form" className="py-24 lg:py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+                {t('contactFormTitle')}
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                {t('contactFormSubtitle')}
+              </p>
+            </div>
+
+            {leadSuccess ? (
+              <div className="text-center py-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/10 mb-6">
+                  <CheckCircle className="w-8 h-8 text-success" />
+                </div>
+                <p className="text-lg font-medium text-gray-900">
+                  {t('contactFormSuccess')}
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleLeadSubmit} className="space-y-6">
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <Input
+                    id="lead-name"
+                    label={t('contactFormName')}
+                    value={leadForm.full_name}
+                    onChange={(e) =>
+                      setLeadForm((prev) => ({ ...prev, full_name: e.target.value }))
+                    }
+                    placeholder={t('contactFormNamePlaceholder')}
+                    required
+                  />
+                  <Input
+                    id="lead-email"
+                    type="email"
+                    label={t('contactFormEmail')}
+                    value={leadForm.email}
+                    onChange={(e) =>
+                      setLeadForm((prev) => ({ ...prev, email: e.target.value }))
+                    }
+                    placeholder={t('contactFormEmailPlaceholder')}
+                    required
+                  />
+                </div>
+
+                <Input
+                  id="lead-phone"
+                  type="tel"
+                  label={t('contactFormPhone')}
+                  value={leadForm.phone}
+                  onChange={(e) =>
+                    setLeadForm((prev) => ({ ...prev, phone: e.target.value }))
+                  }
+                  placeholder={t('contactFormPhonePlaceholder')}
+                />
+
+                <Textarea
+                  id="lead-message"
+                  label={t('contactFormMessage')}
+                  value={leadForm.message}
+                  onChange={(e) =>
+                    setLeadForm((prev) => ({ ...prev, message: e.target.value }))
+                  }
+                  placeholder={t('contactFormMessagePlaceholder')}
+                  rows={4}
+                />
+
+                {leadError && (
+                  <div className="text-center p-4 rounded-xl bg-destructive/10 text-destructive text-sm">
+                    {t('contactFormError')}
+                  </div>
+                )}
+
+                <div className="text-center pt-2">
+                  <Button type="submit" size="lg" loading={leadSubmitting}>
+                    {t('contactFormSubmit')}
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </section>

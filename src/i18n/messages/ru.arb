@@ -418,7 +418,20 @@
     "gdprCompliant": "Соответствие GDPR",
     "footer": "© 2026 Dokal. Все права защищены.",
     "loggingOut": "Выход...",
-    "loggingOutMessage": "Вы будете перенаправлены на главную страницу."
+    "loggingOutMessage": "Вы будете перенаправлены на главную страницу.",
+    "contactFormTitle": "Свяжитесь с нами",
+    "contactFormSubtitle": "Заинтересованы в Dokal? Оставьте свои данные, и мы свяжемся с вами в ближайшее время.",
+    "contactFormName": "Полное имя",
+    "contactFormNamePlaceholder": "Д-р Иван Иванов",
+    "contactFormEmail": "Электронная почта",
+    "contactFormEmailPlaceholder": "ivan@example.com",
+    "contactFormPhone": "Телефон (необязательно)",
+    "contactFormPhonePlaceholder": "+7 912 345 67 89",
+    "contactFormMessage": "Сообщение (необязательно)",
+    "contactFormMessagePlaceholder": "Расскажите о своей практике или задайте вопрос...",
+    "contactFormSubmit": "Отправить сообщение",
+    "contactFormSuccess": "Сообщение отправлено! Мы свяжемся с вами в ближайшее время.",
+    "contactFormError": "Не удалось отправить сообщение. Пожалуйста, попробуйте снова."
   },
   "contact": {
     "title": "Контакты",

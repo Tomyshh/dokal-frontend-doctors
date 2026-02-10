@@ -147,6 +147,19 @@ CREATE TABLE public.health_vaccinations (
   CONSTRAINT health_vaccinations_pkey PRIMARY KEY (id),
   CONSTRAINT health_vaccinations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );
+CREATE TABLE public.lead (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  full_name character varying NOT NULL,
+  email character varying NOT NULL,
+  phone character varying,
+  message text,
+  source character varying NOT NULL DEFAULT 'welcome_page'::character varying,
+  locale character varying,
+  status character varying NOT NULL DEFAULT 'new'::character varying,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT lead_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.messages (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   conversation_id uuid NOT NULL,

@@ -418,7 +418,20 @@
     "gdprCompliant": "Conforme RGPD",
     "footer": "© 2026 Dokal. Tous droits réservés.",
     "loggingOut": "Déconnexion en cours...",
-    "loggingOutMessage": "Vous allez être redirigé vers la page d'accueil."
+    "loggingOutMessage": "Vous allez être redirigé vers la page d'accueil.",
+    "contactFormTitle": "Contactez-nous",
+    "contactFormSubtitle": "Intéressé par Dokal ? Laissez-nous vos coordonnées et nous vous recontacterons rapidement.",
+    "contactFormName": "Nom complet",
+    "contactFormNamePlaceholder": "Dr. Jean Dupont",
+    "contactFormEmail": "E-mail",
+    "contactFormEmailPlaceholder": "jean@exemple.com",
+    "contactFormPhone": "Téléphone (optionnel)",
+    "contactFormPhonePlaceholder": "+33 6 12 34 56 78",
+    "contactFormMessage": "Message (optionnel)",
+    "contactFormMessagePlaceholder": "Parlez-nous de votre pratique ou posez une question...",
+    "contactFormSubmit": "Envoyer le message",
+    "contactFormSuccess": "Message envoyé ! Nous vous recontacterons rapidement.",
+    "contactFormError": "Impossible d'envoyer votre message. Veuillez réessayer."
   },
   "contact": {
     "title": "Contact",

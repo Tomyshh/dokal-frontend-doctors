@@ -418,7 +418,20 @@
     "gdprCompliant": "GDPR compliant",
     "footer": "© 2026 Dokal. All rights reserved.",
     "loggingOut": "Signing out...",
-    "loggingOutMessage": "You will be redirected to the home page."
+    "loggingOutMessage": "You will be redirected to the home page.",
+    "contactFormTitle": "Contáctenos",
+    "contactFormSubtitle": "¿Interesado en Dokal? Déjenos sus datos y nos pondremos en contacto con usted pronto.",
+    "contactFormName": "Nombre completo",
+    "contactFormNamePlaceholder": "Dr. Juan Pérez",
+    "contactFormEmail": "Correo electrónico",
+    "contactFormEmailPlaceholder": "juan@ejemplo.com",
+    "contactFormPhone": "Teléfono (opcional)",
+    "contactFormPhonePlaceholder": "+34 612 345 678",
+    "contactFormMessage": "Mensaje (opcional)",
+    "contactFormMessagePlaceholder": "Cuéntenos sobre su práctica o haga una pregunta...",
+    "contactFormSubmit": "Enviar mensaje",
+    "contactFormSuccess": "¡Mensaje enviado! Nos pondremos en contacto pronto.",
+    "contactFormError": "No se pudo enviar el mensaje. Por favor, inténtelo de nuevo."
   },
   "contact": {
     "title": "Contact",

@@ -425,7 +425,20 @@
     "gdprCompliant": "תואם GDPR",
     "footer": "© 2026 Dokal. כל הזכויות שמורות.",
     "loggingOut": "מתנתק...",
-    "loggingOutMessage": "תועבר לדף הבית."
+    "loggingOutMessage": "תועבר לדף הבית.",
+    "contactFormTitle": "צרו קשר",
+    "contactFormSubtitle": "מעוניינים ב-Dokal? השאירו פרטים ונחזור אליכם בהקדם.",
+    "contactFormName": "שם מלא",
+    "contactFormNamePlaceholder": "ד\"ר ישראל ישראלי",
+    "contactFormEmail": "אימייל",
+    "contactFormEmailPlaceholder": "israel@example.com",
+    "contactFormPhone": "טלפון (אופציונלי)",
+    "contactFormPhonePlaceholder": "050-1234567",
+    "contactFormMessage": "הודעה (אופציונלי)",
+    "contactFormMessagePlaceholder": "ספרו לנו על הפרקטיקה שלכם או שאלו שאלה...",
+    "contactFormSubmit": "שליחת הודעה",
+    "contactFormSuccess": "ההודעה נשלחה! נחזור אליכם בקרוב.",
+    "contactFormError": "לא ניתן לשלוח את ההודעה. אנא נסו שוב."
   },
   "contact": {
     "title": "יצירת קשר",
