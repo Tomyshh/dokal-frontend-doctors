@@ -1,5 +1,19 @@
 import api from '@/lib/api';
 
+// ─── Plan Types ──────────────────────────────────────────────────────
+
+export type PlanType = 'individual' | 'clinic';
+
+export const PLAN_PRICES: Record<PlanType, number> = {
+  individual: 29000, // 290 ILS in agorot
+  clinic: 49000,     // 490 ILS in agorot
+};
+
+export const PLAN_PRICES_ILS: Record<PlanType, number> = {
+  individual: 290,
+  clinic: 490,
+};
+
 // ─── Types ───────────────────────────────────────────────────────────
 
 export interface SubscriptionCard {
@@ -15,7 +29,7 @@ export interface SubscriptionCard {
 
 export interface Subscription {
   id: string;
-  plan: string;
+  plan: PlanType;
   price_agorot: number;
   status: 'active' | 'cancelled' | 'paused';
   current_period_start: string;
@@ -57,6 +71,7 @@ export interface AddCardResponse {
 
 export interface SubscribeWithCardIdPayload {
   cardId: string;
+  plan?: PlanType;
 }
 
 export interface SubscribeWithNewCardPayload {
@@ -65,6 +80,7 @@ export interface SubscribeWithNewCardPayload {
   cvv: string;
   cardHolder?: string;
   buyerZipCode?: string;
+  plan?: PlanType;
 }
 
 export type SubscribePayload = SubscribeWithCardIdPayload | SubscribeWithNewCardPayload;
@@ -143,5 +159,23 @@ export async function pauseSubscription(): Promise<PauseResumeResponse> {
 
 export async function resumeSubscription(): Promise<PauseResumeResponse> {
   const { data } = await api.post<PauseResumeResponse>(`${BASE}/resume`, {});
+  return data;
+}
+
+// ─── Plan Upgrade / Downgrade ─────────────────────────────────────────
+
+export interface PlanChangeResponse {
+  subscription: Subscription;
+}
+
+export async function upgradePlan(): Promise<PlanChangeResponse> {
+  const { data } = await api.post<PlanChangeResponse>(`${BASE}/upgrade`, {});
+  return data;
+}
+
+export async function downgradePlan(keepPractitionerId: string): Promise<PlanChangeResponse> {
+  const { data } = await api.post<PlanChangeResponse>(`${BASE}/downgrade`, {
+    keep_practitioner_id: keepPractitionerId,
+  });
   return data;
 }

@@ -80,9 +80,11 @@ export interface OrganizationMember {
   staff_type: StaffType;
   invited_by: string | null;
   joined_at: string;
+  is_active?: boolean;
   // Joined fields
   profiles?: Pick<Profile, 'id' | 'first_name' | 'last_name' | 'avatar_url' | 'email' | 'phone' | 'role'>;
   practitioner?: {
+    id: string;
     specialty: Pick<Specialty, 'name' | 'name_fr' | 'name_he'>;
   } | null;
 }

@@ -5,11 +5,12 @@ interface CardProps {
   children: ReactNode;
   className?: string;
   padding?: boolean;
+  id?: string;
 }
 
-export function Card({ children, className, padding = true }: CardProps) {
+export function Card({ children, className, padding = true, id }: CardProps) {
   return (
-    <div className={cn('bg-card rounded-2xl shadow-card border border-border/50', padding && 'p-6', className)}>
+    <div id={id} className={cn('bg-card rounded-2xl shadow-card border border-border/50', padding && 'p-6', className)}>
       {children}
     </div>
   );

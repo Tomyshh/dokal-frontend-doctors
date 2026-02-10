@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { addCard, subscribe, startTrial } from '@/lib/subscription';
+import { addCard, subscribe, startTrial, PLAN_PRICES_ILS, type PlanType } from '@/lib/subscription';
 import {
   CreditCard,
   Shield,
@@ -14,6 +14,10 @@ import {
   Sparkles,
   Clock,
   Zap,
+  Users,
+  Building2,
+  BarChart3,
+  Crown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -25,7 +29,7 @@ type CardForm = {
   buyerZipCode: string;
 };
 
-type View = 'choice' | 'card-form';
+type View = 'plan-picker' | 'choice' | 'card-form';
 
 function formatCardNumber(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 16);
@@ -71,13 +75,107 @@ function CardBrandIcon({ brand }: { brand: string | null }) {
   return <CreditCard className="h-4 w-4 text-gray-400" />;
 }
 
+// ─── Plan Picker Card ────────────────────────────────────────────────
+function PlanCard({
+  plan,
+  selected,
+  onSelect,
+  t,
+}: {
+  plan: PlanType;
+  selected: boolean;
+  onSelect: () => void;
+  t: ReturnType<typeof useTranslations<'subscription'>>;
+}) {
+  const isClinic = plan === 'clinic';
+  const price = PLAN_PRICES_ILS[plan];
+
+  const features = isClinic
+    ? ['feature1', 'feature2', 'feature3', 'feature4', 'planFeatureTeam', 'planFeatureMultiPractitioner', 'planFeatureOrgStats'] as const
+    : ['feature1', 'feature2', 'feature3', 'feature4'] as const;
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={cn(
+        'relative flex flex-col rounded-2xl border-2 p-5 text-left transition-all w-full',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20',
+        selected
+          ? 'border-primary bg-primary/5 shadow-md'
+          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50',
+      )}
+    >
+      {/* Popular badge for clinic */}
+      {isClinic && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-primary rounded-full px-3 py-1">
+            <Crown className="h-3 w-3" />
+            {t('popular')}
+          </span>
+        </div>
+      )}
+
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-bold text-gray-900">
+            {isClinic ? t('planClinic') : t('planIndividual')}
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {isClinic ? t('planClinicDesc') : t('planIndividualDesc')}
+          </p>
+        </div>
+        <div className={cn(
+          'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1',
+          selected ? 'border-primary' : 'border-gray-300',
+        )}>
+          {selected && <div className="w-3 h-3 rounded-full bg-primary" />}
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <span className="text-3xl font-extrabold text-gray-900">{price}</span>
+        <span className="text-lg font-medium text-gray-500 ml-1">₪</span>
+        <span className="text-xs text-gray-400 ml-1">/ {t('perMonth')}</span>
+      </div>
+
+      {/* Badge */}
+      <div className="mb-4">
+        {isClinic ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-2.5 py-0.5">
+            <Users className="h-3 w-3" />
+            {t('unlimitedTeam')}
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-600 bg-gray-100 rounded-full px-2.5 py-0.5">
+            {t('onePractitioner')}
+          </span>
+        )}
+      </div>
+
+      <div className="space-y-2 flex-1">
+        {features.map((key) => (
+          <div key={key} className="flex items-center gap-2 text-xs text-gray-600">
+            <CheckCircle2 className={cn(
+              'h-3.5 w-3.5 shrink-0',
+              isClinic ? 'text-primary' : 'text-gray-400',
+            )} />
+            {t(key)}
+          </div>
+        ))}
+      </div>
+    </button>
+  );
+}
+
 export default function OnboardingSubscriptionPage() {
   const t = useTranslations('subscription');
   const locale = useLocale();
   const { profile, refreshSubscription } = useAuth();
   const actionInFlightRef = useRef(false);
 
-  const [view, setView] = useState<View>('choice');
+  const [view, setView] = useState<View>('plan-picker');
+  const [selectedPlan, setSelectedPlan] = useState<PlanType>('individual');
   const [form, setForm] = useState<CardForm>({
     cardNumber: '',
     expirationDate: '',
@@ -92,6 +190,7 @@ export default function OnboardingSubscriptionPage() {
 
   const cardBrand = getCardBrand(form.cardNumber);
   const rawCardNumber = form.cardNumber.replace(/\s/g, '');
+  const selectedPrice = PLAN_PRICES_ILS[selectedPlan];
 
   const userName = profile
     ? `Dr ${profile.last_name || ''}`
@@ -176,7 +275,7 @@ export default function OnboardingSubscriptionPage() {
         buyerZipCode: form.buyerZipCode || undefined,
       });
 
-      await subscribe({ cardId: cardResponse.card.id });
+      await subscribe({ cardId: cardResponse.card.id, plan: selectedPlan });
       // Refresh subscription status in the auth context so dashboard won't bounce back
       await refreshSubscription();
       setSuccess('subscribed');
@@ -213,10 +312,60 @@ export default function OnboardingSubscriptionPage() {
     );
   }
 
+  // ─── Plan Picker View ──────────────────────────────────────────────
+  if (view === 'plan-picker') {
+    return (
+      <div>
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+            <Sparkles className="h-7 w-7 text-primary" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">{t('planPickerTitle')}</h1>
+          <p className="text-sm text-muted-foreground mt-2">{t('planPickerSubtitle')}</p>
+        </div>
+
+        {/* Plan cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          <PlanCard
+            plan="individual"
+            selected={selectedPlan === 'individual'}
+            onSelect={() => setSelectedPlan('individual')}
+            t={t}
+          />
+          <PlanCard
+            plan="clinic"
+            selected={selectedPlan === 'clinic'}
+            onSelect={() => setSelectedPlan('clinic')}
+            t={t}
+          />
+        </div>
+
+        {/* Continue button */}
+        <Button
+          className="w-full rounded-full h-12 text-base"
+          onClick={() => setView('choice')}
+        >
+          {t('continueToPlan')} — {selectedPrice} ₪/{t('perMonth')}
+        </Button>
+      </div>
+    );
+  }
+
   // ─── Choice View: Trial or Subscribe ───────────────────────────────
   if (view === 'choice') {
     return (
       <div>
+        {/* Back to plan picker */}
+        <button
+          type="button"
+          onClick={() => { setView('plan-picker'); setError(''); }}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6"
+        >
+          <CreditCard className="h-4 w-4" />
+          {t('backToPlanPicker')}
+        </button>
+
         {/* Header */}
         <div className="text-center mb-8">
           <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
@@ -226,32 +375,30 @@ export default function OnboardingSubscriptionPage() {
           <p className="text-sm text-muted-foreground mt-2">{t('onboardingSubtitle')}</p>
         </div>
 
-        {/* Plan card */}
+        {/* Selected plan summary */}
         <div className="rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-5 mb-8">
           <div className="flex items-center justify-between">
             <div>
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 rounded-full px-3 py-1 mb-2">
-                <Shield className="h-3 w-3" />
-                {t('planBadge')}
+                {selectedPlan === 'clinic' ? (
+                  <><Building2 className="h-3 w-3" />{t('planClinic')}</>
+                ) : (
+                  <><Shield className="h-3 w-3" />{t('planIndividual')}</>
+                )}
               </span>
-              <h3 className="text-lg font-bold text-gray-900">{t('planName')}</h3>
-              <p className="text-sm text-gray-500 mt-0.5">{t('planDescription')}</p>
+              <h3 className="text-lg font-bold text-gray-900">
+                {selectedPlan === 'clinic' ? t('planClinic') : t('planIndividual')}
+              </h3>
+              <p className="text-sm text-gray-500 mt-0.5">
+                {selectedPlan === 'clinic' ? t('planClinicDesc') : t('planIndividualDesc')}
+              </p>
             </div>
             <div className="text-right">
               <div className="text-3xl font-extrabold text-gray-900">
-                290 <span className="text-lg font-medium text-gray-500">₪</span>
+                {selectedPrice} <span className="text-lg font-medium text-gray-500">₪</span>
               </div>
               <span className="text-xs text-gray-400">/ {t('perMonth')}</span>
             </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            {(['feature1', 'feature2', 'feature3', 'feature4'] as const).map((key) => (
-              <div key={key} className="flex items-center gap-2 text-xs text-gray-600">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
-                {t(key)}
-              </div>
-            ))}
           </div>
         </div>
 
@@ -328,7 +475,9 @@ export default function OnboardingSubscriptionPage() {
               </div>
               <div className="flex-1">
                 <h3 className="text-base font-bold text-gray-900">{t('subscribeNowTitle')}</h3>
-                <p className="text-sm text-gray-500 mt-1">{t('subscribeNowDescription')}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {t('subscribeNowDescriptionWithPrice', { price: selectedPrice })}
+                </p>
               </div>
             </div>
           </button>
@@ -489,7 +638,7 @@ export default function OnboardingSubscriptionPage() {
           disabled={!isFormValid}
         >
           <Lock className="h-4 w-4" />
-          {t('subscribe')} — 290 ₪/{t('perMonth')}
+          {t('subscribe')} — {selectedPrice} ₪/{t('perMonth')}
         </Button>
       </form>
     </div>

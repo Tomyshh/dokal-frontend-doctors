@@ -18,12 +18,11 @@ import {
   useInviteMember,
   useRemoveOrganizationMember,
   useUpdateOrganizationMember,
-  useUpdateOrganization,
 } from '@/hooks/useOrganization';
 import { useAuth } from '@/providers/AuthProvider';
-import api from '@/lib/api';
 import type { InviteMemberRequest } from '@/types/api';
 import type { OrganizationMember } from '@/types';
+import { useRouter } from '@/i18n/routing';
 import {
   UserPlus,
   Users,
@@ -73,14 +72,13 @@ export default function TeamPage() {
   const ts = useTranslations('settings');
   const locale = useLocale();
   const { profile } = useAuth();
+  const router = useRouter();
   const { data: organization, isLoading: loadingOrg } = useCrmOrganization();
   const { data: members, isLoading: loadingMembers } = useOrganizationMembers(organization?.id);
   const inviteMember = useInviteMember();
   const removeMember = useRemoveOrganizationMember();
   const updateMember = useUpdateOrganizationMember();
-  const updateOrganization = useUpdateOrganization();
 
-  const [clinicName, setClinicName] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<InviteForm>(INITIAL_FORM);
   const [inviteError, setInviteError] = useState('');
@@ -205,26 +203,11 @@ export default function TeamPage() {
 
   if (loadingOrg || loadingMembers) return <Spinner size="lg" />;
 
-  const handleUpgradeToClinic = async () => {
-    if (!organization || !clinicName.trim()) return;
-    try {
-      // PATCH the organization: change type to clinic + set the clinic name
-      await api.patch(`/organizations/${organization.id}`, {
-        type: 'clinic',
-        name: clinicName.trim(),
-      });
-      // Refetch organization data to update the UI
-      window.location.reload();
-    } catch {
-      // Silently handle
-    }
-  };
-
   if (!organization) {
     return <Spinner size="lg" />;
   }
 
-  // Show upgrade screen for individual organizations
+  // Show upgrade prompt for individual organizations — redirect to Settings
   if (organization.type !== 'clinic') {
     return (
       <div className="flex items-center justify-center py-16">
@@ -237,25 +220,13 @@ export default function TeamPage() {
             <p className="text-sm text-muted-foreground leading-relaxed">
               {t('upgradeDescription')}
             </p>
-            <div className="w-full space-y-3 mt-2">
-              <Input
-                id="clinicName"
-                label={t('clinicNameLabel')}
-                value={clinicName}
-                onChange={(e) => setClinicName(e.target.value)}
-                placeholder={t('clinicNamePlaceholder')}
-                required
-              />
-              <Button
-                className="w-full"
-                onClick={handleUpgradeToClinic}
-                loading={updateOrganization.isPending}
-                disabled={!clinicName.trim()}
-              >
-                {t('upgradeButton')}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button
+              className="w-full"
+              onClick={() => router.push('/settings#plan')}
+            >
+              {t('upgradeButton')}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
         </Card>
       </div>
