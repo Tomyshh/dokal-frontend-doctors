@@ -179,7 +179,8 @@
     "instructions": "הנחיות לפני פגישה",
     "help": "עזרה",
     "support": "תמיכה",
-    "team": "צוות"
+    "team": "צוות",
+    "calendar": "יומן"
   },
   "dashboard": {
     "title": "לוח בקרה",
@@ -653,6 +654,33 @@
     "upgradeTitle": "נדרש מסלול מרפאה",
     "upgradeDescription": "כדי לנהל את הצוות שלך ולהוסיף רופאים ומזכירות, שדרגו למסלול מרפאה מההגדרות.",
     "upgradeButton": "צפה במסלולים"
+  },
+  "calendar": {
+    "title": "יומן",
+    "month": "חודש",
+    "week": "שבוע",
+    "day": "יום",
+    "today": "היום",
+    "noEvents": "אין פגישות",
+    "allPractitioners": "כל הרופאים",
+    "myCalendar": "היומן שלי",
+    "moreEvents": "+{count} נוספים",
+    "colleague": "עמית",
+    "viewDay": "צפה ביום",
+    "pending": "ממתין",
+    "confirmed": "מאושר",
+    "completed": "הושלם",
+    "cancelled": "בוטל",
+    "noShow": "לא הגיע",
+    "eventDetails": "פרטי הפגישה",
+    "patient": "מטופל",
+    "reason": "סיבה",
+    "time": "שעה",
+    "status": "סטטוס",
+    "notes": "הערות",
+    "viewPatient": "צפה בתיק מטופל",
+    "viewAppointment": "צפה בפגישה",
+    "now": "עכשיו"
   }
 }
 

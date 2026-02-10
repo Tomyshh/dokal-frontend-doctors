@@ -179,7 +179,8 @@
     "instructions": "Instructions pré-RDV",
     "help": "Aide",
     "support": "Support",
-    "team": "Équipe"
+    "team": "Équipe",
+    "calendar": "Calendrier"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -653,6 +654,33 @@
     "upgradeTitle": "Forfait Clinique requis",
     "upgradeDescription": "Pour gérer votre équipe et ajouter des médecins et secrétaires, passez au forfait Clinique depuis les paramètres.",
     "upgradeButton": "Voir les forfaits"
+  },
+  "calendar": {
+    "title": "Calendrier",
+    "month": "Mois",
+    "week": "Semaine",
+    "day": "Jour",
+    "today": "Aujourd'hui",
+    "noEvents": "Aucun rendez-vous",
+    "allPractitioners": "Tous les praticiens",
+    "myCalendar": "Mon calendrier",
+    "moreEvents": "+{count} de plus",
+    "colleague": "Collègue",
+    "viewDay": "Voir le jour",
+    "pending": "En attente",
+    "confirmed": "Confirmé",
+    "completed": "Terminé",
+    "cancelled": "Annulé",
+    "noShow": "Absent",
+    "eventDetails": "Détails du rendez-vous",
+    "patient": "Patient",
+    "reason": "Motif",
+    "time": "Heure",
+    "status": "Statut",
+    "notes": "Notes",
+    "viewPatient": "Voir la fiche patient",
+    "viewAppointment": "Voir le rendez-vous",
+    "now": "Maintenant"
   }
 }
 

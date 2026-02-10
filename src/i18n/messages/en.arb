@@ -179,7 +179,8 @@
     "instructions": "Pre-appointment instructions",
     "help": "Help",
     "support": "Support",
-    "team": "Team"
+    "team": "Team",
+    "calendar": "Calendar"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -653,6 +654,33 @@
     "upgradeTitle": "Clinic plan required",
     "upgradeDescription": "To manage your team and add doctors and secretaries, upgrade to the Clinic plan from Settings.",
     "upgradeButton": "View plans"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "today": "Today",
+    "noEvents": "No appointments",
+    "allPractitioners": "All practitioners",
+    "myCalendar": "My calendar",
+    "moreEvents": "+{count} more",
+    "colleague": "Colleague",
+    "viewDay": "View day",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "noShow": "No show",
+    "eventDetails": "Appointment details",
+    "patient": "Patient",
+    "reason": "Reason",
+    "time": "Time",
+    "status": "Status",
+    "notes": "Notes",
+    "viewPatient": "View patient file",
+    "viewAppointment": "View appointment",
+    "now": "Now"
   }
 }
 

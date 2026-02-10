@@ -179,7 +179,8 @@
     "instructions": "Инструкции перед приёмом",
     "help": "Помощь",
     "support": "Поддержка",
-    "team": "Команда"
+    "team": "Команда",
+    "calendar": "Календарь"
   },
   "dashboard": {
     "title": "Панель управления",
@@ -653,6 +654,33 @@
     "upgradeTitle": "Требуется тариф Клиника",
     "upgradeDescription": "Для управления командой и добавления врачей и секретарей перейдите на тариф Клиника в настройках.",
     "upgradeButton": "Посмотреть тарифы"
+  },
+  "calendar": {
+    "title": "Календарь",
+    "month": "Месяц",
+    "week": "Неделя",
+    "day": "День",
+    "today": "Сегодня",
+    "noEvents": "Нет приёмов",
+    "allPractitioners": "Все врачи",
+    "myCalendar": "Мой календарь",
+    "moreEvents": "+{count} ещё",
+    "colleague": "Коллега",
+    "viewDay": "Посмотреть день",
+    "pending": "Ожидание",
+    "confirmed": "Подтверждён",
+    "completed": "Завершён",
+    "cancelled": "Отменён",
+    "noShow": "Не явился",
+    "eventDetails": "Детали приёма",
+    "patient": "Пациент",
+    "reason": "Причина",
+    "time": "Время",
+    "status": "Статус",
+    "notes": "Заметки",
+    "viewPatient": "Карта пациента",
+    "viewAppointment": "Просмотр приёма",
+    "now": "Сейчас"
   }
 }
 

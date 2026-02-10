@@ -116,6 +116,9 @@ export interface ReplyReviewRequest {
 // CRM Specific
 export interface CrmAppointmentsQuery {
   date?: string;
+  from?: string;
+  to?: string;
+  practitioner_id?: string;
   status?: string;
   limit?: number;
   offset?: number;

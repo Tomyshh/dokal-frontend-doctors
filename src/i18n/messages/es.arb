@@ -179,7 +179,8 @@
     "instructions": "Pre-appointment instructions",
     "help": "Help",
     "support": "Support",
-    "team": "Team"
+    "team": "Team",
+    "calendar": "Calendario"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -653,6 +654,33 @@
     "upgradeTitle": "Clinic plan required",
     "upgradeDescription": "To manage your team and add doctors and secretaries, upgrade to the Clinic plan from Settings.",
     "upgradeButton": "View plans"
+  },
+  "calendar": {
+    "title": "Calendario",
+    "month": "Mes",
+    "week": "Semana",
+    "day": "Dia",
+    "today": "Hoy",
+    "noEvents": "Sin citas",
+    "allPractitioners": "Todos los profesionales",
+    "myCalendar": "Mi calendario",
+    "moreEvents": "+{count} mas",
+    "colleague": "Colega",
+    "viewDay": "Ver dia",
+    "pending": "Pendiente",
+    "confirmed": "Confirmado",
+    "completed": "Completado",
+    "cancelled": "Cancelado",
+    "noShow": "No presentado",
+    "eventDetails": "Detalles de la cita",
+    "patient": "Paciente",
+    "reason": "Motivo",
+    "time": "Hora",
+    "status": "Estado",
+    "notes": "Notas",
+    "viewPatient": "Ver ficha del paciente",
+    "viewAppointment": "Ver cita",
+    "now": "Ahora"
   }
 }
 

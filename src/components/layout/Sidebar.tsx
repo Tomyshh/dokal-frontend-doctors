@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
   CalendarDays,
+  Calendar,
   MessageSquare,
   CalendarCheck,
   Star,
@@ -60,6 +61,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     }
 
     links.push(
+      { href: '/calendar', icon: Calendar, label: t('calendar') },
       { href: '/messages', icon: MessageSquare, label: t('messages') },
       { href: '/appointments', icon: CalendarCheck, label: t('appointments') },
     );
