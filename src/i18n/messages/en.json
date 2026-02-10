@@ -619,6 +619,11 @@
     "promoteToAdmin": "Promote to admin",
     "demoteToMember": "Demote to member",
     "noMembers": "No members in the team",
-    "clinicOnly": "Team management is only available for clinics"
+    "clinicOnly": "Team management is only available for clinics",
+    "upgradeTitle": "Switch to clinic mode",
+    "upgradeDescription": "To add doctors and secretaries to your team, upgrade your individual practice to a clinic. Give your clinic a name to get started.",
+    "clinicNameLabel": "Clinic name",
+    "clinicNamePlaceholder": "e.g. Downtown Medical Center",
+    "upgradeButton": "Create my clinic"
   }
 }

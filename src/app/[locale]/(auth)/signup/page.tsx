@@ -66,6 +66,43 @@ export default function SignupPage() {
   const [otpRedirecting, setOtpRedirecting] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const otpSubmitInFlightRef = useRef(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // ─── Detect browser autofill and sync React state ────────────────
+  // Browsers sometimes fire native `change` events (not `input`) on autofill,
+  // which React's synthetic onChange doesn't capture.
+  useEffect(() => {
+    const formEl = formRef.current;
+    if (!formEl) return;
+
+    const autofillFields: (keyof FormState)[] = [
+      'firstName', 'lastName', 'email', 'phone',
+      'licenseNumber', 'addressLine', 'zipCode',
+      'password', 'confirmPassword',
+    ];
+
+    const handleNativeChange = (e: Event) => {
+      const input = e.target as HTMLInputElement;
+      if (!input?.id || !autofillFields.includes(input.id as keyof FormState)) return;
+
+      const key = input.id as keyof FormState;
+      let val: string = input.value;
+
+      // Normalise phone digits the same way PhoneInputIL does
+      if (key === 'phone') val = val.replace(/\D/g, '');
+      // Normalise license number
+      if (key === 'licenseNumber') val = val.replace(/\D/g, '').slice(0, 6);
+
+      setForm((prev) => {
+        if (prev[key] === val) return prev;
+        return { ...prev, [key]: val };
+      });
+    };
+
+    // Use capture phase so we intercept before React's own listeners
+    formEl.addEventListener('change', handleNativeChange, true);
+    return () => formEl.removeEventListener('change', handleNativeChange, true);
+  }, []);
 
   const passwordMismatch = useMemo(() => {
     return (
@@ -90,18 +127,19 @@ export default function SignupPage() {
   };
 
   /** Call backend to create profiles + practitioners + organization rows (after auth is confirmed) */
-  const registerPractitionerOnBackend = async () => {
-    const normalizedPhone = normalizeIsraelPhoneToE164(form.phone);
+  const registerPractitionerOnBackend = async (overrideForm?: FormState) => {
+    const f = overrideForm ?? form;
+    const normalizedPhone = normalizeIsraelPhoneToE164(f.phone);
     const payload: RegisterPractitionerRequest = {
-      first_name: form.firstName,
-      last_name: form.lastName,
-      email: form.email,
-      phone: normalizedPhone ?? form.phone,
-      city: form.city,
-      specialty: form.specialty,
-      license_number: form.licenseNumber,
-      address_line: form.addressLine,
-      zip_code: form.zipCode,
+      first_name: f.firstName,
+      last_name: f.lastName,
+      email: f.email,
+      phone: normalizedPhone ?? f.phone,
+      city: f.city,
+      specialty: f.specialty,
+      license_number: f.licenseNumber,
+      address_line: f.addressLine,
+      zip_code: f.zipCode,
       // Le backend crée automatiquement une organization de type 'individual'
       // Pour rejoindre une clinique existante, passer organization_id
       // Pour créer une clinique, passer organization_name + organization_type: 'clinic'
@@ -121,22 +159,55 @@ export default function SignupPage() {
     e.preventDefault();
     setError('');
 
-    if (passwordMismatch) {
+    // ── Read actual DOM values as a safety net for browser autofill ──
+    // Browser autofill can set DOM values without triggering React onChange,
+    // leaving React state empty while the UI shows filled-in fields.
+    const domVal = (id: string): string =>
+      (document.getElementById(id) as HTMLInputElement)?.value ?? '';
+
+    const synced: FormState = {
+      firstName: form.firstName || domVal('firstName'),
+      lastName: form.lastName || domVal('lastName'),
+      email: form.email || domVal('email'),
+      phone: form.phone || domVal('phone').replace(/\D/g, ''),
+      city: form.city || domVal('city'),
+      specialty: form.specialty, // custom combobox, not subject to autofill
+      licenseNumber: form.licenseNumber || domVal('licenseNumber').replace(/\D/g, '').slice(0, 6),
+      addressLine: form.addressLine || domVal('addressLine'),
+      zipCode: form.zipCode || domVal('zipCode'),
+      password: form.password || domVal('password'),
+      confirmPassword: form.confirmPassword || domVal('confirmPassword'),
+      acceptTerms: form.acceptTerms,
+    };
+
+    // Persist the merged values back into React state
+    setForm(synced);
+
+    // Validate using synced values (not the possibly-stale React state)
+    const syncedPwMismatch =
+      synced.password.length > 0 &&
+      synced.confirmPassword.length > 0 &&
+      synced.password !== synced.confirmPassword;
+    if (syncedPwMismatch) {
       setError(t('passwordMismatch'));
       return;
     }
 
-    if (licenseNumberInvalid) {
+    const syncedLicenseInvalid =
+      synced.licenseNumber.length > 0 && !/^\d{1,6}$/.test(synced.licenseNumber);
+    if (syncedLicenseInvalid) {
       setError(t('licenseNumberInvalid'));
       return;
     }
 
-    if (phoneInvalid) {
+    const syncedPhoneInvalid =
+      synced.phone.length > 0 && normalizeIsraelPhoneToE164(synced.phone) === null;
+    if (syncedPhoneInvalid) {
       setError(t('phoneInvalid'));
       return;
     }
 
-    if (!form.acceptTerms) {
+    if (!synced.acceptTerms) {
       setError(t('termsError'));
       return;
     }
@@ -145,8 +216,8 @@ export default function SignupPage() {
     try {
       const supabase = createClient();
       const { data, error: signUpError } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
+        email: synced.email,
+        password: synced.password,
         options: {
           emailRedirectTo: `${window.location.origin}/${locale}/login`,
           data: {
@@ -164,7 +235,7 @@ export default function SignupPage() {
       // register practitioner on backend then go to subscription
       if (data.session) {
         try {
-          await registerPractitionerOnBackend();
+          await registerPractitionerOnBackend(synced);
         } catch (err) {
           console.error('Practitioner registration failed:', err);
         }
@@ -449,7 +520,7 @@ export default function SignupPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
             {/* Row 1: Name + Email */}
             <div className="grid grid-cols-4 gap-3">
               <Input

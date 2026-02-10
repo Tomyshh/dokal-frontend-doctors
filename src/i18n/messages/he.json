@@ -619,6 +619,11 @@
     "promoteToAdmin": "קדם למנהל",
     "demoteToMember": "הורד לחבר",
     "noMembers": "אין חברים בצוות",
-    "clinicOnly": "ניהול צוות זמין רק למרפאות"
+    "clinicOnly": "ניהול צוות זמין רק למרפאות",
+    "upgradeTitle": "עבור למצב מרפאה",
+    "upgradeDescription": "כדי להוסיף רופאים ומזכירות לצוות שלך, שדרג את הפרקטיקה הפרטית שלך למרפאה. תן שם למרפאה שלך כדי להתחיל.",
+    "clinicNameLabel": "שם המרפאה",
+    "clinicNamePlaceholder": "לדוגמה: מרפאת המרכז",
+    "upgradeButton": "צור את המרפאה שלי"
   }
 }

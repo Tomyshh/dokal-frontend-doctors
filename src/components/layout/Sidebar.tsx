@@ -37,7 +37,6 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { data: organization } = useCrmOrganization();
 
   const isSecretary = profile?.role === 'secretary';
-  const isClinic = organization?.type === 'clinic';
 
   const pathnameWithoutLocale =
     pathname.startsWith(`/${locale}`) ? pathname.slice(`/${locale}`.length) || '/' : pathname;
@@ -87,13 +86,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       );
     }
 
-    // Team management for clinics
-    if (isClinic) {
-      links.push({ href: '/team', icon: Users, label: t('team') });
-    }
+    // Team management — always visible (page handles individual→clinic upgrade)
+    links.push({ href: '/team', icon: Users, label: t('team') });
 
     return links;
-  }, [t, isSecretary, isClinic]);
+  }, [t, isSecretary]);
 
   const isActive = (href: string, exact = false) => {
     if (exact) return pathnameWithoutLocale === href;

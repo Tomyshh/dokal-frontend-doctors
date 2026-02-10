@@ -619,6 +619,11 @@
     "promoteToAdmin": "Promouvoir administrateur",
     "demoteToMember": "Rétrograder en membre",
     "noMembers": "Aucun membre dans l'équipe",
-    "clinicOnly": "La gestion d'équipe est réservée aux cliniques"
+    "clinicOnly": "La gestion d'équipe est réservée aux cliniques",
+    "upgradeTitle": "Passez en mode clinique",
+    "upgradeDescription": "Pour ajouter des médecins et secrétaires à votre équipe, transformez votre cabinet individuel en clinique. Donnez un nom à votre clinique pour commencer.",
+    "clinicNameLabel": "Nom de la clinique",
+    "clinicNamePlaceholder": "Ex : Clinique du Centre",
+    "upgradeButton": "Créer ma clinique"
   }
 }

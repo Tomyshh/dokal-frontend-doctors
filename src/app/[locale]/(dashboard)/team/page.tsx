@@ -18,8 +18,10 @@ import {
   useInviteMember,
   useRemoveOrganizationMember,
   useUpdateOrganizationMember,
+  useUpdateOrganization,
 } from '@/hooks/useOrganization';
 import { useAuth } from '@/providers/AuthProvider';
+import api from '@/lib/api';
 import type { InviteMemberRequest } from '@/types/api';
 import type { OrganizationMember } from '@/types';
 import {
@@ -31,6 +33,8 @@ import {
   ShieldCheck,
   Crown,
   Mail,
+  Building2,
+  ArrowRight,
 } from 'lucide-react';
 
 type StaffTypeForm = 'practitioner' | 'secretary';
@@ -74,7 +78,9 @@ export default function TeamPage() {
   const inviteMember = useInviteMember();
   const removeMember = useRemoveOrganizationMember();
   const updateMember = useUpdateOrganizationMember();
+  const updateOrganization = useUpdateOrganization();
 
+  const [clinicName, setClinicName] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<InviteForm>(INITIAL_FORM);
   const [inviteError, setInviteError] = useState('');
@@ -199,10 +205,59 @@ export default function TeamPage() {
 
   if (loadingOrg || loadingMembers) return <Spinner size="lg" />;
 
-  if (!organization || organization.type !== 'clinic') {
+  const handleUpgradeToClinic = async () => {
+    if (!organization || !clinicName.trim()) return;
+    try {
+      // PATCH the organization: change type to clinic + set the clinic name
+      await api.patch(`/organizations/${organization.id}`, {
+        type: 'clinic',
+        name: clinicName.trim(),
+      });
+      // Refetch organization data to update the UI
+      window.location.reload();
+    } catch {
+      // Silently handle
+    }
+  };
+
+  if (!organization) {
+    return <Spinner size="lg" />;
+  }
+
+  // Show upgrade screen for individual organizations
+  if (organization.type !== 'clinic') {
     return (
-      <div className="text-center py-12 text-muted-foreground">
-        {t('clinicOnly')}
+      <div className="flex items-center justify-center py-16">
+        <Card className="max-w-lg w-full text-center">
+          <div className="flex flex-col items-center gap-4 p-8">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Building2 className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-xl font-bold text-gray-900">{t('upgradeTitle')}</h1>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {t('upgradeDescription')}
+            </p>
+            <div className="w-full space-y-3 mt-2">
+              <Input
+                id="clinicName"
+                label={t('clinicNameLabel')}
+                value={clinicName}
+                onChange={(e) => setClinicName(e.target.value)}
+                placeholder={t('clinicNamePlaceholder')}
+                required
+              />
+              <Button
+                className="w-full"
+                onClick={handleUpgradeToClinic}
+                loading={updateOrganization.isPending}
+                disabled={!clinicName.trim()}
+              >
+                {t('upgradeButton')}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </Card>
       </div>
     );
   }
