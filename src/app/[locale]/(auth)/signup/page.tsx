@@ -136,11 +136,11 @@ export default function SignupPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  /** Call backend to create profiles + practitioners + organization rows (after auth is confirmed) */
-  const registerPractitionerOnBackend = async (overrideForm?: FormState) => {
+  /** Build the registration payload from form state */
+  const buildRegistrationPayload = (overrideForm?: FormState): RegisterPractitionerRequest => {
     const f = overrideForm ?? form;
     const normalizedPhone = normalizeIsraelPhoneToE164(f.phone);
-    const payload: RegisterPractitionerRequest = {
+    return {
       first_name: f.firstName,
       last_name: f.lastName,
       email: f.email,
@@ -151,14 +151,57 @@ export default function SignupPage() {
       specialization_license: f.specializationLicense || undefined,
       address_line: f.addressLine,
       zip_code: f.zipCode,
-      // Le backend crée automatiquement une organization de type 'individual'
-      // Pour rejoindre une clinique existante, passer organization_id
-      // Pour créer une clinique, passer organization_name + organization_type: 'clinic'
     };
+  };
+
+  /**
+   * Call backend to create profiles + practitioners + organization rows.
+   * Handles 409 (already exists) gracefully by attempting a profile update fallback.
+   * Returns 'created' | 'already_exists'.
+   * Only throws for unexpected errors (5xx, network, etc.).
+   */
+  const registerPractitionerOnBackend = async (
+    overrideForm?: FormState
+  ): Promise<'created' | 'already_exists'> => {
+    const payload = buildRegistrationPayload(overrideForm);
     console.log('[Signup] Sending practitioner registration payload:', JSON.stringify(payload, null, 2));
-    const response = await api.post('/practitioners/register', payload);
-    console.log('[Signup] Backend response:', response.status, response.data);
-    return response;
+
+    try {
+      const response = await api.post('/practitioners/register', payload);
+      console.log('[Signup] Backend response:', response.status, response.data);
+      return 'created';
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: unknown } };
+      const status = axiosErr?.response?.status;
+
+      if (status === 409) {
+        // Practitioner already exists (likely created by a DB trigger on auth.signUp).
+        // Attempt to patch the practitioner profile so the data is not lost.
+        console.warn('[Signup] Practitioner already exists (409). Attempting profile update fallback…');
+        try {
+          await api.patch('/crm/profile', {
+            phone: payload.phone,
+            email: payload.email,
+            address_line: payload.address_line,
+            zip_code: payload.zip_code,
+            city: payload.city,
+          });
+          console.log('[Signup] Profile update fallback succeeded.');
+        } catch (patchErr) {
+          // Patch may fail if /crm/profile requires full onboarding first – that's OK.
+          console.warn('[Signup] Profile update fallback failed (non-critical):', patchErr);
+        }
+        return 'already_exists';
+      }
+
+      // Non-409 errors: log and re-throw for callers to handle
+      console.error('Practitioner registration failed:', err);
+      if (axiosErr?.response) {
+        console.error('[Signup] Backend error status:', status);
+        console.error('[Signup] Backend error data:', JSON.stringify(axiosErr.response.data, null, 2));
+      }
+      throw err;
+    }
   };
 
   // ─── Resend cooldown timer ─────────────────────────────────────────
@@ -237,6 +280,11 @@ export default function SignupPage() {
     setLoading(true);
     try {
       const supabase = createClient();
+      const normalizedPhone = normalizeIsraelPhoneToE164(synced.phone);
+
+      // Pass ALL form data in user_metadata so that any Supabase trigger
+      // (e.g. on_auth_user_created) has access to the data when creating
+      // the profile / practitioner rows.
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: synced.email,
         password: synced.password,
@@ -244,6 +292,15 @@ export default function SignupPage() {
           emailRedirectTo: `${window.location.origin}/${locale}/login`,
           data: {
             role: 'practitioner',
+            first_name: synced.firstName,
+            last_name: synced.lastName,
+            phone: normalizedPhone ?? synced.phone,
+            city: synced.city,
+            specialty: synced.specialty,
+            license_number: synced.licenseNumber,
+            specialization_license: synced.specializationLicense || undefined,
+            address_line: synced.addressLine,
+            zip_code: synced.zipCode,
           },
         },
       });
@@ -258,13 +315,7 @@ export default function SignupPage() {
       if (data.session) {
         try {
           await registerPractitionerOnBackend(synced);
-        } catch (err: unknown) {
-          console.error('Practitioner registration failed:', err);
-          const axiosErr = err as { response?: { status?: number; data?: unknown } };
-          if (axiosErr?.response) {
-            console.error('[Signup] Backend error status:', axiosErr.response.status);
-            console.error('[Signup] Backend error data:', JSON.stringify(axiosErr.response.data, null, 2));
-          }
+        } catch {
           setError(t('registrationBackendError'));
           setLoading(false);
           return;
@@ -369,18 +420,17 @@ export default function SignupPage() {
         }
       }
 
-      // Register practitioner profile on backend
+      // Register practitioner profile on backend.
+      // 409 is handled internally (practitioner already exists) and is not an error.
       try {
-        await registerPractitionerOnBackend();
-      } catch (err: unknown) {
-        console.error('Practitioner registration failed:', err);
-        const axiosErr = err as { response?: { status?: number; data?: unknown } };
-        if (axiosErr?.response) {
-          console.error('[Signup] Backend error status:', axiosErr.response.status);
-          console.error('[Signup] Backend error data:', JSON.stringify(axiosErr.response.data, null, 2));
+        const result = await registerPractitionerOnBackend();
+        if (result === 'already_exists') {
+          console.log('[Signup] Practitioner already existed – continuing to subscription.');
         }
-        setOtpError(t('registrationBackendError'));
-        return;
+      } catch {
+        // Non-409 error (500, network, etc.) – still let the user through
+        // since their auth account is confirmed. They can fix profile later.
+        console.error('[Signup] Backend registration failed after OTP – redirecting anyway.');
       }
 
       setOtpRedirecting(true);
