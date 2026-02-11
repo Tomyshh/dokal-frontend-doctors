@@ -188,8 +188,10 @@ export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
   return data;
 }
 
-export async function startTrial(): Promise<StartTrialResponse> {
-  const { data } = await api.post<StartTrialResponse>(`${BASE}/start-trial`, {});
+export async function startTrial(plan?: PlanType): Promise<StartTrialResponse> {
+  const { data } = await api.post<StartTrialResponse>(`${BASE}/start-trial`, {
+    plan: plan ?? 'individual',
+  });
   return data;
 }
 

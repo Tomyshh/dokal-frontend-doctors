@@ -151,6 +151,10 @@ export default function SignupPage() {
       specialization_license: f.specializationLicense || undefined,
       address_line: f.addressLine,
       zip_code: f.zipCode,
+      // Default organization: named after the practitioner, type will be
+      // updated when the user picks a plan on the subscription page.
+      organization_name: `Cabinet Dr ${f.lastName}`.trim(),
+      organization_type: 'individual',
     };
   };
 

@@ -312,14 +312,16 @@ export default function OnboardingSubscriptionPage() {
     window.location.assign(`/${locale}`);
   };
 
-  // ─── Start free trial ──────────────────────────────────────────────
+  // ─── Start free trial (individual & clinic only) ───────────────────
   const handleStartTrial = async () => {
+    // Enterprise has no trial – guard against accidental calls
+    if (selectedPlan === 'enterprise') return;
     if (actionInFlightRef.current) return;
     actionInFlightRef.current = true;
     setError('');
     setTrialLoading(true);
     try {
-      await startTrial();
+      await startTrial(selectedPlan);
       await refreshSubscription();
       setSuccess('trial');
       setTimeout(hardRedirectToDashboard, 2000);
@@ -366,7 +368,7 @@ export default function OnboardingSubscriptionPage() {
   // ─── Success Screen ────────────────────────────────────────────────
   if (success) {
     return (
-      <div className="text-center py-8 space-y-6">
+      <div className="text-center py-8 space-y-6 max-w-md mx-auto">
         <div className="mx-auto w-20 h-20 rounded-full bg-green-50 flex items-center justify-center">
           <CheckCircle2 className="h-10 w-10 text-green-500" />
         </div>
@@ -419,8 +421,8 @@ export default function OnboardingSubscriptionPage() {
         {/* Choose plan label */}
         <p className="text-sm font-medium text-gray-700 mb-3">{t('planPickerChoose')}</p>
 
-        {/* Plan cards — 3 plans */}
-        <div className="grid grid-cols-1 gap-4 mb-6">
+        {/* Plan cards — 3 plans side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 items-stretch">
           <PlanCard
             plan="individual"
             selected={selectedPlan === 'individual'}
@@ -442,90 +444,98 @@ export default function OnboardingSubscriptionPage() {
           />
         </div>
 
-        {/* Error */}
-        {error && (
-          <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 mb-4">
-            {error}
-          </div>
-        )}
+        {/* CTA section — centered below the plan grid */}
+        <div className="max-w-md mx-auto">
+          {/* Error */}
+          {error && (
+            <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 mb-4">
+              {error}
+            </div>
+          )}
 
-        {/* Enterprise CTA — contact sales */}
-        {selectedPlan === 'enterprise' ? (
-          <div className="space-y-3">
-            <div className="rounded-2xl bg-primary/5 border border-primary/20 p-4 text-center">
-              <Building2 className="h-8 w-8 text-primary mx-auto mb-2" />
-              <p className="text-sm font-semibold text-gray-900">{t('contactSalesTitle')}</p>
-              <p className="text-xs text-muted-foreground mt-1">{t('contactSalesDesc')}</p>
-              <div className="mt-3 flex flex-col sm:flex-row gap-2 justify-center">
+          {/* Enterprise — no trial, subscribe directly */}
+          {selectedPlan === 'enterprise' ? (
+            <div className="space-y-4">
+              <Button
+                className="w-full rounded-full h-12 text-base"
+                onClick={() => setView('card-form')}
+              >
+                <CreditCard className="h-4 w-4" />
+                {t('subscribeNowTitle')} — {BASE_PRICES_ILS.enterprise} ₪/{t('perMonth')}
+              </Button>
+
+              <div className="rounded-2xl bg-primary/5 border border-primary/20 p-4 text-center">
+                <Building2 className="h-6 w-6 text-primary mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground">{t('contactSalesDesc')}</p>
                 <a
                   href="mailto:contact@dokal.co.il"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium mt-2"
                 >
-                  <Phone className="h-4 w-4" />
+                  <Phone className="h-3.5 w-3.5" />
                   {t('contactSales')}
                 </a>
               </div>
+              <p className="text-[10px] text-gray-400 text-center">{t('enterpriseNote')}</p>
             </div>
-            <p className="text-[10px] text-gray-400 text-center">{t('enterpriseNote')}</p>
-          </div>
-        ) : (
-          <>
-            {/* Start free trial CTA */}
-            <Button
-              className="w-full rounded-full h-12 text-base"
-              onClick={handleStartTrial}
-              loading={trialLoading}
-            >
-              <Clock className="h-4 w-4" />
-              {t('startFreeTrial')}
-            </Button>
+          ) : (
+            <>
+              {/* Start free trial CTA (individual & clinic only) */}
+              <Button
+                className="w-full rounded-full h-12 text-base"
+                onClick={handleStartTrial}
+                loading={trialLoading}
+              >
+                <Clock className="h-4 w-4" />
+                {t('startFreeTrial')}
+              </Button>
 
-            {/* Trust signals */}
-            <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
-                <Shield className="h-3 w-3 text-primary/60" />
-                {t('trialNoCreditCard')}
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
-                <CheckCircle2 className="h-3 w-3 text-primary/60" />
-                {t('trialNoCommitment')}
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
-                <Clock className="h-3 w-3 text-primary/60" />
-                {t('trialDays', { days: TRIAL_DURATION_DAYS })}
-              </span>
-            </div>
+              {/* Trust signals */}
+              <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
+                  <Shield className="h-3 w-3 text-primary/60" />
+                  {t('trialNoCreditCard')}
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
+                  <CheckCircle2 className="h-3 w-3 text-primary/60" />
+                  {t('trialNoCommitment')}
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
+                  <Clock className="h-3 w-3 text-primary/60" />
+                  {t('trialDays', { days: TRIAL_DURATION_DAYS })}
+                </span>
+              </div>
 
-            {/* Price footnote */}
-            <p className="text-[10px] text-gray-400 text-center mt-5 leading-relaxed">
-              {t('priceFootnote', {
-                individualPrice: BASE_PRICES_ILS.individual,
-                clinicPrice: BASE_PRICES_ILS.clinic,
-              })}
-            </p>
+              {/* Price footnote */}
+              <p className="text-[10px] text-gray-400 text-center mt-5 leading-relaxed">
+                {t('priceFootnote', {
+                  individualPrice: BASE_PRICES_ILS.individual,
+                  clinicPrice: BASE_PRICES_ILS.clinic,
+                })}
+              </p>
 
-            {/* Secondary: subscribe directly */}
-            <div className="flex items-center gap-4 mt-5">
-              <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-[11px] text-gray-400 font-medium">{t('or')}</span>
-              <div className="flex-1 h-px bg-gray-200" />
-            </div>
-            <button
-              type="button"
-              onClick={() => setView('card-form')}
-              className="w-full mt-3 text-center text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-2"
-            >
-              {t('orSubscribeDirectly')}
-            </button>
-          </>
-        )}
+              {/* Secondary: subscribe directly */}
+              <div className="flex items-center gap-4 mt-5">
+                <div className="flex-1 h-px bg-gray-200" />
+                <span className="text-[11px] text-gray-400 font-medium">{t('or')}</span>
+                <div className="flex-1 h-px bg-gray-200" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setView('card-form')}
+                className="w-full mt-3 text-center text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-2"
+              >
+                {t('orSubscribeDirectly')}
+              </button>
+            </>
+          )}
+        </div>
       </div>
     );
   }
 
   // ─── Card Form View ────────────────────────────────────────────────
   return (
-    <div>
+    <div className="max-w-2xl mx-auto">
       {/* Back to plan picker */}
       <button
         type="button"

@@ -18,7 +18,7 @@ export default function OnboardingLayout({ children }: { children: ReactNode }) 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-900 via-primary to-primary-700">
-      <div className="max-w-2xl mx-auto px-6 py-10 lg:py-16">
+      <div className="max-w-5xl mx-auto px-6 py-10 lg:py-16">
         {/* Logo */}
         <div className="flex justify-center mb-10">
           <Image
