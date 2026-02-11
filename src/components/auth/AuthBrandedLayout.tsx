@@ -10,8 +10,8 @@ export function AuthBrandedLayout({ children }: { children: ReactNode }) {
   const t = useTranslations('authLayout');
 
   return (
-    <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10 lg:py-16 min-h-screen flex items-center">
-      <div className="grid lg:grid-cols-2 gap-10 items-stretch w-full">
+    <div className="w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-10 py-8 lg:py-0">
+      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-stretch w-full">
         {/* Brand / Visual (hidden on mobile) */}
         <div className="hidden lg:flex flex-col justify-between rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur-sm overflow-hidden relative">
           <div>
@@ -60,7 +60,7 @@ export function AuthBrandedLayout({ children }: { children: ReactNode }) {
 
         {/* Auth panel */}
         <div className="flex flex-col justify-center">
-          <div className="mx-auto w-full max-w-md">
+          <div className="mx-auto w-full max-w-[520px]">
             <div className="flex justify-center mb-8 lg:hidden">
               <Image
                 src="/branding/fulllogo_transparent_nobuffer.png"

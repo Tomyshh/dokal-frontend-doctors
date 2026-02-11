@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
@@ -17,12 +18,14 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const loading = passwordLoading || googleLoading;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setPasswordLoading(true);
 
     try {
       const supabase = createClient();
@@ -41,13 +44,13 @@ export default function LoginPage() {
     } catch {
       setError(t('invalidCredentials'));
     } finally {
-      setLoading(false);
+      setPasswordLoading(false);
     }
   };
 
   const handleGoogle = async () => {
     setError('');
-    setLoading(true);
+    setGoogleLoading(true);
     try {
       const supabase = createClient();
       const { error: authError } = await supabase.auth.signInWithOAuth({
@@ -60,25 +63,25 @@ export default function LoginPage() {
     } catch {
       setError(t('invalidCredentials'));
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
   };
 
   return (
-    <div>
-      <div className="mb-6">
-        <Link
-          href="/welcome"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t('backToLanding')}
-        </Link>
-      </div>
+    <div className="space-y-6">
+      <Link
+        href="/welcome"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors w-fit"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        {t('backToLanding')}
+      </Link>
 
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">{t('loginTitle')}</h1>
-        <p className="text-sm text-muted-foreground mt-2">{t('loginSubtitle')}</p>
+      <div className="space-y-2">
+        <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+          {t('loginTitle')}
+        </h1>
+        <p className="text-sm text-muted-foreground">{t('loginSubtitle')}</p>
       </div>
 
       {searchParams.get('checkEmail') === '1' && (
@@ -97,11 +100,21 @@ export default function LoginPage() {
         <Button
           type="button"
           variant="outline"
-          className="w-full rounded-full h-12"
+          size="lg"
+          className="w-full justify-center bg-white/90 hover:bg-white"
           onClick={handleGoogle}
-          loading={loading}
+          loading={googleLoading}
+          disabled={passwordLoading}
         >
-          {t('continueWithGoogle')}
+          <Image
+            src="/logo/google_logo.png"
+            alt=""
+            width={18}
+            height={18}
+            className="h-[18px] w-[18px] shrink-0"
+            aria-hidden
+          />
+          <span>{t('continueWithGoogle')}</span>
         </Button>
 
         <div className="flex items-center gap-4">
@@ -120,6 +133,7 @@ export default function LoginPage() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
+          disabled={loading}
         />
         <Input
           id="password"
@@ -130,6 +144,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="current-password"
+          disabled={loading}
         />
 
         {error && (
@@ -138,7 +153,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <Button type="submit" className="w-full rounded-full h-12" loading={loading}>
+        <Button type="submit" size="lg" className="w-full" loading={passwordLoading} disabled={googleLoading}>
           {t('login')}
         </Button>
 
