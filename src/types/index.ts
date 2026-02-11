@@ -85,6 +85,8 @@ export interface OrganizationMember {
   profiles?: Pick<Profile, 'id' | 'first_name' | 'last_name' | 'avatar_url' | 'email' | 'phone' | 'role'>;
   practitioner?: {
     id: string;
+    license_number?: string | null;
+    specialization_license?: string | null;
     specialty: Pick<Specialty, 'name' | 'name_fr' | 'name_he'>;
   } | null;
 }
@@ -93,6 +95,8 @@ export interface Practitioner {
   id: string;
   organization_id: string;
   specialty_id: string | null;
+  license_number: string | null;
+  specialization_license: string | null;
   address_line: string | null;
   zip_code: string | null;
   city: string | null;

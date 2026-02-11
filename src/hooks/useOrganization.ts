@@ -8,6 +8,7 @@ import type {
   UpdateOrganizationMemberRequest,
   InviteMemberRequest,
   InviteMemberResponse,
+  UpdatePractitionerLicensesRequest,
   CrmAppointmentsQuery,
   CancelAppointmentRequest,
   CompleteAppointmentRequest,
@@ -206,6 +207,33 @@ export function useRemoveOrganizationMember() {
       memberId: string;
     }) => {
       await api.delete(`/organizations/${organizationId}/members/${memberId}`);
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['organization-members', variables.organizationId],
+      });
+    },
+  });
+}
+
+/** PATCH /organizations/:orgId/practitioners/:practitionerId/licenses — update license numbers */
+export function useUpdatePractitionerLicenses() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      organizationId,
+      practitionerId,
+      data,
+    }: {
+      organizationId: string;
+      practitionerId: string;
+      data: UpdatePractitionerLicensesRequest;
+    }) => {
+      const { data: result } = await api.patch(
+        `/organizations/${organizationId}/practitioners/${practitionerId}/licenses`,
+        data,
+      );
+      return result;
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({

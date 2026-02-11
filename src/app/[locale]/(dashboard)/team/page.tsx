@@ -18,6 +18,7 @@ import {
   useInviteMember,
   useRemoveOrganizationMember,
   useUpdateOrganizationMember,
+  useUpdatePractitionerLicenses,
 } from '@/hooks/useOrganization';
 import { useAuth } from '@/providers/AuthProvider';
 import type { InviteMemberRequest } from '@/types/api';
@@ -34,6 +35,8 @@ import {
   Mail,
   Building2,
   ArrowRight,
+  Pencil,
+  FileCheck,
 } from 'lucide-react';
 
 type StaffTypeForm = 'practitioner' | 'secretary';
@@ -47,6 +50,7 @@ interface InviteForm {
   orgRole: 'member' | 'admin';
   specialty: string;
   licenseNumber: string;
+  specializationLicense: string;
   addressLine: string;
   zipCode: string;
   city: string;
@@ -61,6 +65,7 @@ const INITIAL_FORM: InviteForm = {
   orgRole: 'member',
   specialty: '',
   licenseNumber: '',
+  specializationLicense: '',
   addressLine: '',
   zipCode: '',
   city: '',
@@ -78,12 +83,19 @@ export default function TeamPage() {
   const inviteMember = useInviteMember();
   const removeMember = useRemoveOrganizationMember();
   const updateMember = useUpdateOrganizationMember();
+  const updateLicenses = useUpdatePractitionerLicenses();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<InviteForm>(INITIAL_FORM);
   const [inviteError, setInviteError] = useState('');
   const [inviteSuccess, setInviteSuccess] = useState('');
   const [confirmRemove, setConfirmRemove] = useState<OrganizationMember | null>(null);
+
+  // License editing dialog state
+  const [editLicenseMember, setEditLicenseMember] = useState<OrganizationMember | null>(null);
+  const [editLicenseNumber, setEditLicenseNumber] = useState('');
+  const [editSpecLicense, setEditSpecLicense] = useState('');
+  const [editLicenseError, setEditLicenseError] = useState('');
 
   // Check if current user is owner or admin
   const currentMember = members?.find((m) => m.user_id === profile?.id);
@@ -113,6 +125,7 @@ export default function TeamPage() {
         org_role: form.orgRole,
         specialty: form.specialty,
         license_number: form.licenseNumber,
+        specialization_license: form.specializationLicense || undefined,
         address_line: form.addressLine || undefined,
         zip_code: form.zipCode || undefined,
         city: form.city || undefined,
@@ -159,6 +172,47 @@ export default function TeamPage() {
       // Silently fail
     }
     setConfirmRemove(null);
+  };
+
+  const handleOpenEditLicenses = (member: OrganizationMember) => {
+    setEditLicenseMember(member);
+    setEditLicenseNumber(member.practitioner?.license_number ?? '');
+    setEditSpecLicense(member.practitioner?.specialization_license ?? '');
+    setEditLicenseError('');
+  };
+
+  const handleSaveLicenses = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!organization || !editLicenseMember?.practitioner) return;
+
+    if (!editLicenseNumber && !editSpecLicense) {
+      setEditLicenseError(t('licenseAtLeastOne'));
+      return;
+    }
+
+    if (editLicenseNumber && !/^\d{1,6}$/.test(editLicenseNumber)) {
+      setEditLicenseError(t('licenseNumberInvalid'));
+      return;
+    }
+    if (editSpecLicense && !/^\d{1,6}$/.test(editSpecLicense)) {
+      setEditLicenseError(t('specializationLicenseInvalid'));
+      return;
+    }
+
+    try {
+      await updateLicenses.mutateAsync({
+        organizationId: organization.id,
+        practitionerId: editLicenseMember.practitioner.id,
+        data: {
+          license_number: editLicenseNumber || undefined,
+          specialization_license: editSpecLicense || undefined,
+        },
+      });
+      setEditLicenseMember(null);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t('inviteError');
+      setEditLicenseError(message);
+    }
   };
 
   const handleToggleRole = async (member: OrganizationMember) => {
@@ -285,10 +339,35 @@ export default function TeamPage() {
                     {getSpecialtyLabel(member)}
                   </p>
                 )}
+                {member.staff_type === 'practitioner' && member.practitioner && (
+                  <div className="flex items-center gap-3 mt-0.5">
+                    {member.practitioner.license_number && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <FileCheck className="h-3 w-3" />
+                        {t('licenseNumberShort')}: {member.practitioner.license_number}
+                      </span>
+                    )}
+                    {member.practitioner.specialization_license && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <FileCheck className="h-3 w-3" />
+                        {t('specializationLicenseShort')}: {member.practitioner.specialization_license}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
               {/* Actions — only for non-owners, by managers */}
               {canManage && member.role !== 'owner' && member.user_id !== profile?.id && (
                 <div className="flex items-center gap-1">
+                  {member.staff_type === 'practitioner' && member.practitioner && (
+                    <button
+                      onClick={() => handleOpenEditLicenses(member)}
+                      className="rounded-lg p-2 text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+                      title={t('editLicenses')}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                  )}
                   <button
                     onClick={() => handleToggleRole(member)}
                     className="rounded-lg p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
@@ -394,20 +473,35 @@ export default function TeamPage() {
                 required
                 placeholder={t('specialty')}
               />
-              <Input
-                id="invLicense"
-                label={t('licenseNumber')}
-                value={form.licenseNumber}
-                onChange={(e) => {
-                  const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 6);
-                  handleChange('licenseNumber', digitsOnly);
-                }}
-                required
-                inputMode="numeric"
-                pattern="[0-9]{1,6}"
-                maxLength={6}
-                placeholder="123456"
-              />
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  id="invLicense"
+                  label={t('licenseNumber')}
+                  value={form.licenseNumber}
+                  onChange={(e) => {
+                    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    handleChange('licenseNumber', digitsOnly);
+                  }}
+                  required
+                  inputMode="numeric"
+                  pattern="[0-9]{1,6}"
+                  maxLength={6}
+                  placeholder="123456"
+                />
+                <Input
+                  id="invSpecLicense"
+                  label={t('specializationLicense')}
+                  value={form.specializationLicense}
+                  onChange={(e) => {
+                    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    handleChange('specializationLicense', digitsOnly);
+                  }}
+                  inputMode="numeric"
+                  pattern="[0-9]{0,6}"
+                  maxLength={6}
+                  placeholder="123456"
+                />
+              </div>
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2">
                   <Input
@@ -478,6 +572,67 @@ export default function TeamPage() {
             {t('removeMember')}
           </Button>
         </div>
+      </Dialog>
+
+      {/* Edit Licenses Dialog */}
+      <Dialog
+        open={!!editLicenseMember}
+        onClose={() => setEditLicenseMember(null)}
+        title={t('editLicenses')}
+        className="max-w-md"
+      >
+        <form onSubmit={handleSaveLicenses} className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {t('editLicensesDescription', {
+              name: `${editLicenseMember?.profiles?.first_name ?? ''} ${editLicenseMember?.profiles?.last_name ?? ''}`.trim(),
+            })}
+          </p>
+
+          <Input
+            id="editLicenseNumber"
+            label={t('licenseNumber')}
+            value={editLicenseNumber}
+            onChange={(e) => {
+              const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 6);
+              setEditLicenseNumber(digitsOnly);
+              setEditLicenseError('');
+            }}
+            inputMode="numeric"
+            pattern="[0-9]{0,6}"
+            maxLength={6}
+            placeholder="123456"
+          />
+
+          <Input
+            id="editSpecLicense"
+            label={t('specializationLicense')}
+            value={editSpecLicense}
+            onChange={(e) => {
+              const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 6);
+              setEditSpecLicense(digitsOnly);
+              setEditLicenseError('');
+            }}
+            inputMode="numeric"
+            pattern="[0-9]{0,6}"
+            maxLength={6}
+            placeholder="123456"
+          />
+
+          {editLicenseError && (
+            <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {editLicenseError}
+            </div>
+          )}
+
+          <div className="flex gap-3 justify-end">
+            <Button variant="ghost" type="button" onClick={() => setEditLicenseMember(null)}>
+              {tc('cancel')}
+            </Button>
+            <Button type="submit" loading={updateLicenses.isPending}>
+              {tc('save')}
+            </Button>
+          </div>
+        </form>
       </Dialog>
     </div>
   );

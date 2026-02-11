@@ -25,6 +25,7 @@ type FormState = {
   city: string;
   specialty: string;
   licenseNumber: string;
+  specializationLicense: string;
   addressLine: string;
   zipCode: string;
   password: string;
@@ -50,6 +51,7 @@ export default function SignupPage() {
     city: '',
     specialty: '',
     licenseNumber: '',
+    specializationLicense: '',
     addressLine: '',
     zipCode: '',
     password: '',
@@ -79,7 +81,7 @@ export default function SignupPage() {
 
     const autofillFields: (keyof FormState)[] = [
       'firstName', 'lastName', 'email', 'phone',
-      'licenseNumber', 'addressLine', 'zipCode',
+      'licenseNumber', 'specializationLicense', 'addressLine', 'zipCode',
       'password', 'confirmPassword',
     ];
 
@@ -92,8 +94,9 @@ export default function SignupPage() {
 
       // Normalise phone digits the same way PhoneInputIL does
       if (key === 'phone') val = val.replace(/\D/g, '');
-      // Normalise license number
+      // Normalise license numbers
       if (key === 'licenseNumber') val = val.replace(/\D/g, '').slice(0, 6);
+      if (key === 'specializationLicense') val = val.replace(/\D/g, '').slice(0, 6);
 
       setForm((prev) => {
         if (prev[key] === val) return prev;
@@ -119,6 +122,11 @@ export default function SignupPage() {
     return !/^\d{1,6}$/.test(form.licenseNumber);
   }, [form.licenseNumber]);
 
+  const specializationLicenseInvalid = useMemo(() => {
+    if (form.specializationLicense.length === 0) return false;
+    return !/^\d{1,6}$/.test(form.specializationLicense);
+  }, [form.specializationLicense]);
+
   const phoneInvalid = useMemo(() => {
     if (form.phone.length === 0) return false;
     return normalizeIsraelPhoneToE164(form.phone) === null;
@@ -140,6 +148,7 @@ export default function SignupPage() {
       city: f.city,
       specialty: f.specialty,
       license_number: f.licenseNumber,
+      specialization_license: f.specializationLicense || undefined,
       address_line: f.addressLine,
       zip_code: f.zipCode,
       // Le backend crée automatiquement une organization de type 'individual'
@@ -178,6 +187,7 @@ export default function SignupPage() {
       city: form.city || domVal('city'),
       specialty: form.specialty, // custom combobox, not subject to autofill
       licenseNumber: form.licenseNumber || domVal('licenseNumber').replace(/\D/g, '').slice(0, 6),
+      specializationLicense: form.specializationLicense || domVal('specializationLicense').replace(/\D/g, '').slice(0, 6),
       addressLine: form.addressLine || domVal('addressLine'),
       zipCode: form.zipCode || domVal('zipCode'),
       password: form.password || domVal('password'),
@@ -202,6 +212,13 @@ export default function SignupPage() {
       synced.licenseNumber.length > 0 && !/^\d{1,6}$/.test(synced.licenseNumber);
     if (syncedLicenseInvalid) {
       setError(t('licenseNumberInvalid'));
+      return;
+    }
+
+    const syncedSpecLicenseInvalid =
+      synced.specializationLicense.length > 0 && !/^\d{1,6}$/.test(synced.specializationLicense);
+    if (syncedSpecLicenseInvalid) {
+      setError(t('specializationLicenseInvalid'));
       return;
     }
 
@@ -607,8 +624,8 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Row 3: License + Address + Zip */}
-            <div className="grid grid-cols-4 gap-3">
+            {/* Row 3: Licenses */}
+            <div className="grid grid-cols-2 gap-3">
               <Input
                 id="licenseNumber"
                 label={t('licenseNumber')}
@@ -624,7 +641,25 @@ export default function SignupPage() {
                 placeholder="123456"
                 error={licenseNumberInvalid ? t('licenseNumberInvalid') : undefined}
               />
-              <div className="col-span-2">
+              <Input
+                id="specializationLicense"
+                label={t('specializationLicense')}
+                value={form.specializationLicense}
+                onChange={(e) => {
+                  const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  handleChange('specializationLicense', digitsOnly);
+                }}
+                inputMode="numeric"
+                pattern="[0-9]{0,6}"
+                maxLength={6}
+                placeholder="123456"
+                error={specializationLicenseInvalid ? t('specializationLicenseInvalid') : undefined}
+              />
+            </div>
+
+            {/* Row 4: Address + Zip */}
+            <div className="grid grid-cols-4 gap-3">
+              <div className="col-span-3">
                 <Input
                   id="addressLine"
                   label={t('addressLine')}

@@ -151,6 +151,7 @@ export interface RegisterPractitionerRequest {
   city: string;
   specialty: string;
   license_number: string;
+  specialization_license?: string;
   address_line: string;
   zip_code: string;
   // Optional: join existing clinic
@@ -210,6 +211,7 @@ export interface InvitePractitionerRequest {
   org_role: 'member' | 'admin';
   specialty: string;
   license_number: string;
+  specialization_license?: string;
   address_line?: string;
   zip_code?: string;
   city?: string;
@@ -225,6 +227,12 @@ export interface InviteSecretaryRequest {
 }
 
 export type InviteMemberRequest = InvitePractitionerRequest | InviteSecretaryRequest;
+
+/** PATCH /organizations/:orgId/practitioners/:practitionerId/licenses */
+export interface UpdatePractitionerLicensesRequest {
+  license_number?: string;
+  specialization_license?: string;
+}
 
 export interface InviteMemberResponse {
   member: {
