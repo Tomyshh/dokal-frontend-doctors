@@ -300,21 +300,57 @@ export default function WelcomePage() {
 
             {/* Dashboard image */}
             <div className="relative lg:ml-8">
-              <button
-                type="button"
-                onClick={() => setLightboxIndex(0)}
-                className="relative w-full rounded-2xl overflow-hidden shadow-2xl shadow-black/30 border border-white/10 hover:scale-[1.01] transition-transform duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-                aria-label={t('openImage')}
-              >
-                <Image
-                  src="/images/presentation-crm.png"
-                  alt={t('screenshotAlt')}
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto"
-                  priority
-                />
-              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setLightboxIndex(0)}
+                  className="relative w-full rounded-2xl overflow-hidden shadow-2xl shadow-black/30 border border-white/10 hover:scale-[1.01] transition-transform duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                  aria-label={t('openImage')}
+                >
+                  <Image
+                    src="/images/presentation-crm.png"
+                    alt={t('screenshotAlt')}
+                    width={1200}
+                    height={800}
+                    className="w-full h-auto"
+                    priority
+                  />
+                </button>
+
+                {/* Patient app preview (desktop overlay) */}
+                <div className="hidden lg:block pointer-events-none absolute -bottom-10 -left-10 w-[260px]">
+                  <div className="relative rounded-[2.25rem] overflow-hidden border border-white/15 bg-white/5 shadow-2xl shadow-black/40 backdrop-blur-md rotate-[-6deg]">
+                    <div className="relative w-full aspect-[9/19]">
+                      <Image
+                        src="/images/app-pres.png"
+                        alt={t('pricingAppTitle')}
+                        fill
+                        sizes="260px"
+                        className="object-contain"
+                        priority
+                      />
+                    </div>
+                  </div>
+                  <div className="absolute -inset-6 -z-10 rounded-[2.75rem] bg-primary-200/10 blur-2xl" />
+                </div>
+              </div>
+
+              {/* Patient app preview (mobile/tablet) */}
+              <div className="mt-6 lg:hidden">
+                <div className="mx-auto max-w-[320px] rounded-[2.25rem] overflow-hidden border border-white/15 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur-md">
+                  <div className="relative w-full aspect-[9/19]">
+                    <Image
+                      src="/images/app-pres.png"
+                      alt={t('pricingAppTitle')}
+                      fill
+                      sizes="(max-width: 640px) 320px, 360px"
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="absolute -inset-4 -z-10 rounded-3xl bg-white/5 blur-xl" />
             </div>
           </div>
