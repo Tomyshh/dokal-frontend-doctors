@@ -415,6 +415,16 @@
         "description": "Access health profiles, appointment histories and medical information in one click."
       }
     },
+    "patientAppBadge": "App móvil para pacientes",
+    "patientAppTitle": "Tus pacientes te encuentran, reservan cita y te valoran",
+    "patientAppSubtitle": "En la app de Dokal, los usuarios ven tu perfil, tu disponibilidad y reservan en segundos.",
+    "patientAppPointFindTitle": "Que te encuentren fácilmente",
+    "patientAppPointFindDesc": "Búsqueda por especialidad, ciudad y disponibilidad: tu perfil aparece en el momento adecuado.",
+    "patientAppPointBookTitle": "Citas 24/7",
+    "patientAppPointBookDesc": "Los pacientes reservan un hueco disponible y reciben recordatorios, sin sobrecargar a tu secretaría.",
+    "patientAppPointReviewTitle": "Reseñas y reputación",
+    "patientAppPointReviewDesc": "Tras la consulta, pueden dejar una valoración y una reseña para mejorar tu visibilidad.",
+    "seePricing": "Ver precios",
     "stats": {
       "doctors": {
         "value": "200+",

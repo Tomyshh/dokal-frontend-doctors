@@ -415,6 +415,16 @@
         "description": "Access health profiles, appointment histories and medical information in one click."
       }
     },
+    "patientAppBadge": "የታካሚ ሞባይል መተግበሪያ",
+    "patientAppTitle": "ታካሚዎች ያገኙዎታል፣ ቀጠሮ ይይዛሉ እና ይገምግሙዎታል",
+    "patientAppSubtitle": "በDokal መተግበሪያ ውስጥ የእርስዎን መገለጫ፣ ተገኝነት ያያሉ እና በጥቂት ሰከንዶች ውስጥ ቀጠሮ ይይዛሉ።",
+    "patientAppPointFindTitle": "ቀላል ማግኘት",
+    "patientAppPointFindDesc": "በሙያ፣ በከተማ እና በተገኝነት መፈለጊያ — መገለጫዎ በትክክል ጊዜ ይታያል።",
+    "patientAppPointBookTitle": "ቀጠሮ 24/7",
+    "patientAppPointBookDesc": "ታካሚዎች ባለበት ጊዜ ቦታ ይመርጣሉ እና ማሳሰቢያዎችን ይቀበላሉ፣ የጽህፈት ቤትዎን ጫና ሳይጨምሩ።",
+    "patientAppPointReviewTitle": "ግምገማና ስም",
+    "patientAppPointReviewDesc": "ከቀጠሮ በኋላ ደረጃ እና ግምገማ ማስቀመጥ ይችላሉ ለመታየት ይረዳል።",
+    "seePricing": "ዋጋዎችን ይመልከቱ",
     "stats": {
       "doctors": {
         "value": "200+",

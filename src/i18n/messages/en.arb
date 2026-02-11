@@ -415,6 +415,16 @@
         "description": "Access health profiles, appointment histories and medical information in one click."
       }
     },
+    "patientAppBadge": "Patient mobile app",
+    "patientAppTitle": "Patients can find you, book, and rate you",
+    "patientAppSubtitle": "With the Dokal app, users discover your profile, see your availability, and book in seconds.",
+    "patientAppPointFindTitle": "Get discovered",
+    "patientAppPointFindDesc": "Search by specialty, city, and availability — your profile shows up at the right time.",
+    "patientAppPointBookTitle": "24/7 booking",
+    "patientAppPointBookDesc": "Patients pick an available slot and get reminders, without overloading your front desk.",
+    "patientAppPointReviewTitle": "Reviews & reputation",
+    "patientAppPointReviewDesc": "After the visit, they can leave a rating and review to boost your visibility.",
+    "seePricing": "See pricing",
     "stats": {
       "doctors": {
         "value": "200+",

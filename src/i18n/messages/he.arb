@@ -415,6 +415,16 @@
         "description": "גישה לפרופילי בריאות, היסטוריית פגישות ומידע רפואי בלחיצה אחת."
       }
     },
+    "patientAppBadge": "אפליקציית מטופלים",
+    "patientAppTitle": "המטופלים מוצאים אתכם, קובעים תור ומדרגים אתכם",
+    "patientAppSubtitle": "באפליקציית Dokal המשתמשים רואים את הפרופיל שלכם, את הזמינות וקובעים תור תוך שניות.",
+    "patientAppPointFindTitle": "להיות נגישים בחיפוש",
+    "patientAppPointFindDesc": "חיפוש לפי התמחות, עיר וזמינות — הפרופיל שלכם מופיע בזמן הנכון.",
+    "patientAppPointBookTitle": "קביעת תורים 24/7",
+    "patientAppPointBookDesc": "מטופלים קובעים תור זמין ומקבלים תזכורות — בלי להעמיס על המזכירות.",
+    "patientAppPointReviewTitle": "ביקורות ומוניטין",
+    "patientAppPointReviewDesc": "לאחר הביקור ניתן להשאיר דירוג וביקורת כדי להגדיל את החשיפה שלכם.",
+    "seePricing": "לצפייה בתמחור",
     "stats": {
       "doctors": {
         "value": "+200",

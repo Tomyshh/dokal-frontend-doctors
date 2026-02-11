@@ -25,12 +25,14 @@ import {
   FileText,
   Mail,
   Phone,
+  Smartphone,
   MapPin,
   Send,
   CheckCircle,
   Building2,
   Crown,
   CheckCircle2,
+  Star,
 } from 'lucide-react';
 import { BASE_PRICES_ILS, SEAT_PRICES_ILS, TRIAL_DURATION_DAYS } from '@/lib/subscription';
 import { company } from '@/config/company';
@@ -300,57 +302,21 @@ export default function WelcomePage() {
 
             {/* Dashboard image */}
             <div className="relative lg:ml-8">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setLightboxIndex(0)}
-                  className="relative w-full rounded-2xl overflow-hidden shadow-2xl shadow-black/30 border border-white/10 hover:scale-[1.01] transition-transform duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-                  aria-label={t('openImage')}
-                >
-                  <Image
-                    src="/images/presentation-crm.png"
-                    alt={t('screenshotAlt')}
-                    width={1200}
-                    height={800}
-                    className="w-full h-auto"
-                    priority
-                  />
-                </button>
-
-                {/* Patient app preview (desktop overlay) */}
-                <div className="hidden lg:block pointer-events-none absolute -bottom-10 -left-10 w-[260px]">
-                  <div className="relative rounded-[2.25rem] overflow-hidden border border-white/15 bg-white/5 shadow-2xl shadow-black/40 backdrop-blur-md rotate-[-6deg]">
-                    <div className="relative w-full aspect-[9/19]">
-                      <Image
-                        src="/images/app-pres.png"
-                        alt={t('pricingAppTitle')}
-                        fill
-                        sizes="260px"
-                        className="object-contain"
-                        priority
-                      />
-                    </div>
-                  </div>
-                  <div className="absolute -inset-6 -z-10 rounded-[2.75rem] bg-primary-200/10 blur-2xl" />
-                </div>
-              </div>
-
-              {/* Patient app preview (mobile/tablet) */}
-              <div className="mt-6 lg:hidden">
-                <div className="mx-auto max-w-[320px] rounded-[2.25rem] overflow-hidden border border-white/15 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur-md">
-                  <div className="relative w-full aspect-[9/19]">
-                    <Image
-                      src="/images/app-pres.png"
-                      alt={t('pricingAppTitle')}
-                      fill
-                      sizes="(max-width: 640px) 320px, 360px"
-                      className="object-contain"
-                      priority
-                    />
-                  </div>
-                </div>
-              </div>
-
+              <button
+                type="button"
+                onClick={() => setLightboxIndex(0)}
+                className="relative w-full rounded-2xl overflow-hidden shadow-2xl shadow-black/30 border border-white/10 hover:scale-[1.01] transition-transform duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                aria-label={t('openImage')}
+              >
+                <Image
+                  src="/images/presentation-crm.png"
+                  alt={t('screenshotAlt')}
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto"
+                  priority
+                />
+              </button>
               <div className="absolute -inset-4 -z-10 rounded-3xl bg-white/5 blur-xl" />
             </div>
           </div>
@@ -386,6 +352,109 @@ export default function WelcomePage() {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Patient App Section */}
+      <section className="relative overflow-hidden py-24 lg:py-32 bg-white">
+        {/* Background decorations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-[560px] h-[560px] rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-[560px] h-[560px] rounded-full bg-primary/10 blur-3xl" />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Phone mockup */}
+            <div className="order-2 lg:order-1">
+              <div className="relative mx-auto max-w-[380px]">
+                <div className="absolute -inset-10 -z-10 rounded-[3.25rem] bg-gradient-to-br from-primary/20 via-primary/10 to-transparent blur-2xl" />
+                <div className="relative rounded-[2.5rem] overflow-hidden border border-gray-200/60 bg-white/70 backdrop-blur-sm shadow-2xl shadow-black/10">
+                  <div className="relative w-full aspect-[9/19]">
+                    <Image
+                      src="/images/app-pres.png"
+                      alt={t('patientAppTitle')}
+                      fill
+                      sizes="(max-width: 1024px) 320px, 380px"
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Copy */}
+            <div className="order-1 lg:order-2 max-w-xl">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
+                <Smartphone className="h-4 w-4" />
+                {t('patientAppBadge')}
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+                {t('patientAppTitle')}
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+                {t('patientAppSubtitle')}
+              </p>
+
+              <div className="mt-10 grid gap-4">
+                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <MapPin className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{t('patientAppPointFindTitle')}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{t('patientAppPointFindDesc')}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <CalendarCheck className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{t('patientAppPointBookTitle')}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{t('patientAppPointBookDesc')}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Star className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{t('patientAppPointReviewTitle')}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{t('patientAppPointReviewDesc')}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-10 flex flex-wrap gap-4">
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-primary text-white font-semibold text-sm hover:bg-primary/90 transition-all duration-300 shadow-sm"
+                >
+                  {t('cta')}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-gray-200 text-gray-900 font-semibold text-sm hover:bg-gray-50 transition-all duration-300"
+                >
+                  {t('seePricing')}
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -540,24 +609,6 @@ export default function WelcomePage() {
             </div>
           </div>
 
-          {/* App preview */}
-          <div className="mt-16 max-w-3xl mx-auto text-center">
-            <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
-              <div className="shrink-0 w-24 h-24 rounded-2xl overflow-hidden shadow-lg">
-                <Image
-                  src="/images/app-pres.png"
-                  alt="Dokal Patient App"
-                  width={96}
-                  height={96}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="text-left">
-                <p className="text-lg font-semibold text-gray-900">{t('pricingAppTitle')}</p>
-                <p className="text-sm text-muted-foreground mt-1">{t('pricingAppDesc')}</p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
