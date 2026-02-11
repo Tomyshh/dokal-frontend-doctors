@@ -610,33 +610,6 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 lg:py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="relative rounded-3xl bg-gradient-to-br from-primary-900 via-primary to-primary-700 px-8 py-16 sm:px-16 sm:py-20 overflow-hidden">
-            <div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full bg-primary-400/10 blur-3xl" />
-
-            <div className="relative text-center max-w-2xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                {t('ctaTitle')}
-              </h2>
-              <p className="mt-4 text-lg text-primary-100/90">
-                {t('ctaSubtitle')}
-              </p>
-              <div className="mt-10">
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center gap-2 px-10 py-4 rounded-full bg-white text-primary font-semibold hover:bg-primary-50 transition-all duration-300 shadow-lg shadow-black/10"
-                >
-                  {t('ctaButton')}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Lead Contact Form */}
       <section id="contact-form" className="py-24 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -805,12 +778,6 @@ export default function WelcomePage() {
                   <Mail className="w-4 h-4" />
                   <a href={`mailto:${company.email}`} className="hover:text-primary transition-colors" dir="ltr">
                     {company.email}
-                  </a>
-                </li>
-                <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="w-4 h-4" />
-                  <a href={`tel:${company.phoneE164}`} className="hover:text-primary transition-colors" dir="ltr">
-                    {company.phoneE164}
                   </a>
                 </li>
                 <li className="flex items-start gap-2 text-sm text-muted-foreground">
