@@ -2,17 +2,76 @@ import api from '@/lib/api';
 
 // ─── Plan Types ──────────────────────────────────────────────────────
 
-export type PlanType = 'individual' | 'clinic';
+export type PlanType = 'individual' | 'clinic' | 'enterprise';
 
-export const PLAN_PRICES: Record<PlanType, number> = {
-  individual: 29000, // 290 ILS in agorot
-  clinic: 49000,     // 490 ILS in agorot
+// ─── Pricing Constants (agorot = 1/100 ILS) ─────────────────────────
+
+export const BASE_PRICES_AGOROT: Record<PlanType, number> = {
+  individual: 32900,  // 329 ILS
+  clinic:     34900,  // 349 ILS
+  enterprise: 199000, // 1990 ILS
 };
 
-export const PLAN_PRICES_ILS: Record<PlanType, number> = {
-  individual: 290,
-  clinic: 490,
+export const BASE_PRICES_ILS: Record<PlanType, number> = {
+  individual: 329,
+  clinic:     349,
+  enterprise: 1990,
 };
+
+export const SEAT_PRICES_AGOROT = {
+  practitioner: 31900, // 319 ILS
+  secretary:    14900, // 149 ILS
+} as const;
+
+export const SEAT_PRICES_ILS = {
+  practitioner: 319,
+  secretary:    149,
+} as const;
+
+export const TRIAL_DURATION_DAYS = 60;
+
+// ─── Price Calculation ───────────────────────────────────────────────
+
+/**
+ * Calculate the total monthly price for a given plan and seat count.
+ * For Individual: flat base price (no extra seats).
+ * For Clinic: base + (extra practitioners * 319) + (secretaries * 149).
+ *   The first practitioner is included in the base.
+ * For Enterprise: custom (returns base as minimum).
+ */
+export function calculateMonthlyPriceAgorot(
+  plan: PlanType,
+  practitionerSeats: number,
+  secretarySeats: number,
+): number {
+  const base = BASE_PRICES_AGOROT[plan];
+
+  if (plan === 'individual') return base;
+
+  if (plan === 'clinic') {
+    const extraPractitioners = Math.max(0, practitionerSeats - 1); // first included
+    return (
+      base +
+      extraPractitioners * SEAT_PRICES_AGOROT.practitioner +
+      secretarySeats * SEAT_PRICES_AGOROT.secretary
+    );
+  }
+
+  // Enterprise — base is the minimum, actual pricing is custom
+  return base;
+}
+
+export function calculateMonthlyPriceILS(
+  plan: PlanType,
+  practitionerSeats: number,
+  secretarySeats: number,
+): number {
+  return calculateMonthlyPriceAgorot(plan, practitionerSeats, secretarySeats) / 100;
+}
+
+// Keep legacy aliases for backward-compat during transition
+export const PLAN_PRICES: Record<PlanType, number> = BASE_PRICES_AGOROT;
+export const PLAN_PRICES_ILS: Record<PlanType, number> = BASE_PRICES_ILS;
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -29,12 +88,18 @@ export interface SubscriptionCard {
 
 export interface Subscription {
   id: string;
+  organization_id: string;
   plan: PlanType;
-  price_agorot: number;
-  status: 'active' | 'cancelled' | 'paused';
+  practitioner_seats: number;
+  secretary_seats: number;
+  total_price_agorot: number;
+  price_agorot: number; // legacy — same as total_price_agorot
+  status: 'active' | 'trialing' | 'cancelled' | 'paused' | 'past_due' | 'expired';
   current_period_start: string;
   current_period_end: string;
   next_payment_date: string;
+  trial_start: string | null;
+  trial_end: string | null;
   cancelled_at: string | null;
   paused_at: string | null;
 }
@@ -162,15 +227,30 @@ export async function resumeSubscription(): Promise<PauseResumeResponse> {
   return data;
 }
 
-// ─── Plan Upgrade / Downgrade ─────────────────────────────────────────
+// ─── Plan Change ─────────────────────────────────────────────────────
 
 export interface PlanChangeResponse {
   subscription: Subscription;
 }
 
-export async function upgradePlan(): Promise<PlanChangeResponse> {
-  const { data } = await api.post<PlanChangeResponse>(`${BASE}/upgrade`, {});
+export async function changePlan(newPlan: PlanType): Promise<PlanChangeResponse> {
+  const { data } = await api.post<PlanChangeResponse>(`${BASE}/change-plan`, {
+    plan: newPlan,
+  });
   return data;
+}
+
+export async function updateSeats(seats: {
+  practitioner_seats?: number;
+  secretary_seats?: number;
+}): Promise<PlanChangeResponse> {
+  const { data } = await api.post<PlanChangeResponse>(`${BASE}/update-seats`, seats);
+  return data;
+}
+
+// Legacy aliases (still used in settings page during transition)
+export async function upgradePlan(): Promise<PlanChangeResponse> {
+  return changePlan('clinic');
 }
 
 export async function downgradePlan(keepPractitionerId: string): Promise<PlanChangeResponse> {

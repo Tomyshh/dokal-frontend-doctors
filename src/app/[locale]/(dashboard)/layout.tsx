@@ -27,6 +27,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   const hasAccess =
     subscriptionStatus?.hasSubscription ||
+    subscriptionStatus?.subscription?.status === 'trialing' ||
     (subscriptionStatus?.trial?.isActive && (subscriptionStatus.trial.daysRemaining ?? 0) > 0);
 
   // Redirect to onboarding if we know for sure the user has no access
@@ -78,7 +79,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     !bannerDismissed &&
     subscriptionStatus?.trial?.isActive &&
     !subscriptionStatus.hasSubscription &&
-    (subscriptionStatus.trial.daysRemaining ?? 0) <= 5;
+    (subscriptionStatus.trial.daysRemaining ?? 0) <= 14;
 
   return (
     <SocketProvider>

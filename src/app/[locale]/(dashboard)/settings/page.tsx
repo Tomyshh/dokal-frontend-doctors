@@ -12,7 +12,17 @@ import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
 import { Dialog } from '@/components/ui/Dialog';
 import { Avatar } from '@/components/ui/Avatar';
-import { CheckCircle2, Building2, Crown, ArrowUp, ArrowDown, AlertTriangle, Users } from 'lucide-react';
+import {
+  CheckCircle2,
+  Building2,
+  Crown,
+  ArrowUp,
+  ArrowDown,
+  AlertTriangle,
+  Users,
+  Globe,
+  Phone,
+} from 'lucide-react';
 import api from '@/lib/api';
 import type { Practitioner } from '@/types';
 import type { OrganizationMember } from '@/types';
@@ -21,7 +31,14 @@ import { useQuery } from '@tanstack/react-query';
 import { Select } from '@/components/ui/Select';
 import { localeNames, type Locale } from '@/i18n/config';
 import { usePathname, useRouter } from '@/i18n/routing';
-import { upgradePlan, downgradePlan, PLAN_PRICES_ILS, type PlanType } from '@/lib/subscription';
+import {
+  changePlan,
+  downgradePlan,
+  BASE_PRICES_ILS,
+  SEAT_PRICES_ILS,
+  calculateMonthlyPriceILS,
+  type PlanType,
+} from '@/lib/subscription';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
@@ -80,11 +97,23 @@ export default function SettingsPage() {
   // Derive current plan from subscription
   const currentPlan: PlanType = (subscriptionStatus?.subscription?.plan as PlanType) || 'individual';
   const isClinic = currentPlan === 'clinic';
+  const isEnterprise = currentPlan === 'enterprise';
+  const isIndividual = currentPlan === 'individual';
   const isTrial = subscriptionStatus?.trial?.isActive && !subscriptionStatus?.subscription;
+  const isTrialing = subscriptionStatus?.subscription?.status === 'trialing';
+
+  // Seat counts
+  const practitionerSeats = subscriptionStatus?.subscription?.practitioner_seats ?? 1;
+  const secretarySeats = subscriptionStatus?.subscription?.secretary_seats ?? 0;
+  const totalMonthly = calculateMonthlyPriceILS(currentPlan, practitionerSeats, secretarySeats);
 
   // Get practitioner members only (for downgrade selection)
   const practitionerMembers = members?.filter(
     (m) => m.staff_type === 'practitioner' && m.is_active !== false
+  ) || [];
+
+  const secretaryMembers = members?.filter(
+    (m) => m.staff_type === 'secretary' && m.is_active !== false
   ) || [];
 
   // Pre-select the current owner for downgrade
@@ -181,7 +210,7 @@ export default function SettingsPage() {
     setPlanError('');
     setPlanLoading(true);
     try {
-      await upgradePlan();
+      await changePlan('clinic');
       await refreshSubscription();
       setUpgradeDialogOpen(false);
       window.location.reload();
@@ -228,6 +257,19 @@ export default function SettingsPage() {
     if (locale === 'fr' && spec.name_fr) return spec.name_fr;
     if (locale === 'he' && spec.name_he) return spec.name_he;
     return spec.name;
+  };
+
+  // ─── Plan icon ─────────────────────────────────────────────────────
+  const getPlanIcon = () => {
+    if (isEnterprise) return <Globe className="h-6 w-6 text-primary" />;
+    if (isClinic) return <Building2 className="h-6 w-6 text-primary" />;
+    return <Users className="h-6 w-6 text-gray-500" />;
+  };
+
+  const getPlanBadge = () => {
+    if (isEnterprise) return tsub('multiSite');
+    if (isClinic) return tsub('unlimitedTeam');
+    return tsub('onePractitioner');
   };
 
   if (loadingPractitioner || loadingSettings || loadingOrganization) return <Spinner size="lg" />;
@@ -278,46 +320,76 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                isClinic ? 'bg-primary/10' : 'bg-gray-100'
+                isClinic || isEnterprise ? 'bg-primary/10' : 'bg-gray-100'
               }`}>
-                {isClinic ? (
-                  <Building2 className="h-6 w-6 text-primary" />
-                ) : (
-                  <Users className="h-6 w-6 text-gray-500" />
-                )}
+                {getPlanIcon()}
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-gray-900">
-                    {isClinic ? tsub('planClinic') : tsub('planIndividual')}
+                    {isEnterprise ? tsub('planEnterprise') : isClinic ? tsub('planClinic') : tsub('planIndividual')}
                   </span>
-                  <Badge className={isClinic ? 'bg-primary/10 text-primary text-xs' : 'bg-gray-100 text-gray-600 text-xs'}>
-                    {isClinic ? tsub('unlimitedTeam') : tsub('onePractitioner')}
+                  <Badge className={isClinic || isEnterprise ? 'bg-primary/10 text-primary text-xs' : 'bg-gray-100 text-gray-600 text-xs'}>
+                    {getPlanBadge()}
                   </Badge>
-                  {isTrial && (
+                  {(isTrial || isTrialing) && (
                     <Badge className="bg-amber-100 text-amber-800 text-xs">
                       {tsub('trialBadge')}
                     </Badge>
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  {isTrial
+                  {(isTrial || isTrialing)
                     ? tsub('trialBannerText', { days: subscriptionStatus?.trial?.daysRemaining ?? 0 })
-                    : `${PLAN_PRICES_ILS[currentPlan]} ₪/${tsub('perMonth')}`
+                    : `${totalMonthly} ₪/${tsub('perMonth')}`
                   }
                 </p>
               </div>
             </div>
           </div>
 
+          {/* Seat breakdown for clinic/enterprise */}
+          {(isClinic || isEnterprise) && !isTrial && !isTrialing && (
+            <div className="rounded-xl bg-gray-50 p-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">{tsub('basePlan')}</span>
+                <span className="font-medium">{BASE_PRICES_ILS[currentPlan]} ₪</span>
+              </div>
+              {isClinic && practitionerSeats > 1 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">
+                    {practitionerSeats - 1} {tsub('extraPractitioners')}
+                  </span>
+                  <span className="font-medium">
+                    {(practitionerSeats - 1) * SEAT_PRICES_ILS.practitioner} ₪
+                  </span>
+                </div>
+              )}
+              {isClinic && secretarySeats > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">
+                    {secretarySeats} {tsub('secretaries')}
+                  </span>
+                  <span className="font-medium">
+                    {secretarySeats * SEAT_PRICES_ILS.secretary} ₪
+                  </span>
+                </div>
+              )}
+              <div className="border-t border-gray-200 pt-2 flex justify-between text-sm font-semibold">
+                <span className="text-gray-900">{tsub('totalMonthlyCost')}</span>
+                <span className="text-primary">{totalMonthly} ₪/{tsub('perMonth')}</span>
+              </div>
+            </div>
+          )}
+
           <p className="text-xs text-muted-foreground">
             {t('myPlanDescription')}
           </p>
 
           {/* Upgrade / Downgrade buttons */}
-          {!isTrial && (
+          {!isTrial && !isTrialing && (
             <div className="flex gap-3 pt-2">
-              {!isClinic && (
+              {isIndividual && (
                 <Button
                   onClick={() => { setUpgradeDialogOpen(true); setPlanError(''); }}
                   className="gap-2"
@@ -327,14 +399,32 @@ export default function SettingsPage() {
                 </Button>
               )}
               {isClinic && (
-                <Button
-                  variant="ghost"
-                  onClick={openDowngradeDialog}
-                  className="gap-2 text-gray-500 hover:text-red-600"
-                >
-                  <ArrowDown className="h-4 w-4" />
-                  {tsub('downgradeToIndividual')}
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={openDowngradeDialog}
+                    className="gap-2 text-gray-500 hover:text-red-600"
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                    {tsub('downgradeToIndividual')}
+                  </Button>
+                </>
+              )}
+              {isEnterprise && (
+                <div className="rounded-xl bg-primary/5 border border-primary/20 p-3 flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{tsub('enterprisePlan')}</p>
+                    <p className="text-xs text-muted-foreground">{tsub('contactSalesDesc')}</p>
+                  </div>
+                  <a
+                    href="mailto:contact@dokal.co.il"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 shrink-0"
+                  >
+                    <Phone className="h-3 w-3" />
+                    {tsub('contactSales')}
+                  </a>
+                </div>
               )}
             </div>
           )}
@@ -397,9 +487,11 @@ export default function SettingsPage() {
               {t('organization')}
             </CardTitle>
             <Badge className="bg-primary/10 text-primary text-xs">
-              {organization.type === 'clinic'
-                ? t('organizationTypeClinic')
-                : t('organizationTypeIndividual')}
+              {organization.type === 'enterprise'
+                ? t('organizationTypeEnterprise')
+                : organization.type === 'clinic'
+                  ? t('organizationTypeClinic')
+                  : t('organizationTypeIndividual')}
             </Badge>
           </CardHeader>
           <div className="space-y-4">
@@ -479,9 +571,14 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3 mb-2">
               <Building2 className="h-5 w-5 text-primary" />
               <span className="font-semibold text-gray-900">{tsub('planClinic')}</span>
-              <Badge className="bg-primary/10 text-primary text-xs">{PLAN_PRICES_ILS.clinic} ₪/{tsub('perMonth')}</Badge>
+              <Badge className="bg-primary/10 text-primary text-xs">{BASE_PRICES_ILS.clinic} ₪/{tsub('perMonth')}</Badge>
             </div>
             <p className="text-sm text-gray-600">{tsub('upgradeConfirmText')}</p>
+            <div className="mt-3 space-y-1 text-xs text-gray-500">
+              <p>+ {SEAT_PRICES_ILS.practitioner} ₪/{tsub('perPractitioner')}</p>
+              <p>+ {SEAT_PRICES_ILS.secretary} ₪/{tsub('perSecretary')}</p>
+              <p className="text-primary/70">{tsub('basePriceIncludes')}</p>
+            </div>
           </div>
 
           {planError && (
@@ -635,7 +732,7 @@ export default function SettingsPage() {
 
             <div className="rounded-xl bg-gray-50 p-3 text-center">
               <p className="text-sm text-gray-600">
-                {tsub('planIndividual')} — {PLAN_PRICES_ILS.individual} ₪/{tsub('perMonth')}
+                {tsub('planIndividual')} — {BASE_PRICES_ILS.individual} ₪/{tsub('perMonth')}
               </p>
             </div>
 

@@ -5,7 +5,16 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { addCard, subscribe, startTrial, PLAN_PRICES_ILS, type PlanType } from '@/lib/subscription';
+import Image from 'next/image';
+import {
+  addCard,
+  subscribe,
+  startTrial,
+  BASE_PRICES_ILS,
+  SEAT_PRICES_ILS,
+  TRIAL_DURATION_DAYS,
+  type PlanType,
+} from '@/lib/subscription';
 import {
   CreditCard,
   Shield,
@@ -15,6 +24,9 @@ import {
   Clock,
   Users,
   Crown,
+  Building2,
+  Globe,
+  Phone,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -72,24 +84,57 @@ function CardBrandIcon({ brand }: { brand: string | null }) {
   return <CreditCard className="h-4 w-4 text-gray-400" />;
 }
 
-// ─── Plan Picker Card ────────────────────────────────────────────────
+// ─── Plan Card ────────────────────────────────────────────────────────
+
 function PlanCard({
   plan,
   selected,
   onSelect,
   t,
+  highlighted,
 }: {
   plan: PlanType;
   selected: boolean;
   onSelect: () => void;
   t: ReturnType<typeof useTranslations<'subscription'>>;
+  highlighted?: boolean;
 }) {
   const isClinic = plan === 'clinic';
-  const price = PLAN_PRICES_ILS[plan];
+  const isEnterprise = plan === 'enterprise';
+  const isIndividual = plan === 'individual';
 
-  const features = isClinic
-    ? ['feature1', 'feature2', 'feature3', 'feature4', 'planFeatureTeam', 'planFeatureMultiPractitioner', 'planFeatureOrgStats'] as const
-    : ['feature1', 'feature2', 'feature3', 'feature4'] as const;
+  const price = BASE_PRICES_ILS[plan];
+
+  const getFeatures = () => {
+    if (isIndividual) {
+      return ['feature1', 'feature2', 'feature3', 'feature4'] as const;
+    }
+    if (isClinic) {
+      return ['feature1', 'feature2', 'feature3', 'feature4', 'planFeatureTeam', 'planFeatureMultiPractitioner', 'planFeatureOrgStats'] as const;
+    }
+    // Enterprise
+    return ['feature1', 'feature2', 'feature3', 'feature4', 'planFeatureTeam', 'planFeatureMultiPractitioner', 'planFeatureOrgStats', 'planFeatureMultiSite'] as const;
+  };
+
+  const features = getFeatures();
+
+  const getIcon = () => {
+    if (isEnterprise) return <Globe className="h-6 w-6 text-primary" />;
+    if (isClinic) return <Building2 className="h-6 w-6 text-primary" />;
+    return <Users className="h-6 w-6 text-gray-500" />;
+  };
+
+  const getPlanName = () => {
+    if (isEnterprise) return t('planEnterprise');
+    if (isClinic) return t('planClinic');
+    return t('planIndividual');
+  };
+
+  const getPlanDesc = () => {
+    if (isEnterprise) return t('planEnterpriseDesc');
+    if (isClinic) return t('planClinicDesc');
+    return t('planIndividualDesc');
+  };
 
   return (
     <button
@@ -101,6 +146,7 @@ function PlanCard({
         selected
           ? 'border-primary bg-primary/5 shadow-md'
           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50',
+        highlighted && !selected && 'border-primary/40',
       )}
     >
       {/* Popular badge for clinic */}
@@ -114,13 +160,17 @@ function PlanCard({
       )}
 
       <div className="flex items-start justify-between mb-3">
-        <div>
-          <h3 className="text-lg font-bold text-gray-900">
-            {isClinic ? t('planClinic') : t('planIndividual')}
-          </h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {isClinic ? t('planClinicDesc') : t('planIndividualDesc')}
-          </p>
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            'w-10 h-10 rounded-xl flex items-center justify-center',
+            isClinic || isEnterprise ? 'bg-primary/10' : 'bg-gray-100',
+          )}>
+            {getIcon()}
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">{getPlanName()}</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">{getPlanDesc()}</p>
+          </div>
         </div>
         <div className={cn(
           'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1',
@@ -132,7 +182,12 @@ function PlanCard({
 
       {/* Badge */}
       <div className="mb-3">
-        {isClinic ? (
+        {isEnterprise ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-2.5 py-0.5">
+            <Globe className="h-3 w-3" />
+            {t('multiSite')}
+          </span>
+        ) : isClinic ? (
           <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-2.5 py-0.5">
             <Users className="h-3 w-3" />
             {t('unlimitedTeam')}
@@ -149,22 +204,46 @@ function PlanCard({
           <div key={key} className="flex items-center gap-2 text-xs text-gray-600">
             <CheckCircle2 className={cn(
               'h-3.5 w-3.5 shrink-0',
-              isClinic ? 'text-primary' : 'text-gray-400',
+              isClinic || isEnterprise ? 'text-primary' : 'text-gray-400',
             )} />
             {t(key)}
           </div>
         ))}
       </div>
 
-      {/* Price as small footnote reference */}
+      {/* Pricing */}
       <div className="mt-3 pt-3 border-t border-gray-100">
-        <span className="text-[11px] text-gray-400">
-          *{price} ₪/{t('perMonth')}
-        </span>
+        {isEnterprise ? (
+          <div>
+            <span className="text-lg font-bold text-gray-900">{t('fromPrice', { price })}</span>
+            <span className="text-[11px] text-gray-400 ml-1">/{t('perMonth')}</span>
+          </div>
+        ) : isClinic ? (
+          <div>
+            <span className="text-lg font-bold text-gray-900">{price} ₪</span>
+            <span className="text-[11px] text-gray-400 ml-1">/{t('perMonth')}</span>
+            <div className="mt-1 space-y-0.5">
+              <p className="text-[10px] text-gray-500">
+                + {SEAT_PRICES_ILS.practitioner} ₪/{t('perPractitioner')}
+              </p>
+              <p className="text-[10px] text-gray-500">
+                + {SEAT_PRICES_ILS.secretary} ₪/{t('perSecretary')}
+              </p>
+            </div>
+            <p className="text-[10px] text-primary/70 mt-1">{t('basePriceIncludes')}</p>
+          </div>
+        ) : (
+          <div>
+            <span className="text-lg font-bold text-gray-900">{price} ₪</span>
+            <span className="text-[11px] text-gray-400 ml-1">/{t('perMonth')}</span>
+          </div>
+        )}
       </div>
     </button>
   );
 }
+
+// ─── Main Page ────────────────────────────────────────────────────────
 
 export default function OnboardingSubscriptionPage() {
   const t = useTranslations('subscription');
@@ -188,7 +267,7 @@ export default function OnboardingSubscriptionPage() {
 
   const cardBrand = getCardBrand(form.cardNumber);
   const rawCardNumber = form.cardNumber.replace(/\s/g, '');
-  const selectedPrice = PLAN_PRICES_ILS[selectedPlan];
+  const selectedPrice = BASE_PRICES_ILS[selectedPlan];
 
   const userName = profile
     ? `Dr ${profile.last_name || ''}`
@@ -230,7 +309,6 @@ export default function OnboardingSubscriptionPage() {
     form.cvv.length >= 3;
 
   const hardRedirectToDashboard = () => {
-    // Hard redirect so that AuthProvider re-fetches everything fresh
     window.location.assign(`/${locale}`);
   };
 
@@ -242,7 +320,6 @@ export default function OnboardingSubscriptionPage() {
     setTrialLoading(true);
     try {
       await startTrial();
-      // Refresh subscription status in the auth context so dashboard won't bounce back
       await refreshSubscription();
       setSuccess('trial');
       setTimeout(hardRedirectToDashboard, 2000);
@@ -274,7 +351,6 @@ export default function OnboardingSubscriptionPage() {
       });
 
       await subscribe({ cardId: cardResponse.card.id, plan: selectedPlan });
-      // Refresh subscription status in the auth context so dashboard won't bounce back
       await refreshSubscription();
       setSuccess('subscribed');
       setTimeout(hardRedirectToDashboard, 2000);
@@ -323,11 +399,28 @@ export default function OnboardingSubscriptionPage() {
           <p className="text-sm text-muted-foreground mt-2">{t('planPickerSubtitle')}</p>
         </div>
 
+        {/* App preview — value proposition */}
+        <div className="mb-6 rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 p-4 flex items-center gap-4">
+          <div className="shrink-0 w-16 h-16 rounded-xl overflow-hidden shadow-md">
+            <Image
+              src="/images/app-pres.png"
+              alt="Dokal Patient App"
+              width={64}
+              height={64}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900">{t('appPreviewTitle')}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('appPreviewDesc')}</p>
+          </div>
+        </div>
+
         {/* Choose plan label */}
         <p className="text-sm font-medium text-gray-700 mb-3">{t('planPickerChoose')}</p>
 
-        {/* Plan cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        {/* Plan cards — 3 plans */}
+        <div className="grid grid-cols-1 gap-4 mb-6">
           <PlanCard
             plan="individual"
             selected={selectedPlan === 'individual'}
@@ -339,6 +432,13 @@ export default function OnboardingSubscriptionPage() {
             selected={selectedPlan === 'clinic'}
             onSelect={() => setSelectedPlan('clinic')}
             t={t}
+            highlighted
+          />
+          <PlanCard
+            plan="enterprise"
+            selected={selectedPlan === 'enterprise'}
+            onSelect={() => setSelectedPlan('enterprise')}
+            t={t}
           />
         </div>
 
@@ -349,53 +449,76 @@ export default function OnboardingSubscriptionPage() {
           </div>
         )}
 
-        {/* Start free trial CTA */}
-        <Button
-          className="w-full rounded-full h-12 text-base"
-          onClick={handleStartTrial}
-          loading={trialLoading}
-        >
-          <Clock className="h-4 w-4" />
-          {t('startFreeTrial')}
-        </Button>
+        {/* Enterprise CTA — contact sales */}
+        {selectedPlan === 'enterprise' ? (
+          <div className="space-y-3">
+            <div className="rounded-2xl bg-primary/5 border border-primary/20 p-4 text-center">
+              <Building2 className="h-8 w-8 text-primary mx-auto mb-2" />
+              <p className="text-sm font-semibold text-gray-900">{t('contactSalesTitle')}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('contactSalesDesc')}</p>
+              <div className="mt-3 flex flex-col sm:flex-row gap-2 justify-center">
+                <a
+                  href="mailto:contact@dokal.co.il"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  <Phone className="h-4 w-4" />
+                  {t('contactSales')}
+                </a>
+              </div>
+            </div>
+            <p className="text-[10px] text-gray-400 text-center">{t('enterpriseNote')}</p>
+          </div>
+        ) : (
+          <>
+            {/* Start free trial CTA */}
+            <Button
+              className="w-full rounded-full h-12 text-base"
+              onClick={handleStartTrial}
+              loading={trialLoading}
+            >
+              <Clock className="h-4 w-4" />
+              {t('startFreeTrial')}
+            </Button>
 
-        {/* Trust signals */}
-        <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
-            <Shield className="h-3 w-3 text-primary/60" />
-            {t('trialNoCreditCard')}
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
-            <CheckCircle2 className="h-3 w-3 text-primary/60" />
-            {t('trialNoCommitment')}
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
-            <Clock className="h-3 w-3 text-primary/60" />
-            {t('trialCancelAnytime')}
-          </span>
-        </div>
+            {/* Trust signals */}
+            <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
+                <Shield className="h-3 w-3 text-primary/60" />
+                {t('trialNoCreditCard')}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
+                <CheckCircle2 className="h-3 w-3 text-primary/60" />
+                {t('trialNoCommitment')}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
+                <Clock className="h-3 w-3 text-primary/60" />
+                {t('trialDays', { days: TRIAL_DURATION_DAYS })}
+              </span>
+            </div>
 
-        {/* Price footnote */}
-        <p className="text-[10px] text-gray-400 text-center mt-5 leading-relaxed">
-          {t('priceFootnote', {
-            individualPrice: PLAN_PRICES_ILS.individual,
-            clinicPrice: PLAN_PRICES_ILS.clinic,
-          })}
-        </p>
+            {/* Price footnote */}
+            <p className="text-[10px] text-gray-400 text-center mt-5 leading-relaxed">
+              {t('priceFootnote', {
+                individualPrice: BASE_PRICES_ILS.individual,
+                clinicPrice: BASE_PRICES_ILS.clinic,
+              })}
+            </p>
 
-        {/* Secondary: subscribe directly */}
-        <div className="flex items-center gap-4 mt-5">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-[11px] text-gray-400 font-medium">{t('or')}</span>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div>
-        <button
-          type="button"
-          onClick={() => setView('card-form')}
-          className="w-full mt-3 text-center text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-2"
-        >
-          {t('orSubscribeDirectly')}
-        </button>
+            {/* Secondary: subscribe directly */}
+            <div className="flex items-center gap-4 mt-5">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-[11px] text-gray-400 font-medium">{t('or')}</span>
+              <div className="flex-1 h-px bg-gray-200" />
+            </div>
+            <button
+              type="button"
+              onClick={() => setView('card-form')}
+              className="w-full mt-3 text-center text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-2"
+            >
+              {t('orSubscribeDirectly')}
+            </button>
+          </>
+        )}
       </div>
     );
   }

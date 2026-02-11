@@ -56,12 +56,14 @@ CREATE TABLE public.appointments (
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   organization_id uuid,
+  site_id uuid,
   CONSTRAINT appointments_pkey PRIMARY KEY (id),
   CONSTRAINT appointments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
   CONSTRAINT appointments_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id),
   CONSTRAINT appointments_relative_id_fkey FOREIGN KEY (relative_id) REFERENCES public.relatives(id),
   CONSTRAINT appointments_reason_id_fkey FOREIGN KEY (reason_id) REFERENCES public.appointment_reasons(id),
-  CONSTRAINT appointments_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
+  CONSTRAINT appointments_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id),
+  CONSTRAINT appointments_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.organization_sites(id)
 );
 CREATE TABLE public.audit_log (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -196,10 +198,29 @@ CREATE TABLE public.organization_members (
   staff_type text NOT NULL DEFAULT 'practitioner'::text CHECK (staff_type = ANY (ARRAY['practitioner'::text, 'secretary'::text])),
   invited_by uuid,
   is_active boolean NOT NULL DEFAULT true,
+  site_id uuid,
   CONSTRAINT organization_members_pkey PRIMARY KEY (id),
   CONSTRAINT organization_members_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id),
   CONSTRAINT organization_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
-  CONSTRAINT organization_members_invited_by_fkey FOREIGN KEY (invited_by) REFERENCES public.profiles(id)
+  CONSTRAINT organization_members_invited_by_fkey FOREIGN KEY (invited_by) REFERENCES public.profiles(id),
+  CONSTRAINT organization_members_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.organization_sites(id)
+);
+CREATE TABLE public.organization_sites (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  organization_id uuid NOT NULL,
+  name text NOT NULL,
+  address_line text,
+  zip_code text,
+  city text,
+  latitude double precision,
+  longitude double precision,
+  phone text,
+  email text,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT organization_sites_pkey PRIMARY KEY (id),
+  CONSTRAINT organization_sites_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
 );
 CREATE TABLE public.organizations (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -307,10 +328,13 @@ CREATE TABLE public.practitioners (
   trial_end timestamp with time zone,
   trial_used boolean NOT NULL DEFAULT false,
   organization_id uuid NOT NULL,
+  license_number text,
+  site_id uuid,
   CONSTRAINT practitioners_pkey PRIMARY KEY (id),
   CONSTRAINT practitioners_id_fkey FOREIGN KEY (id) REFERENCES public.profiles(id),
   CONSTRAINT practitioners_specialty_id_fkey FOREIGN KEY (specialty_id) REFERENCES public.specialties(id),
-  CONSTRAINT practitioners_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id)
+  CONSTRAINT practitioners_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id),
+  CONSTRAINT practitioners_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.organization_sites(id)
 );
 CREATE TABLE public.profiles (
   id uuid NOT NULL,
@@ -366,13 +390,25 @@ CREATE TABLE public.specialties (
   name_es text,
   CONSTRAINT specialties_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.subscription_plans (
+  id text NOT NULL,
+  name text NOT NULL,
+  base_price_agorot integer NOT NULL,
+  practitioner_seat_price_agorot integer NOT NULL DEFAULT 0,
+  secretary_seat_price_agorot integer NOT NULL DEFAULT 0,
+  max_sites integer NOT NULL DEFAULT 1,
+  trial_duration_days integer NOT NULL DEFAULT 60,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT subscription_plans_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.subscriptions (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL UNIQUE,
-  payment_method_id uuid NOT NULL,
-  plan text NOT NULL DEFAULT 'individual'::text CHECK (plan = ANY (ARRAY['individual'::text, 'clinic'::text])),
+  user_id uuid NOT NULL,
+  payment_method_id uuid,
+  plan text NOT NULL DEFAULT 'individual'::text CHECK (plan = ANY (ARRAY['individual'::text, 'clinic'::text, 'enterprise'::text])),
   price_agorot integer NOT NULL DEFAULT 29000,
-  status text NOT NULL DEFAULT 'active'::text CHECK (status = ANY (ARRAY['active'::text, 'cancelled'::text, 'paused'::text, 'past_due'::text, 'expired'::text])),
+  status text NOT NULL DEFAULT 'active'::text CHECK (status = ANY (ARRAY['active'::text, 'trialing'::text, 'cancelled'::text, 'paused'::text, 'past_due'::text, 'expired'::text])),
   payme_sub_id text,
   payme_sub_code text,
   payme_sale_id text,
@@ -383,7 +419,14 @@ CREATE TABLE public.subscriptions (
   paused_at timestamp with time zone,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  organization_id uuid NOT NULL UNIQUE,
+  practitioner_seats integer NOT NULL DEFAULT 1,
+  secretary_seats integer NOT NULL DEFAULT 0,
+  total_price_agorot integer NOT NULL DEFAULT 32900,
+  trial_start timestamp with time zone,
+  trial_end timestamp with time zone,
   CONSTRAINT subscriptions_pkey PRIMARY KEY (id),
+  CONSTRAINT subscriptions_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id),
   CONSTRAINT subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
   CONSTRAINT subscriptions_payment_method_id_fkey FOREIGN KEY (payment_method_id) REFERENCES public.payment_methods(id)
 );

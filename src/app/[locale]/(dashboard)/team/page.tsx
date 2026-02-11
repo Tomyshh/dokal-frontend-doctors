@@ -25,6 +25,11 @@ import type { InviteMemberRequest } from '@/types/api';
 import type { OrganizationMember } from '@/types';
 import { useRouter } from '@/i18n/routing';
 import {
+  SEAT_PRICES_ILS,
+  BASE_PRICES_ILS,
+  calculateMonthlyPriceILS,
+} from '@/lib/subscription';
+import {
   UserPlus,
   Users,
   Stethoscope,
@@ -37,6 +42,7 @@ import {
   ArrowRight,
   Pencil,
   FileCheck,
+  Receipt,
 } from 'lucide-react';
 
 type StaffTypeForm = 'practitioner' | 'secretary';
@@ -242,9 +248,23 @@ export default function TeamPage() {
 
   const getStaffTypeBadge = (staffType: string) => {
     if (staffType === 'secretary') {
-      return <Badge className="bg-purple-100 text-purple-800"><ClipboardPen className="h-3 w-3 mr-1" />{t('secretary')}</Badge>;
+      return (
+        <div className="flex items-center gap-1.5">
+          <Badge className="bg-purple-100 text-purple-800"><ClipboardPen className="h-3 w-3 mr-1" />{t('secretary')}</Badge>
+          {orgPlan === 'clinic' && (
+            <Badge className="bg-gray-50 text-gray-500 text-[10px]">{SEAT_PRICES_ILS.secretary} ₪/{t('perMonth')}</Badge>
+          )}
+        </div>
+      );
     }
-    return <Badge className="bg-primary/10 text-primary"><Stethoscope className="h-3 w-3 mr-1" />{t('practitioner')}</Badge>;
+    return (
+      <div className="flex items-center gap-1.5">
+        <Badge className="bg-primary/10 text-primary"><Stethoscope className="h-3 w-3 mr-1" />{t('practitioner')}</Badge>
+        {orgPlan === 'clinic' && (
+          <Badge className="bg-gray-50 text-gray-500 text-[10px]">{SEAT_PRICES_ILS.practitioner} ₪/{t('perMonth')}</Badge>
+        )}
+      </div>
+    );
   };
 
   const getSpecialtyLabel = (member: OrganizationMember) => {
@@ -261,8 +281,20 @@ export default function TeamPage() {
     return <Spinner size="lg" />;
   }
 
+  // Seat counts for cost display
+  const practitionerCount = members?.filter(
+    (m) => m.staff_type === 'practitioner' && m.is_active !== false
+  ).length ?? 1;
+  const secretaryCount = members?.filter(
+    (m) => m.staff_type === 'secretary' && m.is_active !== false
+  ).length ?? 0;
+  const orgPlan = organization.type === 'enterprise' ? 'enterprise' as const
+    : organization.type === 'clinic' ? 'clinic' as const
+    : 'individual' as const;
+  const totalMonthlyCost = calculateMonthlyPriceILS(orgPlan, practitionerCount, secretaryCount);
+
   // Show upgrade prompt for individual organizations — redirect to Settings
-  if (organization.type !== 'clinic') {
+  if (organization.type !== 'clinic' && organization.type !== 'enterprise') {
     return (
       <div className="flex items-center justify-center py-16">
         <Card className="max-w-lg w-full text-center">
@@ -394,6 +426,48 @@ export default function TeamPage() {
           )}
         </div>
       </Card>
+
+      {/* Cost Recap (clinic plan) */}
+      {orgPlan === 'clinic' && members && members.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Receipt className="h-5 w-5 text-primary" />
+              {t('costRecap')}
+            </CardTitle>
+          </CardHeader>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">{t('basePlan')}</span>
+              <span className="font-medium">{BASE_PRICES_ILS.clinic} ₪</span>
+            </div>
+            {practitionerCount > 1 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">
+                  {practitionerCount - 1} {t('extraPractitioners')}
+                </span>
+                <span className="font-medium">
+                  {(practitionerCount - 1) * SEAT_PRICES_ILS.practitioner} ₪
+                </span>
+              </div>
+            )}
+            {secretaryCount > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">
+                  {secretaryCount} {t('secretariesLabel')}
+                </span>
+                <span className="font-medium">
+                  {secretaryCount * SEAT_PRICES_ILS.secretary} ₪
+                </span>
+              </div>
+            )}
+            <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold">
+              <span className="text-gray-900">{t('totalMonthly')}</span>
+              <span className="text-primary">{totalMonthlyCost} ₪/{t('perMonth')}</span>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Invite Dialog */}
       <Dialog

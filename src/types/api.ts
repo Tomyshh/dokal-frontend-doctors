@@ -158,7 +158,7 @@ export interface RegisterPractitionerRequest {
   organization_id?: string;
   // Optional: create a new clinic
   organization_name?: string;
-  organization_type?: 'individual' | 'clinic';
+  organization_type?: 'individual' | 'clinic' | 'enterprise';
 }
 
 // ==========================================
@@ -167,7 +167,7 @@ export interface RegisterPractitionerRequest {
 
 export interface CreateOrganizationRequest {
   name: string;
-  type: 'individual' | 'clinic';
+  type: 'individual' | 'clinic' | 'enterprise';
   email?: string;
   phone?: string;
   address_line?: string;
@@ -176,6 +176,27 @@ export interface CreateOrganizationRequest {
   license_number?: string;
   description?: string;
   website?: string;
+}
+
+// ── Organization Sites (multi-site enterprise) ──
+
+export interface CreateOrganizationSiteRequest {
+  name: string;
+  address_line?: string;
+  zip_code?: string;
+  city?: string;
+  phone?: string;
+  email?: string;
+}
+
+export interface UpdateOrganizationSiteRequest {
+  name?: string;
+  address_line?: string | null;
+  zip_code?: string | null;
+  city?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  is_active?: boolean;
 }
 
 export interface UpdateOrganizationRequest {

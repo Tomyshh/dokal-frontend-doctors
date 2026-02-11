@@ -28,7 +28,11 @@ import {
   MapPin,
   Send,
   CheckCircle,
+  Building2,
+  Crown,
+  CheckCircle2,
 } from 'lucide-react';
+import { BASE_PRICES_ILS, SEAT_PRICES_ILS, TRIAL_DURATION_DAYS } from '@/lib/subscription';
 import { company } from '@/config/company';
 import axios from 'axios';
 
@@ -383,8 +387,146 @@ export default function WelcomePage() {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section id="pricing" className="py-24 lg:py-32 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+              {t('pricingTitle')}
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              {t('pricingSubtitle')}
+            </p>
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold">
+              <Clock className="h-4 w-4" />
+              {t('pricingTrialBadge', { days: TRIAL_DURATION_DAYS })}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Individual */}
+            <div className="rounded-2xl bg-white border border-gray-200 p-8 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col">
+              <div className="mb-6">
+                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6 text-gray-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">{t('pricingIndividualTitle')}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{t('pricingIndividualDesc')}</p>
+              </div>
+              <div className="mb-6">
+                <span className="text-4xl font-bold text-gray-900">{BASE_PRICES_ILS.individual}</span>
+                <span className="text-lg text-gray-500 ml-1">₪/{t('pricingPerMonth')}</span>
+              </div>
+              <ul className="space-y-3 flex-1 mb-8">
+                {['pricingFeature1', 'pricingFeature2', 'pricingFeature3', 'pricingFeature4'].map((key) => (
+                  <li key={key} className="flex items-center gap-2 text-sm text-gray-600">
+                    <CheckCircle2 className="h-4 w-4 text-gray-400 shrink-0" />
+                    {t(key)}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/signup"
+                className="block w-full text-center px-6 py-3 rounded-full border-2 border-gray-200 text-gray-700 font-semibold text-sm hover:border-primary hover:text-primary transition-all duration-300"
+              >
+                {t('pricingStartTrial')}
+              </Link>
+            </div>
+
+            {/* Clinic — highlighted */}
+            <div className="relative rounded-2xl bg-white border-2 border-primary p-8 shadow-card-hover flex flex-col">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-primary rounded-full px-4 py-1.5">
+                  <Crown className="h-3.5 w-3.5" />
+                  {t('pricingPopular')}
+                </span>
+              </div>
+              <div className="mb-6">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                  <Building2 className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">{t('pricingClinicTitle')}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{t('pricingClinicDesc')}</p>
+              </div>
+              <div className="mb-2">
+                <span className="text-4xl font-bold text-gray-900">{BASE_PRICES_ILS.clinic}</span>
+                <span className="text-lg text-gray-500 ml-1">₪/{t('pricingPerMonth')}</span>
+              </div>
+              <div className="mb-6 space-y-1">
+                <p className="text-xs text-gray-500">+ {SEAT_PRICES_ILS.practitioner} ₪/{t('pricingPerPractitioner')}</p>
+                <p className="text-xs text-gray-500">+ {SEAT_PRICES_ILS.secretary} ₪/{t('pricingPerSecretary')}</p>
+                <p className="text-xs text-primary/70">{t('pricingClinicIncludes')}</p>
+              </div>
+              <ul className="space-y-3 flex-1 mb-8">
+                {['pricingFeature1', 'pricingFeature2', 'pricingFeature3', 'pricingFeature4', 'pricingFeatureTeam', 'pricingFeatureMultiPractitioner', 'pricingFeatureOrgStats'].map((key) => (
+                  <li key={key} className="flex items-center gap-2 text-sm text-gray-600">
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                    {t(key)}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/signup"
+                className="block w-full text-center px-6 py-3 rounded-full bg-primary text-white font-semibold text-sm hover:bg-primary/90 transition-all duration-300 shadow-sm"
+              >
+                {t('pricingStartTrial')}
+              </Link>
+            </div>
+
+            {/* Enterprise */}
+            <div className="rounded-2xl bg-white border border-gray-200 p-8 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col">
+              <div className="mb-6">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                  <Globe className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">{t('pricingEnterpriseTitle')}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{t('pricingEnterpriseDesc')}</p>
+              </div>
+              <div className="mb-6">
+                <span className="text-lg font-semibold text-gray-700">{t('pricingFrom')}</span>
+                <span className="text-4xl font-bold text-gray-900 ml-1">{BASE_PRICES_ILS.enterprise}</span>
+                <span className="text-lg text-gray-500 ml-1">₪/{t('pricingPerMonth')}</span>
+              </div>
+              <ul className="space-y-3 flex-1 mb-8">
+                {['pricingFeature1', 'pricingFeature2', 'pricingFeature3', 'pricingFeature4', 'pricingFeatureTeam', 'pricingFeatureMultiPractitioner', 'pricingFeatureOrgStats', 'pricingFeatureMultiSite'].map((key) => (
+                  <li key={key} className="flex items-center gap-2 text-sm text-gray-600">
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                    {t(key)}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="mailto:contact@dokal.co.il"
+                className="block w-full text-center px-6 py-3 rounded-full border-2 border-primary text-primary font-semibold text-sm hover:bg-primary/5 transition-all duration-300"
+              >
+                {t('pricingContactSales')}
+              </a>
+            </div>
+          </div>
+
+          {/* App preview */}
+          <div className="mt-16 max-w-3xl mx-auto text-center">
+            <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
+              <div className="shrink-0 w-24 h-24 rounded-2xl overflow-hidden shadow-lg">
+                <Image
+                  src="/images/app-pres.png"
+                  alt="Dokal Patient App"
+                  width={96}
+                  height={96}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="text-left">
+                <p className="text-lg font-semibold text-gray-900">{t('pricingAppTitle')}</p>
+                <p className="text-sm text-muted-foreground mt-1">{t('pricingAppDesc')}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section className="py-24 lg:py-32 bg-gray-50">
+      <section className="py-24 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="relative rounded-3xl bg-gradient-to-br from-primary-900 via-primary to-primary-700 px-8 py-16 sm:px-16 sm:py-20 overflow-hidden">
             <div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full bg-primary-400/10 blur-3xl" />

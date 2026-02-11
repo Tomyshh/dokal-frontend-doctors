@@ -27,7 +27,7 @@ export type NotificationType =
 export type HealthTable = 'conditions' | 'medications' | 'allergies' | 'vaccinations';
 
 // Organization enums
-export type OrganizationType = 'individual' | 'clinic';
+export type OrganizationType = 'individual' | 'clinic' | 'enterprise';
 export type OrganizationRole = 'owner' | 'admin' | 'member';
 export type StaffType = 'practitioner' | 'secretary';
 
@@ -72,12 +72,29 @@ export interface Organization {
   updated_at: string;
 }
 
+export interface OrganizationSite {
+  id: string;
+  organization_id: string;
+  name: string;
+  address_line: string | null;
+  zip_code: string | null;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  phone: string | null;
+  email: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface OrganizationMember {
   id: string;
   organization_id: string;
   user_id: string;
   role: OrganizationRole;
   staff_type: StaffType;
+  site_id: string | null;
   invited_by: string | null;
   joined_at: string;
   is_active?: boolean;
@@ -89,11 +106,13 @@ export interface OrganizationMember {
     specialization_license?: string | null;
     specialty: Pick<Specialty, 'name' | 'name_fr' | 'name_he'>;
   } | null;
+  site?: OrganizationSite | null;
 }
 
 export interface Practitioner {
   id: string;
   organization_id: string;
+  site_id: string | null;
   specialty_id: string | null;
   license_number: string | null;
   specialization_license: string | null;
@@ -117,6 +136,7 @@ export interface Practitioner {
   profiles?: Pick<Profile, 'first_name' | 'last_name' | 'avatar_url'>;
   specialties?: Specialty;
   organizations?: Organization;
+  site?: OrganizationSite | null;
 }
 
 export interface Specialty {
@@ -144,6 +164,7 @@ export interface Appointment {
   patient_id: string;
   practitioner_id: string;
   organization_id: string | null;
+  site_id: string | null;
   relative_id: string | null;
   reason_id: string | null;
   appointment_date: string;

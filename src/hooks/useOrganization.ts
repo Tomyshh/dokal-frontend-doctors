@@ -2,13 +2,15 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
-import type { Organization, OrganizationMember, Appointment } from '@/types';
+import type { Organization, OrganizationMember, OrganizationSite, Appointment } from '@/types';
 import type {
   UpdateOrganizationRequest,
   UpdateOrganizationMemberRequest,
   InviteMemberRequest,
   InviteMemberResponse,
   UpdatePractitionerLicensesRequest,
+  CreateOrganizationSiteRequest,
+  UpdateOrganizationSiteRequest,
   CrmAppointmentsQuery,
   CancelAppointmentRequest,
   CompleteAppointmentRequest,
@@ -254,5 +256,94 @@ export function useOrganizationStats(organizationId: string | undefined) {
       return data;
     },
     enabled: !!organizationId,
+  });
+}
+
+// ─── Organization Sites (Enterprise multi-site) ──────────────────────
+
+/** GET /organizations/:id/sites */
+export function useOrganizationSites(organizationId: string | undefined) {
+  return useQuery({
+    queryKey: ['organization-sites', organizationId],
+    queryFn: async () => {
+      const { data } = await api.get<OrganizationSite[]>(
+        `/organizations/${organizationId}/sites`,
+      );
+      return data;
+    },
+    enabled: !!organizationId,
+  });
+}
+
+/** POST /organizations/:id/sites */
+export function useCreateSite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      organizationId,
+      data,
+    }: {
+      organizationId: string;
+      data: CreateOrganizationSiteRequest;
+    }) => {
+      const { data: result } = await api.post<OrganizationSite>(
+        `/organizations/${organizationId}/sites`,
+        data,
+      );
+      return result;
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['organization-sites', variables.organizationId],
+      });
+    },
+  });
+}
+
+/** PATCH /organizations/:id/sites/:siteId */
+export function useUpdateSite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      organizationId,
+      siteId,
+      data,
+    }: {
+      organizationId: string;
+      siteId: string;
+      data: UpdateOrganizationSiteRequest;
+    }) => {
+      const { data: result } = await api.patch<OrganizationSite>(
+        `/organizations/${organizationId}/sites/${siteId}`,
+        data,
+      );
+      return result;
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['organization-sites', variables.organizationId],
+      });
+    },
+  });
+}
+
+/** DELETE /organizations/:id/sites/:siteId */
+export function useDeleteSite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      organizationId,
+      siteId,
+    }: {
+      organizationId: string;
+      siteId: string;
+    }) => {
+      await api.delete(`/organizations/${organizationId}/sites/${siteId}`);
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['organization-sites', variables.organizationId],
+      });
+    },
   });
 }
