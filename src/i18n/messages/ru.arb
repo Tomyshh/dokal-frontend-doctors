@@ -95,7 +95,13 @@
     "otpResendIn": "Повторная отправка через {seconds}с",
     "otpResendError": "Не удалось отправить код. Попробуйте позже.",
     "otpResendSuccess": "Новый код отправлен на вашу электронную почту.",
-    "otpBackToForm": "Изменить данные"
+    "otpBackToForm": "Изменить данные",
+    "continueWithGoogle": "Продолжить с Google",
+    "or": "или",
+    "signupMinimalSubtitle": "Создайте аккаунт за секунды. Профессиональные данные заполним далее.",
+    "completeProfileTitle": "Заполните профиль",
+    "completeProfileSubtitle": "Эти данные необходимы для активации аккаунта.",
+    "saveAndContinue": "Сохранить и продолжить"
   },
   "subscription": {
     "onboardingTitle": "Добро пожаловать в Dokal!",

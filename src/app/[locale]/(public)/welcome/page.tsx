@@ -370,17 +370,15 @@ export default function WelcomePage() {
             <div className="order-2 lg:order-1">
               <div className="relative mx-auto max-w-[380px]">
                 <div className="absolute -inset-10 -z-10 rounded-[3.25rem] bg-gradient-to-br from-primary/20 via-primary/10 to-transparent blur-2xl" />
-                <div className="relative rounded-[2.5rem] overflow-hidden border border-gray-200/60 bg-white/70 backdrop-blur-sm shadow-2xl shadow-black/10">
-                  <div className="relative w-full aspect-[9/19]">
-                    <Image
-                      src="/images/app-pres.png"
-                      alt={t('patientAppTitle')}
-                      fill
-                      sizes="(max-width: 1024px) 320px, 380px"
-                      className="object-contain"
-                      priority
-                    />
-                  </div>
+                <div className="relative w-full aspect-[9/19] drop-shadow-2xl">
+                  <Image
+                    src="/images/app-pres.png"
+                    alt={t('patientAppTitle')}
+                    fill
+                    sizes="(max-width: 1024px) 320px, 380px"
+                    className="object-contain"
+                    priority
+                  />
                 </div>
               </div>
             </div>

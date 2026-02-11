@@ -95,7 +95,13 @@
     "otpResendIn": "שליחה מחדש בעוד {seconds} שניות",
     "otpResendError": "לא ניתן לשלוח שוב. נסו מאוחר יותר.",
     "otpResendSuccess": "קוד חדש נשלח לכתובת האימייל שלך.",
-    "otpBackToForm": "עריכת הפרטים"
+    "otpBackToForm": "עריכת הפרטים",
+    "continueWithGoogle": "המשך עם Google",
+    "or": "או",
+    "signupMinimalSubtitle": "צור/י חשבון בשניות. לאחר מכן נבקש פרטים מקצועיים.",
+    "completeProfileTitle": "השלמת פרופיל",
+    "completeProfileSubtitle": "הפרטים האלה נדרשים כדי להפעיל את החשבון.",
+    "saveAndContinue": "שמירה והמשך"
   },
   "subscription": {
     "onboardingTitle": "!ברוכים הבאים ל-Dokal",

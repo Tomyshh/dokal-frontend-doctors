@@ -14,6 +14,9 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Clock, X } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/api';
+import type { Practitioner } from '@/types';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { loading, user, profile, subscriptionStatus, signOut } = useAuth();
@@ -30,6 +33,36 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     subscriptionStatus?.subscription?.status === 'trialing' ||
     (subscriptionStatus?.trial?.isActive && (subscriptionStatus.trial.daysRemaining ?? 0) > 0);
 
+  const {
+    data: practitioner,
+    isLoading: loadingPractitioner,
+    isError: practitionerError,
+  } = useQuery({
+    queryKey: ['practitioner', profile?.id],
+    queryFn: async () => {
+      const { data } = await api.get<Practitioner>(`/practitioners/${profile?.id}`);
+      return data;
+    },
+    enabled: !!profile?.id && (profile?.role === 'practitioner' || profile?.role === 'admin'),
+    retry: 1,
+  });
+
+  const needsProfileCompletion = (() => {
+    if (!profile) return false;
+    if (profile.role !== 'practitioner' && profile.role !== 'admin') return false;
+    if (loadingPractitioner) return false;
+    if (practitionerError) return true;
+    if (!practitioner) return true;
+    return !(
+      practitioner.phone &&
+      practitioner.city &&
+      practitioner.address_line &&
+      practitioner.zip_code &&
+      practitioner.license_number &&
+      practitioner.specialty_id
+    );
+  })();
+
   // Redirect to onboarding if we know for sure the user has no access
   // Secretaries don't manage their own subscription (the clinic pays)
   useEffect(() => {
@@ -37,13 +70,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     // Must have a user + profile + subscription status all resolved
     if (!user || !profile || subscriptionStatus === null) return;
 
+    // Must complete profile before any subscription step
+    if (needsProfileCompletion) {
+      router.replace(`/${locale}/complete-profile`);
+      return;
+    }
+
     if (
       (profile.role === 'practitioner' || profile.role === 'admin') &&
       !hasAccess
     ) {
       router.replace(`/${locale}/subscription`);
     }
-  }, [loading, user, profile, subscriptionStatus, hasAccess, router, locale]);
+  }, [loading, user, profile, subscriptionStatus, hasAccess, router, locale, needsProfileCompletion]);
 
   // ─── Loading state ─────────────────────────────────────────────────
   if (loading) {

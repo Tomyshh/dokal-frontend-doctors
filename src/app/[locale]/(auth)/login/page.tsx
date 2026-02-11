@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Link } from '@/i18n/routing';
 import { ArrowLeft } from 'lucide-react';
-import { AuthBrandedLayout } from '@/components/auth/AuthBrandedLayout';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
@@ -46,8 +45,27 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogle = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/${locale}`,
+        },
+      });
+      if (authError) setError(authError.message);
+    } catch {
+      setError(t('invalidCredentials'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <AuthBrandedLayout>
+    <div>
       <div className="mb-6">
         <Link
           href="/welcome"
@@ -75,7 +93,24 @@ export default function LoginPage() {
         </div>
       )}
 
-      <form onSubmit={handleLogin} className="space-y-5">
+      <div className="space-y-5">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full rounded-full h-12"
+          onClick={handleGoogle}
+          loading={loading}
+        >
+          {t('continueWithGoogle')}
+        </Button>
+
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-[11px] text-gray-400 font-medium">{t('or')}</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-5">
         <Input
           id="email"
           type="email"
@@ -118,7 +153,8 @@ export default function LoginPage() {
             {t('signup')}
           </Link>
         </div>
-      </form>
-    </AuthBrandedLayout>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
 import { Input } from '@/components/ui/Input';
@@ -29,6 +29,11 @@ import {
   Phone,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/api';
+import type { Practitioner } from '@/types';
+import { useRouter } from 'next/navigation';
+import { Spinner } from '@/components/ui/Spinner';
 
 type CardForm = {
   cardNumber: string;
@@ -249,6 +254,7 @@ export default function OnboardingSubscriptionPage() {
   const t = useTranslations('subscription');
   const locale = useLocale();
   const { profile, refreshSubscription } = useAuth();
+  const router = useRouter();
   const actionInFlightRef = useRef(false);
 
   const [view, setView] = useState<View>('plan-picker');
@@ -272,6 +278,50 @@ export default function OnboardingSubscriptionPage() {
   const userName = profile
     ? `Dr ${profile.last_name || ''}`
     : '';
+
+  // Enforce profile completion before plan selection
+  const { data: practitioner, isLoading: loadingPractitioner, isError: practitionerError } = useQuery({
+    queryKey: ['practitioner', profile?.id],
+    queryFn: async () => {
+      const { data } = await api.get<Practitioner>(`/practitioners/${profile?.id}`);
+      return data;
+    },
+    enabled: !!profile?.id,
+    retry: 1,
+  });
+
+  const needsProfileCompletion = (() => {
+    if (!profile) return false;
+    if (loadingPractitioner) return false;
+    if (practitionerError) return true;
+    if (!practitioner) return true;
+    return !(
+      practitioner.phone &&
+      practitioner.city &&
+      practitioner.address_line &&
+      practitioner.zip_code &&
+      practitioner.license_number &&
+      practitioner.specialty_id
+    );
+  })();
+
+  useEffect(() => {
+    if (needsProfileCompletion) {
+      router.replace(`/${locale}/complete-profile`);
+    }
+  }, [needsProfileCompletion, router, locale]);
+
+  if (loadingPractitioner) {
+    return (
+      <div className="flex items-center justify-center py-10">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (needsProfileCompletion) {
+    return null;
+  }
 
   const handleChange = useCallback(
     <K extends keyof CardForm>(key: K, value: CardForm[K]) => {

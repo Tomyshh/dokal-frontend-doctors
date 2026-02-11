@@ -95,7 +95,13 @@
     "otpResendIn": "Renvoyer dans {seconds}s",
     "otpResendError": "Impossible de renvoyer le code. Réessayez plus tard.",
     "otpResendSuccess": "Un nouveau code a été envoyé à votre adresse e-mail.",
-    "otpBackToForm": "Modifier mes informations"
+    "otpBackToForm": "Modifier mes informations",
+    "continueWithGoogle": "Continuer avec Google",
+    "or": "ou",
+    "signupMinimalSubtitle": "Créez votre compte en quelques secondes. Nous demanderons les informations professionnelles ensuite.",
+    "completeProfileTitle": "Complétez votre profil",
+    "completeProfileSubtitle": "Ces informations sont indispensables pour activer votre compte.",
+    "saveAndContinue": "Enregistrer et continuer"
   },
   "subscription": {
     "onboardingTitle": "Bienvenue sur Dokal !",

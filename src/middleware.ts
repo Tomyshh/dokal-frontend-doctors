@@ -24,11 +24,11 @@ export async function middleware(request: NextRequest) {
   const { user, supabaseResponse } = await updateSession(request);
 
   // Route classification
-  const isAuthRoute = new RegExp(`^/${LOCALE_GROUP}/(login|forgot-password|signup)`).test(pathname);
+  const isAuthRoute = new RegExp(`^/${LOCALE_GROUP}/(login|forgot-password|signup|verify-email)`).test(pathname);
   const isPublicRoute = new RegExp(`^/${LOCALE_GROUP}/(welcome|privacy|terms)`).test(pathname);
-  const isOnboardingRoute = new RegExp(`^/${LOCALE_GROUP}/subscription`).test(pathname);
+  const isOnboardingRoute = new RegExp(`^/${LOCALE_GROUP}/(subscription|complete-profile)`).test(pathname);
   const isDashboardRoute = new RegExp(
-    `^/${LOCALE_GROUP}(/(?!login|forgot-password|signup|welcome|privacy|terms|subscription).*)?$`
+    `^/${LOCALE_GROUP}(/(?!login|forgot-password|signup|verify-email|welcome|privacy|terms|subscription|complete-profile).*)?$`
   ).test(pathname);
 
   // Protected routes: redirect unauthenticated users to welcome
@@ -40,7 +40,8 @@ export async function middleware(request: NextRequest) {
 
   // If logged in and trying to access auth or welcome, redirect to dashboard (allow privacy/terms)
   const isWelcome = new RegExp(`^/${LOCALE_GROUP}/welcome`).test(pathname);
-  if ((isAuthRoute || isWelcome) && user) {
+  const isVerifyEmail = new RegExp(`^/${LOCALE_GROUP}/verify-email`).test(pathname);
+  if ((isAuthRoute || isWelcome) && user && !isVerifyEmail) {
     const locale = pathname.split('/')[1] || defaultLocale;
     const dashboardUrl = new URL(`/${locale}`, request.url);
     return NextResponse.redirect(dashboardUrl);
