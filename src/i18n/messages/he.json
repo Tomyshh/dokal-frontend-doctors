@@ -52,6 +52,7 @@
     "phoneInvalid": "נא להזין מספר טלפון ישראלי תקין.",
     "city": "עיר",
     "specialty": "התמחות",
+    "specialtyInvalid": "נא לבחור התמחות מהרשימה.",
     "licenseNumber": "מספר רישיון",
     "licenseNumberInvalid": "מספר רישיון חייב להכיל 1–6 ספרות בלבד.",
     "specializationLicense": "רישיון התמחות",
@@ -174,6 +175,9 @@
     "planChanged": "המסלול שונה",
     "planUpgraded": "המסלול שודרג בהצלחה",
     "planDowngraded": "המסלול שונמך בהצלחה"
+    ,
+    "retry": "נסה שוב",
+    "backToProfile": "חזרה לפרופיל"
   },
   "nav": {
     "menu": "תפריט",
@@ -646,6 +650,7 @@
     "secretary": "מזכיר/ה",
     "orgRole": "תפקיד בארגון",
     "specialty": "התמחות",
+    "specialtyInvalid": "נא לבחור התמחות מהרשימה.",
     "licenseNumber": "מספר רישיון",
     "specializationLicense": "רישיון התמחות",
     "addressLine": "כתובת",

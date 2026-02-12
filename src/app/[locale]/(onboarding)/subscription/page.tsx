@@ -34,6 +34,7 @@ import api from '@/lib/api';
 import type { Practitioner } from '@/types';
 import { useRouter } from 'next/navigation';
 import { Spinner } from '@/components/ui/Spinner';
+import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
 
 type CardForm = {
   cardNumber: string;
@@ -280,20 +281,29 @@ export default function OnboardingSubscriptionPage() {
     : '';
 
   // Enforce profile completion before plan selection
-  const { data: practitioner, isLoading: loadingPractitioner, isError: practitionerError } = useQuery({
+  const {
+    data: practitioner,
+    isLoading: loadingPractitioner,
+    isError: practitionerError,
+    error: practitionerErrorObj,
+    refetch: refetchPractitioner,
+  } = useQuery({
     queryKey: ['practitioner', profile?.id],
     queryFn: async () => {
       const { data } = await api.get<Practitioner>(`/practitioners/${profile?.id}`);
       return data;
     },
     enabled: !!profile?.id,
-    retry: 1,
+    retry: 5,
+    retryDelay: (attempt) => Math.min(750 * 2 ** attempt, 4000),
   });
 
   const needsProfileCompletion = (() => {
     if (!profile) return false;
     if (loadingPractitioner) return false;
-    if (practitionerError) return true;
+    // If we can't load the practitioner yet (temporary backend error or eventual consistency),
+    // do not bounce back to the form. We'll show an error state with retry instead.
+    if (practitionerError) return false;
     if (!practitioner) return true;
     return !(
       practitioner.phone &&
@@ -315,6 +325,30 @@ export default function OnboardingSubscriptionPage() {
     return (
       <div className="flex items-center justify-center py-10">
         <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (practitionerError) {
+    return (
+      <div className="space-y-4">
+        <ApiErrorCallout
+          error={practitionerErrorObj}
+          action={(
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => refetchPractitioner()}
+            >
+              {t('retry')}
+            </Button>
+          )}
+        />
+        <div className="flex gap-3">
+          <Button type="button" variant="outline" onClick={() => router.replace(`/${locale}/complete-profile`)}>
+            {t('backToProfile')}
+          </Button>
+        </div>
       </div>
     );
   }

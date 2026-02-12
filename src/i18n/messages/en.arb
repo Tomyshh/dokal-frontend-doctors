@@ -52,6 +52,7 @@
     "phoneInvalid": "Enter a valid Israeli phone number.",
     "city": "City",
     "specialty": "Specialty",
+    "specialtyInvalid": "Please select a specialty from the list.",
     "licenseNumber": "License number",
     "licenseNumberInvalid": "License number must contain 1 to 6 digits.",
     "specializationLicense": "Specialization license",
@@ -199,6 +200,9 @@
     "planChanged": "Plan changed",
     "planUpgraded": "Plan upgraded successfully",
     "planDowngraded": "Plan downgraded successfully"
+    ,
+    "retry": "Retry",
+    "backToProfile": "Back to profile"
   },
   "nav": {
     "menu": "Menu",
@@ -722,6 +726,7 @@
     "secretary": "Secretary",
     "orgRole": "Organization role",
     "specialty": "Specialty",
+    "specialtyInvalid": "Please select a specialty from the list.",
     "licenseNumber": "License number",
     "specializationLicense": "Specialization license",
     "addressLine": "Address",

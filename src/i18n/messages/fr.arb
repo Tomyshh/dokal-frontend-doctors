@@ -52,6 +52,7 @@
     "phoneInvalid": "Entrez un numéro israélien valide.",
     "city": "Ville",
     "specialty": "Spécialité",
+    "specialtyInvalid": "Veuillez sélectionner une spécialité dans la liste.",
     "licenseNumber": "Numéro RPPS / ADELI",
     "licenseNumberInvalid": "Le numéro de permis doit contenir entre 1 et 6 chiffres.",
     "specializationLicense": "Licence de spécialité",
@@ -199,6 +200,9 @@
     "planChanged": "Forfait modifié",
     "planUpgraded": "Forfait amélioré avec succès",
     "planDowngraded": "Forfait rétrogradé avec succès"
+    ,
+    "retry": "Réessayer",
+    "backToProfile": "Retour au profil"
   },
   "nav": {
     "menu": "Menu",
@@ -722,6 +726,7 @@
     "secretary": "Secrétaire",
     "orgRole": "Rôle dans l'organisation",
     "specialty": "Spécialité",
+    "specialtyInvalid": "Veuillez sélectionner une spécialité dans la liste.",
     "licenseNumber": "N° de licence",
     "specializationLicense": "Licence de spécialité",
     "addressLine": "Adresse",

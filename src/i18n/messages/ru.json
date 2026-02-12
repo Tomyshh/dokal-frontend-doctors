@@ -52,6 +52,7 @@
     "phoneInvalid": "Введите корректный израильский номер телефона.",
     "city": "Город",
     "specialty": "Специализация",
+    "specialtyInvalid": "Пожалуйста, выберите специальность из списка.",
     "licenseNumber": "Номер лицензии",
     "licenseNumberInvalid": "Номер лицензии должен содержать от 1 до 6 цифр.",
     "specializationLicense": "Лицензия специализации",
@@ -173,7 +174,9 @@
     "downgradeDeactivatedLabel": "Участники для деактивации:",
     "planChanged": "Тариф изменён",
     "planUpgraded": "Тариф успешно повышен",
-    "planDowngraded": "Тариф успешно понижен"
+    "planDowngraded": "Тариф успешно понижен",
+    "retry": "Повторить",
+    "backToProfile": "Вернуться к профилю"
   },
   "nav": {
     "menu": "Меню",
@@ -646,6 +649,7 @@
     "secretary": "Секретарь",
     "orgRole": "Роль в организации",
     "specialty": "Специальность",
+    "specialtyInvalid": "Пожалуйста, выберите специальность из списка.",
     "licenseNumber": "Номер лицензии",
     "specializationLicense": "Лицензия специализации",
     "addressLine": "Адрес",

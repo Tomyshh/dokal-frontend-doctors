@@ -12,6 +12,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Spinner } from '@/components/ui/Spinner';
 import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
+import { specialtyKeyToBackendSpecialtyName } from '@/lib/specialty';
 import {
   useCrmOrganization,
   useOrganizationMembers,
@@ -122,6 +123,12 @@ export default function TeamPage() {
     let payload: InviteMemberRequest;
 
     if (form.staffType === 'practitioner') {
+      const backendSpecialty = specialtyKeyToBackendSpecialtyName(form.specialty);
+      if (!backendSpecialty) {
+        setInviteError(t('specialtyInvalid'));
+        return;
+      }
+
       payload = {
         email: form.email,
         first_name: form.firstName,
@@ -129,7 +136,7 @@ export default function TeamPage() {
         phone: normalizedPhone || undefined,
         staff_type: 'practitioner',
         org_role: form.orgRole,
-        specialty: form.specialty,
+        specialty: backendSpecialty,
         license_number: form.licenseNumber,
         specialization_license: form.specializationLicense || undefined,
         address_line: form.addressLine || undefined,

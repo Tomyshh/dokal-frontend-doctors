@@ -1,17 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import api from '@/lib/api';
 import type { RegisterPractitionerRequest } from '@/types/api';
+import type { Practitioner } from '@/types';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { CityCombobox } from '@/components/auth/CityCombobox';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
 import { Spinner } from '@/components/ui/Spinner';
+import { specialtyKeyToBackendSpecialtyName } from '@/lib/specialty';
 
 type FormState = {
   firstName: string;
@@ -58,6 +60,32 @@ export default function CompleteProfilePage() {
     }));
   }, [profile]);
 
+  // If a practitioner already exists (e.g. after a redirect back), prefill missing fields from it.
+  useEffect(() => {
+    if (!profile?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await api.get<Practitioner>(`/practitioners/${profile.id}`);
+        if (cancelled) return;
+        setForm((prev) => ({
+          ...prev,
+          phone: prev.phone || (data.phone ? data.phone.replace(/\D/g, '') : ''),
+          city: prev.city || data.city || '',
+          addressLine: prev.addressLine || data.address_line || '',
+          zipCode: prev.zipCode || data.zip_code || '',
+          licenseNumber: prev.licenseNumber || data.license_number || '',
+          specializationLicense: prev.specializationLicense || data.specialization_license || '',
+        }));
+      } catch {
+        // ignore (practitioner may not exist yet)
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [profile?.id]);
+
   const phoneInvalid = useMemo(() => {
     if (form.phone.length === 0) return false;
     return normalizeIsraelPhoneToE164(form.phone) === null;
@@ -77,6 +105,33 @@ export default function CompleteProfilePage() {
     setForm((prev) => ({ ...prev, [key]: value }));
     setError('');
   };
+
+  const waitForPractitionerReady = useCallback(
+    async (id: string) => {
+      const started = Date.now();
+      let delay = 400;
+      while (Date.now() - started < 12_000) {
+        try {
+          const { data } = await api.get<Practitioner>(`/practitioners/${id}`);
+          const ready =
+            !!data &&
+            !!data.phone &&
+            !!data.city &&
+            !!data.address_line &&
+            !!data.zip_code &&
+            !!data.license_number &&
+            !!data.specialty_id;
+          if (ready) return true;
+        } catch {
+          // not ready yet
+        }
+        await new Promise((r) => setTimeout(r, delay));
+        delay = Math.min(Math.round(delay * 1.7), 2000);
+      }
+      return false;
+    },
+    []
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +155,12 @@ export default function CompleteProfilePage() {
       return;
     }
 
+    const backendSpecialty = specialtyKeyToBackendSpecialtyName(form.specialty);
+    if (!backendSpecialty) {
+      setError(t('specialtyInvalid'));
+      return;
+    }
+
     setLoading(true);
     try {
       const normalizedPhone = normalizeIsraelPhoneToE164(form.phone);
@@ -109,7 +170,7 @@ export default function CompleteProfilePage() {
         email: profile.email,
         phone: normalizedPhone ?? form.phone,
         city: form.city,
-        specialty: form.specialty,
+        specialty: backendSpecialty,
         license_number: form.licenseNumber,
         specialization_license: form.specializationLicense || undefined,
         address_line: form.addressLine,
@@ -119,8 +180,11 @@ export default function CompleteProfilePage() {
       };
 
       await api.post('/practitioners/register', payload);
-      router.push(`/${locale}/subscription`);
-      router.refresh();
+      if (profile?.id) {
+        await waitForPractitionerReady(profile.id);
+      }
+      // Use a hard navigation to avoid any state/middleware race.
+      window.location.assign(`/${locale}/subscription`);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: { message?: string } } } };
       setError(axiosErr?.response?.data?.error?.message || t('registrationBackendError'));
