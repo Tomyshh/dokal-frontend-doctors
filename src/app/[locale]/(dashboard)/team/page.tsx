@@ -12,7 +12,6 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Spinner } from '@/components/ui/Spinner';
 import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
-import { specialtyKeyToBackendSpecialtyName } from '@/lib/specialty';
 import {
   useCrmOrganization,
   useOrganizationMembers,
@@ -55,7 +54,8 @@ interface InviteForm {
   phone: string;
   staffType: StaffTypeForm;
   orgRole: 'member' | 'admin';
-  specialty: string;
+  /** Specialty UUID from the backend */
+  specialtyId: string;
   licenseNumber: string;
   specializationLicense: string;
   addressLine: string;
@@ -70,7 +70,7 @@ const INITIAL_FORM: InviteForm = {
   phone: '',
   staffType: 'practitioner',
   orgRole: 'member',
-  specialty: '',
+  specialtyId: '',
   licenseNumber: '',
   specializationLicense: '',
   addressLine: '',
@@ -123,8 +123,7 @@ export default function TeamPage() {
     let payload: InviteMemberRequest;
 
     if (form.staffType === 'practitioner') {
-      const backendSpecialty = specialtyKeyToBackendSpecialtyName(form.specialty);
-      if (!backendSpecialty) {
+      if (!form.specialtyId) {
         setInviteError(t('specialtyInvalid'));
         return;
       }
@@ -136,7 +135,7 @@ export default function TeamPage() {
         phone: normalizedPhone || undefined,
         staff_type: 'practitioner',
         org_role: form.orgRole,
-        specialty: backendSpecialty,
+        specialty_id: form.specialtyId,
         license_number: form.licenseNumber,
         specialization_license: form.specializationLicense || undefined,
         address_line: form.addressLine || undefined,
@@ -549,8 +548,8 @@ export default function TeamPage() {
               <SpecialtyCombobox
                 id="invSpecialty"
                 label={t('specialty')}
-                value={form.specialty}
-                onChange={(v) => handleChange('specialty', v)}
+                value={form.specialtyId}
+                onChange={(v) => handleChange('specialtyId', v)}
                 required
                 placeholder={t('specialty')}
               />

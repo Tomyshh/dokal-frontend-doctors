@@ -1,14 +1,20 @@
 'use client';
 
 import { useRef, useState, useMemo, useCallback } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { SPECIALTY_KEYS } from '@/data/specialties';
+import {
+  useSpecialties,
+  getSpecialtyDisplayName,
+  type BackendSpecialty,
+} from '@/hooks/useSpecialties';
 
 export interface SpecialtyComboboxProps {
   id: string;
   label: string;
+  /** The selected specialty UUID (or empty string). */
   value: string;
+  /** Called with the specialty UUID when the user selects one. */
   onChange: (value: string) => void;
   required?: boolean;
   placeholder?: string;
@@ -23,20 +29,22 @@ export function SpecialtyCombobox({
   placeholder,
 }: SpecialtyComboboxProps) {
   const locale = useLocale();
-  const t = useTranslations('specialties');
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
+  // ─── Fetch specialties from backend ─────────────────────────────
+  const { data: specialties, isLoading, isError } = useSpecialties();
+
+  // ─── Text helpers ───────────────────────────────────────────────
   const normalize = useCallback((s: string) => {
-    // Lowercase + remove punctuation + normalize spaces.
-    // Also removes Hebrew diacritics (niqqud + cantillation).
     return s
       .toLowerCase()
       .normalize('NFKD')
-      .replace(/[\u0591-\u05C7]/g, '')
-      .replace(/[’'".,;:(){}\[\]<>!?/\\|@#$%^&*_+=~`-]/g, ' ')
+      .replace(/[\u0591-\u05C7]/g, '')       // Hebrew diacritics
+      .replace(/[\u0300-\u036F]/g, '')        // Latin diacritics
+      .replace(/[''".,;:(){}\[\]<>!?/\\|@#$%^&*_+=~`-]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
   }, []);
@@ -48,7 +56,6 @@ export function SpecialtyCombobox({
       if (base) terms.add(base);
 
       if (locale === 'he') {
-        // Heuristics: users may type "רופא/רופאה" while labels use "רפואת ...".
         const variants: Array<[RegExp, string]> = [
           [/רופאים/g, 'רפוא'],
           [/רופאות/g, 'רפוא'],
@@ -56,12 +63,10 @@ export function SpecialtyCombobox({
           [/רופא/g, 'רפוא'],
           [/רפואה/g, 'רפוא'],
         ];
-
         for (const [re, repl] of variants) {
           if (base.match(re)) terms.add(base.replace(re, repl));
         }
-
-        if (base === 'רופא' || base === 'רופאה' || base === 'רופאים' || base === 'רופאות') {
+        if (['רופא', 'רופאה', 'רופאים', 'רופאות'].includes(base)) {
           terms.add('רפואת');
           terms.add('רפוא');
         }
@@ -69,7 +74,7 @@ export function SpecialtyCombobox({
 
       return [...terms].filter(Boolean);
     },
-    [locale, normalize]
+    [locale, normalize],
   );
 
   const buildSearchStrings = useCallback(
@@ -79,7 +84,6 @@ export function SpecialtyCombobox({
       if (base) list.add(base);
 
       if (locale === 'he') {
-        // Add an alias that replaces "רפואת X" -> "רופא X" to match how users search.
         if (base.startsWith('רפואת ')) {
           list.add(base.replace(/^רפואת\s+/, 'רופא '));
           list.add(base.replace(/^רפואת\s+/, 'רופאה '));
@@ -92,14 +96,13 @@ export function SpecialtyCombobox({
 
       return [...list];
     },
-    [locale, normalize]
+    [locale, normalize],
   );
 
   const scoreMatch = useCallback(
     (candidateStrings: string[], queryTerms: string[]) => {
       if (queryTerms.length === 0) return 1;
       let best = 0;
-
       for (const term of queryTerms) {
         if (!term) continue;
         for (const c of candidateStrings) {
@@ -107,7 +110,6 @@ export function SpecialtyCombobox({
           if (c.startsWith(term)) best = Math.max(best, 100);
           else if (c.includes(term)) best = Math.max(best, 70);
           else {
-            // Subsequence-ish match (very light fuzzy) for typos / partials.
             let i = 0;
             for (let j = 0; j < c.length && i < term.length; j++) {
               if (c[j] === term[i]) i++;
@@ -118,41 +120,51 @@ export function SpecialtyCombobox({
           }
         }
       }
-
       return best;
     },
-    []
+    [],
   );
 
+  // ─── Derived values ─────────────────────────────────────────────
+
   const displayValue = useMemo(() => {
-    if (!value) return '';
-    const key = SPECIALTY_KEYS.find((k) => k === value);
-    return key ? t(key) : value;
-  }, [value, t]);
+    if (!value || !specialties) return '';
+    const found = specialties.find((s) => s.id === value);
+    return found ? getSpecialtyDisplayName(found, locale) : '';
+  }, [value, specialties, locale]);
 
   const suggestions = useMemo(() => {
+    if (!specialties) return [];
     const q = inputValue.trim();
-    if (!q) return SPECIALTY_KEYS.slice();
+
+    if (!q) {
+      // No filter → return all, sorted by display name
+      return specialties
+        .map((s) => ({ ...s, displayName: getSpecialtyDisplayName(s, locale) }))
+        .sort((a, b) => a.displayName.localeCompare(b.displayName, locale));
+    }
 
     const queryTerms = expandQueryTerms(q);
-    const ranked = SPECIALTY_KEYS.map((key) => {
-      const labelText = t(key);
-      const candidateStrings = buildSearchStrings(labelText);
-      return {
-        key,
-        labelText,
-        score: scoreMatch(candidateStrings, queryTerms),
-      };
-    })
+    return specialties
+      .map((s) => {
+        const displayName = getSpecialtyDisplayName(s, locale);
+        const candidateStrings = buildSearchStrings(displayName);
+        // Also search on the English name for multilingual flexibility
+        candidateStrings.push(...buildSearchStrings(s.name));
+        return {
+          ...s,
+          displayName,
+          score: scoreMatch(candidateStrings, queryTerms),
+        };
+      })
       .filter((x) => x.score > 0)
       .sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;
-        return a.labelText.localeCompare(b.labelText);
-      })
-      .map((x) => x.key);
+        return a.displayName.localeCompare(b.displayName, locale);
+      });
+  }, [specialties, inputValue, locale, expandQueryTerms, buildSearchStrings, scoreMatch]);
 
-    return ranked;
-  }, [buildSearchStrings, expandQueryTerms, inputValue, scoreMatch, t]);
+  // ─── Handlers ───────────────────────────────────────────────────
 
   const handleFocus = useCallback(() => {
     setOpen(true);
@@ -164,26 +176,34 @@ export function SpecialtyCombobox({
   }, []);
 
   const handleSelect = useCallback(
-    (key: (typeof SPECIALTY_KEYS)[number]) => {
-      onChange(key);
+    (s: BackendSpecialty) => {
+      onChange(s.id);
       setInputValue('');
       setOpen(false);
       inputRef.current?.blur();
     },
-    [onChange]
+    [onChange],
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
     setInputValue(v);
     setOpen(true);
-    const exactKey = SPECIALTY_KEYS.find((k) => t(k) === v);
-    if (exactKey) onChange(exactKey);
-    else onChange(v);
+
+    // If the user typed exactly a display name, auto-select it
+    if (specialties) {
+      const exact = specialties.find(
+        (s) => getSpecialtyDisplayName(s, locale) === v,
+      );
+      if (exact) {
+        onChange(exact.id);
+      }
+    }
   };
 
   const showList = open && suggestions.length > 0;
 
+  // ─── Render ─────────────────────────────────────────────────────
   return (
     <div ref={containerRef} className="space-y-1.5 relative">
       {label && (
@@ -200,15 +220,15 @@ export function SpecialtyCombobox({
         onFocus={handleFocus}
         onBlur={handleBlur}
         required={required}
-        placeholder={placeholder}
+        placeholder={isLoading ? '...' : isError ? '⚠' : placeholder}
         autoComplete="off"
         role="combobox"
         aria-expanded={showList}
         aria-autocomplete="list"
         aria-controls={`${id}-listbox`}
-        aria-activedescendant={showList ? undefined : undefined}
+        disabled={isLoading}
         className={cn(
-          'flex h-10 w-full rounded-xl border border-border bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors'
+          'flex h-10 w-full rounded-xl border border-border bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
         )}
       />
       {showList && (
@@ -217,17 +237,21 @@ export function SpecialtyCombobox({
           role="listbox"
           className="absolute z-50 mt-1 w-full max-h-56 overflow-auto rounded-xl border border-border bg-white py-1 shadow-lg"
         >
-          {suggestions.map((key) => (
+          {suggestions.map((s) => (
             <li
-              key={key}
+              key={s.id}
               role="option"
-              className="px-3 py-2 text-sm cursor-pointer hover:bg-primary-50 focus:bg-primary-50 outline-none"
+              aria-selected={s.id === value}
+              className={cn(
+                'px-3 py-2 text-sm cursor-pointer hover:bg-primary-50 focus:bg-primary-50 outline-none',
+                s.id === value && 'bg-primary-50 font-medium',
+              )}
               onMouseDown={(e) => {
                 e.preventDefault();
-                handleSelect(key);
+                handleSelect(s);
               }}
             >
-              {t(key)}
+              {'displayName' in s ? (s as BackendSpecialty & { displayName: string }).displayName : getSpecialtyDisplayName(s, locale)}
             </li>
           ))}
         </ul>

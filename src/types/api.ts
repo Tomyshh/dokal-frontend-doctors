@@ -149,7 +149,8 @@ export interface RegisterPractitionerRequest {
   email: string;
   phone: string;
   city: string;
-  specialty: string;
+  /** UUID of the specialty from GET /api/v1/specialties */
+  specialty_id: string;
   license_number: string;
   specialization_license?: string;
   address_line: string;
@@ -230,7 +231,8 @@ export interface InvitePractitionerRequest {
   phone?: string;
   staff_type: 'practitioner';
   org_role: 'member' | 'admin';
-  specialty: string;
+  /** UUID of the specialty from GET /api/v1/specialties */
+  specialty_id: string;
   license_number: string;
   specialization_license?: string;
   address_line?: string;

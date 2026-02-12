@@ -13,14 +13,14 @@ import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { CityCombobox } from '@/components/auth/CityCombobox';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
 import { Spinner } from '@/components/ui/Spinner';
-import { specialtyKeyToBackendSpecialtyName } from '@/lib/specialty';
 
 type FormState = {
   firstName: string;
   lastName: string;
   phone: string;
   city: string;
-  specialty: string;
+  /** Specialty UUID from the backend */
+  specialtyId: string;
   licenseNumber: string;
   specializationLicense: string;
   addressLine: string;
@@ -38,7 +38,7 @@ export default function CompleteProfilePage() {
     lastName: profile?.last_name || '',
     phone: profile?.phone ? profile.phone.replace(/\D/g, '') : '',
     city: profile?.city || '',
-    specialty: '',
+    specialtyId: '',
     licenseNumber: '',
     specializationLicense: '',
     addressLine: '',
@@ -72,6 +72,7 @@ export default function CompleteProfilePage() {
           ...prev,
           phone: prev.phone || (data.phone ? data.phone.replace(/\D/g, '') : ''),
           city: prev.city || data.city || '',
+          specialtyId: prev.specialtyId || data.specialty_id || '',
           addressLine: prev.addressLine || data.address_line || '',
           zipCode: prev.zipCode || data.zip_code || '',
           licenseNumber: prev.licenseNumber || data.license_number || '',
@@ -130,7 +131,7 @@ export default function CompleteProfilePage() {
       }
       return false;
     },
-    []
+    [],
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -155,8 +156,7 @@ export default function CompleteProfilePage() {
       return;
     }
 
-    const backendSpecialty = specialtyKeyToBackendSpecialtyName(form.specialty);
-    if (!backendSpecialty) {
+    if (!form.specialtyId) {
       setError(t('specialtyInvalid'));
       return;
     }
@@ -170,7 +170,7 @@ export default function CompleteProfilePage() {
         email: profile.email,
         phone: normalizedPhone ?? form.phone,
         city: form.city,
-        specialty: backendSpecialty,
+        specialty_id: form.specialtyId,
         license_number: form.licenseNumber,
         specialization_license: form.specializationLicense || undefined,
         address_line: form.addressLine,
@@ -183,7 +183,7 @@ export default function CompleteProfilePage() {
       if (profile?.id) {
         await waitForPractitionerReady(profile.id);
       }
-      // Use a hard navigation to avoid any state/middleware race.
+      // Hard navigation to avoid state/middleware race.
       window.location.assign(`/${locale}/subscription`);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: { message?: string } } } };
@@ -251,8 +251,8 @@ export default function CompleteProfilePage() {
           <SpecialtyCombobox
             id="specialty"
             label={t('specialty')}
-            value={form.specialty}
-            onChange={(v) => handleChange('specialty', v)}
+            value={form.specialtyId}
+            onChange={(v) => handleChange('specialtyId', v)}
             required
             placeholder={t('specialty')}
           />
@@ -308,4 +308,3 @@ export default function CompleteProfilePage() {
     </div>
   );
 }
-
