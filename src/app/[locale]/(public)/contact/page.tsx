@@ -21,7 +21,7 @@ export default async function ContactPage() {
             href="/welcome"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 rtl-flip-arrow" />
             {ta('backToLanding')}
           </Link>
         </div>

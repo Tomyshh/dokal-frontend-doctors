@@ -38,7 +38,7 @@ export default function ForgotPasswordPage() {
           href="/welcome"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 rtl-flip-arrow" />
           {t('backToLanding')}
         </Link>
       </div>
@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
             {t('resetSent')}
           </div>
           <Link href="/login" className="flex items-center gap-2 text-sm text-primary hover:underline justify-center">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 rtl-flip-arrow" />
             {t('backToLogin')}
           </Link>
         </div>
@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
             {t('sendResetLink')}
           </Button>
           <Link href="/login" className="flex items-center gap-2 text-sm text-primary hover:underline justify-center">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 rtl-flip-arrow" />
             {t('backToLogin')}
           </Link>
         </form>

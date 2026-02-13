@@ -91,7 +91,7 @@ export default function SignupPage() {
         href="/welcome"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors w-fit"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-4 w-4 rtl-flip-arrow" />
         {t('backToLanding')}
       </Link>
 

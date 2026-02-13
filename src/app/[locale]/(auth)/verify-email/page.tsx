@@ -172,7 +172,7 @@ export default function VerifyEmailPage() {
           href="/signup"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 rtl-flip-arrow" />
           {t('otpBackToForm')}
         </Link>
       </div>

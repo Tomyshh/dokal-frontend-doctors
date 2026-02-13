@@ -317,7 +317,7 @@ export default function TeamPage() {
               onClick={() => router.push('/settings#plan')}
             >
               {t('upgradeButton')}
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 rtl-flip-arrow" />
             </Button>
           </div>
         </Card>

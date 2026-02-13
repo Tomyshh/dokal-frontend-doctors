@@ -270,7 +270,7 @@ export default function WelcomePage() {
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-primary font-semibold text-sm hover:bg-primary-50 transition-all duration-300 shadow-lg shadow-black/10"
                 >
                   {t('cta')}
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 rtl-flip-arrow" />
                 </Link>
                 <button
                   onClick={() =>
@@ -441,7 +441,7 @@ export default function WelcomePage() {
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-primary text-white font-semibold text-sm hover:bg-primary/90 transition-all duration-300 shadow-sm"
                 >
                   {t('cta')}
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 rtl-flip-arrow" />
                 </Link>
                 <button
                   type="button"
@@ -862,7 +862,7 @@ export default function WelcomePage() {
                 className="absolute left-3 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm flex items-center justify-center transition-colors"
                 aria-label={tc('previous')}
               >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className="h-6 w-6 rtl-flip-arrow" />
               </button>
               <button
                 type="button"
@@ -870,7 +870,7 @@ export default function WelcomePage() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm flex items-center justify-center transition-colors"
                 aria-label={tc('next')}
               >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className="h-6 w-6 rtl-flip-arrow" />
               </button>
             </div>
           </div>

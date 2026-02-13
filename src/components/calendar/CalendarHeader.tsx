@@ -72,10 +72,10 @@ export default function CalendarHeader({
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1">
           <Button variant="outline" size="icon-sm" onClick={navigateBack}>
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4 rtl-flip-arrow" />
           </Button>
           <Button variant="outline" size="icon-sm" onClick={navigateForward}>
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 rtl-flip-arrow" />
           </Button>
         </div>
         <Button variant="ghost" size="sm" onClick={goToToday} className="text-primary font-medium">

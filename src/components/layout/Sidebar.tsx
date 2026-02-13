@@ -125,7 +125,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           onClick={onToggle}
           className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-muted transition-colors shrink-0"
         >
-          <ChevronLeft className={cn('h-4 w-4 transition-transform', collapsed && 'rotate-180')} />
+          <ChevronLeft className={cn('h-4 w-4 transition-transform rtl-flip-arrow', collapsed && 'rotate-180')} />
         </button>
       </div>
 

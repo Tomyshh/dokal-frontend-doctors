@@ -26,7 +26,7 @@ export default function MessageDetailPage({ params }: { params: Promise<{ id: st
     <div className="space-y-4">
       <Link href="/messages">
         <Button variant="ghost" size="sm">
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 rtl-flip-arrow" />
           {tc('back')}
         </Button>
       </Link>

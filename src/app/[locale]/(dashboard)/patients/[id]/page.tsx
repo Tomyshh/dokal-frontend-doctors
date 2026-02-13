@@ -37,7 +37,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
       {/* Back Button */}
       <Link href="/appointments">
         <Button variant="ghost" size="sm">
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 rtl-flip-arrow" />
           {tc('back')}
         </Button>
       </Link>

@@ -70,7 +70,7 @@ export default function AppointmentsPage() {
                     onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
                     disabled={offset === 0}
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-4 w-4 rtl-flip-arrow" />
                   </Button>
                   <span className="text-sm text-gray-600">
                     {currentPage} / {totalPages}
@@ -81,7 +81,7 @@ export default function AppointmentsPage() {
                     onClick={() => setOffset(offset + PAGE_SIZE)}
                     disabled={currentPage >= totalPages}
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-4 w-4 rtl-flip-arrow" />
                   </Button>
                 </div>
               </div>

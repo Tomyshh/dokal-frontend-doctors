@@ -59,6 +59,14 @@
   @apply flex-row-reverse;
 }
 
+/* Inverser les icônes flèche en hébreu (RTL) pour cohérence visuelle */
+[dir='rtl'] .rtl-flip-arrow {
+  transform: scaleX(-1);
+}
+[dir='rtl'] .rtl-flip-arrow.rotate-180 {
+  transform: scaleX(-1) rotate(180deg);
+}
+
 [dir='rtl'] .stat-card {
   text-align: right;
 }
