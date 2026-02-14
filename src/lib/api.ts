@@ -42,13 +42,22 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+// Avoid multiple redirects when several requests get 401 at once (e.g. profile + subscription/status)
+let handling401 = false;
+
 // Response error handling
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Token expired - redirect to landing page
-      if (typeof window !== 'undefined') {
+  async (error) => {
+    if (error.response?.status === 401 && typeof window !== 'undefined' && !handling401) {
+      handling401 = true;
+      try {
+        // Clear Supabase session so the next page load won't retry with the same invalid token
+        // (stops the loop: welcome → load → 401 → redirect → welcome → load → …)
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        await supabase.auth.signOut();
+      } finally {
         const locale = window.location.pathname.split('/')[1] || defaultLocale;
         window.location.href = `/${locale}/welcome`;
       }
