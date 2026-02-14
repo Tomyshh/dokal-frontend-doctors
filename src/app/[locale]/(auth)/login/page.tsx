@@ -56,7 +56,7 @@ export default function LoginPage() {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/${locale}`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/${locale}`,
         },
       });
       if (authError) setError(authError.message);
@@ -93,6 +93,12 @@ export default function LoginPage() {
       {searchParams.get('signup') === '1' && (
         <div className="rounded-2xl bg-green-50 border border-green-200 p-4 text-sm text-green-800 mb-6">
           {t('accountCreated')}
+        </div>
+      )}
+
+      {searchParams.get('error') === 'auth_code' && (
+        <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 mb-6">
+          {t('authCodeError')}
         </div>
       )}
 

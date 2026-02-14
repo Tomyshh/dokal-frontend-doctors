@@ -81,6 +81,7 @@
     "signupError": "Impossible de créer le compte. Veuillez réessayer.",
     "registrationBackendError": "Compte créé mais l'enregistrement du profil a échoué. Veuillez contacter le support.",
     "invalidCredentials": "E-mail ou mot de passe incorrect",
+    "authCodeError": "La connexion avec Google a échoué. Veuillez réessayer.",
     "resetSent": "Un lien de réinitialisation a été envoyé à votre adresse e-mail",
     "accessDenied": "Accès réservé aux praticiens",
     "accessDeniedDetail": "Votre compte n'est pas associé à un profil praticien. Contactez le support si vous pensez qu'il s'agit d'une erreur.",

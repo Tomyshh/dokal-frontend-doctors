@@ -81,6 +81,7 @@
     "signupError": "Unable to create account. Please try again.",
     "registrationBackendError": "Account created but profile registration failed. Please contact support.",
     "invalidCredentials": "Invalid email or password",
+    "authCodeError": "Sign in with Google failed. Please try again.",
     "resetSent": "A reset link has been sent to your email",
     "accessDenied": "Access restricted to practitioners",
     "accessDeniedDetail": "Your account is not associated with a practitioner profile. Contact support if you believe this is an error.",
