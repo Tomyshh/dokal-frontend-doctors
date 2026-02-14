@@ -31,11 +31,14 @@ export default function CompleteProfilePage() {
   const t = useTranslations('auth');
   const locale = useLocale();
   const router = useRouter();
-  const { profile, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
+
+  // Google user_metadata may contain given_name, family_name, full_name, avatar_url
+  const googleMeta = user?.user_metadata;
 
   const [form, setForm] = useState<FormState>({
-    firstName: profile?.first_name || '',
-    lastName: profile?.last_name || '',
+    firstName: profile?.first_name || googleMeta?.given_name || '',
+    lastName: profile?.last_name || googleMeta?.family_name || '',
     phone: profile?.phone ? profile.phone.replace(/\D/g, '') : '',
     city: profile?.city || '',
     specialtyId: '',
@@ -48,25 +51,31 @@ export default function CompleteProfilePage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // If profile arrives after initial render, prefill basic fields once.
+  // Resolve email and user ID: prefer backend profile, fall back to Supabase user (Google OAuth)
+  const resolvedEmail = profile?.email || user?.email || null;
+  const resolvedUserId = profile?.id || user?.id || null;
+
+  // If profile or user arrives after initial render, prefill basic fields once.
+  // For Google OAuth users, user_metadata may have given_name/family_name before the backend profile exists.
   useEffect(() => {
-    if (!profile) return;
+    if (!profile && !user) return;
     setForm((prev) => ({
       ...prev,
-      firstName: prev.firstName || profile.first_name || '',
-      lastName: prev.lastName || profile.last_name || '',
-      phone: prev.phone || (profile.phone ? profile.phone.replace(/\D/g, '') : ''),
-      city: prev.city || profile.city || '',
+      firstName: prev.firstName || profile?.first_name || googleMeta?.given_name || '',
+      lastName: prev.lastName || profile?.last_name || googleMeta?.family_name || '',
+      phone: prev.phone || (profile?.phone ? profile.phone.replace(/\D/g, '') : ''),
+      city: prev.city || profile?.city || '',
     }));
-  }, [profile]);
+  }, [profile, user, googleMeta]);
 
   // If a practitioner already exists (e.g. after a redirect back), prefill missing fields from it.
+  // Use resolvedUserId so Google OAuth users (where profile may be null initially) also get prefilled.
   useEffect(() => {
-    if (!profile?.id) return;
+    if (!resolvedUserId) return;
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await api.get<Practitioner>(`/practitioners/${profile.id}`);
+        const { data } = await api.get<Practitioner>(`/practitioners/${resolvedUserId}`);
         if (cancelled) return;
         setForm((prev) => ({
           ...prev,
@@ -85,7 +94,7 @@ export default function CompleteProfilePage() {
     return () => {
       cancelled = true;
     };
-  }, [profile?.id]);
+  }, [resolvedUserId]);
 
   const phoneInvalid = useMemo(() => {
     if (form.phone.length === 0) return false;
@@ -138,7 +147,7 @@ export default function CompleteProfilePage() {
     e.preventDefault();
     setError('');
 
-    if (!profile?.email) {
+    if (!resolvedEmail) {
       setError(t('registrationBackendError'));
       return;
     }
@@ -167,7 +176,7 @@ export default function CompleteProfilePage() {
       const payload: RegisterPractitionerRequest = {
         first_name: form.firstName,
         last_name: form.lastName,
-        email: profile.email,
+        email: resolvedEmail,
         phone: normalizedPhone ?? form.phone,
         city: form.city,
         specialty_id: form.specialtyId,
@@ -180,8 +189,8 @@ export default function CompleteProfilePage() {
       };
 
       await api.post('/practitioners/register', payload);
-      if (profile?.id) {
-        await waitForPractitionerReady(profile.id);
+      if (resolvedUserId) {
+        await waitForPractitionerReady(resolvedUserId);
       }
       // Hard navigation to avoid state/middleware race.
       window.location.assign(`/${locale}/subscription`);
@@ -195,7 +204,7 @@ export default function CompleteProfilePage() {
 
   return (
     <div>
-      {authLoading && !profile ? (
+      {authLoading && !user ? (
         <div className="flex items-center justify-center py-10">
           <Spinner size="lg" />
         </div>

@@ -27,6 +27,7 @@ const api: AxiosInstance = axios.create({
   baseURL: `${API_URL}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
+    'X-Client-App': 'crm',
   },
 });
 

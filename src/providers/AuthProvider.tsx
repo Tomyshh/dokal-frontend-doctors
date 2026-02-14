@@ -72,11 +72,28 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       getSubscriptionStatus(),
     ]);
 
+    let profileData: Profile | null = null;
+
     if (results[0].status === 'fulfilled') {
-      setProfile(results[0].value.data);
+      profileData = results[0].value.data;
     } else {
-      setProfile(null);
+      // If the profile doesn't exist yet (404), try to bootstrap it.
+      // This handles Google OAuth users who don't have a backend profile yet.
+      const is404 =
+        results[0].status === 'rejected' &&
+        (results[0].reason as { response?: { status?: number } })?.response?.status === 404;
+
+      if (is404) {
+        try {
+          const bootstrapRes = await api.post<Profile>('/crm/auth/bootstrap');
+          profileData = bootstrapRes.data;
+        } catch {
+          // Bootstrap failed — profile stays null, onboarding flow will handle it.
+        }
+      }
     }
+
+    setProfile(profileData);
 
     if (results[1].status === 'fulfilled') {
       setSubscriptionStatus(results[1].value);

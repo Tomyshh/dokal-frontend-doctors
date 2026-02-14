@@ -30,7 +30,7 @@ export default function SignupPage() {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/${locale}`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/${locale}/complete-profile`,
         },
       });
       if (authError) setError(authError.message);

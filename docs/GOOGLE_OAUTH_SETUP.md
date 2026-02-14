@@ -17,7 +17,7 @@ Ce document décrit la configuration nécessaire pour que la connexion avec Goog
    - Application type : **Web application**.
    - **Authorized JavaScript origins** :
      - En dev : `http://localhost:3001`
-     - En prod : `https://votre-domaine.com`
+     - En prod : `https://dokal.life`
    - **Authorized redirect URIs** (obligatoire) :
      - Utiliser l’URL de callback **Supabase** (pas celle de votre app) :
      - Format : `https://<PROJECT_REF>.supabase.co/auth/v1/callback`
@@ -29,23 +29,41 @@ Ce document décrit la configuration nécessaire pour que la connexion avec Goog
 
 ### 1.2 Supabase Dashboard
 
+**Important** : le CRM frontend tourne sur le **port 3001** (`npm run dev` → `http://localhost:3001`). Ne pas utiliser le port 3000 (réservé au backend).
+
 1. Ouvrir le [Dashboard Supabase](https://supabase.com/dashboard) → votre projet.
-2. **Authentication** → **Providers** → **Google**.
-3. Activer **Enable Sign in with Google**.
-4. Renseigner :
+2. **Authentication** → **URL Configuration** :
+   - **Site URL** : en dev mettre `http://localhost:3001` (pas 3000). Sinon Supabase peut rediriger vers le mauvais port après Google.
+   - **Redirect URLs** : ajouter explicitement :
+     - En dev : `http://localhost:3001/auth/callback`
+     - En prod : `https://dokal.life/auth/callback`
+   - Sauvegarder.
+3. **Authentication** → **Providers** → **Google**.
+4. Activer **Enable Sign in with Google**.
+5. Renseigner :
    - **Client ID** : celui fourni par Google.
    - **Client Secret** : celui fourni par Google.
-5. **Redirect URLs** (liste des URLs autorisées après connexion Google) :
-   - En dev : `http://localhost:3001/auth/callback`
-   - En prod : `https://votre-domaine.com/auth/callback`
 6. Enregistrer.
 
-### 1.3 Résumé DevOps
+### 1.3 Production (dokal.life)
+
+Pour le déploiement actuel (frontend sur **dokal.life**, backend déployé à part) :
+
+| Où | Valeur à mettre |
+|----|-----------------|
+| **Supabase → URL Configuration → Site URL** | `https://dokal.life` |
+| **Supabase → Redirect URLs** | `https://dokal.life/auth/callback` |
+| **Google Console → Authorized JavaScript origins** | `https://dokal.life` |
+| **Google Console → Authorized redirect URIs** | `https://<PROJECT_REF>.supabase.co/auth/v1/callback` (inchangé) |
+
+Sans ça, après la connexion Google, Supabase redirige vers la mauvaise URL (ex. localhost ou le backend) et tu obtiens une erreur ou « site inaccessible ».
+
+### 1.4 Résumé DevOps
 
 | Où | Quoi |
 |----|------|
 | **Google Console** | Créer OAuth 2.0 “Web application”, **Redirect URI** = `https://<PROJECT_REF>.supabase.co/auth/v1/callback` |
-| **Supabase** | Activer Google, coller Client ID + Secret, ajouter **Redirect URLs** = `https://votre-domaine.com/auth/callback` (et localhost en dev) |
+| **Supabase** | Activer Google, coller Client ID + Secret, ajouter **Redirect URLs** = `https://dokal.life/auth/callback` (et localhost en dev) |
 
 Aucune variable d’environnement supplémentaire n’est nécessaire côté frontend pour Google (Supabase gère le provider).
 
