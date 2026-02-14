@@ -67,14 +67,25 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   // Secretaries don't manage their own subscription (the clinic pays)
   useEffect(() => {
     if (loading) return;
-    // Must have a user + profile + subscription status all resolved
-    if (!user || !profile || subscriptionStatus === null) return;
+    if (!user) return;
 
-    // Must complete profile before any subscription step
+    // No profile or not a practitioner/secretary/admin → send to complete-profile
+    // (same flow as Google signup: they can onboard as a practitioner)
+    const notPractitioner =
+      !profile ||
+      (profile.role !== 'practitioner' && profile.role !== 'secretary' && profile.role !== 'admin');
+    if (notPractitioner) {
+      router.replace(`/${locale}/complete-profile`);
+      return;
+    }
+
+    // Must complete practitioner details before subscription step
     if (needsProfileCompletion) {
       router.replace(`/${locale}/complete-profile`);
       return;
     }
+
+    if (subscriptionStatus === null) return;
 
     if (
       (profile.role === 'practitioner' || profile.role === 'admin') &&
