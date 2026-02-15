@@ -31,7 +31,7 @@ export default function CompleteProfilePage() {
   const t = useTranslations('auth');
   const locale = useLocale();
   const router = useRouter();
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading, refreshUserData } = useAuth();
 
   // Google user_metadata may contain given_name, family_name, full_name, avatar_url
   const googleMeta = user?.user_metadata;
@@ -120,7 +120,8 @@ export default function CompleteProfilePage() {
     async (id: string) => {
       const started = Date.now();
       let delay = 400;
-      while (Date.now() - started < 12_000) {
+      // Some backends use async jobs / eventual consistency — allow a bit more time.
+      while (Date.now() - started < 25_000) {
         try {
           const { data } = await api.get<Practitioner>(`/practitioners/${id}`);
           const ready =
@@ -189,8 +190,25 @@ export default function CompleteProfilePage() {
       };
 
       await api.post('/practitioners/register', payload);
+      // Ensure practitioner profile fields used by the onboarding guards are persisted.
+      // Some backends create the practitioner in /register but update contact/address fields via /crm/profile.
+      await api.patch('/crm/profile', {
+        phone: payload.phone,
+        city: payload.city,
+        address_line: payload.address_line,
+        zip_code: payload.zip_code,
+        email: payload.email,
+      });
+
+      // Refresh in-memory auth profile/subscription (role changes, etc.)
+      await refreshUserData();
+
       if (resolvedUserId) {
-        await waitForPractitionerReady(resolvedUserId);
+        const ready = await waitForPractitionerReady(resolvedUserId);
+        if (!ready) {
+          setError(t('registrationBackendError'));
+          return;
+        }
       }
       // Hard navigation to avoid state/middleware race.
       window.location.assign(`/${locale}/subscription`);

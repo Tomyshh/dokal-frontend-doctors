@@ -29,6 +29,8 @@ interface AuthContextType {
   loading: boolean;
   loggingOut: boolean;
   signOut: () => Promise<void>;
+  /** Refetch profile + subscription from backend (keeps session). */
+  refreshUserData: () => Promise<void>;
   refreshSubscription: () => Promise<void>;
 }
 
@@ -40,6 +42,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   loggingOut: false,
   signOut: async () => {},
+  refreshUserData: async () => {},
   refreshSubscription: async () => {},
 });
 
@@ -101,6 +104,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       setSubscriptionStatus(null);
     }
   }, []);
+
+  const refreshUserData = useCallback(async () => {
+    await fetchUserData();
+  }, [fetchUserData]);
 
   const refreshSubscription = useCallback(async () => {
     try {
@@ -208,6 +215,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         loggingOut,
         signOut,
+        refreshUserData,
         refreshSubscription,
       }}
     >
