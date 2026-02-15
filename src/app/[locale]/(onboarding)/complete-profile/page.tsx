@@ -186,13 +186,15 @@ export default function CompleteProfilePage() {
       // Refresh in-memory auth profile/subscription (role changes, etc.)
       await refreshUserData();
 
-      // If register response isn't complete yet, wait for /practitioners/me to become consistent.
+      // Always wait for /practitioners/me to be consistent before navigating.
+      // This prevents subscription page guards from bouncing back to this form in a loop.
       if (!isPractitionerProfileComplete(registered)) {
-        const ready = await waitForPractitionerReady();
-        if (!ready) {
-          setError(t('registrationBackendError'));
-          return;
-        }
+        // keep going to the poll below
+      }
+      const ready = await waitForPractitionerReady();
+      if (!ready) {
+        setError(t('registrationBackendError'));
+        return;
       }
       // Hard navigation to avoid state/middleware race.
       window.location.assign(`/${locale}/subscription`);

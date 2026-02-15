@@ -30,13 +30,17 @@ export async function getMyPractitionerOrNull(): Promise<Practitioner | null> {
 
 export function isPractitionerProfileComplete(practitioner: Practitioner | null | undefined): boolean {
   if (!practitioner) return false;
-  return !!(
-    practitioner.phone &&
-    practitioner.city &&
-    practitioner.address_line &&
-    practitioner.zip_code &&
-    practitioner.license_number &&
-    practitioner.specialty_id
+
+  const hasText = (v: unknown) => typeof v === 'string' && v.trim().length > 0;
+  const hasSpecialty = hasText(practitioner.specialty_id) || hasText(practitioner.specialties?.id);
+
+  return (
+    hasText(practitioner.phone) &&
+    hasText(practitioner.city) &&
+    hasText(practitioner.address_line) &&
+    hasText(practitioner.zip_code) &&
+    hasText(practitioner.license_number) &&
+    hasSpecialty
   );
 }
 

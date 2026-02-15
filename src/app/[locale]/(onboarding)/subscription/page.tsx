@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
 import { Input } from '@/components/ui/Input';
@@ -308,11 +308,46 @@ export default function OnboardingSubscriptionPage() {
     return !isPractitionerProfileComplete(practitioner);
   })();
 
+  const [waitingForProfile, setWaitingForProfile] = useState(false);
+  const profileMissingButMayPropagate = useMemo(() => {
+    // Right after registration, backend might need a short delay for /practitioners/me to become consistent.
+    // In that case, we should NOT redirect back to the form (loop); we should wait + retry.
+    return !!profile && !loadingPractitioner && !practitionerError && needsProfileCompletion;
+  }, [profile, loadingPractitioner, practitionerError, needsProfileCompletion]);
+
   useEffect(() => {
-    if (needsProfileCompletion) {
-      router.replace(`/${locale}/complete-profile`);
+    if (!profileMissingButMayPropagate) {
+      setWaitingForProfile(false);
+      return;
     }
-  }, [needsProfileCompletion, router, locale]);
+    setWaitingForProfile(true);
+
+    let cancelled = false;
+    const started = Date.now();
+    const tick = async () => {
+      // Stop waiting after ~20s and let the user go back manually.
+      if (Date.now() - started > 20_000) {
+        if (!cancelled) setWaitingForProfile(false);
+        return;
+      }
+      try {
+        const res = await refetchPractitioner();
+        const next = res.data;
+        if (isPractitionerProfileComplete(next)) {
+          if (!cancelled) setWaitingForProfile(false);
+          return;
+        }
+      } catch {
+        // ignore and retry
+      }
+      if (!cancelled) setTimeout(tick, 1200);
+    };
+    setTimeout(tick, 700);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [profileMissingButMayPropagate, refetchPractitioner]);
 
   if (loadingPractitioner) {
     return (
@@ -347,7 +382,35 @@ export default function OnboardingSubscriptionPage() {
   }
 
   if (needsProfileCompletion) {
-    return null;
+    if (waitingForProfile) {
+      return (
+        <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
+          <Spinner size="lg" />
+          <p className="text-sm text-muted-foreground">
+            {t('redirecting')}
+          </p>
+          <p className="text-xs text-muted-foreground max-w-md">
+            Finalisation de votre profil en cours… Si cela prend trop de temps, vous pourrez revenir au formulaire.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
+          Votre profil praticien n’est pas encore complet côté serveur. Veuillez revenir au formulaire et réessayer.
+        </div>
+        <div className="flex gap-3">
+          <Button type="button" variant="outline" onClick={() => router.replace(`/${locale}/complete-profile`)}>
+            {t('backToProfile')}
+          </Button>
+          <Button type="button" onClick={() => refetchPractitioner()}>
+            {t('retry')}
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   const handleChange = useCallback(
