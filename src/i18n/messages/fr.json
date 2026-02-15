@@ -452,7 +452,20 @@
     "host": "Hébergeur",
     "address": "Adresse",
     "email": "E-mail",
-    "phone": "Téléphone"
+    "phone": "Téléphone",
+    "lastUpdated": "Dernière mise à jour : 15 février 2026",
+    "section1Title": "1. Éditeur et hébergeur",
+    "section1Content": "Les informations relatives à l'éditeur et à l'hébergeur du site Dokal sont présentées dans le tableau ci-dessous.",
+    "section2Title": "2. Propriété intellectuelle",
+    "section2Content": "L'ensemble des éléments du site et de la plateforme Dokal (textes, graphismes, logos, icônes, logiciels, base de données) est protégé par le droit de la propriété intellectuelle. Toute reproduction, représentation, modification ou exploitation non autorisée de tout ou partie de ces éléments, sans l'accord préalable de Dokal, est strictement interdite et constitue une contrefaçon.",
+    "section3Title": "3. Limitation de responsabilité",
+    "section3Content": "Dokal s'efforce d'assurer l'exactitude et la mise à jour des informations diffusées sur ce site. Toutefois, Dokal ne peut garantir l'exactitude, la précision ou l'exhaustivité des informations. En conséquence, Dokal décline toute responsabilité pour toute imprécision, inexactitude ou omission portant sur des informations disponibles sur le site. Les liens hypertextes vers d'autres sites ne sauraient engager la responsabilité de Dokal.",
+    "section4Title": "4. Liens hypertextes",
+    "section4Content": "Le site peut contenir des liens vers d'autres sites. Dokal n'exerce aucun contrôle sur ces sites et décline toute responsabilité quant à leur contenu. La création de liens vers le site Dokal est soumise à l'accord préalable de l'éditeur. Les liens profonds (deep linking) et le framing sont interdits.",
+    "section5Title": "5. Droit applicable et juridiction",
+    "section5Content": "Les présentes mentions légales sont régies par le droit français. En cas de litige, et à défaut de résolution amiable, les tribunaux français seront seuls compétents.",
+    "section6Title": "6. Contact",
+    "section6Content": "Pour toute question relative aux mentions légales ou au service Dokal, vous pouvez nous contacter à l'adresse : contact@dokal.life ou via la page Contact."
   },
   "privacy": {
     "title": "Politique de confidentialité",

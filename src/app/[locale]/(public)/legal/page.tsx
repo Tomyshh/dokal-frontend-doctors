@@ -4,6 +4,8 @@ import { Link } from '@/i18n/routing';
 import { ArrowLeft } from 'lucide-react';
 import { company } from '@/config/company';
 
+const LEGAL_SECTIONS_COUNT = 6;
+
 export default async function LegalPage() {
   const t = await getTranslations('legal');
   const tl = await getTranslations('landing');
@@ -18,6 +20,8 @@ export default async function LegalPage() {
     { label: t('email'), value: company.email, ltr: true },
     { label: t('phone'), value: company.phoneE164, ltr: true },
   ];
+
+  const sections = Array.from({ length: LEGAL_SECTIONS_COUNT }, (_, i) => i + 1);
 
   return (
     <div className="min-h-screen bg-white">
@@ -42,25 +46,41 @@ export default async function LegalPage() {
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
           {t('title')}
         </h1>
-        <p className="mt-6 text-base text-gray-700 leading-relaxed">{t('intro')}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{t('lastUpdated')}</p>
 
-        <div className="mt-10 rounded-2xl border border-gray-100 overflow-hidden">
-          <dl className="divide-y divide-gray-100">
-            {rows.map((row) => (
-              <div
-                key={row.label}
-                className="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
-              >
-                <dt className="text-sm font-medium text-gray-900">{row.label}</dt>
-                <dd
-                  className="text-sm text-gray-700 sm:text-right"
-                  dir={row.ltr ? 'ltr' : undefined}
-                >
-                  {row.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
+        <p className="mt-8 text-base text-gray-700 leading-relaxed">{t('intro')}</p>
+
+        <div className="mt-12 space-y-10">
+          {sections.map((n) => (
+            <section key={n}>
+              <h2 className="text-xl font-semibold text-gray-900 mb-3">
+                {t(`section${n}Title`)}
+              </h2>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {t(`section${n}Content`)}
+              </p>
+              {n === 1 && (
+                <div className="mt-6 rounded-2xl border border-gray-100 overflow-hidden">
+                  <dl className="divide-y divide-gray-100">
+                    {rows.map((row) => (
+                      <div
+                        key={row.label}
+                        className="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                      >
+                        <dt className="text-sm font-medium text-gray-900">{row.label}</dt>
+                        <dd
+                          className="text-sm text-gray-700 sm:text-right"
+                          dir={row.ltr ? 'ltr' : undefined}
+                        >
+                          {row.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              )}
+            </section>
+          ))}
         </div>
       </main>
 
