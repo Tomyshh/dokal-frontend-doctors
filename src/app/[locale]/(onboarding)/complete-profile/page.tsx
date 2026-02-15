@@ -192,13 +192,18 @@ export default function CompleteProfilePage() {
       await api.post('/practitioners/register', payload);
       // Ensure practitioner profile fields used by the onboarding guards are persisted.
       // Some backends create the practitioner in /register but update contact/address fields via /crm/profile.
-      await api.patch('/crm/profile', {
-        phone: payload.phone,
-        city: payload.city,
-        address_line: payload.address_line,
-        zip_code: payload.zip_code,
-        email: payload.email,
-      });
+      try {
+        await api.patch('/crm/profile', {
+          phone: payload.phone,
+          city: payload.city,
+          address_line: payload.address_line,
+          zip_code: payload.zip_code,
+          email: payload.email,
+        });
+      } catch {
+        // Non-fatal: some environments may not expose this endpoint for onboarding.
+        // We'll still rely on the practitioner readiness check below.
+      }
 
       // Refresh in-memory auth profile/subscription (role changes, etc.)
       await refreshUserData();

@@ -79,6 +79,7 @@
     "checkEmail": "A confirmation email has been sent. Please check your inbox to complete signup.",
     "accountCreated": "Account created. You can now sign in.",
     "signupError": "Unable to create account. Please try again.",
+    "registrationBackendError": "Account created but profile registration failed. Please contact support.",
     "invalidCredentials": "Invalid email or password",
     "resetSent": "A reset link has been sent to your email",
     "accessDenied": "Access restricted to practitioners",
