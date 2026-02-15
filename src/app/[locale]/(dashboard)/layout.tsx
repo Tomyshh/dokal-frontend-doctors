@@ -15,9 +15,7 @@ import { useRouter } from 'next/navigation';
 import { Clock, X } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
-import type { Practitioner } from '@/types';
-import { getPractitionerForUserId, isPractitionerProfileComplete } from '@/lib/practitioner';
+import { getMyPractitionerOrNull, isPractitionerProfileComplete } from '@/lib/practitioner';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { loading, user, profile, subscriptionStatus, signOut } = useAuth();
@@ -39,10 +37,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     isLoading: loadingPractitioner,
     isError: practitionerError,
   } = useQuery({
-    queryKey: ['practitioner', profile?.id],
+    queryKey: ['practitioner', 'me', profile?.id],
     queryFn: async () => {
-      if (!profile?.id) return null;
-      return await getPractitionerForUserId(profile.id);
+      return await getMyPractitionerOrNull();
     },
     enabled: !!profile?.id && (profile?.role === 'practitioner' || profile?.role === 'admin'),
     retry: 1,

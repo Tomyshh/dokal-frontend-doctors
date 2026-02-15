@@ -35,7 +35,7 @@ import type { Practitioner } from '@/types';
 import { useRouter } from 'next/navigation';
 import { Spinner } from '@/components/ui/Spinner';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
-import { getPractitionerForUserId, isPractitionerProfileComplete } from '@/lib/practitioner';
+import { getMyPractitionerOrNull, isPractitionerProfileComplete } from '@/lib/practitioner';
 
 type CardForm = {
   cardNumber: string;
@@ -289,10 +289,9 @@ export default function OnboardingSubscriptionPage() {
     error: practitionerErrorObj,
     refetch: refetchPractitioner,
   } = useQuery({
-    queryKey: ['practitioner', profile?.id],
+    queryKey: ['practitioner', 'me', profile?.id],
     queryFn: async () => {
-      if (!profile?.id) return null;
-      return await getPractitionerForUserId(profile.id);
+      return await getMyPractitionerOrNull();
     },
     enabled: !!profile?.id,
     retry: 5,

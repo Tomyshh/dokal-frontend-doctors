@@ -13,7 +13,7 @@ import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { CityCombobox } from '@/components/auth/CityCombobox';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
 import { Spinner } from '@/components/ui/Spinner';
-import { getPractitionerForUserId, isPractitionerProfileComplete } from '@/lib/practitioner';
+import { getMyPractitionerOrNull, isPractitionerProfileComplete } from '@/lib/practitioner';
 
 type FormState = {
   firstName: string;
@@ -54,7 +54,6 @@ export default function CompleteProfilePage() {
 
   // Resolve email and user ID: prefer backend profile, fall back to Supabase user (Google OAuth)
   const resolvedEmail = profile?.email || user?.email || null;
-  const resolvedUserId = profile?.id || user?.id || null;
 
   // If profile or user arrives after initial render, prefill basic fields once.
   // For Google OAuth users, user_metadata may have given_name/family_name before the backend profile exists.
@@ -70,13 +69,13 @@ export default function CompleteProfilePage() {
   }, [profile, user, googleMeta]);
 
   // If a practitioner already exists (e.g. after a redirect back), prefill missing fields from it.
-  // Use resolvedUserId so Google OAuth users (where profile may be null initially) also get prefilled.
   useEffect(() => {
-    if (!resolvedUserId) return;
+    if (!user) return;
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await api.get<Practitioner>(`/practitioners/${resolvedUserId}`);
+        const data = await getMyPractitionerOrNull();
+        if (!data) return;
         if (cancelled) return;
         setForm((prev) => ({
           ...prev,
@@ -95,7 +94,7 @@ export default function CompleteProfilePage() {
     return () => {
       cancelled = true;
     };
-  }, [resolvedUserId]);
+  }, [user]);
 
   const phoneInvalid = useMemo(() => {
     if (form.phone.length === 0) return false;
@@ -118,13 +117,13 @@ export default function CompleteProfilePage() {
   };
 
   const waitForPractitionerReady = useCallback(
-    async (userId: string) => {
+    async () => {
       const started = Date.now();
       let delay = 400;
       // Some backends use async jobs / eventual consistency — allow a bit more time.
       while (Date.now() - started < 25_000) {
         try {
-          const data = await getPractitionerForUserId(userId);
+          const data = await getMyPractitionerOrNull();
           if (isPractitionerProfileComplete(data)) return true;
         } catch {
           // not ready yet
@@ -182,27 +181,14 @@ export default function CompleteProfilePage() {
         organization_type: 'individual',
       };
 
-      await api.post('/practitioners/register', payload);
-      // Ensure practitioner profile fields used by the onboarding guards are persisted.
-      // Some backends create the practitioner in /register but update contact/address fields via /crm/profile.
-      try {
-        await api.patch('/crm/profile', {
-          phone: payload.phone,
-          city: payload.city,
-          address_line: payload.address_line,
-          zip_code: payload.zip_code,
-          email: payload.email,
-        });
-      } catch {
-        // Non-fatal: some environments may not expose this endpoint for onboarding.
-        // We'll still rely on the practitioner readiness check below.
-      }
+      const { data: registered } = await api.post<Practitioner>('/practitioners/register', payload);
 
       // Refresh in-memory auth profile/subscription (role changes, etc.)
       await refreshUserData();
 
-      if (resolvedUserId) {
-        const ready = await waitForPractitionerReady(resolvedUserId);
+      // If register response isn't complete yet, wait for /practitioners/me to become consistent.
+      if (!isPractitionerProfileComplete(registered)) {
+        const ready = await waitForPractitionerReady();
         if (!ready) {
           setError(t('registrationBackendError'));
           return;

@@ -31,7 +31,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Select } from '@/components/ui/Select';
 import { localeNames, type Locale } from '@/i18n/config';
 import { usePathname, useRouter } from '@/i18n/routing';
-import { getPractitionerForUserId } from '@/lib/practitioner';
+import { getMyPractitionerOrNull } from '@/lib/practitioner';
 import {
   changePlan,
   downgradePlan,
@@ -76,8 +76,7 @@ export default function SettingsPage() {
   const { data: practitioner, isLoading: loadingPractitioner } = useQuery({
     queryKey: ['practitioner-profile'],
     queryFn: async () => {
-      if (!profile?.id) return null;
-      return await getPractitionerForUserId(profile.id);
+      return await getMyPractitionerOrNull();
     },
     enabled: !!profile?.id,
   });
