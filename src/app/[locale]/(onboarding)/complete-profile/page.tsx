@@ -181,22 +181,30 @@ export default function CompleteProfilePage() {
         organization_type: 'individual',
       };
 
-      const { data: registered } = await api.post<Practitioner>('/practitioners/register', payload);
+      const { data: raw } = await api.post<Practitioner | { practitioner: Practitioner }>(
+        '/practitioners/register',
+        payload,
+      );
+      const registered = (raw as { practitioner?: Practitioner })?.practitioner ?? (raw as Practitioner);
 
       // Refresh in-memory auth profile/subscription (role changes, etc.)
       await refreshUserData();
 
-      // Always wait for /practitioners/me to be consistent before navigating.
-      // This prevents subscription page guards from bouncing back to this form in a loop.
-      if (!isPractitionerProfileComplete(registered)) {
-        // keep going to the poll below
-      }
-      const ready = await waitForPractitionerReady();
-      if (!ready) {
-        setError(t('registrationBackendError'));
+      // If the 201 response already has complete data, navigate immediately.
+      if (isPractitionerProfileComplete(registered)) {
+        window.location.assign(`/${locale}/subscription`);
         return;
       }
-      // Hard navigation to avoid state/middleware race.
+
+      // Otherwise poll /practitioners/me (with cache-busting) for up to 15s.
+      const ready = await waitForPractitionerReady();
+      if (ready) {
+        window.location.assign(`/${locale}/subscription`);
+        return;
+      }
+
+      // Timeout: go to subscription anyway — it will show "Finalisation..." and retry.
+      // Never block the user with "registration failed" after a successful 201.
       window.location.assign(`/${locale}/subscription`);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: { message?: string } } } };
