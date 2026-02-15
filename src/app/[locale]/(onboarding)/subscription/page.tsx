@@ -315,6 +315,37 @@ export default function OnboardingSubscriptionPage() {
     return !!profile && !loadingPractitioner && !practitionerError && needsProfileCompletion;
   }, [profile, loadingPractitioner, practitionerError, needsProfileCompletion]);
 
+  // All hooks must run before any conditional return (React rules of hooks)
+  const handleChange = useCallback(
+    <K extends keyof CardForm>(key: K, value: CardForm[K]) => {
+      setForm((prev) => ({ ...prev, [key]: value }));
+      setError('');
+    },
+    []
+  );
+
+  const handleCardNumberChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleChange('cardNumber', formatCardNumber(e.target.value));
+    },
+    [handleChange]
+  );
+
+  const handleExpiryChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleChange('expirationDate', formatExpiry(e.target.value));
+    },
+    [handleChange]
+  );
+
+  const handleCvvChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+      handleChange('cvv', digits);
+    },
+    [handleChange]
+  );
+
   useEffect(() => {
     if (!profileMissingButMayPropagate) {
       setWaitingForProfile(false);
@@ -412,36 +443,6 @@ export default function OnboardingSubscriptionPage() {
       </div>
     );
   }
-
-  const handleChange = useCallback(
-    <K extends keyof CardForm>(key: K, value: CardForm[K]) => {
-      setForm((prev) => ({ ...prev, [key]: value }));
-      setError('');
-    },
-    []
-  );
-
-  const handleCardNumberChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      handleChange('cardNumber', formatCardNumber(e.target.value));
-    },
-    [handleChange]
-  );
-
-  const handleExpiryChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      handleChange('expirationDate', formatExpiry(e.target.value));
-    },
-    [handleChange]
-  );
-
-  const handleCvvChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
-      handleChange('cvv', digits);
-    },
-    [handleChange]
-  );
 
   const isFormValid =
     rawCardNumber.length >= 13 &&
