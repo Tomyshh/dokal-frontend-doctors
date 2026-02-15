@@ -13,7 +13,7 @@ import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { CityCombobox } from '@/components/auth/CityCombobox';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
 import { Spinner } from '@/components/ui/Spinner';
-import { getMyPractitionerOrNull, isPractitionerProfileComplete } from '@/lib/practitioner';
+import { getMyPractitionerOrNull, isPractitionerProfileComplete, unwrapPractitioner } from '@/lib/practitioner';
 
 type FormState = {
   firstName: string;
@@ -181,11 +181,8 @@ export default function CompleteProfilePage() {
         organization_type: 'individual',
       };
 
-      const { data: raw } = await api.post<Practitioner | { practitioner: Practitioner }>(
-        '/practitioners/register',
-        payload,
-      );
-      const registered = (raw as { practitioner?: Practitioner })?.practitioner ?? (raw as Practitioner);
+      const { data: raw } = await api.post<unknown>('/practitioners/register', payload);
+      const registered = unwrapPractitioner(raw) as Practitioner;
 
       // Refresh in-memory auth profile/subscription (role changes, etc.)
       await refreshUserData();
