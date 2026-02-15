@@ -17,6 +17,7 @@ import { Link } from '@/i18n/routing';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import type { Practitioner } from '@/types';
+import { getPractitionerForUserId, isPractitionerProfileComplete } from '@/lib/practitioner';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { loading, user, profile, subscriptionStatus, signOut } = useAuth();
@@ -40,8 +41,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   } = useQuery({
     queryKey: ['practitioner', profile?.id],
     queryFn: async () => {
-      const { data } = await api.get<Practitioner>(`/practitioners/${profile?.id}`);
-      return data;
+      if (!profile?.id) return null;
+      return await getPractitionerForUserId(profile.id);
     },
     enabled: !!profile?.id && (profile?.role === 'practitioner' || profile?.role === 'admin'),
     retry: 1,
@@ -51,16 +52,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     if (!profile) return false;
     if (profile.role !== 'practitioner' && profile.role !== 'admin') return false;
     if (loadingPractitioner) return false;
-    if (practitionerError) return true;
+    // Avoid redirect loops on transient API/network errors.
+    if (practitionerError) return false;
     if (!practitioner) return true;
-    return !(
-      practitioner.phone &&
-      practitioner.city &&
-      practitioner.address_line &&
-      practitioner.zip_code &&
-      practitioner.license_number &&
-      practitioner.specialty_id
-    );
+    return !isPractitionerProfileComplete(practitioner);
   })();
 
   // Redirect to onboarding if we know for sure the user has no access

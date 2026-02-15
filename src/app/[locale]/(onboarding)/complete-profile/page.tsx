@@ -13,6 +13,7 @@ import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { CityCombobox } from '@/components/auth/CityCombobox';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
 import { Spinner } from '@/components/ui/Spinner';
+import { getPractitionerForUserId, isPractitionerProfileComplete } from '@/lib/practitioner';
 
 type FormState = {
   firstName: string;
@@ -117,22 +118,14 @@ export default function CompleteProfilePage() {
   };
 
   const waitForPractitionerReady = useCallback(
-    async (id: string) => {
+    async (userId: string) => {
       const started = Date.now();
       let delay = 400;
       // Some backends use async jobs / eventual consistency — allow a bit more time.
       while (Date.now() - started < 25_000) {
         try {
-          const { data } = await api.get<Practitioner>(`/practitioners/${id}`);
-          const ready =
-            !!data &&
-            !!data.phone &&
-            !!data.city &&
-            !!data.address_line &&
-            !!data.zip_code &&
-            !!data.license_number &&
-            !!data.specialty_id;
-          if (ready) return true;
+          const data = await getPractitionerForUserId(userId);
+          if (isPractitionerProfileComplete(data)) return true;
         } catch {
           // not ready yet
         }
