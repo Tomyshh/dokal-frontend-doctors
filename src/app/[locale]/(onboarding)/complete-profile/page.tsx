@@ -77,11 +77,19 @@ export default function CompleteProfilePage() {
         const data = await getMyPractitionerOrNull();
         if (!data) return;
         if (cancelled) return;
+        const dataObj = data as unknown as Record<string, unknown>;
+        const specialtyId =
+          (dataObj.specialty_id as string) ||
+          (dataObj.specialtyId as string) ||
+          ((dataObj.specialty as Record<string, unknown>)?.id as string) ||
+          ((dataObj.specialties as Record<string, unknown>)?.id as string) ||
+          (Array.isArray(dataObj.specialties) && (dataObj.specialties[0] as Record<string, unknown>)?.id as string) ||
+          '';
         setForm((prev) => ({
           ...prev,
           phone: prev.phone || (data.phone ? data.phone.replace(/\D/g, '') : ''),
           city: prev.city || data.city || '',
-          specialtyId: prev.specialtyId || data.specialty_id || '',
+          specialtyId: prev.specialtyId || specialtyId || '',
           addressLine: prev.addressLine || data.address_line || '',
           zipCode: prev.zipCode || data.zip_code || '',
           licenseNumber: prev.licenseNumber || data.license_number || '',

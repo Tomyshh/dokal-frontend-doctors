@@ -72,7 +72,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
 
     // Must complete practitioner details before subscription step
-    if (needsProfileCompletion) {
+    // Exception: if user already has an active subscription, they completed their profile
+    // (avoids redirect loop when API returns practitioner without specialty in some edge cases)
+    if (needsProfileCompletion && !hasAccess) {
       router.replace(`/${locale}/complete-profile`);
       return;
     }
