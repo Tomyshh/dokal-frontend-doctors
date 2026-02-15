@@ -13,7 +13,6 @@ function getHttpStatus(err: unknown): number | undefined {
 export async function getMyPractitioner(): Promise<Practitioner> {
   const { data } = await api.get<Practitioner>('/practitioners/me', {
     params: { _t: Date.now() },
-    headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
   });
   return data;
 }
