@@ -409,7 +409,7 @@ export interface ExternalEvent {
   start_at: string;
   end_at: string;
   date: string;
-  source: 'google';
+  source: 'google' | 'manual';
   type_detected: ExternalEventType;
   created_at: string;
   updated_at: string;
@@ -448,4 +448,20 @@ export interface PatientView {
   allergies: HealthItem[];
   medications: HealthItem[];
   appointment_history: Appointment[];
+}
+
+// ==========================================
+// CRM Patients (search/list)
+// ==========================================
+
+export interface CrmPatientListItem {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  date_of_birth: string | null;
+  sex: SexType | null;
+  city: string | null;
+  avatar_url: string | null;
 }

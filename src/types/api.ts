@@ -139,6 +139,19 @@ export interface CreateCrmPatientRequest {
   city?: string;
 }
 
+export interface CreateCrmAppointmentRequest {
+  patient_id: string;
+  practitioner_id?: string;
+  reason_id?: string | null;
+  appointment_date: string;
+  start_time: string;
+  end_time: string;
+  visited_before?: boolean;
+  /** Optional: immediately create as confirmed */
+  status?: 'pending' | 'confirmed';
+  notes?: string | null;
+}
+
 // ==========================================
 // Practitioner Registration
 // ==========================================
@@ -303,6 +316,24 @@ export interface GoogleCalendarSyncResponse {
 export interface CalendarItemsResponse {
   items: import('@/types').CalendarItem[];
   total: number;
+}
+
+// ==========================================
+// CRM External Events (manual + imported)
+// ==========================================
+
+export interface CreateExternalEventRequest {
+  /** yyyy-MM-dd */
+  date: string;
+  /** HH:mm or HH:mm:ss */
+  start_time: string;
+  /** HH:mm or HH:mm:ss */
+  end_time: string;
+  title: string;
+  description?: string | null;
+  location?: string | null;
+  /** 'appointment' = RDV détecté / 'busy' = indisponibilité */
+  type_detected: import('@/types').ExternalEventType;
 }
 
 // ==========================================

@@ -19,11 +19,6 @@ interface CalendarAppointmentsResponse {
   total: number;
 }
 
-interface ExternalEventsResponse {
-  events: ExternalEvent[];
-  total: number;
-}
-
 /**
  * Fetches appointments for a date range (calendar views).
  * Uses /crm/appointments for personal calendar,
@@ -63,30 +58,7 @@ export function useCalendarAppointments({
  * Fetches external events (Google Calendar) for a date range.
  * Returns an empty array when the endpoint is not yet available (404).
  */
-export function useExternalEvents({
-  from,
-  to,
-}: {
-  from: string;
-  to: string;
-}) {
-  return useQuery({
-    queryKey: ['external-events', from, to],
-    queryFn: async () => {
-      try {
-        const { data } = await api.get<ExternalEventsResponse>(
-          '/integrations/google-calendar/events',
-          { params: { from, to } },
-        );
-        return data.events;
-      } catch {
-        // Endpoint may not exist yet on the backend — gracefully return empty
-        return [] as ExternalEvent[];
-      }
-    },
-    enabled: !!from && !!to,
-  });
-}
+// External events hooks were moved to `src/hooks/useExternalEvents.ts`
 
 /**
  * Groups appointments by date for month/week views.

@@ -14,21 +14,27 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useCrmOrganization } from '@/hooks/useOrganization';
 import {
   useCalendarAppointments,
-  useExternalEvents,
   groupCalendarItemsByDate,
   type CalendarView,
 } from '@/hooks/useCalendarAppointments';
+import { useExternalEvents } from '@/hooks/useExternalEvents';
 import { Spinner } from '@/components/ui/Spinner';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
+import { Button } from '@/components/ui/Button';
 import CalendarHeader from '@/components/calendar/CalendarHeader';
 import CalendarMonthView from '@/components/calendar/CalendarMonthView';
 import CalendarWeekView from '@/components/calendar/CalendarWeekView';
 import CalendarDayView from '@/components/calendar/CalendarDayView';
 import CalendarEventSidebar from '@/components/calendar/CalendarEventSidebar';
 import type { CalendarItem } from '@/types';
+import { ExternalEventDialog } from '@/components/shared/ExternalEventDialog';
+import { useCreateExternalEvent } from '@/hooks/useExternalEvents';
+import { Plus, CalendarPlus } from 'lucide-react';
+import { CreateCrmAppointmentDialog } from '@/components/appointments/CreateCrmAppointmentDialog';
 
 export default function CalendarPage() {
   const t = useTranslations('calendar');
+  const ta = useTranslations('appointments');
   const { profile } = useAuth();
   const { data: organization } = useCrmOrganization();
 
@@ -38,6 +44,10 @@ export default function CalendarPage() {
   /** null = my calendar, 'all' = all org, uuid = specific colleague */
   const [selectedColleague, setSelectedColleague] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<CalendarItem | null>(null);
+  const [createExternalOpen, setCreateExternalOpen] = useState(false);
+  const [createAppointmentOpen, setCreateAppointmentOpen] = useState(false);
+
+  const createExternalMutation = useCreateExternalEvent();
 
   // ─── Date range calculation ─────────────────────────────────────────
   const { from, to } = useMemo(() => {
@@ -114,8 +124,20 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4">
-      {/* Page title */}
-      <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+      {/* Page title + actions */}
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setCreateAppointmentOpen(true)} className="gap-2">
+            <CalendarPlus className="h-4 w-4" />
+            {ta('newAppointment')}
+          </Button>
+          <Button variant="outline" onClick={() => setCreateExternalOpen(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            {t('addExternalEvent')}
+          </Button>
+        </div>
+      </div>
 
       {/* Header: navigation, view toggle, colleague selector */}
       <CalendarHeader
@@ -204,6 +226,22 @@ export default function CalendarPage() {
           />
         </>
       )}
+
+      <ExternalEventDialog
+        open={createExternalOpen}
+        onClose={() => setCreateExternalOpen(false)}
+        defaultDate={dayKey}
+        submitting={createExternalMutation.isPending}
+        onSubmit={async (payload) => {
+          await createExternalMutation.mutateAsync(payload);
+        }}
+      />
+
+      <CreateCrmAppointmentDialog
+        open={createAppointmentOpen}
+        onClose={() => setCreateAppointmentOpen(false)}
+        defaultDate={dayKey}
+      />
     </div>
   );
 }

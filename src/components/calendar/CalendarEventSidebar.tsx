@@ -13,6 +13,9 @@ import { X, User, Clock, FileText, Stethoscope, ExternalLink, Globe } from 'luci
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import type { CalendarItem } from '@/types';
+import { useDeleteExternalEvent } from '@/hooks/useExternalEvents';
+import { Dialog } from '@/components/ui/Dialog';
+import { useState } from 'react';
 
 interface CalendarEventSidebarProps {
   item: CalendarItem | null;
@@ -26,12 +29,15 @@ export default function CalendarEventSidebar({
   const t = useTranslations('calendar');
   const ta = useTranslations('appointments');
   const locale = useLocale();
+  const tc = useTranslations('common');
 
   if (!item) return null;
 
   const colors = getItemColors(item);
   const startTime = getItemStartTime(item);
   const endTime = getItemEndTime(item);
+  const deleteExternalMutation = useDeleteExternalEvent();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // ─── External event sidebar ──────────────────────────────────────────
   if (item.kind === 'external_event') {
@@ -118,11 +124,46 @@ export default function CalendarEventSidebar({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-border p-4">
+        <div className="border-t border-border p-4 flex items-center justify-between gap-3">
           <Button variant="outline" size="sm" onClick={onClose}>
-            {t('viewAppointment')}
+            {tc('close')}
           </Button>
+          {evt.source === 'manual' && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              {t('deleteExternalEvent')}
+            </Button>
+          )}
         </div>
+
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          title={t('deleteExternalEvent')}
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">{t('deleteExternalEventConfirm')}</p>
+            <div className="flex gap-3 justify-end pt-2">
+              <Button variant="ghost" onClick={() => setDeleteDialogOpen(false)}>
+                {tc('cancel')}
+              </Button>
+              <Button
+                variant="destructive"
+                loading={deleteExternalMutation.isPending}
+                onClick={async () => {
+                  await deleteExternalMutation.mutateAsync(evt.id);
+                  setDeleteDialogOpen(false);
+                  onClose();
+                }}
+              >
+                {t('deleteExternalEvent')}
+              </Button>
+            </div>
+          </div>
+        </Dialog>
       </div>
     );
   }
