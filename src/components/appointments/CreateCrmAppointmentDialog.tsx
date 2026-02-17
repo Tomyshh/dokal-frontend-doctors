@@ -103,36 +103,50 @@ export function CreateCrmAppointmentDialog({
 
   const [error, setError] = useState('');
 
-  // Reset on open
+  // Reset ONLY once per dialog open (avoid wiping user input when async data arrives)
+  const initializedRef = useRef(false);
+  useEffect(() => {
+    if (open) {
+      if (initializedRef.current) return;
+      initializedRef.current = true;
+
+      setStep('patient');
+      setError('');
+      setPatientQuery('');
+      setPatientOpen(false);
+      setSelectedPatient(null);
+      setCreateNewPatient(false);
+      setPFirstName('');
+      setPLastName('');
+      setPPhone('');
+      setPEmail('');
+      setPCity('');
+      setPSex('');
+      setPDob('');
+      setDate(defaultDate || todayStr());
+      setStartTime(defaultStartTime || '09:00');
+      setEndTime('09:30');
+      setReasonId('');
+      setVisitedBefore(false);
+      setStatus('confirmed');
+      setNotes('');
+      // Don't derive practitioner here (members may still be loading)
+      setPractitionerId('');
+    } else {
+      initializedRef.current = false;
+    }
+  }, [open, defaultDate, defaultStartTime]);
+
+  // When members arrive, set a default practitioner for secretaries without resetting the form
   useEffect(() => {
     if (!open) return;
-    setStep('patient');
-    setError('');
-    setPatientQuery('');
-    setSelectedPatient(null);
-    setCreateNewPatient(false);
-    setPFirstName('');
-    setPLastName('');
-    setPPhone('');
-    setPEmail('');
-    setPCity('');
-    setPSex('');
-    setPDob('');
-    setDate(defaultDate || todayStr());
-    setStartTime(defaultStartTime || '09:00');
-    setEndTime('09:30');
-    setReasonId('');
-    setVisitedBefore(false);
-    setStatus('confirmed');
-    setNotes('');
-    // preselect practitioner if not secretary: backend can infer, but keep empty
-    if (isSecretary && practitionerMembers.length > 0) {
-      const first = practitionerMembers.find((m) => m.role === 'owner') || practitionerMembers[0];
-      setPractitionerId(first.practitioner?.id || '');
-    } else {
-      setPractitionerId('');
-    }
-  }, [open, defaultDate, defaultStartTime, isSecretary, practitionerMembers]);
+    if (!isSecretary) return;
+    if (practitionerId) return;
+    if (practitionerMembers.length === 0) return;
+    const first = practitionerMembers.find((m) => m.role === 'owner') || practitionerMembers[0];
+    const id = first?.practitioner?.id || '';
+    if (id) setPractitionerId(id);
+  }, [open, isSecretary, practitionerId, practitionerMembers]);
 
   const submitting = createAppointmentMutation.isPending || createPatientMutation.isPending;
 
