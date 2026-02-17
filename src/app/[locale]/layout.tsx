@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { isRtl } from '@/i18n/config';
 import AuthProvider from '@/providers/AuthProvider';
 import QueryProvider from '@/providers/QueryProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
+import IntlProvider from '@/providers/IntlProvider';
 import '../globals.css';
 
 export const metadata: Metadata = {
@@ -29,22 +29,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={rtl ? 'rtl' : 'ltr'}>
       <body>
-        <NextIntlClientProvider
-          messages={messages}
-          onError={(error) => {
-            // Prevent missing messages from crashing the app.
-            // Keep logs in dev for visibility.
-            if (process.env.NODE_ENV !== 'production') {
-              // eslint-disable-next-line no-console
-              console.warn(error);
-            }
-          }}
-          getMessageFallback={({ namespace, key }) => {
-            // Show a stable placeholder instead of throwing on missing translations.
-            // Example: calendar.googleEvent
-            return namespace ? `${namespace}.${key}` : key;
-          }}
-        >
+        <IntlProvider locale={locale} messages={messages}>
           <QueryProvider>
             <AuthProvider>
               <ToastProvider>
@@ -52,7 +37,7 @@ export default async function LocaleLayout({
               </ToastProvider>
             </AuthProvider>
           </QueryProvider>
-        </NextIntlClientProvider>
+        </IntlProvider>
       </body>
     </html>
   );
