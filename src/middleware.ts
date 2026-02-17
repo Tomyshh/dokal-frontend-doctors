@@ -21,7 +21,17 @@ export async function middleware(request: NextRequest) {
   }
 
   // Update Supabase session (refresh token if needed)
-  const { user, supabaseResponse } = await updateSession(request);
+  // Important: ce middleware ne doit jamais faire crasher les routes publiques.
+  let user: any = null;
+  let supabaseResponse = NextResponse.next({ request });
+  try {
+    const result = await updateSession(request);
+    user = result.user;
+    supabaseResponse = result.supabaseResponse;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('updateSession() failed in middleware:', err);
+  }
 
   // Route classification
   const isAuthRoute = new RegExp(`^/${LOCALE_GROUP}/(login|forgot-password|signup|verify-email)`).test(pathname);
