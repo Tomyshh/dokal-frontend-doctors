@@ -101,14 +101,15 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <Image
-                src="/logo/dokal_google_sync.png"
+                src={
+                  gcalStatus?.connected
+                    ? '/logo/dokal_google_sync_activated.png'
+                    : '/logo/dokal_google_sync_deactivated.png'
+                }
                 alt={t('gcalSync')}
                 width={32}
                 height={32}
-                className={cn(
-                  'h-8 w-8 object-contain',
-                  !gcalStatus?.connected && 'grayscale opacity-60'
-                )}
+                className="h-8 w-8 object-contain"
               />
             )}
           </button>
