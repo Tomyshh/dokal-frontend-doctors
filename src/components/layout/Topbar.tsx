@@ -103,10 +103,10 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
               <Image
                 src="/logo/dokal_google_sync.png"
                 alt={t('gcalSync')}
-                width={20}
-                height={20}
+                width={32}
+                height={32}
                 className={cn(
-                  'h-5 w-5',
+                  'h-8 w-8 object-contain',
                   !gcalStatus?.connected && 'grayscale opacity-60'
                 )}
               />
