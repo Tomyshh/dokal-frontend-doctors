@@ -83,14 +83,14 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
 
         {/* Right: Google Calendar sync, language, notifications */}
         <div className="flex items-center gap-2">
-          {/* Google Calendar Sync Indicator */}
+          {/* Google Calendar Sync Indicator (format paysage) */}
           <button
             type="button"
             onClick={handleGoogleCalendarClick}
             title={gcalTitle}
             aria-label={gcalTitle}
             className={cn(
-              'relative h-10 w-10 rounded-xl flex items-center justify-center transition-colors',
+              'relative h-10 min-w-[72px] px-1 rounded-xl flex items-center justify-center transition-colors',
               gcalStatus?.connected
                 ? 'text-emerald-600 hover:bg-emerald-50'
                 : 'text-gray-500 hover:bg-muted',
@@ -107,9 +107,9 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
                     : '/logo/dokal_google_sync_deactivated.png'
                 }
                 alt={t('gcalSync')}
-                width={32}
-                height={32}
-                className="h-8 w-8 object-contain"
+                width={80}
+                height={40}
+                className="h-8 w-auto max-w-[80px] object-contain"
               />
             )}
           </button>
