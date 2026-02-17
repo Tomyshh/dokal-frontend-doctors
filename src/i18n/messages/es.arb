@@ -786,7 +786,13 @@
     "notes": "Notas",
     "viewPatient": "Ver ficha del paciente",
     "viewAppointment": "Ver cita",
-    "now": "Ahora"
+    "now": "Ahora",
+    "externalEvent": "Evento externo",
+    "googleEvent": "Google Calendar",
+    "detectedAppointment": "Cita detectada",
+    "detectedBusy": "No disponible",
+    "source": "Fuente",
+    "type": "Tipo"
   }
 }
 

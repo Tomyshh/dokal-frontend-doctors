@@ -786,7 +786,13 @@
     "notes": "Notes",
     "viewPatient": "View patient file",
     "viewAppointment": "View appointment",
-    "now": "Now"
+    "now": "Now",
+    "externalEvent": "External event",
+    "googleEvent": "Google Calendar",
+    "detectedAppointment": "Detected appointment",
+    "detectedBusy": "Unavailability",
+    "source": "Source",
+    "type": "Type"
   }
 }
 

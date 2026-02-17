@@ -15,7 +15,7 @@ import CalendarEventCard from './CalendarEventCard';
 import { getItemStartTime, getItemEndTime } from '@/hooks/useCalendarAppointments';
 import type { CalendarItem } from '@/types';
 
-const localeMap: Record<string, import('date-fns').Locale> = { fr, en: enUS, he, ru, es };
+const localeMap: Record<string, import('date-fns').Locale> = { fr, en: enUS, he, ru, es, am: enUS };
 
 const HOUR_HEIGHT = 60; // px per hour
 const START_HOUR = 7;

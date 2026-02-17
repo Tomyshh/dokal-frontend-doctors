@@ -29,7 +29,22 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={rtl ? 'rtl' : 'ltr'}>
       <body>
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider
+          messages={messages}
+          onError={(error) => {
+            // Prevent missing messages from crashing the app.
+            // Keep logs in dev for visibility.
+            if (process.env.NODE_ENV !== 'production') {
+              // eslint-disable-next-line no-console
+              console.warn(error);
+            }
+          }}
+          getMessageFallback={({ namespace, key }) => {
+            // Show a stable placeholder instead of throwing on missing translations.
+            // Example: calendar.googleEvent
+            return namespace ? `${namespace}.${key}` : key;
+          }}
+        >
           <QueryProvider>
             <AuthProvider>
               <ToastProvider>

@@ -9,7 +9,7 @@ import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays } fr
 import { fr, enUS, he, ru, es } from 'date-fns/locale';
 import type { CalendarView } from '@/hooks/useCalendarAppointments';
 
-const localeMap: Record<string, import('date-fns').Locale> = { fr, en: enUS, he, ru, es };
+const localeMap: Record<string, import('date-fns').Locale> = { fr, en: enUS, he, ru, es, am: enUS };
 
 interface CalendarHeaderProps {
   currentDate: Date;

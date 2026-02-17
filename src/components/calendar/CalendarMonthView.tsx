@@ -18,7 +18,7 @@ import { getItemColors } from './CalendarEventCard';
 import { getItemStartTime, getItemTitle } from '@/hooks/useCalendarAppointments';
 import type { CalendarItem } from '@/types';
 
-const localeMap: Record<string, import('date-fns').Locale> = { fr, en: enUS, he, ru, es };
+const localeMap: Record<string, import('date-fns').Locale> = { fr, en: enUS, he, ru, es, am: enUS };
 
 interface CalendarMonthViewProps {
   currentDate: Date;
