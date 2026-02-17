@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 import { localeNames, type Locale } from '@/i18n/config';
+import { cn } from '@/lib/utils';
 import {
   CalendarCheck,
   Clock,
@@ -37,11 +38,15 @@ import {
 import { BASE_PRICES_ILS, SEAT_PRICES_ILS, TRIAL_DURATION_DAYS } from '@/lib/subscription';
 import { company } from '@/config/company';
 import axios from 'axios';
+import { isRtl } from '@/i18n/config';
 
 export default function WelcomePage() {
   const t = useTranslations('landing');
   const tc = useTranslations('common');
   const locale = useLocale() as Locale;
+  const rtl = isRtl(locale);
+  const PrevChevron = rtl ? ChevronRight : ChevronLeft;
+  const NextChevron = rtl ? ChevronLeft : ChevronRight;
   const router = useRouter();
   const pathname = usePathname();
   const [showLangMenu, setShowLangMenu] = useState(false);
@@ -113,17 +118,17 @@ export default function WelcomePage() {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        prev();
+        (rtl ? next : prev)();
       }
       if (e.key === 'ArrowRight') {
         e.preventDefault();
-        next();
+        (rtl ? prev : next)();
       }
     };
 
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [lightboxOpen, lightboxIndex, galleryItems.length]);
+  }, [lightboxOpen, rtl, lightboxIndex, galleryItems.length]);
 
   const switchLocale = (newLocale: Locale) => {
     router.replace(pathname, { locale: newLocale });
@@ -828,25 +833,33 @@ export default function WelcomePage() {
       <Dialog
         open={lightboxOpen}
         onClose={closeLightbox}
-        className="max-w-6xl bg-black text-white overflow-hidden"
+        className="max-w-6xl bg-transparent shadow-none border-0 rounded-none max-h-none overflow-visible"
+        bodyClassName="p-0"
+        overlayClassName="bg-black/70 backdrop-blur-md"
       >
         {lightboxIndex !== null ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-white/80">
+          <div className="relative w-[min(96vw,1152px)] h-[min(82vh,760px)] overflow-hidden rounded-2xl">
+            {/* Top bar (gradient for legibility) */}
+            <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-3 sm:p-4 bg-gradient-to-b from-black/60 via-black/20 to-transparent">
+              <div
+                className="text-sm text-white tabular-nums font-medium px-2.5 py-1 rounded-full bg-black/45 border border-white/15 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
+                dir="ltr"
+                aria-label={`${lightboxIndex + 1} / ${galleryItems.length}`}
+              >
                 {lightboxIndex + 1} / {galleryItems.length}
               </div>
               <button
                 type="button"
                 onClick={closeLightbox}
-                className="inline-flex items-center justify-center h-10 w-10 rounded-xl hover:bg-white/10 transition-colors"
+                className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                 aria-label={tc('close')}
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5 text-white" />
               </button>
             </div>
 
-            <div className="relative h-[70vh] w-full rounded-xl overflow-hidden bg-black">
+            {/* Image */}
+            <div className="absolute inset-0 bg-transparent">
               <Image
                 src={galleryItems[lightboxIndex].src}
                 alt={galleryItems[lightboxIndex].alt}
@@ -855,24 +868,35 @@ export default function WelcomePage() {
                 className="object-contain"
                 priority
               />
-
-              <button
-                type="button"
-                onClick={prev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm flex items-center justify-center transition-colors"
-                aria-label={tc('previous')}
-              >
-                <ChevronLeft className="h-6 w-6 rtl-flip-arrow" />
-              </button>
-              <button
-                type="button"
-                onClick={next}
-                className="absolute right-3 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm flex items-center justify-center transition-colors"
-                aria-label={tc('next')}
-              >
-                <ChevronRight className="h-6 w-6 rtl-flip-arrow" />
-              </button>
             </div>
+
+            {/* Side scrims to keep arrows visible on bright images */}
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-24 sm:w-32 bg-gradient-to-r from-black/35 via-black/10 to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-24 sm:w-32 bg-gradient-to-l from-black/35 via-black/10 to-transparent" />
+
+            {/* Navigation */}
+            <button
+              type="button"
+              onClick={prev}
+              className={cn(
+                'absolute top-1/2 -translate-y-1/2 z-10 h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-black/40 hover:bg-black/55 border border-white/20 backdrop-blur-md flex items-center justify-center transition-colors shadow-[0_12px_30px_rgba(0,0,0,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+                rtl ? 'right-3 sm:right-4' : 'left-3 sm:left-4'
+              )}
+              aria-label={tc('previous')}
+            >
+              <PrevChevron className="h-6 w-6 text-white" />
+            </button>
+            <button
+              type="button"
+              onClick={next}
+              className={cn(
+                'absolute top-1/2 -translate-y-1/2 z-10 h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-black/40 hover:bg-black/55 border border-white/20 backdrop-blur-md flex items-center justify-center transition-colors shadow-[0_12px_30px_rgba(0,0,0,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+                rtl ? 'left-3 sm:left-4' : 'right-3 sm:right-4'
+              )}
+              aria-label={tc('next')}
+            >
+              <NextChevron className="h-6 w-6 text-white" />
+            </button>
           </div>
         ) : null}
       </Dialog>

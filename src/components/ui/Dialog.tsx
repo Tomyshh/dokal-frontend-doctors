@@ -10,9 +10,11 @@ interface DialogProps {
   children: ReactNode;
   className?: string;
   title?: string;
+  bodyClassName?: string;
+  overlayClassName?: string;
 }
 
-export function Dialog({ open, onClose, children, className, title }: DialogProps) {
+export function Dialog({ open, onClose, children, className, title, bodyClassName, overlayClassName }: DialogProps) {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -35,7 +37,10 @@ export function Dialog({ open, onClose, children, className, title }: DialogProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className={cn('fixed inset-0 bg-black/40 backdrop-blur-sm', overlayClassName)}
+        onClick={onClose}
+      />
       <div
         className={cn(
           'relative z-50 bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-y-auto w-full max-w-lg mx-4 animate-in fade-in zoom-in-95',
@@ -53,7 +58,7 @@ export function Dialog({ open, onClose, children, className, title }: DialogProp
             </button>
           </div>
         )}
-        <div className="p-6">{children}</div>
+        <div className={cn('p-6', bodyClassName)}>{children}</div>
       </div>
     </div>
   );
