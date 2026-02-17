@@ -17,6 +17,7 @@ import {
   CalendarCheck,
   Star,
   Settings,
+  CreditCard,
   ClipboardList,
   FileText,
   LogOut,
@@ -72,6 +73,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     }
 
     links.push({ href: '/settings', icon: Settings, label: t('settings') });
+
+    // Billing is not for secretaries (clinic pays)
+    if (!isSecretary) {
+      links.push({ href: '/billing', icon: CreditCard, label: t('billing') });
+    }
 
     return links;
   }, [t, isSecretary]);
