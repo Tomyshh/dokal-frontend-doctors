@@ -14,6 +14,8 @@ import { CityCombobox } from '@/components/auth/CityCombobox';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
 import { Spinner } from '@/components/ui/Spinner';
 import { getMyPractitionerOrNull, isPractitionerProfileComplete, unwrapPractitioner } from '@/lib/practitioner';
+import { isRtl } from '@/i18n/config';
+import { LogOut } from 'lucide-react';
 
 type FormState = {
   firstName: string;
@@ -31,8 +33,9 @@ type FormState = {
 export default function CompleteProfilePage() {
   const t = useTranslations('auth');
   const locale = useLocale();
+  const rtl = isRtl(locale);
   const router = useRouter();
-  const { user, profile, loading: authLoading, refreshUserData } = useAuth();
+  const { user, profile, loading: authLoading, refreshUserData, signOut, loggingOut } = useAuth();
 
   // Google user_metadata may contain given_name, family_name, full_name, avatar_url
   const googleMeta = user?.user_metadata;
@@ -226,6 +229,31 @@ export default function CompleteProfilePage() {
           <Spinner size="lg" />
         </div>
       ) : null}
+
+      <div className={rtl ? 'flex items-center justify-end mb-6' : 'flex items-center justify-start mb-6'}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="rounded-full"
+          onClick={signOut}
+          loading={loggingOut}
+          aria-label={`${t('backToLanding')} (${t('logout')})`}
+        >
+          {rtl ? (
+            <>
+              <span>{t('backToLanding')}</span>
+              <LogOut className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              <LogOut className="h-4 w-4" />
+              <span>{t('backToLanding')}</span>
+            </>
+          )}
+        </Button>
+      </div>
+
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">{t('completeProfileTitle')}</h1>
         <p className="text-sm text-muted-foreground mt-2">{t('completeProfileSubtitle')}</p>
