@@ -14,7 +14,8 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useCrmOrganization } from '@/hooks/useOrganization';
 import {
   useCalendarAppointments,
-  groupAppointmentsByDate,
+  useExternalEvents,
+  groupCalendarItemsByDate,
   type CalendarView,
 } from '@/hooks/useCalendarAppointments';
 import { Spinner } from '@/components/ui/Spinner';
@@ -24,7 +25,7 @@ import CalendarMonthView from '@/components/calendar/CalendarMonthView';
 import CalendarWeekView from '@/components/calendar/CalendarWeekView';
 import CalendarDayView from '@/components/calendar/CalendarDayView';
 import CalendarEventSidebar from '@/components/calendar/CalendarEventSidebar';
-import type { Appointment } from '@/types';
+import type { CalendarItem } from '@/types';
 
 export default function CalendarPage() {
   const t = useTranslations('calendar');
@@ -36,12 +37,11 @@ export default function CalendarPage() {
   const [view, setView] = useState<CalendarView>('month');
   /** null = my calendar, 'all' = all org, uuid = specific colleague */
   const [selectedColleague, setSelectedColleague] = useState<string | null>(null);
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [selectedItem, setSelectedItem] = useState<CalendarItem | null>(null);
 
   // ─── Date range calculation ─────────────────────────────────────────
   const { from, to } = useMemo(() => {
     if (view === 'month') {
-      // Extend to full calendar grid (includes prev/next month days)
       const monthStart = startOfMonth(currentDate);
       const monthEnd = endOfMonth(currentDate);
       const calStart = startOfWeek(monthStart, { weekStartsOn: 0 });
@@ -59,7 +59,6 @@ export default function CalendarPage() {
         to: format(weekEnd, 'yyyy-MM-dd'),
       };
     }
-    // Day view
     const dayStr = format(currentDate, 'yyyy-MM-dd');
     return { from: dayStr, to: dayStr };
   }, [currentDate, view]);
@@ -69,7 +68,7 @@ export default function CalendarPage() {
   const practitionerIdFilter =
     selectedColleague === 'all' ? undefined : selectedColleague || undefined;
 
-  // ─── Fetch appointments ─────────────────────────────────────────────
+  // ─── Fetch CRM appointments ─────────────────────────────────────────
   const { data, isLoading, isError, error } = useCalendarAppointments({
     from,
     to,
@@ -77,9 +76,17 @@ export default function CalendarPage() {
     isOrganization: isOrgMode,
   });
 
-  const appointmentsByDate = useMemo(
-    () => groupAppointmentsByDate(data?.appointments || []),
-    [data?.appointments]
+  // ─── Fetch external events (Google Calendar) ────────────────────────
+  const { data: externalEvents } = useExternalEvents({ from, to });
+
+  // ─── Merge into unified CalendarItem map ────────────────────────────
+  const itemsByDate = useMemo(
+    () =>
+      groupCalendarItemsByDate(
+        data?.appointments || [],
+        externalEvents || [],
+      ),
+    [data?.appointments, externalEvents],
   );
 
   // ─── Handlers ───────────────────────────────────────────────────────
@@ -90,20 +97,20 @@ export default function CalendarPage() {
         setView('day');
       }
     },
-    [view]
+    [view],
   );
 
-  const handleEventClick = useCallback((appointment: Appointment) => {
-    setSelectedAppointment(appointment);
+  const handleEventClick = useCallback((item: CalendarItem) => {
+    setSelectedItem(item);
   }, []);
 
   const handleCloseSidebar = useCallback(() => {
-    setSelectedAppointment(null);
+    setSelectedItem(null);
   }, []);
 
-  // ─── Day appointments for day view ──────────────────────────────────
+  // ─── Day items for day view ─────────────────────────────────────────
   const dayKey = format(currentDate, 'yyyy-MM-dd');
-  const dayAppointments = appointmentsByDate[dayKey] || [];
+  const dayItems = itemsByDate[dayKey] || [];
 
   return (
     <div className="space-y-4">
@@ -142,6 +149,10 @@ export default function CalendarPage() {
           <div className="h-2.5 w-2.5 rounded-full bg-gray-400" />
           <span>{t('noShow')}</span>
         </div>
+        <div className="flex items-center gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-blue-400" />
+          <span>{t('googleEvent')}</span>
+        </div>
       </div>
 
       {/* Calendar content */}
@@ -156,7 +167,7 @@ export default function CalendarPage() {
           {view === 'month' && (
             <CalendarMonthView
               currentDate={currentDate}
-              appointments={appointmentsByDate}
+              items={itemsByDate}
               onDayClick={handleDayClick}
               onEventClick={handleEventClick}
             />
@@ -164,7 +175,7 @@ export default function CalendarPage() {
           {view === 'week' && (
             <CalendarWeekView
               currentDate={currentDate}
-              appointments={appointmentsByDate}
+              items={itemsByDate}
               onEventClick={handleEventClick}
               onDayClick={handleDayClick}
             />
@@ -172,7 +183,7 @@ export default function CalendarPage() {
           {view === 'day' && (
             <CalendarDayView
               currentDate={currentDate}
-              appointments={dayAppointments}
+              items={dayItems}
               onEventClick={handleEventClick}
             />
           )}
@@ -180,7 +191,7 @@ export default function CalendarPage() {
       )}
 
       {/* Event detail sidebar */}
-      {selectedAppointment && (
+      {selectedItem && (
         <>
           {/* Backdrop */}
           <div
@@ -188,7 +199,7 @@ export default function CalendarPage() {
             onClick={handleCloseSidebar}
           />
           <CalendarEventSidebar
-            appointment={selectedAppointment}
+            item={selectedItem}
             onClose={handleCloseSidebar}
           />
         </>

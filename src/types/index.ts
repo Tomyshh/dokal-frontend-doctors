@@ -371,6 +371,56 @@ export interface UserSettings {
 }
 
 // ==========================================
+// Google Calendar Integration
+// ==========================================
+
+export type ExternalEventType = 'appointment' | 'busy';
+
+export interface GoogleCalendarStatus {
+  connected: boolean;
+  google_email: string | null;
+  calendar_id: string | null;
+  calendar_name: string | null;
+  sync_crm_to_google: boolean;
+  sync_google_to_crm: boolean;
+  keywords_appointment: string[];
+  keywords_busy: string[];
+  ai_enabled: boolean;
+  ai_prompt: string | null;
+  last_sync_at: string | null;
+  last_error: string | null;
+  watch_expiration: string | null;
+}
+
+export interface GoogleCalendarEntry {
+  id: string;
+  summary: string;
+  primary: boolean;
+  accessRole: string;
+}
+
+export interface ExternalEvent {
+  id: string;
+  practitioner_id: string;
+  google_event_id: string | null;
+  title: string;
+  description: string | null;
+  location: string | null;
+  start_at: string;
+  end_at: string;
+  date: string;
+  source: 'google';
+  type_detected: ExternalEventType;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Unified calendar item for rendering both CRM appointments and external events */
+export type CalendarItem =
+  | { kind: 'crm_appointment'; data: Appointment }
+  | { kind: 'external_event'; data: ExternalEvent };
+
+// ==========================================
 // CRM Dashboard
 // ==========================================
 

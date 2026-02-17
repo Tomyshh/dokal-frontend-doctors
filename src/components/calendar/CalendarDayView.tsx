@@ -2,17 +2,15 @@
 
 import { useRef, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { format, isToday } from 'date-fns';
-import { fr, enUS, he, ru, es } from 'date-fns/locale';
+import { isToday } from 'date-fns';
 import { cn, formatTime } from '@/lib/utils';
-import { getEventStatusColors } from './CalendarEventCard';
+import { getItemColors } from './CalendarEventCard';
 import { Avatar } from '@/components/ui/Avatar';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { Badge } from '@/components/ui/Badge';
 import { getStatusColor } from '@/lib/utils';
-import type { Appointment } from '@/types';
-
-const localeMap: Record<string, import('date-fns').Locale> = { fr, en: enUS, he, ru, es };
+import { getItemStartTime, getItemEndTime, getItemTitle } from '@/hooks/useCalendarAppointments';
+import type { CalendarItem } from '@/types';
 
 const HOUR_HEIGHT = 72; // px per hour, larger for day view
 const START_HOUR = 7;
@@ -21,19 +19,18 @@ const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR
 
 interface CalendarDayViewProps {
   currentDate: Date;
-  appointments: Appointment[];
-  onEventClick: (appointment: Appointment) => void;
+  items: CalendarItem[];
+  onEventClick: (item: CalendarItem) => void;
 }
 
 export default function CalendarDayView({
   currentDate,
-  appointments,
+  items,
   onEventClick,
 }: CalendarDayViewProps) {
   const t = useTranslations('calendar');
   const ta = useTranslations('appointments');
   const locale = useLocale();
-  const dateFnsLocale = localeMap[locale] || fr;
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const today = isToday(currentDate);
@@ -54,9 +51,9 @@ export default function CalendarDayView({
   const nowOffset = ((nowMinutes - START_HOUR * 60) / 60) * HOUR_HEIGHT;
   const showNowLine = today && nowMinutes >= START_HOUR * 60 && nowMinutes <= END_HOUR * 60;
 
-  // Sort appointments by start time
-  const sorted = [...appointments].sort((a, b) =>
-    a.start_time.localeCompare(b.start_time)
+  // Sort items by start time
+  const sorted = [...items].sort((a, b) =>
+    getItemStartTime(a).localeCompare(getItemStartTime(b)),
   );
 
   return (
@@ -100,11 +97,53 @@ export default function CalendarDayView({
               />
             ))}
 
-            {/* Appointments */}
-            {sorted.map((appt) => {
-              const { top, height } = getEventPosition(appt);
+            {/* Calendar items */}
+            {sorted.map((item) => {
+              const { top, height } = getItemPosition(item);
               if (height <= 0) return null;
-              const colors = getEventStatusColors(appt.status);
+
+              const colors = getItemColors(item);
+              const startTime = getItemStartTime(item);
+              const endTime = getItemEndTime(item);
+              const title = getItemTitle(item);
+              const id = item.data.id;
+              const isExternal = item.kind === 'external_event';
+
+              if (isExternal) {
+                // Render external event (simpler card)
+                return (
+                  <button
+                    key={`external-${id}`}
+                    type="button"
+                    onClick={() => onEventClick(item)}
+                    className={cn(
+                      'absolute left-2 right-2 rounded-xl border-l-[4px] px-3 py-2 transition-all hover:shadow-md cursor-pointer group text-left',
+                      colors.bg,
+                      colors.border,
+                      colors.text,
+                    )}
+                    style={{ top, height: Math.max(height, 36) }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold">
+                        {formatTime(startTime)} - {formatTime(endTime)}
+                      </span>
+                      <Badge className="bg-blue-100 text-blue-700 text-[10px] py-0 px-1.5">
+                        {item.data.type_detected === 'appointment'
+                          ? t('detectedAppointment')
+                          : t('detectedBusy')}
+                      </Badge>
+                    </div>
+                    <p className="text-xs truncate mt-0.5 opacity-80">
+                      <span className="opacity-60">[Google] </span>
+                      {title}
+                    </p>
+                  </button>
+                );
+              }
+
+              // CRM appointment
+              const appt = item.data;
               const patientName = appt.profiles
                 ? `${appt.profiles.first_name || ''} ${appt.profiles.last_name || ''}`.trim()
                 : '-';
@@ -118,19 +157,18 @@ export default function CalendarDayView({
 
               return (
                 <button
-                  key={appt.id}
+                  key={`appt-${appt.id}`}
                   type="button"
-                  onClick={() => onEventClick(appt)}
+                  onClick={() => onEventClick(item)}
                   className={cn(
                     'absolute left-2 right-2 rounded-xl border-l-[4px] px-3 py-2 transition-all hover:shadow-md cursor-pointer group text-left',
                     colors.bg,
                     colors.border,
-                    colors.text
+                    colors.text,
                   )}
                   style={{ top, height: Math.max(height, 36) }}
                 >
                   <div className="flex items-start gap-3 h-full">
-                    {/* Time & Patient */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold">
@@ -193,9 +231,11 @@ export default function CalendarDayView({
   );
 }
 
-function getEventPosition(appt: Appointment) {
-  const [startH, startM] = appt.start_time.split(':').map(Number);
-  const [endH, endM] = appt.end_time.split(':').map(Number);
+function getItemPosition(item: CalendarItem) {
+  const startTime = getItemStartTime(item);
+  const endTime = getItemEndTime(item);
+  const [startH, startM] = startTime.split(':').map(Number);
+  const [endH, endM] = endTime.split(':').map(Number);
   const startMinutes = startH * 60 + startM;
   const endMinutes = endH * 60 + endM;
   const top = ((startMinutes - START_HOUR * 60) / 60) * HOUR_HEIGHT;

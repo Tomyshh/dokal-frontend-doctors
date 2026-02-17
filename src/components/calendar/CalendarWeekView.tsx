@@ -12,7 +12,8 @@ import {
 import { fr, enUS, he, ru, es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import CalendarEventCard from './CalendarEventCard';
-import type { Appointment } from '@/types';
+import { getItemStartTime, getItemEndTime } from '@/hooks/useCalendarAppointments';
+import type { CalendarItem } from '@/types';
 
 const localeMap: Record<string, import('date-fns').Locale> = { fr, en: enUS, he, ru, es };
 
@@ -23,14 +24,14 @@ const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR
 
 interface CalendarWeekViewProps {
   currentDate: Date;
-  appointments: Record<string, Appointment[]>;
-  onEventClick: (appointment: Appointment) => void;
+  items: Record<string, CalendarItem[]>;
+  onEventClick: (item: CalendarItem) => void;
   onDayClick: (date: Date) => void;
 }
 
 export default function CalendarWeekView({
   currentDate,
-  appointments,
+  items,
   onEventClick,
   onDayClick,
 }: CalendarWeekViewProps) {
@@ -116,7 +117,7 @@ export default function CalendarWeekView({
           {/* Day columns */}
           {weekDays.map((day) => {
             const dateKey = format(day, 'yyyy-MM-dd');
-            const dayAppointments = appointments[dateKey] || [];
+            const dayItems = items[dateKey] || [];
             const today = isToday(day);
 
             return (
@@ -136,19 +137,23 @@ export default function CalendarWeekView({
                   />
                 ))}
 
-                {/* Appointments */}
-                {dayAppointments.map((appt) => {
-                  const { top, height } = getEventPosition(appt);
+                {/* Calendar items */}
+                {dayItems.map((item) => {
+                  const { top, height } = getItemPosition(item);
                   if (height <= 0) return null;
+                  const id =
+                    item.kind === 'crm_appointment'
+                      ? item.data.id
+                      : item.data.id;
 
                   return (
                     <div
-                      key={appt.id}
+                      key={`${item.kind}-${id}`}
                       className="absolute left-0.5 right-0.5 z-10"
                       style={{ top, height: Math.max(height, 20) }}
                     >
                       <CalendarEventCard
-                        appointment={appt}
+                        item={item}
                         onClick={onEventClick}
                         compact={height < 40}
                       />
@@ -177,9 +182,11 @@ export default function CalendarWeekView({
   );
 }
 
-function getEventPosition(appt: Appointment) {
-  const [startH, startM] = appt.start_time.split(':').map(Number);
-  const [endH, endM] = appt.end_time.split(':').map(Number);
+function getItemPosition(item: CalendarItem) {
+  const startTime = getItemStartTime(item);
+  const endTime = getItemEndTime(item);
+  const [startH, startM] = startTime.split(':').map(Number);
+  const [endH, endM] = endTime.split(':').map(Number);
   const startMinutes = startH * 60 + startM;
   const endMinutes = endH * 60 + endM;
   const top = ((startMinutes - START_HOUR * 60) / 60) * HOUR_HEIGHT;

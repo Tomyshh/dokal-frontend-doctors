@@ -40,6 +40,7 @@ import {
   calculateMonthlyPriceILS,
   type PlanType,
 } from '@/lib/subscription';
+import GoogleCalendarSection from '@/components/settings/GoogleCalendarSection';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
@@ -559,6 +560,9 @@ export default function SettingsPage() {
           </Button>
         </div>
       </Card>
+
+      {/* Google Calendar Integration */}
+      <GoogleCalendarSection />
 
       {/* ─── Upgrade Dialog ─────────────────────────────────────────────── */}
       <Dialog

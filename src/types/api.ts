@@ -277,6 +277,35 @@ export interface InviteMemberResponse {
 }
 
 // ==========================================
+// Google Calendar Integration
+// ==========================================
+
+export interface UpdateGoogleCalendarConfigRequest {
+  calendar_id?: string;
+  sync_crm_to_google?: boolean;
+  sync_google_to_crm?: boolean;
+  keywords_appointment?: string[];
+  keywords_busy?: string[];
+  ai_enabled?: boolean;
+  ai_prompt?: string | null;
+}
+
+export interface GoogleCalendarConnectResponse {
+  auth_url: string;
+}
+
+export interface GoogleCalendarSyncResponse {
+  synced_count: number;
+  errors: string[];
+}
+
+/** Response shape for the unified calendar items endpoint */
+export interface CalendarItemsResponse {
+  items: import('@/types').CalendarItem[];
+  total: number;
+}
+
+// ==========================================
 // API Error Response
 // ==========================================
 

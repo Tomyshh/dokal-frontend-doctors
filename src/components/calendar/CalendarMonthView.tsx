@@ -10,28 +10,28 @@ import {
   eachDayOfInterval,
   format,
   isSameMonth,
-  isSameDay,
   isToday,
 } from 'date-fns';
 import { fr, enUS, he, ru, es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { getEventStatusColors } from './CalendarEventCard';
-import type { Appointment } from '@/types';
+import { getItemColors } from './CalendarEventCard';
+import { getItemStartTime, getItemTitle } from '@/hooks/useCalendarAppointments';
+import type { CalendarItem } from '@/types';
 
 const localeMap: Record<string, import('date-fns').Locale> = { fr, en: enUS, he, ru, es };
 
 interface CalendarMonthViewProps {
   currentDate: Date;
-  appointments: Record<string, Appointment[]>;
+  items: Record<string, CalendarItem[]>;
   onDayClick: (date: Date) => void;
-  onEventClick: (appointment: Appointment) => void;
+  onEventClick: (item: CalendarItem) => void;
 }
 
 const MAX_VISIBLE_EVENTS = 3;
 
 export default function CalendarMonthView({
   currentDate,
-  appointments,
+  items,
   onDayClick,
   onEventClick,
 }: CalendarMonthViewProps) {
@@ -76,12 +76,11 @@ export default function CalendarMonthView({
       <div className="grid grid-cols-7">
         {calendarDays.map((day, index) => {
           const dateKey = format(day, 'yyyy-MM-dd');
-          const dayAppointments = appointments[dateKey] || [];
+          const dayItems = items[dateKey] || [];
           const isCurrentMonth = isSameMonth(day, currentDate);
-          const isSelected = false; // Could be extended
           const today = isToday(day);
-          const hasMore = dayAppointments.length > MAX_VISIBLE_EVENTS;
-          const visibleEvents = dayAppointments.slice(0, MAX_VISIBLE_EVENTS);
+          const hasMore = dayItems.length > MAX_VISIBLE_EVENTS;
+          const visibleItems = dayItems.slice(0, MAX_VISIBLE_EVENTS);
 
           return (
             <button
@@ -92,8 +91,6 @@ export default function CalendarMonthView({
                 'relative min-h-[100px] sm:min-h-[120px] p-1.5 sm:p-2 border-b border-r border-border/50 text-left transition-colors group',
                 'hover:bg-muted/30',
                 !isCurrentMonth && 'bg-gray-50/50',
-                isSelected && 'bg-primary-50',
-                // Remove right border on last column
                 (index + 1) % 7 === 0 && 'border-r-0'
               )}
             >
@@ -109,27 +106,31 @@ export default function CalendarMonthView({
                 >
                   {format(day, 'd')}
                 </span>
-                {dayAppointments.length > 0 && (
+                {dayItems.length > 0 && (
                   <span className="text-[10px] text-muted-foreground font-medium">
-                    {dayAppointments.length}
+                    {dayItems.length}
                   </span>
                 )}
               </div>
 
               {/* Events */}
               <div className="space-y-0.5">
-                {visibleEvents.map((appt) => {
-                  const colors = getEventStatusColors(appt.status);
-                  const patientName = appt.profiles
-                    ? `${appt.profiles.first_name || ''} ${appt.profiles.last_name || ''}`.trim()
-                    : '';
+                {visibleItems.map((item) => {
+                  const colors = getItemColors(item);
+                  const startTime = getItemStartTime(item);
+                  const title = getItemTitle(item);
+                  const id =
+                    item.kind === 'crm_appointment'
+                      ? item.data.id
+                      : item.data.id;
+                  const isExternal = item.kind === 'external_event';
 
                   return (
                     <div
-                      key={appt.id}
+                      key={`${item.kind}-${id}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        onEventClick(appt);
+                        onEventClick(item);
                       }}
                       className={cn(
                         'px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] leading-tight truncate cursor-pointer',
@@ -138,26 +139,26 @@ export default function CalendarMonthView({
                         colors.border,
                         colors.text
                       )}
-                      title={`${appt.start_time.substring(0, 5)} - ${patientName}`}
+                      title={`${startTime.substring(0, 5)} - ${title}`}
                     >
-                      <span className="hidden sm:inline font-semibold">{appt.start_time.substring(0, 5)}</span>
-                      <span className="sm:hidden font-semibold">{appt.start_time.substring(0, 5)}</span>
-                      <span className="hidden sm:inline"> {patientName}</span>
+                      <span className="font-semibold">{startTime.substring(0, 5)}</span>
+                      {isExternal && <span className="opacity-60"> [G]</span>}
+                      <span className="hidden sm:inline"> {title}</span>
                     </div>
                   );
                 })}
                 {hasMore && (
                   <div className="text-[10px] text-muted-foreground font-medium pl-1.5">
-                    {t('moreEvents', { count: dayAppointments.length - MAX_VISIBLE_EVENTS })}
+                    {t('moreEvents', { count: dayItems.length - MAX_VISIBLE_EVENTS })}
                   </div>
                 )}
               </div>
 
-              {/* Dot indicators for mobile when there are events but we don't show them */}
-              {dayAppointments.length > 0 && (
+              {/* Dot indicators for mobile */}
+              {dayItems.length > 0 && (
                 <div className="flex items-center gap-0.5 mt-1 sm:hidden">
-                  {dayAppointments.slice(0, 4).map((appt, i) => {
-                    const colors = getEventStatusColors(appt.status);
+                  {dayItems.slice(0, 4).map((item, i) => {
+                    const colors = getItemColors(item);
                     return (
                       <div
                         key={i}
@@ -165,7 +166,7 @@ export default function CalendarMonthView({
                       />
                     );
                   })}
-                  {dayAppointments.length > 4 && (
+                  {dayItems.length > 4 && (
                     <span className="text-[9px] text-muted-foreground">+</span>
                   )}
                 </div>
