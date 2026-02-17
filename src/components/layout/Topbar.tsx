@@ -2,12 +2,18 @@
 
 import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import Image from 'next/image';
 import { useRouter, usePathname } from '@/i18n/routing';
-import { Bell, Search, Globe, Menu } from 'lucide-react';
+import { Bell, Globe, Menu, Loader2 } from 'lucide-react';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { localeNames, type Locale } from '@/i18n/config';
+import { useAuth } from '@/providers/AuthProvider';
+import {
+  useGoogleCalendarStatus,
+  useStartGoogleCalendarConnect,
+} from '@/hooks/useGoogleCalendarIntegration';
 
 interface TopbarProps {
   onMenuToggle: () => void;
@@ -20,16 +26,47 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
   const pathname = usePathname();
   const { data: unreadCount } = useUnreadCount();
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const { profile, user } = useAuth();
+
+  const { data: gcalStatus, isLoading: gcalStatusLoading } = useGoogleCalendarStatus();
+  const gcalConnectMutation = useStartGoogleCalendarConnect();
 
   const switchLocale = (newLocale: Locale) => {
     router.replace(pathname, { locale: newLocale });
     setShowLangMenu(false);
   };
 
+  const displayName =
+    `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() ||
+    profile?.email ||
+    user?.email ||
+    '';
+
+  const handleGoogleCalendarClick = async () => {
+    if (gcalStatusLoading || gcalConnectMutation.isPending) return;
+
+    if (!gcalStatus?.connected) {
+      const result = await gcalConnectMutation.mutateAsync();
+      if (result.auth_url) {
+        window.location.href = result.auth_url;
+      }
+      return;
+    }
+
+    // Connected: don't allow disabling here — send user to settings.
+    router.push('/settings');
+  };
+
+  const gcalTitle = gcalStatusLoading
+    ? t('gcalSyncLoading')
+    : gcalStatus?.connected
+      ? t('gcalSyncEnabledManageInSettings')
+      : t('gcalSyncDisabledEnable');
+
   return (
     <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-border/50">
       <div className="flex items-center justify-between h-full px-6">
-        {/* Left: hamburger on mobile + search */}
+        {/* Left: hamburger on mobile + greeting */}
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuToggle}
@@ -37,18 +74,45 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <div className="relative hidden sm:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder={t('search')}
-              className="h-10 w-64 rounded-xl border border-border bg-muted/50 pl-10 pr-4 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-            />
+          <div className="min-w-0">
+            <div className="truncate text-sm sm:text-base font-semibold text-gray-900">
+              {displayName ? t('helloName', { name: displayName }) : t('hello')}
+            </div>
           </div>
         </div>
 
-        {/* Right: language, notifications */}
+        {/* Right: Google Calendar sync, language, notifications */}
         <div className="flex items-center gap-2">
+          {/* Google Calendar Sync Indicator */}
+          <button
+            type="button"
+            onClick={handleGoogleCalendarClick}
+            title={gcalTitle}
+            aria-label={gcalTitle}
+            className={cn(
+              'relative h-10 w-10 rounded-xl flex items-center justify-center transition-colors',
+              gcalStatus?.connected
+                ? 'text-emerald-600 hover:bg-emerald-50'
+                : 'text-gray-500 hover:bg-muted',
+              (gcalStatusLoading || gcalConnectMutation.isPending) && 'opacity-80'
+            )}
+          >
+            {gcalStatusLoading || gcalConnectMutation.isPending ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Image
+                src="/logo/dokal_google_sync.png"
+                alt={t('gcalSync')}
+                width={20}
+                height={20}
+                className={cn(
+                  'h-5 w-5',
+                  !gcalStatus?.connected && 'grayscale opacity-60'
+                )}
+              />
+            )}
+          </button>
+
           {/* Language Switcher */}
           <div className="relative">
             <button
