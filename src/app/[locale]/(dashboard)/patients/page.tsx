@@ -117,10 +117,10 @@ export default function PatientsPage() {
                       {tc('email')}
                     </th>
                     <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
-                      {tc('status')}
+                      {t('registration')}
                     </th>
                     <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
-                      {t('missing')}
+                      {t('toComplete')}
                     </th>
                     <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
                       {tc('actions')}
@@ -130,6 +130,9 @@ export default function PatientsPage() {
                 <tbody className="divide-y divide-border/50">
                   {rows.map((p: CrmPatientListItem & { name: string }) => {
                     const missing = p.missing_fields || [];
+                    const missingLabel = missing.length
+                      ? missing.map((f) => formatMissingFieldLabel(tcal, f)).join(', ')
+                      : '';
                     return (
                       <tr key={p.id} className="hover:bg-muted/30 transition-colors">
                         <td className="py-3 px-3">
@@ -137,18 +140,20 @@ export default function PatientsPage() {
                             <p className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
                               {p.name}
                             </p>
-                            <div className="flex items-center gap-1.5 mt-1">
-                              {p.status === 'draft' && (
-                                <Badge className="bg-amber-50 text-amber-800 border border-amber-200">
-                                  {tcal('patientDraftBadge')}
-                                </Badge>
-                              )}
-                              {p.is_incomplete && (
-                                <Badge className="bg-red-50 text-red-700 border border-red-200">
-                                  {tcal('missingInfoBadge')}
-                                </Badge>
-                              )}
-                            </div>
+                            {(p.status === 'draft' || p.is_incomplete) && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                {p.status === 'draft' && (
+                                  <Badge className="bg-amber-50 text-amber-800 border border-amber-200">
+                                    {tcal('patientDraftBadge')}
+                                  </Badge>
+                                )}
+                                {p.is_incomplete && (
+                                  <Badge className="bg-red-50 text-red-700 border border-red-200">
+                                    {tcal('missingInfoBadge')}
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
                           </Link>
                         </td>
                         <td className="py-3 px-3 text-sm text-gray-600">{p.phone || '-'}</td>
@@ -162,8 +167,15 @@ export default function PatientsPage() {
                             '-'
                           )}
                         </td>
-                        <td className="py-3 px-3 text-sm text-gray-600">
-                          {missing.length ? missing.map((f) => formatMissingFieldLabel(tcal, f)).join(', ') : '-'}
+                        <td className="py-3 px-3 text-sm text-gray-600" title={missingLabel || undefined}>
+                          {missing.length ? (
+                            <span>
+                              {missing.slice(0, 2).map((f) => formatMissingFieldLabel(tcal, f)).join(', ')}
+                              {missing.length > 2 ? ` +${missing.length - 2}` : ''}
+                            </span>
+                          ) : (
+                            '-'
+                          )}
                         </td>
                         <td className="py-3 px-3 text-right">
                           <Link href={`/patients/${p.id}`}>

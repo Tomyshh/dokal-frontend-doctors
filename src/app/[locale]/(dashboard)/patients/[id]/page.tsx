@@ -17,6 +17,7 @@ import { ArrowLeft, Phone, Mail, MapPin, Calendar, AlertTriangle } from 'lucide-
 import { Link } from '@/i18n/routing';
 import type { CrmPatientListItem, Appointment } from '@/types';
 import { formatMissingFieldLabel } from '@/lib/crm';
+import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
 
 export default function PatientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -25,15 +26,39 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   const ta = useTranslations('appointments');
   const tcal = useTranslations('calendar');
   const locale = useLocale();
-  const { data: patient, isLoading } = usePatient(id);
+  const { data: data, isLoading, isError, error } = usePatient(id);
   const updateMutation = useUpdateCrmPatient();
   const [editMode, setEditMode] = useState(false);
 
-  const record = useMemo(() => {
-    if (!patient) return null;
-    const anyPatient = patient as unknown as { patient?: CrmPatientListItem };
-    return (anyPatient.patient || (patient as unknown as CrmPatientListItem)) as CrmPatientListItem;
-  }, [patient]);
+  const { crmRecord, teudatDisplay, history } = useMemo(() => {
+    const d = data as any;
+    const fromWrapped = d?.patient as CrmPatientListItem | undefined;
+    const fromDirect =
+      d && typeof d === 'object' && typeof d.id === 'string' && ('first_name' in d || 'last_name' in d)
+        ? (d as CrmPatientListItem)
+        : undefined;
+    const record = fromWrapped || fromDirect || undefined;
+
+    const teudat =
+      (record as any)?.teudat_zehut_masked ||
+      (record as any)?.teudat_zehut ||
+      d?.health_profile?.teudat_zehut ||
+      null;
+
+    const appts =
+      (d?.appointment_history ||
+        d?.appointments ||
+        (record as any)?.appointment_history ||
+        (record as any)?.appointments) as
+        | Appointment[]
+        | undefined;
+
+    return {
+      crmRecord: record || null,
+      teudatDisplay: teudat,
+      history: Array.isArray(appts) ? appts : [],
+    };
+  }, [data]);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -45,18 +70,32 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   const [teudat, setTeudat] = useState<string>('');
 
   useEffect(() => {
-    if (!record) return;
-    setFirstName(record.first_name || '');
-    setLastName(record.last_name || '');
-    setPhone(record.phone || '');
-    setEmail(record.email || '');
-    setCity(record.city || '');
-    setDob(record.date_of_birth || '');
-    setSex((record.sex as string) || '');
-  }, [record?.id]);
+    if (!crmRecord) return;
+    setFirstName(crmRecord.first_name || '');
+    setLastName(crmRecord.last_name || '');
+    setPhone(crmRecord.phone || '');
+    setEmail(crmRecord.email || '');
+    setCity(crmRecord.city || '');
+    setDob(crmRecord.date_of_birth || '');
+    setSex((crmRecord.sex as string) || '');
+  }, [crmRecord?.id]);
 
   if (isLoading) return <Spinner size="lg" />;
-  if (!patient || !record?.id) {
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <Link href="/patients">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="h-4 w-4 rtl-flip-arrow" />
+            {tc('back')}
+          </Button>
+        </Link>
+        <ApiErrorCallout error={error} />
+      </div>
+    );
+  }
+
+  if (!data || !crmRecord?.id) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         {t('notFound')}
@@ -64,9 +103,9 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  const displayName = `${record.first_name || ''} ${record.last_name || ''}`.trim() || '-';
-  const missingFields = record.missing_fields || [];
-  const isIncomplete = record.is_incomplete === true;
+  const displayName = `${crmRecord.first_name || ''} ${crmRecord.last_name || ''}`.trim() || '-';
+  const missingFields = crmRecord.missing_fields || [];
+  const isIncomplete = crmRecord.is_incomplete === true;
 
   return (
     <div className="space-y-6">
@@ -81,38 +120,43 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
       {/* Profile Header */}
       <Card>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          <Avatar src={record.avatar_url} firstName={record.first_name} lastName={record.last_name} size="lg" />
+          <Avatar
+            src={crmRecord.avatar_url}
+            firstName={crmRecord.first_name}
+            lastName={crmRecord.last_name}
+            size="lg"
+          />
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-gray-900">
               {displayName}
             </h1>
             <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
-              {record.phone && (
+              {crmRecord.phone && (
                 <span className="flex items-center gap-1">
-                  <Phone className="h-4 w-4" /> {record.phone}
+                  <Phone className="h-4 w-4" /> {crmRecord.phone}
                 </span>
               )}
-              {record.email && (
+              {crmRecord.email && (
                 <span className="flex items-center gap-1">
-                  <Mail className="h-4 w-4" /> {record.email}
+                  <Mail className="h-4 w-4" /> {crmRecord.email}
                 </span>
               )}
-              {record.city && (
+              {crmRecord.city && (
                 <span className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" /> {record.city}
+                  <MapPin className="h-4 w-4" /> {crmRecord.city}
                 </span>
               )}
-              {record.date_of_birth && (
+              {crmRecord.date_of_birth && (
                 <span className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" /> {formatDate(record.date_of_birth, 'dd/MM/yyyy', locale)}
+                  <Calendar className="h-4 w-4" /> {formatDate(crmRecord.date_of_birth, 'dd/MM/yyyy', locale)}
                 </span>
               )}
             </div>
 
             <div className="flex flex-wrap items-center gap-2 mt-3">
-              {record.status && (
-                <Badge className={record.status === 'linked' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'}>
-                  {record.status === 'linked' ? t('statusLinked') : t('statusDraft')}
+              {crmRecord.status && (
+                <Badge className={crmRecord.status === 'linked' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'}>
+                  {crmRecord.status === 'linked' ? t('statusLinked') : t('statusDraft')}
                 </Badge>
               )}
               {isIncomplete && (
@@ -120,7 +164,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   {t('incomplete')}
                 </Badge>
               )}
-              {record.has_teudat_zehut === false && (
+              {crmRecord.has_teudat_zehut === false && (
                 <Badge className="bg-gray-100 text-gray-700">
                   {t('noTeudat')}
                 </Badge>
@@ -135,6 +179,25 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
             >
               {editMode ? tc('close') : tc('edit')}
             </Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Identity (incl. Teoudat) */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('profile')}</CardTitle>
+        </CardHeader>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <div>
+            <div className="text-xs text-muted-foreground">{t('teudatZehut')}</div>
+            <div className="font-medium text-gray-900">{teudatDisplay || '-'}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">{t('registration')}</div>
+            <div className="font-medium text-gray-900">
+              {crmRecord.status === 'linked' ? t('statusLinked') : t('statusDraft')}
+            </div>
           </div>
         </div>
       </Card>
@@ -196,7 +259,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               loading={updateMutation.isPending}
               onClick={async () => {
                 await updateMutation.mutateAsync({
-                  id: record.id,
+                  id: crmRecord.id,
                   data: {
                     first_name: firstName.trim() || null,
                     last_name: lastName.trim() || null,
@@ -222,7 +285,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
         <CardHeader>
           <CardTitle>{t('appointmentHistory')}</CardTitle>
         </CardHeader>
-        {(((patient as any).appointment_history || (patient as any).appointments) as Appointment[] | undefined)?.length ? (
+        {history.length ? (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -234,7 +297,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
-                {(((patient as any).appointment_history || (patient as any).appointments) as Appointment[]).map((appt) => (
+                {history.map((appt) => (
                   <tr key={appt.id} className="hover:bg-muted/30">
                     <td className="py-3 px-2 text-sm">{formatDate(appt.appointment_date, 'dd/MM/yyyy', locale)}</td>
                     <td className="py-3 px-2 text-sm text-gray-600">
@@ -254,7 +317,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
             </table>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">-</p>
+          <p className="text-sm text-muted-foreground">{tcal('noEvents')}</p>
         )}
       </Card>
     </div>
