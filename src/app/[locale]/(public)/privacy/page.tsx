@@ -1,7 +1,34 @@
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { ArrowLeft } from 'lucide-react';
+import { buildAlternatesForPath, buildDefaultMetadata, normalizeLocale } from '@/lib/seo';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const locale = normalizeLocale(params.locale);
+  const t = await getTranslations({ locale, namespace: 'privacy' });
+
+  const title = t('title');
+  const description = t('intro');
+
+  return {
+    ...buildDefaultMetadata(locale),
+    title,
+    description,
+    alternates: buildAlternatesForPath('/privacy'),
+    openGraph: {
+      ...buildDefaultMetadata(locale).openGraph,
+      title,
+      description,
+      url: `/${locale}/privacy`,
+    },
+  };
+}
 
 export default async function PrivacyPage() {
   const t = await getTranslations('privacy');

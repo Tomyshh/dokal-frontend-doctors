@@ -1,19 +1,22 @@
-import type { Metadata } from 'next';
 import { getMessages } from 'next-intl/server';
 import { isRtl } from '@/i18n/config';
 import AuthProvider from '@/providers/AuthProvider';
 import QueryProvider from '@/providers/QueryProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import IntlProvider from '@/providers/IntlProvider';
+import type { Metadata } from 'next';
+import { buildDefaultMetadata, normalizeLocale } from '@/lib/seo';
 import '../globals.css';
 
-export const metadata: Metadata = {
-  title: 'Dokal CRM - Espace Praticien',
-  description: 'CRM medical pour praticiens - Gerez vos rendez-vous, patients et planning',
-  icons: {
-    icon: '/favicon.ico',
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
+  return buildDefaultMetadata(locale);
+}
 
 export default async function LocaleLayout({
   children,

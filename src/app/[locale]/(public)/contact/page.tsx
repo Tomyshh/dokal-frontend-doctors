@@ -1,8 +1,35 @@
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { ArrowLeft, Mail, Phone, MapPin } from 'lucide-react';
 import { company } from '@/config/company';
+import { buildAlternatesForPath, buildDefaultMetadata, normalizeLocale } from '@/lib/seo';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const locale = normalizeLocale(params.locale);
+  const t = await getTranslations({ locale, namespace: 'contact' });
+
+  const title = t('title');
+  const description = t('intro');
+
+  return {
+    ...buildDefaultMetadata(locale),
+    title,
+    description,
+    alternates: buildAlternatesForPath('/contact'),
+    openGraph: {
+      ...buildDefaultMetadata(locale).openGraph,
+      title,
+      description,
+      url: `/${locale}/contact`,
+    },
+  };
+}
 
 export default async function ContactPage() {
   const t = await getTranslations('contact');
