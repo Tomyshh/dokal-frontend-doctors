@@ -6,7 +6,7 @@ import SocketProvider from '@/providers/SocketProvider';
 import Sidebar from '@/components/layout/Sidebar';
 import Topbar from '@/components/layout/Topbar';
 import MobileNav from '@/components/layout/MobileNav';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -92,8 +92,37 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   // ─── Loading state ─────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Spinner size="lg" />
+      <div className="min-h-screen bg-background">
+        <div className="hidden lg:block fixed left-0 top-0 bottom-0 w-[260px] p-4">
+          <div className="h-full rounded-2xl border border-border bg-card p-4 space-y-4">
+            <Skeleton className="h-10 w-32 rounded-xl" />
+            <div className="space-y-2">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full rounded-xl" />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:ml-[260px]">
+          <div className="sticky top-0 z-10 bg-background border-b border-border">
+            <div className="h-[72px] px-6 flex items-center justify-between">
+              <Skeleton className="h-9 w-56 rounded-xl" />
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-9 w-28 rounded-xl" />
+                <Skeleton className="h-9 w-9 rounded-full" />
+              </div>
+            </div>
+          </div>
+          <main className="p-6 space-y-4" aria-label="Chargement">
+            <Skeleton className="h-8 w-64 rounded-md" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Skeleton className="h-40 w-full rounded-2xl" />
+              <Skeleton className="h-40 w-full rounded-2xl" />
+            </div>
+            <Skeleton className="h-64 w-full rounded-2xl" />
+          </main>
+        </div>
       </div>
     );
   }

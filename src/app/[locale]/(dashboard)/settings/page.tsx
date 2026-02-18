@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import {
   CheckCircle2,
   Building2,
@@ -142,7 +142,31 @@ export default function SettingsPage() {
     router.replace(pathname, { locale: newLocale });
   };
 
-  if (loadingPractitioner || loadingSettings || loadingOrganization) return <Spinner size="lg" />;
+  if (loadingPractitioner || loadingSettings || loadingOrganization) {
+    return (
+      <div className="w-full max-w-7xl mx-auto space-y-6" aria-label="Chargement">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48 rounded-md" />
+            <Skeleton className="h-4 w-80 rounded-md" />
+          </div>
+          <Skeleton className="h-5 w-28 rounded-full" />
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-5 space-y-6">
+            <Skeleton className="h-56 w-full rounded-2xl" />
+            <Skeleton className="h-56 w-full rounded-2xl" />
+            <Skeleton className="h-72 w-full rounded-2xl" />
+          </div>
+          <div className="lg:col-span-7 space-y-6">
+            <Skeleton className="h-72 w-full rounded-2xl" />
+            <Skeleton className="h-96 w-full rounded-2xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6">

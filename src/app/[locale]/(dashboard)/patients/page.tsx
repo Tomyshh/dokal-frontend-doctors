@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Spinner } from '@/components/ui/Spinner';
+import { TableSkeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -96,7 +96,9 @@ export default function PatientsPage() {
         </div>
 
         {isLoading ? (
-          <Spinner />
+          <div className="py-2">
+            <TableSkeleton rows={10} columns={6} />
+          </div>
         ) : isError ? (
           <div className="text-sm text-muted-foreground">{tc('apiError')}</div>
         ) : rows.length === 0 ? (

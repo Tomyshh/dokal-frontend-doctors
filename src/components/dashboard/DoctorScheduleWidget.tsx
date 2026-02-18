@@ -3,7 +3,7 @@
 import { useTranslations, useLocale } from 'next-intl';
 import { useWeeklySchedule } from '@/hooks/useSchedule';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { getDayName, formatTime } from '@/lib/utils';
 import { Clock } from 'lucide-react';
 
@@ -21,7 +21,17 @@ export default function DoctorScheduleWidget() {
       </CardHeader>
 
       {isLoading ? (
-        <Spinner />
+        <div className="space-y-3" aria-label="Chargement">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between py-2 px-3 rounded-xl bg-muted/50">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-4 w-4 rounded-md" />
+                <Skeleton className="h-4 w-28 rounded-md" />
+              </div>
+              <Skeleton className="h-4 w-28 rounded-md" />
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="space-y-3">
           {schedule

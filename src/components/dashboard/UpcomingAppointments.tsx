@@ -5,7 +5,7 @@ import { useCrmAppointments } from '@/hooks/useAppointments';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
-import { Spinner } from '@/components/ui/Spinner';
+import { TableSkeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
@@ -31,7 +31,9 @@ export default function UpcomingAppointments() {
       </CardHeader>
 
       {isLoading ? (
-        <Spinner />
+        <div className="py-2">
+          <TableSkeleton rows={6} columns={4} />
+        </div>
       ) : !data?.appointments?.length ? (
         <EmptyState icon={CalendarX} title={ta('noAppointments')} />
       ) : (

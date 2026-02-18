@@ -9,7 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { Dialog } from '@/components/ui/Dialog';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
 import {
@@ -281,10 +281,46 @@ export default function TeamPage() {
     return spec.name;
   };
 
-  if (loadingOrg || loadingMembers) return <Spinner size="lg" />;
+  if (loadingOrg || loadingMembers) {
+    return (
+      <div className="space-y-6 max-w-4xl" aria-label="Chargement">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-40 rounded-md" />
+            <Skeleton className="h-4 w-72 rounded-md" />
+          </div>
+          <Skeleton className="h-9 w-32 rounded-xl" />
+        </div>
+        <Card>
+          <div className="space-y-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between rounded-xl border border-border/50 bg-white p-4">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-44 rounded-md" />
+                    <Skeleton className="h-3 w-32 rounded-md" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                  <Skeleton className="h-8 w-8 rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   if (!organization) {
-    return <Spinner size="lg" />;
+    return (
+      <div className="space-y-4 max-w-4xl" aria-label="Chargement">
+        <Skeleton className="h-8 w-40 rounded-md" />
+        <Skeleton className="h-48 w-full rounded-2xl" />
+      </div>
+    );
   }
 
   // Seat counts for cost display

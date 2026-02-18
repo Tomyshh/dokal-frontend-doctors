@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import AppointmentActions from '@/components/appointments/AppointmentActions';
 import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
@@ -38,7 +38,43 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
     enabled: !!id,
   });
 
-  if (isLoading) return <Spinner size="lg" />;
+  if (isLoading) {
+    return (
+      <div className="space-y-6 max-w-3xl" aria-label="Chargement">
+        <Skeleton className="h-8 w-44 rounded-lg" />
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <Skeleton className="h-6 w-40 rounded-md" />
+              <Skeleton className="h-6 w-24 rounded-full" />
+            </div>
+          </CardHeader>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <Skeleton className="h-3 w-28 rounded-md" />
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-48 rounded-md" />
+                  <Skeleton className="h-3 w-32 rounded-md" />
+                </div>
+              </div>
+              <Skeleton className="h-6 w-28 rounded-full" />
+            </div>
+            <div className="space-y-3">
+              <Skeleton className="h-3 w-28 rounded-md" />
+              <Skeleton className="h-4 w-64 rounded-md" />
+              <Skeleton className="h-4 w-56 rounded-md" />
+              <Skeleton className="h-4 w-48 rounded-md" />
+            </div>
+          </div>
+          <div className="mt-6 flex justify-end">
+            <Skeleton className="h-9 w-28 rounded-xl" />
+          </div>
+        </Card>
+      </div>
+    );
+  }
   if (!appointment) {
     return (
       <div className="text-center py-12 text-muted-foreground">

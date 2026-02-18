@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useCrmStats } from '@/hooks/useCrmStats';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 
@@ -69,7 +69,14 @@ export default function AppointmentChart() {
         {isError ? (
           <ApiErrorCallout error={error} />
         ) : isLoading ? (
-          <Spinner />
+          <div className="h-full flex flex-col justify-center gap-4 px-4" aria-label="Chargement">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <Skeleton className="h-3 w-28 rounded-md" />
+                <Skeleton className="h-4 flex-1 rounded-md" />
+              </div>
+            ))}
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart

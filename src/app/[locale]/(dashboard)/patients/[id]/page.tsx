@@ -7,7 +7,7 @@ import { useUpdateCrmPatient } from '@/hooks/useCrmPatients';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton, TableSkeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
@@ -80,7 +80,61 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
     setSex((crmRecord.sex as string) || '');
   }, [crmRecord?.id]);
 
-  if (isLoading) return <Spinner size="lg" />;
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-24 rounded-lg" />
+
+        <Card>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <Skeleton className="h-14 w-14 rounded-full" />
+            <div className="flex-1 space-y-3">
+              <Skeleton className="h-7 w-64 rounded-md" />
+              <div className="flex flex-wrap gap-3">
+                <Skeleton className="h-4 w-40 rounded-md" />
+                <Skeleton className="h-4 w-32 rounded-md" />
+                <Skeleton className="h-4 w-28 rounded-md" />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Skeleton className="h-6 w-24 rounded-full" />
+                <Skeleton className="h-6 w-28 rounded-full" />
+              </div>
+            </div>
+            <Skeleton className="h-9 w-28 rounded-xl" />
+          </div>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Skeleton className="h-5 w-32 rounded-md" />
+            </CardTitle>
+          </CardHeader>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Skeleton className="h-3 w-32 rounded-md" />
+              <Skeleton className="h-4 w-48 rounded-md" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-3 w-32 rounded-md" />
+              <Skeleton className="h-4 w-40 rounded-md" />
+            </div>
+          </div>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Skeleton className="h-5 w-48 rounded-md" />
+            </CardTitle>
+          </CardHeader>
+          <div className="py-2">
+            <TableSkeleton rows={6} columns={4} />
+          </div>
+        </Card>
+      </div>
+    );
+  }
   if (isError) {
     return (
       <div className="space-y-4">

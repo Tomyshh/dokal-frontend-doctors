@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Dialog } from '@/components/ui/Dialog';
 import { Badge } from '@/components/ui/Badge';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Plus, Pencil, FileText } from 'lucide-react';
 import type { AppointmentInstruction } from '@/types';
@@ -69,7 +69,23 @@ export default function InstructionsPage() {
 
       <Card>
         {isLoading ? (
-          <Spinner />
+          <div className="space-y-3" aria-label="Chargement">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="border border-border/50 rounded-xl p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-56 rounded-md" />
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </div>
+                    <Skeleton className="h-3 w-[85%] rounded-md" />
+                    <Skeleton className="h-3 w-[70%] rounded-md" />
+                  </div>
+                  <Skeleton className="h-8 w-8 rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : !instructions?.length ? (
           <EmptyState icon={FileText} title={tc('noResults')} action={<Button onClick={openAdd}><Plus className="h-4 w-4" />{tc('add')}</Button>} />
         ) : (

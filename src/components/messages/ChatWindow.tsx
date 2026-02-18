@@ -7,7 +7,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useSocket } from '@/providers/SocketProvider';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import MessageBubble from './MessageBubble';
 import { Send } from 'lucide-react';
@@ -80,7 +80,16 @@ export default function ChatWindow({ conversationId, patientName, patientAvatar 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {isLoading ? (
-          <Spinner />
+          <div className="space-y-3" aria-label="Chargement">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div
+                key={i}
+                className={i % 3 === 0 ? 'flex justify-end' : 'flex justify-start'}
+              >
+                <Skeleton className={i % 3 === 0 ? 'h-10 w-64 rounded-2xl' : 'h-12 w-72 rounded-2xl'} />
+              </div>
+            ))}
+          </div>
         ) : (
           messages?.map((msg) => (
             <MessageBubble

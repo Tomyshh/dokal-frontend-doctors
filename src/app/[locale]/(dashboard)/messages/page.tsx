@@ -6,7 +6,7 @@ import { useConversations } from '@/hooks/useMessages';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
-import { Spinner } from '@/components/ui/Spinner';
+import { ListSkeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import ChatWindow from '@/components/messages/ChatWindow';
 import { MessageSquare } from 'lucide-react';
@@ -33,7 +33,9 @@ export default function MessagesPage() {
           </div>
           <div className="flex-1 overflow-y-auto">
             {isLoading ? (
-              <Spinner />
+              <div className="p-4">
+                <ListSkeleton items={7} />
+              </div>
             ) : !conversations?.length ? (
               <EmptyState icon={MessageSquare} title={t('noConversations')} />
             ) : (

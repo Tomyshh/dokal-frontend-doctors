@@ -5,7 +5,7 @@ import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead 
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Bell, CheckCheck, CalendarCheck, MessageSquare, Star, Clock } from 'lucide-react';
 import { formatRelativeDate } from '@/lib/utils';
@@ -68,7 +68,20 @@ export default function NotificationsPage() {
 
       <Card padding={false}>
         {isLoading ? (
-          <Spinner />
+          <div className="p-4 space-y-3" aria-label="Chargement">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-4 p-4">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <Skeleton className="h-4 w-56 rounded-md" />
+                    <Skeleton className="h-3 w-20 rounded-md" />
+                  </div>
+                  <Skeleton className="h-3 w-[85%] rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : !notifications?.length ? (
           <div className="p-6">
             <EmptyState icon={Bell} title={t('noNotifications')} />

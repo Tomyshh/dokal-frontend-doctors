@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useCrmAppointments } from '@/hooks/useAppointments';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
 import AppointmentFilters from '@/components/appointments/AppointmentFilters';
@@ -105,7 +105,27 @@ export default function AppointmentsPage() {
         {isError ? (
           <ApiErrorCallout error={error} />
         ) : isLoading ? (
-          <Spinner />
+          <div className="space-y-6" aria-label="Chargement">
+            {Array.from({ length: 3 }).map((_, g) => (
+              <div key={g} className="space-y-2">
+                <Skeleton className="h-4 w-40 rounded-md" />
+                <div className="divide-y divide-border/60 rounded-xl border border-border/60 bg-white overflow-hidden">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="p-4 flex items-center justify-between gap-4">
+                      <div className="min-w-0 flex items-start gap-4 flex-1">
+                        <Skeleton className="h-4 w-[92px] rounded-md" />
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <Skeleton className="h-4 w-64 rounded-md" />
+                          <Skeleton className="h-3 w-80 rounded-md" />
+                        </div>
+                      </div>
+                      <Skeleton className="h-8 w-24 rounded-lg" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         ) : grouped.size === 0 ? (
           <EmptyState icon={CalendarX} title={t('noAppointments')} />
         ) : (

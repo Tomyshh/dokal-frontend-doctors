@@ -9,7 +9,7 @@ import { Dialog } from '@/components/ui/Dialog';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import { getDayName, formatTime } from '@/lib/utils';
 import { Plus, Pencil, Trash2, CalendarOff } from 'lucide-react';
@@ -110,7 +110,21 @@ export default function SchedulePage() {
         </CardHeader>
 
         {isLoading ? (
-          <Spinner />
+          <div className="space-y-2" aria-label="Chargement">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between py-3 px-4 rounded-xl bg-muted/50">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-4 w-28 rounded-md" />
+                  <Skeleton className="h-4 w-32 rounded-md" />
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+                <div className="flex items-center gap-1">
+                  <Skeleton className="h-8 w-8 rounded-lg" />
+                  <Skeleton className="h-8 w-8 rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="space-y-2">
             {schedule?.sort((a, b) => a.day_of_week - b.day_of_week).map((block) => (
@@ -162,7 +176,19 @@ export default function SchedulePage() {
         </CardHeader>
 
         {loadingOverrides ? (
-          <Spinner />
+          <div className="space-y-2" aria-label="Chargement">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between py-3 px-4 rounded-xl bg-muted/50">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-4 w-4 rounded-md" />
+                  <Skeleton className="h-4 w-24 rounded-md" />
+                  <Skeleton className="h-6 w-24 rounded-full" />
+                  <Skeleton className="h-4 w-36 rounded-md" />
+                </div>
+                <Skeleton className="h-8 w-8 rounded-lg" />
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="space-y-2">
             {overrides?.map((override) => (

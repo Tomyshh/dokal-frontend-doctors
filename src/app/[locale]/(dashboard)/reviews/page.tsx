@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Textarea';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Star, MessageCircle } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
@@ -75,7 +75,30 @@ export default function ReviewsPage() {
         </CardHeader>
 
         {isLoading ? (
-          <Spinner />
+          <div className="space-y-4" aria-label="Chargement">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="border border-border/50 rounded-xl p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-40 rounded-md" />
+                      <Skeleton className="h-3 w-24 rounded-md" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: 5 }).map((__, s) => (
+                      <Skeleton key={s} className="h-4 w-4 rounded-md" />
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-3 space-y-2">
+                  <Skeleton className="h-3 w-[85%] rounded-md" />
+                  <Skeleton className="h-3 w-[70%] rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : !reviews?.length ? (
           <EmptyState icon={Star} title={t('noReviews')} />
         ) : (

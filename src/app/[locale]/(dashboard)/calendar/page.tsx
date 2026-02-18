@@ -18,7 +18,7 @@ import {
   type CalendarView,
 } from '@/hooks/useCalendarAppointments';
 import { useExternalEvents } from '@/hooks/useExternalEvents';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
 import { Button } from '@/components/ui/Button';
 import CalendarHeader from '@/components/calendar/CalendarHeader';
@@ -181,8 +181,17 @@ export default function CalendarPage() {
       {isError ? (
         <ApiErrorCallout error={error} />
       ) : isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <Spinner size="lg" />
+        <div className="space-y-4" aria-label="Chargement">
+          <div className="grid grid-cols-7 gap-2">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <Skeleton key={i} className="h-5 w-full rounded-md" />
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-2">
+            {Array.from({ length: 35 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-xl" />
+            ))}
+          </div>
         </div>
       ) : (
         <>

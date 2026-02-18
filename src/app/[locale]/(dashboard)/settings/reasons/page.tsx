@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Dialog } from '@/components/ui/Dialog';
 import { Badge } from '@/components/ui/Badge';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Plus, Pencil, ClipboardList } from 'lucide-react';
 import type { AppointmentReason } from '@/types';
@@ -71,7 +71,20 @@ export default function ReasonsPage() {
 
       <Card>
         {isLoading ? (
-          <Spinner />
+          <div className="space-y-2" aria-label="Chargement">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between py-3 px-4 rounded-xl bg-muted/50">
+                <div className="flex items-center gap-3">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-56 rounded-md" />
+                    <Skeleton className="h-3 w-40 rounded-md" />
+                  </div>
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+                <Skeleton className="h-8 w-8 rounded-lg" />
+              </div>
+            ))}
+          </div>
         ) : !reasons?.length ? (
           <EmptyState icon={ClipboardList} title={tc('noResults')} action={<Button onClick={openAdd}><Plus className="h-4 w-4" />{tc('add')}</Button>} />
         ) : (
