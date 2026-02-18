@@ -2078,6 +2078,19 @@ components:
 
     HealthProfile:
       type: object
+      properties:
+        user_id: { type: string, format: uuid }
+        teudat_zehut: { type: string, nullable: true, description: "Numéro d'identité israélien (déchiffré)" }
+        date_of_birth: { type: string, format: date, nullable: true }
+        sex: { $ref: "#/components/schemas/SexType", nullable: true }
+        blood_type: { type: string, nullable: true }
+        kupat_holim: { type: string, nullable: true }
+        insurance_provider: { type: string, nullable: true, description: "Assurance privée (AIG, איילון, etc.)" }
+        kupat_member_id: { type: string, nullable: true }
+        family_doctor_name: { type: string, nullable: true }
+        emergency_contact_name: { type: string, nullable: true }
+        emergency_contact_phone: { type: string, nullable: true }
+        updated_at: { type: string, format: date-time }
       additionalProperties: true
 
     UpsertHealthProfileRequest:
@@ -2088,6 +2101,7 @@ components:
         sex: { $ref: "#/components/schemas/SexType", nullable: true }
         blood_type: { type: string, nullable: true }
         kupat_holim: { type: string, nullable: true }
+        insurance_provider: { type: string, nullable: true }
         kupat_member_id: { type: string, nullable: true }
         family_doctor_name: { type: string, nullable: true }
         emergency_contact_name: { type: string, nullable: true }

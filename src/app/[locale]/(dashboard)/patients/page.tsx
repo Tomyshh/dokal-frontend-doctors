@@ -97,7 +97,7 @@ export default function PatientsPage() {
 
         {isLoading ? (
           <div className="py-2">
-            <TableSkeleton rows={10} columns={6} />
+            <TableSkeleton rows={10} columns={7} />
           </div>
         ) : isError ? (
           <div className="text-sm text-muted-foreground">{tc('apiError')}</div>
@@ -111,6 +111,9 @@ export default function PatientsPage() {
                   <tr className="border-b border-border">
                     <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
                       {tc('patient')}
+                    </th>
+                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+                      {t('teudatZehut')}
                     </th>
                     <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
                       {tc('phone')}
@@ -157,6 +160,9 @@ export default function PatientsPage() {
                               </div>
                             )}
                           </Link>
+                        </td>
+                        <td className="py-3 px-3 text-sm text-gray-600 whitespace-nowrap">
+                          {p.teudat_zehut || '-'}
                         </td>
                         <td className="py-3 px-3 text-sm text-gray-600">{p.phone || '-'}</td>
                         <td className="py-3 px-3 text-sm text-gray-600">{p.email || '-'}</td>

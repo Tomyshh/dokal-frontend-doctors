@@ -19,6 +19,23 @@ import type { CrmPatientListItem, Appointment } from '@/types';
 import { formatMissingFieldLabel } from '@/lib/crm';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
 
+const INSURANCE_PROVIDER_OPTIONS = [
+  'AIG',
+  'איילון',
+  'ביטוח חקלאי',
+  'דקלה',
+  'הראל',
+  'הכשרה',
+  'הפניקס',
+  'כלל',
+  'מגדל',
+  'מנורה',
+  'ביטוח ישיר',
+  'שירביט',
+  'שלמה',
+  'שומרה',
+] as const;
+
 export default function PatientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const t = useTranslations('patients');
@@ -30,7 +47,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   const updateMutation = useUpdateCrmPatient();
   const [editMode, setEditMode] = useState(false);
 
-  const { crmRecord, teudatDisplay, history } = useMemo(() => {
+  const { crmRecord, teudatDisplay, insuranceProviderDisplay, history } = useMemo(() => {
     const d = data as any;
     const fromWrapped = d?.patient as CrmPatientListItem | undefined;
     const fromDirect =
@@ -39,11 +56,14 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
         : undefined;
     const record = fromWrapped || fromDirect || undefined;
 
+    const normalize = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null);
     const teudat =
-      (record as any)?.teudat_zehut_masked ||
-      (record as any)?.teudat_zehut ||
-      d?.health_profile?.teudat_zehut ||
+      normalize((record as any)?.teudat_zehut) ||
+      normalize(d?.health_profile?.teudat_zehut) ||
+      normalize((record as any)?.teudat_zehut_masked) ||
       null;
+
+    const insuranceProvider = normalize(d?.health_profile?.insurance_provider) || normalize((record as any)?.insurance_provider) || null;
 
     const appts =
       (d?.appointment_history ||
@@ -56,6 +76,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
     return {
       crmRecord: record || null,
       teudatDisplay: teudat,
+      insuranceProviderDisplay: insuranceProvider,
       history: Array.isArray(appts) ? appts : [],
     };
   }, [data]);
@@ -68,6 +89,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   const [dob, setDob] = useState('');
   const [sex, setSex] = useState<string>('');
   const [teudat, setTeudat] = useState<string>('');
+  const [insuranceProvider, setInsuranceProvider] = useState<string>('');
 
   useEffect(() => {
     if (!crmRecord) return;
@@ -78,7 +100,9 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
     setCity(crmRecord.city || '');
     setDob(crmRecord.date_of_birth || '');
     setSex((crmRecord.sex as string) || '');
-  }, [crmRecord?.id]);
+    setTeudat(teudatDisplay || '');
+    setInsuranceProvider(insuranceProviderDisplay || '');
+  }, [crmRecord?.id, teudatDisplay, insuranceProviderDisplay]);
 
   if (isLoading) {
     return (
@@ -304,6 +328,16 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               onChange={(e) => setTeudat(e.target.value)}
               placeholder={t('teudatZehutPlaceholder')}
             />
+            <Select
+              id="insurance_provider"
+              label={t('insurance')}
+              value={insuranceProvider}
+              onChange={(e) => setInsuranceProvider(e.target.value)}
+              options={[
+                { value: '', label: t('optional') },
+                ...INSURANCE_PROVIDER_OPTIONS.map((v) => ({ value: v, label: v })),
+              ]}
+            />
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <Button variant="outline" onClick={() => setEditMode(false)} disabled={updateMutation.isPending}>
@@ -323,6 +357,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                     date_of_birth: dob || null,
                     sex: (sex || null) as 'male' | 'female' | 'other' | null,
                     teudat_zehut: teudat.trim() || null,
+                    insurance_provider: insuranceProvider || null,
                   },
                 });
                 setEditMode(false);

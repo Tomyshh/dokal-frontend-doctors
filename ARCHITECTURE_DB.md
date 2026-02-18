@@ -199,6 +199,7 @@ CREATE TABLE public.health_profiles (
   emergency_contact_name text,
   emergency_contact_phone text,
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  insurance_provider text,
   CONSTRAINT health_profiles_pkey PRIMARY KEY (user_id),
   CONSTRAINT health_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );

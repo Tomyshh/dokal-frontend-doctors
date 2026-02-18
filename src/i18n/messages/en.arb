@@ -351,7 +351,7 @@
     "missing": "Missing",
     "missingFields": "Missing fields",
     "editPatient": "Edit patient",
-    "statusDraft": "Not registered",
+    "statusDraft": "Not registered in Dokal App",
     "statusLinked": "Registered",
     "incomplete": "Incomplete",
     "noTeudat": "No Teudat",
@@ -911,7 +911,7 @@
     "viewAppointment": "View appointment",
     "patientDraftTitle": "Patient not registered (draft)",
     "patientDraftDesc": "This appointment is linked to a CRM patient record without a mobile account.",
-    "patientDraftBadge": "Not registered",
+    "patientDraftBadge": "Not registered in Dokal App",
     "completePatient": "Complete patient",
     "missingInfoTitle": "Missing patient information",
     "missingInfoBadge": "To complete",
@@ -935,7 +935,8 @@
       "email": "Email",
       "date_of_birth": "Date of birth",
       "sex": "Sex",
-      "city": "City"
+      "city": "City",
+      "insurance_provider": "Private insurance"
     },
     "now": "Now",
     "externalEvent": "External event",

@@ -171,6 +171,7 @@ export interface UpdateCrmPatientRequest {
   date_of_birth?: string | null;
   sex?: 'male' | 'female' | 'other' | null;
   city?: string | null;
+  insurance_provider?: string | null;
 }
 
 export interface CrmPatientsListQuery {

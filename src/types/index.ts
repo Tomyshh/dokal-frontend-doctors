@@ -320,6 +320,7 @@ export interface HealthProfile {
   sex: SexType | null;
   blood_type: string | null;
   kupat_holim: string | null;
+  insurance_provider?: string | null;
   kupat_member_id: string | null;
   family_doctor_name: string | null;
   emergency_contact_name: string | null;
@@ -492,6 +493,8 @@ export interface CrmPatientListItem {
   sex: SexType | null;
   city: string | null;
   avatar_url: string | null;
+  teudat_zehut?: string | null;
+  teudat_zehut_masked?: string | null;
   status?: 'draft' | 'linked';
   is_incomplete?: boolean;
   missing_fields?: string[];

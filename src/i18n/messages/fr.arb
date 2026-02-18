@@ -935,7 +935,8 @@
       "email": "E-mail",
       "date_of_birth": "Date de naissance",
       "sex": "Sexe",
-      "city": "Ville"
+      "city": "Ville",
+      "insurance_provider": "Assurance privée"
     },
     "now": "Maintenant",
     "externalEvent": "Événement externe",
