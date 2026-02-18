@@ -1,9 +1,25 @@
 import type { MetadataRoute } from 'next';
+import { headers } from 'next/headers';
 import { locales } from '@/i18n/config';
 import { getSiteUrl } from '@/lib/seo';
 
-export default function robots(): MetadataRoute.Robots {
-  const base = getSiteUrl();
+async function getBaseUrlFromRequest(): Promise<string> {
+  try {
+    const h = await headers();
+    const protoRaw = h.get('x-forwarded-proto') ?? 'https';
+    const hostRaw = h.get('x-forwarded-host') ?? h.get('host');
+    const proto = protoRaw.split(',')[0]?.trim() || 'https';
+    const host = hostRaw?.split(',')[0]?.trim();
+    if (host) return `${proto}://${host}`.replace(/\/+$/, '');
+  } catch {
+    // noop
+  }
+
+  return getSiteUrl();
+}
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const base = await getBaseUrlFromRequest();
 
   const authAndPrivate = [
     '/login',
