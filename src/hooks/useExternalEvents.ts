@@ -13,15 +13,26 @@ export interface ExternalEventsResponse {
 /**
  * Fetch external events (manual + Google imported) for a date range.
  *
- * Backend recommended endpoint: GET /crm/external-events?from=...&to=...
- * For backward compat, we fall back to /integrations/google-calendar/events.
+ * Backend recommended endpoint (Google overlay): GET /integrations/google-calendar/external-events?from=...&to=...
+ * For backward compat, we fall back to /crm/external-events then /integrations/google-calendar/events.
  */
 export function useExternalEvents(params: { from: string; to: string }) {
   const { from, to } = params;
   return useQuery({
     queryKey: ['external-events', from, to],
     queryFn: async () => {
-      // 1) Preferred CRM endpoint
+      // 1) Preferred Google overlay endpoint
+      try {
+        const { data } = await api.get<ExternalEventsResponse>(
+          '/integrations/google-calendar/external-events',
+          { params: { from, to } },
+        );
+        return data.events;
+      } catch {
+        // ignore and try fallback
+      }
+
+      // 2) CRM endpoint (manual + imported, if enabled server-side)
       try {
         const { data } = await api.get<ExternalEventsResponse>('/crm/external-events', {
           params: { from, to },
@@ -31,7 +42,7 @@ export function useExternalEvents(params: { from: string; to: string }) {
         // ignore and try fallback
       }
 
-      // 2) Legacy endpoint (Google-only)
+      // 3) Legacy endpoint (Google-only)
       try {
         const { data } = await api.get<ExternalEventsResponse>(
           '/integrations/google-calendar/events',

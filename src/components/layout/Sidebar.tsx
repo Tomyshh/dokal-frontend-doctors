@@ -65,6 +65,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       { href: '/calendar', icon: Calendar, label: t('calendar') },
       { href: '/messages', icon: MessageSquare, label: t('messages') },
       { href: '/appointments', icon: CalendarCheck, label: t('appointments') },
+      { href: '/patients', icon: Users, label: t('patients') },
     );
 
     // Secretaries don't have reviews

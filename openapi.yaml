@@ -15,12 +15,15 @@ tags:
   - name: Profile
   - name: Relatives
   - name: Practitioners
+  - name: Organizations
+    description: Clinics & independent practitioner organizations
   - name: Appointments
   - name: Messaging
   - name: Health
   - name: Notifications
   - name: Settings
   - name: Payments
+  - name: Subscription
   - name: Reviews
   - name: CRM
 
@@ -170,6 +173,23 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/PractitionerSearchResult" }
 
+  /api/v1/practitioners/me:
+    get:
+      tags: [Practitioners]
+      summary: Get current user's practitioner profile (authenticated)
+      description: |
+        Use after POST /practitioners/register to get the practitioner without knowing the id.
+        Returns 404 if the user has no practitioner row yet (onboarding not completed).
+      responses:
+        "200":
+          description: Practitioner profile (same shape as GET /practitioners/{id})
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PractitionerDetail" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: No practitioner profile for this user (complete onboarding first)
+
   /api/v1/practitioners/{id}:
     get:
       tags: [Practitioners]
@@ -235,6 +255,282 @@ paths:
                     items: { $ref: "#/components/schemas/Review" }
                   total: { type: integer }
                 required: [reviews, total]
+
+  /api/v1/practitioners/register:
+    post:
+      tags: [Practitioners]
+      summary: Register as practitioner (optionally join or create organization)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterPractitionerRequest" }
+      responses:
+        "201":
+          description: Created practitioner
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "200":
+          description: Updated practitioner (idempotent retry)
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  # ── Organizations ──────────────────────────────────────────────────────
+
+  /api/v1/organizations/search:
+    get:
+      tags: [Organizations]
+      security: []
+      summary: Search organizations (clinics / independent)
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: type
+          in: query
+          schema: { $ref: "#/components/schemas/OrganizationType" }
+        - name: city
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        "200":
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Organization" }
+
+  /api/v1/organizations/{id}:
+    get:
+      tags: [Organizations]
+      security: []
+      summary: Get organization details (with practitioners)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Organization
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OrganizationDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [Organizations]
+      summary: Update organization (owner/admin only)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateOrganizationRequest" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Organization" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/organizations:
+    get:
+      tags: [Organizations]
+      summary: List my organizations
+      responses:
+        "200":
+          description: Organizations I belong to
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - { $ref: "#/components/schemas/Organization" }
+                    - type: object
+                      properties:
+                        my_role: { $ref: "#/components/schemas/OrganizationRole" }
+                        joined_at: { type: string, format: date-time }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Organizations]
+      summary: Create organization (clinic or individual)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateOrganizationRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Organization" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/v1/organizations/{id}/members:
+    get:
+      tags: [Organizations]
+      summary: List organization members (with profile + specialty)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/OrganizationMemberDetail" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [Organizations]
+      summary: Add existing user as member (owner/admin only)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id: { type: string, format: uuid }
+                role:
+                  type: string
+                  enum: [admin, member]
+                  default: member
+              required: [user_id]
+      responses:
+        "201":
+          description: Added
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409":
+          description: Already a member
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /api/v1/organizations/{id}/members/{memberId}:
+    patch:
+      tags: [Organizations]
+      summary: Update member role (owner/admin only)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+        - $ref: "#/components/parameters/MemberIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  enum: [admin, member]
+              required: [role]
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Organizations]
+      summary: Remove member (owner/admin only, cannot remove owner)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+        - $ref: "#/components/parameters/MemberIdParam"
+      responses:
+        "204": { description: Removed }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/organizations/{id}/invite:
+    post:
+      tags: [Organizations]
+      summary: >
+        Invite a team member (creates Supabase user + practitioner or secretary).
+        Sends invite email if new user.
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InviteMemberRequest" }
+      responses:
+        "201":
+          description: Member invited/added
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InviteMemberResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409":
+          description: User already a member
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /api/v1/organizations/{id}/stats:
+    get:
+      tags: [Organizations]
+      summary: Organization-level appointment statistics
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  appointments:
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      pending: { type: integer }
+                      confirmed: { type: integer }
+                      cancelled: { type: integer }
+                      completed: { type: integer }
+                      no_show: { type: integer }
+                  practitioners_count: { type: integer }
+                  active_practitioners: { type: integer }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
 
   /api/v1/appointments:
     post:
@@ -717,10 +1013,29 @@ paths:
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
+  /api/v1/crm/auth/bootstrap:
+    post:
+      tags: [CRM]
+      summary: Bootstrap CRM profile after OAuth signup (creates/updates profiles.role)
+      parameters:
+        - name: X-Client-App
+          in: header
+          required: false
+          description: Optional client guard (recommended value is `crm`)
+          schema: { type: string }
+      responses:
+        "200":
+          description: Profile (same format as GET /api/v1/profile)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
   /api/v1/crm/dashboard/stats:
     get:
       tags: [CRM]
-      summary: CRM stats (practitioner/admin)
+      summary: CRM stats (practitioner/secretary/admin — secretaries see org-level stats)
       parameters:
         - name: from
           in: query
@@ -750,7 +1065,7 @@ paths:
   /api/v1/crm/appointments:
     get:
       tags: [CRM]
-      summary: CRM appointments list (filters)
+      summary: CRM appointments list (practitioner sees own, secretary sees org-level)
       parameters:
         - name: date
           in: query
@@ -779,6 +1094,94 @@ paths:
                 required: [appointments, total]
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [CRM]
+      summary: Create a CRM appointment (confirmed)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                patient_record_id:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Existing CRM patient record id
+                patient:
+                  type: object
+                  nullable: true
+                  description: Inline patient creation (draft patient record, no auth)
+                  properties:
+                    first_name: { type: string }
+                    last_name: { type: string }
+                    phone: { type: string, nullable: true }
+                    email: { type: string, format: email, nullable: true }
+                    teudat_zehut: { type: string, nullable: true }
+                    date_of_birth: { type: string, format: date, nullable: true }
+                    sex: { type: string, nullable: true }
+                    city: { type: string, nullable: true }
+                practitioner_id:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Required if the actor is a secretary/admin
+                reason_id: { type: string, format: uuid, nullable: true }
+                appointment_date: { type: string, format: date }
+                start_time: { type: string, example: "09:00:00" }
+                end_time: { type: string, example: "09:30:00" }
+                visited_before: { type: boolean }
+                status: { type: string, enum: ["confirmed"] }
+                notes: { type: string, nullable: true }
+              required:
+                - reason_id
+                - appointment_date
+                - start_time
+                - end_time
+                - visited_before
+                - status
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                required: [id]
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/appointments/{id}:
+    patch:
+      tags: [CRM]
+      summary: Update appointment metadata (practitioner only)
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason_id: { type: string, format: uuid, nullable: true }
+                practitioner_notes: { type: string, nullable: true }
+                external_title: { type: string, nullable: true }
+                external_description: { type: string, nullable: true }
+                external_location: { type: string, nullable: true }
+      responses:
+        "200":
+          description: Updated appointment
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
   /api/v1/crm/appointments/{id}/confirm:
     patch:
@@ -1054,10 +1457,146 @@ paths:
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
+  /api/v1/crm/patients/search:
+    get:
+      tags: [CRM]
+      summary: Search CRM patients (visible patients only)
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+      responses:
+        "200":
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        auth_user_id: { type: string, format: uuid, nullable: true }
+                        first_name: { type: string, nullable: true }
+                        last_name: { type: string, nullable: true }
+                        email: { type: string, nullable: true }
+                        phone: { type: string, nullable: true }
+                        date_of_birth: { type: string, format: date, nullable: true }
+                        sex: { type: string, nullable: true }
+                        city: { type: string, nullable: true }
+                        avatar_url: { type: string, nullable: true }
+                        status: { type: string, enum: [draft, linked] }
+                        is_incomplete: { type: boolean }
+                        missing_fields:
+                          type: array
+                          items: { type: string }
+                        has_teudat_zehut: { type: boolean }
+                      required: [id]
+                  total: { type: integer }
+                required: [patients, total]
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/patients:
+    get:
+      tags: [CRM]
+      summary: List CRM patients (visible patients only, paginated)
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+        - name: status
+          in: query
+          required: false
+          schema: { type: string, enum: [draft, linked] }
+        - name: incomplete
+          in: query
+          required: false
+          schema: { type: boolean }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 500, default: 50 }
+        - name: offset
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        "200":
+          description: Page
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patients:
+                    type: array
+                    items: { type: object, additionalProperties: true }
+                  total: { type: integer }
+                required: [patients, total]
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [CRM]
+      summary: Create a patient record from CRM (no auth account)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name: { type: string }
+                last_name: { type: string }
+                phone: { type: string, nullable: true }
+                email: { type: string, format: email, nullable: true }
+                teudat_zehut: { type: string, nullable: true, description: "Teoudat Zehout (Israeli national ID), digits preferred" }
+                date_of_birth: { type: string, format: date, nullable: true }
+                sex: { type: string, nullable: true }
+                city: { type: string, nullable: true }
+              required: [first_name, last_name]
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                  auth_user_id: { type: string, format: uuid, nullable: true }
+                  first_name: { type: string, nullable: true }
+                  last_name: { type: string, nullable: true }
+                  email: { type: string, nullable: true }
+                  phone: { type: string, nullable: true }
+                  date_of_birth: { type: string, format: date, nullable: true }
+                  sex: { type: string, nullable: true }
+                  city: { type: string, nullable: true }
+                  avatar_url: { type: string, nullable: true }
+                  status: { type: string, enum: [draft, linked] }
+                  is_incomplete: { type: boolean }
+                  missing_fields:
+                    type: array
+                    items: { type: string }
+                  has_teudat_zehut: { type: boolean }
+                required: [id]
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
   /api/v1/crm/patients/{id}:
     get:
       tags: [CRM]
-      summary: Patient view (only if practitioner has an appointment with patient)
+      summary: Patient view (practitioner or secretary with org appointment access)
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       responses:
         "200":
@@ -1065,6 +1604,35 @@ paths:
           content:
             application/json:
               schema: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [CRM]
+      summary: Update patient record (no auth account creation)
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name: { type: string, nullable: true }
+                last_name: { type: string, nullable: true }
+                phone: { type: string, nullable: true }
+                email: { type: string, format: email, nullable: true }
+                teudat_zehut: { type: string, nullable: true }
+                date_of_birth: { type: string, format: date, nullable: true }
+                sex: { type: string, nullable: true }
+                city: { type: string, nullable: true }
+      responses:
+        "200":
+          description: Updated patient
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -1123,6 +1691,146 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
 
+  /api/v1/crm/organization:
+    get:
+      tags: [CRM]
+      summary: Get my organization info (for practitioner or secretary)
+      responses:
+        "200":
+          description: Organization with members
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - { $ref: "#/components/schemas/OrganizationDetail" }
+                  - { type: "null" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/organization/appointments:
+    get:
+      tags: [CRM]
+      summary: List all appointments in my organization (owner/admin/secretary)
+      parameters:
+        - name: date
+          in: query
+          schema: { type: string, format: date }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        "200":
+          description: Page
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  appointments:
+                    type: array
+                    items: { type: object, additionalProperties: true }
+                  total: { type: integer }
+                required: [appointments, total]
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/organization/appointments/{id}:
+    patch:
+      tags: [CRM]
+      summary: Update appointment metadata (org admin/secretary)
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason_id: { type: string, format: uuid, nullable: true }
+                practitioner_notes: { type: string, nullable: true }
+                external_title: { type: string, nullable: true }
+                external_description: { type: string, nullable: true }
+                external_location: { type: string, nullable: true }
+      responses:
+        "200":
+          description: Updated appointment
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/organization/appointments/{id}/confirm:
+    patch:
+      tags: [CRM]
+      summary: Confirm appointment (org admin/secretary)
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      responses:
+        "204": { description: Confirmed }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/organization/appointments/{id}/cancel:
+    patch:
+      tags: [CRM]
+      summary: Cancel appointment (org admin/secretary)
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cancellation_reason: { type: string, nullable: true }
+      responses:
+        "204": { description: Cancelled }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/organization/appointments/{id}/complete:
+    patch:
+      tags: [CRM]
+      summary: Complete appointment (org admin/secretary)
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                practitioner_notes: { type: string, nullable: true }
+      responses:
+        "204": { description: Completed }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/crm/organization/appointments/{id}/no-show:
+    patch:
+      tags: [CRM]
+      summary: Mark appointment as no-show (org admin/secretary)
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      responses:
+        "204": { description: Updated }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1134,6 +1842,13 @@ components:
   parameters:
     IdParam:
       name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    MemberIdParam:
+      name: memberId
       in: path
       required: true
       schema:
@@ -1177,7 +1892,19 @@ components:
 
     UserRole:
       type: string
-      enum: [patient, practitioner, admin]
+      enum: [patient, practitioner, secretary, admin]
+
+    OrganizationType:
+      type: string
+      enum: [individual, clinic]
+
+    OrganizationRole:
+      type: string
+      enum: [owner, admin, member]
+
+    StaffType:
+      type: string
+      enum: [practitioner, secretary]
 
     SexType:
       type: string
@@ -1508,3 +2235,171 @@ components:
         address_line: { type: string, nullable: true }
         zip_code: { type: string, nullable: true }
         city: { type: string, nullable: true }
+
+    RegisterPractitionerRequest:
+      type: object
+      properties:
+        first_name: { type: string, minLength: 1 }
+        last_name: { type: string, minLength: 1 }
+        email: { type: string, format: email }
+        phone: { type: string, pattern: '^\+[1-9]\d{1,14}$' }
+        city: { type: string, minLength: 1 }
+        specialty: { type: string, minLength: 1 }
+        license_number: { type: string, pattern: '^\d{1,6}$' }
+        address_line: { type: string, minLength: 1 }
+        zip_code: { type: string, minLength: 1 }
+        organization_id:
+          type: string
+          format: uuid
+          description: Join an existing organization (optional)
+        organization_name:
+          type: string
+          description: Name for a new organization (optional)
+        organization_type:
+          $ref: "#/components/schemas/OrganizationType"
+      required: [first_name, last_name, email, phone, city, specialty, license_number, address_line, zip_code]
+
+    # ── Organizations ──────────────────────────────────────────────────
+
+    Organization:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        slug: { type: string, nullable: true }
+        email: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        address_line: { type: string, nullable: true }
+        zip_code: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        latitude: { type: number, nullable: true }
+        longitude: { type: number, nullable: true }
+        avatar_url: { type: string, nullable: true }
+        type: { $ref: "#/components/schemas/OrganizationType" }
+        license_number: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        website: { type: string, nullable: true }
+        owner_id: { type: string, format: uuid }
+        is_active: { type: boolean }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+      required: [id, name, type, owner_id, is_active]
+
+    OrganizationDetail:
+      description: Organization with nested practitioners or members
+      allOf:
+        - { $ref: "#/components/schemas/Organization" }
+        - type: object
+          properties:
+            practitioners:
+              type: array
+              items: { type: object, additionalProperties: true }
+            organization_members:
+              type: array
+              items: { $ref: "#/components/schemas/OrganizationMemberDetail" }
+
+    OrganizationMemberDetail:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        role: { $ref: "#/components/schemas/OrganizationRole" }
+        staff_type: { $ref: "#/components/schemas/StaffType" }
+        invited_by: { type: string, format: uuid, nullable: true }
+        joined_at: { type: string, format: date-time }
+        profiles:
+          type: object
+          properties:
+            first_name: { type: string, nullable: true }
+            last_name: { type: string, nullable: true }
+            avatar_url: { type: string, nullable: true }
+            email: { type: string, nullable: true }
+            phone: { type: string, nullable: true }
+            role: { $ref: "#/components/schemas/UserRole" }
+        practitioner:
+          description: >
+            Present only when staff_type=practitioner. Contains specialty info.
+          type: object
+          nullable: true
+          properties:
+            specialty:
+              type: object
+              properties:
+                name: { type: string }
+                name_fr: { type: string, nullable: true }
+                name_he: { type: string, nullable: true }
+      required: [id, user_id, role, staff_type, joined_at]
+
+    CreateOrganizationRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        type: { $ref: "#/components/schemas/OrganizationType" }
+        email: { type: string, format: email, nullable: true }
+        phone: { type: string, nullable: true }
+        address_line: { type: string, nullable: true }
+        zip_code: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        latitude: { type: number, nullable: true }
+        longitude: { type: number, nullable: true }
+        license_number: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        website: { type: string, format: uri, nullable: true }
+      required: [name]
+
+    UpdateOrganizationRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        email: { type: string, format: email, nullable: true }
+        phone: { type: string, nullable: true }
+        address_line: { type: string, nullable: true }
+        zip_code: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        latitude: { type: number, nullable: true }
+        longitude: { type: number, nullable: true }
+        avatar_url: { type: string, format: uri, nullable: true }
+        license_number: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        website: { type: string, format: uri, nullable: true }
+        is_active: { type: boolean }
+
+    InviteMemberRequest:
+      type: object
+      description: >
+        Invite a new team member. Creates a Supabase user (sends invite email)
+        or adds an existing user. For staff_type=practitioner, specialty and
+        license_number are required.
+      properties:
+        email: { type: string, format: email }
+        first_name: { type: string, minLength: 1 }
+        last_name: { type: string, minLength: 1 }
+        phone: { type: string, nullable: true, pattern: '^\+[1-9]\d{1,14}$' }
+        staff_type: { $ref: "#/components/schemas/StaffType" }
+        org_role:
+          type: string
+          enum: [admin, member]
+          default: member
+        specialty:
+          type: string
+          description: Required when staff_type=practitioner (i18n key or name)
+        license_number:
+          type: string
+          description: Required when staff_type=practitioner
+          pattern: '^\d{1,6}$'
+        address_line: { type: string, nullable: true }
+        zip_code: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+      required: [email, first_name, last_name, staff_type]
+
+    InviteMemberResponse:
+      type: object
+      properties:
+        member: { $ref: "#/components/schemas/OrganizationMemberDetail" }
+        is_existing_user:
+          type: boolean
+          description: true if the email was already registered
+        invite_sent:
+          type: boolean
+          description: true if an invite email was sent (false for existing users)
+      required: [member, is_existing_user, invite_sent]

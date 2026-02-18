@@ -98,7 +98,6 @@ export function CreateCrmAppointmentDialog({
   const [endTime, setEndTime] = useState('09:30');
   const [reasonId, setReasonId] = useState<string>('');
   const [visitedBefore, setVisitedBefore] = useState(false);
-  const [status, setStatus] = useState<'pending' | 'confirmed'>('confirmed');
   const [notes, setNotes] = useState('');
 
   const [error, setError] = useState('');
@@ -128,7 +127,6 @@ export function CreateCrmAppointmentDialog({
       setEndTime('09:30');
       setReasonId('');
       setVisitedBefore(false);
-      setStatus('confirmed');
       setNotes('');
       // Don't derive practitioner here (members may still be loading)
       setPractitionerId('');
@@ -221,14 +219,14 @@ export function CreateCrmAppointmentDialog({
     }
 
     const payload: CreateCrmAppointmentRequest = {
-      patient_id: selectedPatient.id,
+      patient_record_id: selectedPatient.id,
       practitioner_id: isSecretary ? practitionerId : undefined,
       reason_id: reasonId || null,
       appointment_date: date,
       start_time: padTime(startTime),
       end_time: padTime(endTime),
       visited_before: visitedBefore,
-      status,
+      status: 'confirmed',
       notes: notes.trim() || null,
     };
 
@@ -247,7 +245,6 @@ export function CreateCrmAppointmentDialog({
     endTime,
     reasonId,
     visitedBefore,
-    status,
     notes,
     createAppointmentMutation,
     onClose,
@@ -569,18 +566,6 @@ export function CreateCrmAppointmentDialog({
                 <p className="text-xs text-muted-foreground">{t('visitedBeforeDesc')}</p>
               </div>
             </div>
-
-            <Select
-              id="status"
-              label={t('status')}
-              value={status}
-              onChange={(e) => setStatus(e.target.value as typeof status)}
-              disabled={submitting}
-              options={[
-                { value: 'confirmed', label: t('statusLabel.confirmed') },
-                { value: 'pending', label: t('statusLabel.pending') },
-              ]}
-            />
 
             <Textarea
               id="notes"

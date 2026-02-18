@@ -15,11 +15,18 @@ import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { ArrowLeft, Calendar, Clock, MapPin, User, FileText } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import type { Appointment } from '@/types';
+import {
+  getAppointmentSourceLabel,
+  getCrmAppointmentPatientDisplayName,
+  getCrmAppointmentPatientRecordId,
+  isDraftPatientAppointment,
+} from '@/lib/crm';
 
 export default function AppointmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const t = useTranslations('appointments');
   const tc = useTranslations('common');
+  const tcal = useTranslations('calendar');
   const locale = useLocale();
 
   const { data: appointment, isLoading } = useQuery({
@@ -39,6 +46,10 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
       </div>
     );
   }
+
+  const patientName = getCrmAppointmentPatientDisplayName(appointment);
+  const patientRecordId = getCrmAppointmentPatientRecordId(appointment);
+  const isDraft = isDraftPatientAppointment(appointment);
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -73,12 +84,27 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
                 size="lg"
               />
               <div>
-                <Link href={`/patients/${appointment.patient_id}`} className="text-base font-semibold text-gray-900 hover:text-primary">
-                  {appointment.profiles?.first_name} {appointment.profiles?.last_name}
+                <Link
+                  href={`/patients/${patientRecordId || appointment.patient_id || ''}`}
+                  className="text-base font-semibold text-gray-900 hover:text-primary"
+                >
+                  {patientName}
                 </Link>
                 {appointment.profiles?.phone && (
                   <p className="text-sm text-muted-foreground">{appointment.profiles.phone}</p>
                 )}
+                <div className="flex items-center gap-2 mt-2">
+                  {isDraft && (
+                    <Badge className="bg-amber-50 text-amber-800 border border-amber-200">
+                      {tcal('patientDraftBadge')}
+                    </Badge>
+                  )}
+                  {appointment.patient_info_missing && (
+                    <Badge className="bg-red-50 text-red-700 border border-red-200">
+                      {tcal('missingInfoBadge')}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
             {appointment.visited_before ? (
@@ -119,8 +145,24 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
                 </span>
               </div>
             )}
+
+            <div className="flex items-center gap-2 text-sm">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              <span>{getAppointmentSourceLabel(tcal, appointment.source)}</span>
+            </div>
           </div>
         </div>
+
+        {(appointment.external_title || appointment.external_description || appointment.external_location) && (
+          <div className="mt-6 p-4 rounded-xl bg-muted/30 border border-border/60">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">{tcal('appointmentMeta')}</h3>
+            {appointment.external_title && <p className="text-sm font-medium text-gray-900">{appointment.external_title}</p>}
+            {appointment.external_description && (
+              <p className="text-sm text-gray-700 whitespace-pre-line mt-1">{appointment.external_description}</p>
+            )}
+            {appointment.external_location && <p className="text-sm text-gray-700 mt-1">{appointment.external_location}</p>}
+          </div>
+        )}
 
         {/* Notes */}
         {appointment.practitioner_notes && (

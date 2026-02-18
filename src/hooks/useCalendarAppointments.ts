@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import type { Appointment, CalendarItem, ExternalEvent } from '@/types';
 import type { CrmAppointmentsQuery } from '@/types/api';
+import { getCrmAppointmentPatientDisplayName } from '@/lib/crm';
 
 export type CalendarView = 'month' | 'week' | 'day';
 
@@ -139,10 +140,7 @@ export function getItemEndTime(item: CalendarItem): string {
 /** Get display title for a CalendarItem */
 export function getItemTitle(item: CalendarItem): string {
   if (item.kind === 'crm_appointment') {
-    const p = item.data.profiles;
-    return p
-      ? `${p.first_name || ''} ${p.last_name || ''}`.trim() || '-'
-      : '-';
+    return getCrmAppointmentPatientDisplayName(item.data);
   }
   return item.data.title || '';
 }

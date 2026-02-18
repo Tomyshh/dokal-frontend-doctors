@@ -3,6 +3,7 @@
 import { cn, formatTime } from '@/lib/utils';
 import type { Appointment, AppointmentStatus, CalendarItem } from '@/types';
 import { getItemStartTime, getItemEndTime, getItemTitle } from '@/hooks/useCalendarAppointments';
+import { isDraftPatientAppointment } from '@/lib/crm';
 
 interface CalendarEventCardProps {
   item: CalendarItem;
@@ -78,6 +79,20 @@ export function getItemColors(item: CalendarItem) {
   return externalEventColors[item.data.type_detected] || externalEventColors.busy;
 }
 
+function getSourceShort(source?: string | null) {
+  switch (source) {
+    case 'dokal_crm':
+      return 'CRM';
+    case 'dokal_app':
+      return 'APP';
+    case 'google_calendar_sync':
+      return 'G';
+    case 'legacy_unknown':
+    default:
+      return '?';
+  }
+}
+
 export default function CalendarEventCard({
   item,
   onClick,
@@ -88,6 +103,12 @@ export default function CalendarEventCard({
   const startTime = getItemStartTime(item);
   const endTime = getItemEndTime(item);
   const isExternal = item.kind === 'external_event';
+  const isDraft =
+    item.kind === 'crm_appointment' ? isDraftPatientAppointment(item.data) : false;
+  const isMissing =
+    item.kind === 'crm_appointment' ? item.data.patient_info_missing === true : false;
+  const sourceShort =
+    item.kind === 'crm_appointment' ? getSourceShort(item.data.source) : '';
 
   if (compact) {
     return (
@@ -104,6 +125,9 @@ export default function CalendarEventCard({
       >
         <span className="font-medium">{formatTime(startTime)}</span>{' '}
         {isExternal && <span className="opacity-60">[G] </span>}
+        {!isExternal && sourceShort && <span className="opacity-60">[{sourceShort}] </span>}
+        {!isExternal && isDraft && <span className="opacity-60">[D] </span>}
+        {!isExternal && isMissing && <span className="opacity-60">[!] </span>}
         {title}
       </button>
     );
@@ -134,6 +158,25 @@ export default function CalendarEventCard({
       <p className="text-xs truncate mt-0.5 opacity-80 group-hover:opacity-100">
         {title}
       </p>
+      {!isExternal && (
+        <div className="flex items-center gap-1.5 mt-1 text-[10px] opacity-70 group-hover:opacity-90">
+          {sourceShort && (
+            <span className="px-1 py-0 rounded bg-white/60 border border-border/60">
+              {sourceShort}
+            </span>
+          )}
+          {isDraft && (
+            <span className="px-1 py-0 rounded bg-amber-50 border border-amber-200 text-amber-800">
+              DRAFT
+            </span>
+          )}
+          {isMissing && (
+            <span className="px-1 py-0 rounded bg-red-50 border border-red-200 text-red-700">
+              !
+            </span>
+          )}
+        </div>
+      )}
     </button>
   );
 }

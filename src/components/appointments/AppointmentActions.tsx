@@ -7,12 +7,17 @@ import { Dialog } from '@/components/ui/Dialog';
 import { Textarea } from '@/components/ui/Textarea';
 import {
   useConfirmAppointment,
+  useConfirmOrganizationAppointment,
   useCancelAppointment,
+  useCancelOrganizationAppointment,
   useCompleteAppointment,
+  useCompleteOrganizationAppointment,
   useNoShowAppointment,
+  useNoShowOrganizationAppointment,
 } from '@/hooks/useAppointments';
 import { Check, X, CheckCircle2, UserX } from 'lucide-react';
 import type { AppointmentStatus } from '@/types';
+import { useAuth } from '@/providers/AuthProvider';
 
 interface AppointmentActionsProps {
   appointmentId: string;
@@ -21,36 +26,42 @@ interface AppointmentActionsProps {
 
 export default function AppointmentActions({ appointmentId, status }: AppointmentActionsProps) {
   const t = useTranslations('appointments');
+  const { profile } = useAuth();
+  const isOrgActor = profile?.role === 'secretary' || profile?.role === 'admin';
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [practitionerNotes, setPractitionerNotes] = useState('');
 
   const confirmMutation = useConfirmAppointment();
+  const confirmOrgMutation = useConfirmOrganizationAppointment();
   const cancelMutation = useCancelAppointment();
+  const cancelOrgMutation = useCancelOrganizationAppointment();
   const completeMutation = useCompleteAppointment();
+  const completeOrgMutation = useCompleteOrganizationAppointment();
   const noShowMutation = useNoShowAppointment();
+  const noShowOrgMutation = useNoShowOrganizationAppointment();
 
   const handleConfirm = () => {
-    confirmMutation.mutate(appointmentId);
+    (isOrgActor ? confirmOrgMutation : confirmMutation).mutate(appointmentId);
   };
 
   const handleCancel = () => {
-    cancelMutation.mutate(
+    (isOrgActor ? cancelOrgMutation : cancelMutation).mutate(
       { id: appointmentId, data: { cancellation_reason: cancelReason || undefined } },
       { onSuccess: () => setCancelDialogOpen(false) }
     );
   };
 
   const handleComplete = () => {
-    completeMutation.mutate(
+    (isOrgActor ? completeOrgMutation : completeMutation).mutate(
       { id: appointmentId, data: { practitioner_notes: practitionerNotes || undefined } },
       { onSuccess: () => setCompleteDialogOpen(false) }
     );
   };
 
   const handleNoShow = () => {
-    noShowMutation.mutate(appointmentId);
+    (isOrgActor ? noShowOrgMutation : noShowMutation).mutate(appointmentId);
   };
 
   if (status === 'completed' || status === 'cancelled_by_patient' || status === 'cancelled_by_practitioner' || status === 'no_show') {
@@ -64,7 +75,7 @@ export default function AppointmentActions({ appointmentId, status }: Appointmen
           size="icon-sm"
           variant="ghost"
           onClick={handleConfirm}
-          loading={confirmMutation.isPending}
+          loading={(isOrgActor ? confirmOrgMutation : confirmMutation).isPending}
           title={t('confirm')}
           className="text-green-600 hover:bg-green-50"
         >
@@ -87,7 +98,7 @@ export default function AppointmentActions({ appointmentId, status }: Appointmen
             size="icon-sm"
             variant="ghost"
             onClick={handleNoShow}
-            loading={noShowMutation.isPending}
+            loading={(isOrgActor ? noShowOrgMutation : noShowMutation).isPending}
             title={t('noShow')}
             className="text-gray-500 hover:bg-gray-100"
           >
@@ -117,7 +128,11 @@ export default function AppointmentActions({ appointmentId, status }: Appointmen
           <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
             {t('cancel')}
           </Button>
-          <Button variant="destructive" onClick={handleCancel} loading={cancelMutation.isPending}>
+          <Button
+            variant="destructive"
+            onClick={handleCancel}
+            loading={(isOrgActor ? cancelOrgMutation : cancelMutation).isPending}
+          >
             {t('cancel')}
           </Button>
         </div>
@@ -135,7 +150,11 @@ export default function AppointmentActions({ appointmentId, status }: Appointmen
           <Button variant="outline" onClick={() => setCompleteDialogOpen(false)}>
             {t('cancel')}
           </Button>
-          <Button variant="success" onClick={handleComplete} loading={completeMutation.isPending}>
+          <Button
+            variant="success"
+            onClick={handleComplete}
+            loading={(isOrgActor ? completeOrgMutation : completeMutation).isPending}
+          >
             {t('complete')}
           </Button>
         </div>

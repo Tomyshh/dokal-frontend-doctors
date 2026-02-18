@@ -132,24 +132,61 @@ export interface CrmStatsQuery {
 export interface CreateCrmPatientRequest {
   first_name: string;
   last_name: string;
-  phone: string;
-  email?: string;
-  date_of_birth?: string;
-  sex?: 'male' | 'female' | 'other';
-  city?: string;
+  phone?: string | null;
+  email?: string | null;
+  teudat_zehut?: string | null;
+  date_of_birth?: string | null;
+  sex?: 'male' | 'female' | 'other' | null;
+  city?: string | null;
 }
 
 export interface CreateCrmAppointmentRequest {
-  patient_id: string;
+  /**
+   * Existing CRM patient record id.
+   * (Backend name: patient_record_id)
+   */
+  patient_record_id?: string | null;
+  /**
+   * Optional inline patient creation (draft patient record, no auth).
+   * If provided, backend will create a patient record and link the appointment.
+   */
+  patient?: CreateCrmPatientRequest | null;
   practitioner_id?: string;
   reason_id?: string | null;
   appointment_date: string;
   start_time: string;
   end_time: string;
   visited_before?: boolean;
-  /** Optional: immediately create as confirmed */
-  status?: 'pending' | 'confirmed';
+  /** Backend currently creates CRM appointments as confirmed */
+  status: 'confirmed';
   notes?: string | null;
+}
+
+export interface UpdateCrmPatientRequest {
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  teudat_zehut?: string | null;
+  date_of_birth?: string | null;
+  sex?: 'male' | 'female' | 'other' | null;
+  city?: string | null;
+}
+
+export interface CrmPatientsListQuery {
+  q?: string;
+  status?: 'draft' | 'linked';
+  incomplete?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
+export interface UpdateCrmAppointmentRequest {
+  reason_id?: string | null;
+  practitioner_notes?: string | null;
+  external_title?: string | null;
+  external_description?: string | null;
+  external_location?: string | null;
 }
 
 // ==========================================

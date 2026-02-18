@@ -14,6 +14,12 @@ export type AppointmentStatus =
   | 'completed'
   | 'no_show';
 
+export type AppointmentSource =
+  | 'dokal_crm'
+  | 'dokal_app'
+  | 'google_calendar_sync'
+  | 'legacy_unknown';
+
 export type MessageType = 'text' | 'image' | 'file' | 'system';
 
 export type NotificationType =
@@ -161,7 +167,13 @@ export interface Relative {
 
 export interface Appointment {
   id: string;
-  patient_id: string;
+  /**
+   * Auth profile id (mobile patient). Nullable for CRM-created draft patients.
+   * (Backend: appointments.patient_id can remain NULL until mobile signup.)
+   */
+  patient_id: string | null;
+  /** CRM patient record id (always present for CRM/google sourced appointments) */
+  patient_record_id?: string;
   practitioner_id: string;
   organization_id: string | null;
   site_id: string | null;
@@ -171,6 +183,16 @@ export interface Appointment {
   start_time: string;
   end_time: string;
   status: AppointmentStatus;
+  /** Source of creation for CRM calendar rendering */
+  source?: AppointmentSource;
+  /** Appointment has missing patient info */
+  patient_info_missing?: boolean;
+  /** Missing patient fields, when patient_info_missing=true */
+  patient_missing_fields?: string[];
+  /** Imported/overlay metadata (Google) that can be edited in CRM */
+  external_title?: string | null;
+  external_description?: string | null;
+  external_location?: string | null;
   patient_address_line: string | null;
   patient_zip_code: string | null;
   patient_city: string | null;
@@ -188,6 +210,11 @@ export interface Appointment {
   organizations?: Organization | null;
   appointment_reasons?: AppointmentReason | null;
   relatives?: Relative | null;
+  /**
+   * Optional joined CRM patient record (shape may vary by endpoint).
+   * We keep this permissive because OpenAPI uses additionalProperties.
+   */
+  patient_record?: CrmPatientListItem | null;
 }
 
 export interface AppointmentReason {
@@ -409,7 +436,7 @@ export interface ExternalEvent {
   start_at: string;
   end_at: string;
   date: string;
-  source: 'google' | 'manual';
+  source: 'google' | 'manual' | 'google_calendar_sync' | 'dokal_crm';
   type_detected: ExternalEventType;
   created_at: string;
   updated_at: string;
@@ -456,6 +483,7 @@ export interface PatientView {
 
 export interface CrmPatientListItem {
   id: string;
+  auth_user_id?: string | null;
   first_name: string | null;
   last_name: string | null;
   email: string | null;
@@ -464,4 +492,8 @@ export interface CrmPatientListItem {
   sex: SexType | null;
   city: string | null;
   avatar_url: string | null;
+  status?: 'draft' | 'linked';
+  is_incomplete?: boolean;
+  missing_fields?: string[];
+  has_teudat_zehut?: boolean;
 }

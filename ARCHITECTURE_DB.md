@@ -36,7 +36,7 @@ CREATE TABLE public.appointment_reasons (
 );
 CREATE TABLE public.appointments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  patient_id uuid NOT NULL,
+  patient_id uuid,
   practitioner_id uuid NOT NULL,
   relative_id uuid,
   reason_id uuid,
@@ -57,13 +57,21 @@ CREATE TABLE public.appointments (
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   organization_id uuid,
   site_id uuid,
+  source text NOT NULL DEFAULT 'legacy_unknown'::text CHECK (source = ANY (ARRAY['dokal_crm'::text, 'dokal_app'::text, 'google_calendar_sync'::text, 'legacy_unknown'::text])),
+  patient_record_id uuid NOT NULL,
+  patient_info_missing boolean NOT NULL DEFAULT false,
+  patient_missing_fields ARRAY NOT NULL DEFAULT ARRAY[]::text[],
+  external_title text,
+  external_description text,
+  external_location text,
   CONSTRAINT appointments_pkey PRIMARY KEY (id),
   CONSTRAINT appointments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
   CONSTRAINT appointments_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id),
   CONSTRAINT appointments_relative_id_fkey FOREIGN KEY (relative_id) REFERENCES public.relatives(id),
   CONSTRAINT appointments_reason_id_fkey FOREIGN KEY (reason_id) REFERENCES public.appointment_reasons(id),
   CONSTRAINT appointments_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id),
-  CONSTRAINT appointments_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.organization_sites(id)
+  CONSTRAINT appointments_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.organization_sites(id),
+  CONSTRAINT appointments_patient_record_id_fkey FOREIGN KEY (patient_record_id) REFERENCES public.patients(id)
 );
 CREATE TABLE public.audit_log (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -87,6 +95,62 @@ CREATE TABLE public.conversations (
   CONSTRAINT conversations_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
   CONSTRAINT conversations_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id),
   CONSTRAINT conversations_appointment_id_fkey FOREIGN KEY (appointment_id) REFERENCES public.appointments(id)
+);
+CREATE TABLE public.crm_external_events (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  practitioner_id uuid NOT NULL,
+  google_event_id text NOT NULL,
+  title text NOT NULL DEFAULT ''::text,
+  description text,
+  location text,
+  start_at timestamp with time zone NOT NULL,
+  end_at timestamp with time zone NOT NULL,
+  date date NOT NULL,
+  source text NOT NULL DEFAULT 'google'::text,
+  type_detected text NOT NULL DEFAULT 'busy'::text CHECK (type_detected = ANY (ARRAY['appointment'::text, 'busy'::text])),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT crm_external_events_pkey PRIMARY KEY (id),
+  CONSTRAINT crm_external_events_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id)
+);
+CREATE TABLE public.google_calendar_connections (
+  user_id uuid NOT NULL,
+  google_email text,
+  refresh_token text,
+  access_token text,
+  token_expiry timestamp with time zone,
+  calendar_id text NOT NULL DEFAULT 'primary'::text,
+  calendar_name text,
+  sync_token text,
+  watch_channel_id text UNIQUE,
+  watch_resource_id text,
+  watch_expiration timestamp with time zone,
+  watch_token text,
+  sync_crm_to_google boolean NOT NULL DEFAULT true,
+  sync_google_to_crm boolean NOT NULL DEFAULT true,
+  keywords_appointment ARRAY NOT NULL DEFAULT ARRAY['rdv'::text, 'consultation'::text, 'patient'::text],
+  keywords_busy ARRAY NOT NULL DEFAULT ARRAY['perso'::text, 'vacances'::text, 'congé'::text],
+  ai_enabled boolean NOT NULL DEFAULT true,
+  ai_prompt text,
+  last_sync_at timestamp with time zone,
+  last_error text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT google_calendar_connections_pkey PRIMARY KEY (user_id),
+  CONSTRAINT google_calendar_connections_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.google_calendar_event_links (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  google_event_id text NOT NULL,
+  crm_appointment_id uuid,
+  crm_external_event_id uuid,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT google_calendar_event_links_pkey PRIMARY KEY (id),
+  CONSTRAINT google_calendar_event_links_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
+  CONSTRAINT google_calendar_event_links_crm_appointment_id_fkey FOREIGN KEY (crm_appointment_id) REFERENCES public.appointments(id),
+  CONSTRAINT google_calendar_event_links_crm_external_event_id_fkey FOREIGN KEY (crm_external_event_id) REFERENCES public.crm_external_events(id)
 );
 CREATE TABLE public.health_allergies (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -245,6 +309,25 @@ CREATE TABLE public.organizations (
   CONSTRAINT organizations_pkey PRIMARY KEY (id),
   CONSTRAINT organizations_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.profiles(id)
 );
+CREATE TABLE public.patients (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  auth_user_id uuid UNIQUE,
+  first_name text,
+  last_name text,
+  email text,
+  phone text,
+  date_of_birth date,
+  sex text CHECK (sex IS NULL OR (sex = ANY (ARRAY['male'::text, 'female'::text, 'other'::text]))),
+  city text,
+  avatar_url text,
+  teudat_zehut_encrypted text,
+  teudat_zehut_hash text,
+  status text NOT NULL DEFAULT 'draft'::text CHECK (status = ANY (ARRAY['draft'::text, 'linked'::text])),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT patients_pkey PRIMARY KEY (id),
+  CONSTRAINT patients_auth_user_id_fkey FOREIGN KEY (auth_user_id) REFERENCES auth.users(id)
+);
 CREATE TABLE public.payment_methods (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
@@ -330,6 +413,7 @@ CREATE TABLE public.practitioners (
   organization_id uuid NOT NULL,
   license_number text,
   site_id uuid,
+  specialization_license text,
   CONSTRAINT practitioners_pkey PRIMARY KEY (id),
   CONSTRAINT practitioners_id_fkey FOREIGN KEY (id) REFERENCES public.profiles(id),
   CONSTRAINT practitioners_specialty_id_fkey FOREIGN KEY (specialty_id) REFERENCES public.specialties(id),

@@ -8,6 +8,7 @@ import type {
   CancelAppointmentRequest,
   CompleteAppointmentRequest,
   CreateCrmAppointmentRequest,
+  UpdateCrmAppointmentRequest,
 } from '@/types/api';
 
 export function useCrmAppointments(params: CrmAppointmentsQuery) {
@@ -36,6 +37,34 @@ export function useCreateCrmAppointment() {
   });
 }
 
+export function useUpdateCrmAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdateCrmAppointmentRequest }) => {
+      const { data: result } = await api.patch(`/crm/appointments/${id}`, data);
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
+    },
+  });
+}
+
+export function useUpdateCrmOrganizationAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdateCrmAppointmentRequest }) => {
+      const { data: result } = await api.patch(`/crm/organization/appointments/${id}`, data);
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
+    },
+  });
+}
+
 export function useConfirmAppointment() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -44,6 +73,21 @@ export function useConfirmAppointment() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
+    },
+  });
+}
+
+export function useConfirmOrganizationAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.patch(`/crm/organization/appointments/${id}/confirm`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
     },
   });
@@ -57,6 +101,21 @@ export function useCancelAppointment() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
+    },
+  });
+}
+
+export function useCancelOrganizationAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: CancelAppointmentRequest }) => {
+      await api.patch(`/crm/organization/appointments/${id}/cancel`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
     },
   });
@@ -70,6 +129,21 @@ export function useCompleteAppointment() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
+    },
+  });
+}
+
+export function useCompleteOrganizationAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: CompleteAppointmentRequest }) => {
+      await api.patch(`/crm/organization/appointments/${id}/complete`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
     },
   });
@@ -83,6 +157,21 @@ export function useNoShowAppointment() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
+    },
+  });
+}
+
+export function useNoShowOrganizationAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.patch(`/crm/organization/appointments/${id}/no-show`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
     },
   });

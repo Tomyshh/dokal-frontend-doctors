@@ -9,6 +9,13 @@ import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import type { Appointment } from '@/types';
 import { Link } from '@/i18n/routing';
+import {
+  getAppointmentSourceLabel,
+  getCrmAppointmentPatientDisplayName,
+  getCrmAppointmentPatientPhone,
+  getCrmAppointmentPatientRecordId,
+  isDraftPatientAppointment,
+} from '@/lib/crm';
 
 interface AppointmentTableProps {
   appointments: Appointment[];
@@ -16,6 +23,7 @@ interface AppointmentTableProps {
 
 export default function AppointmentTable({ appointments }: AppointmentTableProps) {
   const t = useTranslations('appointments');
+  const tc = useTranslations('calendar');
   const locale = useLocale();
   const { profile } = useAuth();
 
@@ -45,6 +53,9 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
               {t('reason')}
             </th>
             <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+              {tc('source')}
+            </th>
+            <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
               {t('status')}
             </th>
             <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
@@ -57,7 +68,7 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
             <tr key={appt.id} className="hover:bg-muted/30 transition-colors">
               <td className="py-3 px-3">
                 <Link
-                  href={`/patients/${appt.patient_id || appt.profiles?.id}`}
+                  href={`/patients/${getCrmAppointmentPatientRecordId(appt) || appt.patient_id || appt.profiles?.id || ''}`}
                   className="flex items-center gap-3 group"
                 >
                   <Avatar
@@ -68,11 +79,23 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
                   />
                   <div>
                     <p className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
-                      {appt.profiles?.first_name} {appt.profiles?.last_name}
+                      {getCrmAppointmentPatientDisplayName(appt)}
                     </p>
-                    {appt.profiles?.phone && (
-                      <p className="text-xs text-muted-foreground">{appt.profiles.phone}</p>
+                    {getCrmAppointmentPatientPhone(appt) && (
+                      <p className="text-xs text-muted-foreground">{getCrmAppointmentPatientPhone(appt)}</p>
                     )}
+                    <div className="flex items-center gap-1.5 mt-1">
+                      {isDraftPatientAppointment(appt) && (
+                        <Badge className="bg-amber-50 text-amber-800 border border-amber-200">
+                          {tc('patientDraftBadge')}
+                        </Badge>
+                      )}
+                      {appt.patient_info_missing && (
+                        <Badge className="bg-red-50 text-red-700 border border-red-200">
+                          {tc('missingInfoBadge')}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </Link>
               </td>
@@ -103,6 +126,11 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
                   : locale === 'fr'
                     ? appt.appointment_reasons?.label_fr || appt.appointment_reasons?.label || '-'
                     : appt.appointment_reasons?.label || '-'}
+              </td>
+              <td className="py-3 px-3">
+                <Badge className="bg-gray-100 text-gray-700">
+                  {getAppointmentSourceLabel(tc, appt.source)}
+                </Badge>
               </td>
               <td className="py-3 px-3">
                 <Badge className={getStatusColor(appt.status)}>
