@@ -45,21 +45,71 @@ export function buildAlternatesForPath(pathWithoutLocale: `/${string}`): NonNull
 
 export function buildDefaultMetadata(locale: Locale): Metadata {
   const titleByLocale: Record<Locale, string> = {
-    he: 'Dokal — מערכת לניהול מרפאה',
-    en: 'Dokal — Practice management CRM',
-    fr: 'Dokal — CRM médical pour praticiens',
-    ru: 'Dokal — CRM для медицинской практики',
-    am: 'Dokal — የሕክምና ስራ አስተዳደር CRM',
-    es: 'Dokal — CRM para profesionales de salud',
+    he: 'Dokal Pro — מערכת לניהול מרפאה בישראל',
+    en: 'Dokal Pro — Medical CRM in Israel',
+    fr: 'Dokal Pro — CRM médical en Israël',
+    ru: 'Dokal Pro — медицинский CRM в Израиле',
+    am: 'Dokal Pro — በእስራኤል የሕክምና CRM',
+    es: 'Dokal Pro — CRM médico en Israel',
   };
 
   const descriptionByLocale: Record<Locale, string> = {
-    he: 'ניהול תורים, מטופלים והיומן במקום אחד. חוויית SaaS מודרנית לרופאים ומטפלים בישראל.',
-    en: 'Manage appointments, patients and schedule in one place. A modern SaaS experience for doctors and practitioners in Israel.',
-    fr: 'Gérez rendez-vous, patients et planning au même endroit. Une expérience SaaS moderne pour médecins et praticiens en Israël.',
-    ru: 'Управляйте приёмами, пациентами и расписанием в одном месте. Современный SaaS для врачей и практиков в Израиле.',
-    am: 'ቀጠሮዎችን፣ ታካሚዎችን እና መርሃ ግብርን በአንድ ቦታ ያስተዳድሩ። ለእስራኤል ሐኪሞች እና ባለሙያዎች ዘመናዊ SaaS ልምድ።',
-    es: 'Gestiona citas, pacientes y agenda en un solo lugar. Una experiencia SaaS moderna para médicos y profesionales en Israel.',
+    he: 'ניהול תורים, מטופלים והיומן במקום אחד. CRM רפואי בישראל לרופאים ומטפלים, עם אפליקציה למטופלים.',
+    en: 'Manage appointments, patients and schedule in one place. Medical CRM in Israel for doctors and practitioners, with a patient mobile app.',
+    fr: 'Gérez rendez-vous, patients et planning au même endroit. CRM médical en Israël pour médecins et praticiens, avec application mobile patient.',
+    ru: 'Управляйте приёмами, пациентами и расписанием в одном месте. Медицинский CRM в Израиле для врачей и практиков, с мобильным приложением для пациентов.',
+    am: 'ቀጠሮዎችን፣ ታካሚዎችን እና መርሃ ግብርን በአንድ ቦታ ያስተዳድሩ። በእስራኤል ለሐኪሞች እና ባለሙያዎች የሕክምና CRM እና የታካሚ ሞባይል መተግበሪያ።',
+    es: 'Gestiona citas, pacientes y agenda en un solo lugar. CRM médico en Israel para médicos y profesionales, con app móvil para pacientes.',
+  };
+
+  const keywordsByLocale: Record<Locale, string[]> = {
+    he: [
+      'Dokal Pro',
+      'CRM רפואי',
+      'CRM רפואי ישראל',
+      'ניהול תורים',
+      'יומן רפואי',
+      'תוכנה לניהול מרפאה',
+    ],
+    en: [
+      'Dokal Pro',
+      'medical CRM Israel',
+      'clinic management software Israel',
+      'appointment scheduling for doctors',
+      'practice management CRM',
+      'patient mobile app',
+    ],
+    fr: [
+      'Dokal Pro',
+      'CRM médical Israël',
+      'CRM medical israel',
+      'logiciel cabinet médical',
+      'gestion rendez-vous médecins',
+      'agenda médical',
+      'application patient',
+    ],
+    ru: [
+      'Dokal Pro',
+      'медицинский CRM Израиль',
+      'CRM клиника Израиль',
+      'запись на приём',
+      'управление расписанием врача',
+    ],
+    am: [
+      'Dokal Pro',
+      'የሕክምና CRM',
+      'Israel',
+      'appointment scheduling',
+      'clinic management',
+    ],
+    es: [
+      'Dokal Pro',
+      'CRM médico Israel',
+      'CRM medical israel',
+      'gestión de citas médicas',
+      'software para clínica',
+      'agenda médica',
+    ],
   };
 
   return {
@@ -70,6 +120,7 @@ export function buildDefaultMetadata(locale: Locale): Metadata {
       template: `%s | ${site.name}`,
     },
     description: descriptionByLocale[locale],
+    keywords: keywordsByLocale[locale],
     openGraph: {
       type: 'website',
       siteName: site.name,

@@ -11,10 +11,28 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   const locale = normalizeLocale(params.locale);
-  const t = await getTranslations({ locale, namespace: 'landing' });
+  await getTranslations({ locale, namespace: 'landing' });
 
-  const title = t('headline');
-  const description = t('subtitle');
+  const titleByLocale: Record<string, string> = {
+    he: 'Dokal Pro — מערכת לניהול מרפאה בישראל',
+    en: 'Dokal Pro — Medical CRM in Israel for doctors & practitioners',
+    fr: 'Dokal Pro — CRM médical en Israël pour médecins & praticiens',
+    ru: 'Dokal Pro — медицинский CRM в Израиле для врачей и практиков',
+    am: 'Dokal Pro — በእስራኤል የሕክምና CRM ለሐኪሞች እና ባለሙያዎች',
+    es: 'Dokal Pro — CRM médico en Israel para médicos y profesionales',
+  };
+
+  const descriptionByLocale: Record<string, string> = {
+    he: 'CRM רפואי בישראל: ניהול תורים, יומן, מטופלים והודעות. כולל אפליקציה למטופלים.',
+    en: 'Medical CRM in Israel: appointments, schedule, patients and messaging. Includes a patient mobile app.',
+    fr: 'CRM médical en Israël : rendez-vous, planning, patients et messagerie. Avec application mobile patient.',
+    ru: 'Медицинский CRM в Израиле: приёмы, расписание, пациенты и сообщения. С мобильным приложением для пациентов.',
+    am: 'በእስራኤል የሕክምና CRM፡ ቀጠሮ፣ መርሃ ግብር፣ ታካሚዎች እና መልዕክት። የታካሚ ሞባይል መተግበሪያ አለው።',
+    es: 'CRM médico en Israel: citas, agenda, pacientes y mensajería. Incluye app móvil para pacientes.',
+  };
+
+  const title = titleByLocale[locale] ?? titleByLocale.he;
+  const description = descriptionByLocale[locale] ?? descriptionByLocale.he;
 
   return {
     ...buildDefaultMetadata(locale),
