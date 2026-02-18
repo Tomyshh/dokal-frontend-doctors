@@ -59,10 +59,8 @@ export default function AppointmentsPage() {
         const dt = new Date(`${a.appointment_date}T${(a.start_time || '00:00:00').substring(0, 8)}`);
         return dt >= now;
       })
-      .filter((a) => {
-        if (status !== 'upcoming') return true;
-        return a.status === 'pending' || a.status === 'confirmed';
-      })
+      // IMPORTANT: do not filter out updated statuses (cancelled/no_show/completed),
+      // otherwise after an action the item "disappears" from the list.
       .sort((a, b) => {
         if (a.appointment_date !== b.appointment_date) {
           return a.appointment_date.localeCompare(b.appointment_date);

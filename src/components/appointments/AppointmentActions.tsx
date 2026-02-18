@@ -30,6 +30,7 @@ export default function AppointmentActions({ appointmentId, status }: Appointmen
   const isOrgActor = profile?.role === 'secretary' || profile?.role === 'admin';
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
+  const [noShowDialogOpen, setNoShowDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [practitionerNotes, setPractitionerNotes] = useState('');
 
@@ -61,7 +62,9 @@ export default function AppointmentActions({ appointmentId, status }: Appointmen
   };
 
   const handleNoShow = () => {
-    (isOrgActor ? noShowOrgMutation : noShowMutation).mutate(appointmentId);
+    (isOrgActor ? noShowOrgMutation : noShowMutation).mutate(appointmentId, {
+      onSuccess: () => setNoShowDialogOpen(false),
+    });
   };
 
   if (status === 'completed' || status === 'cancelled_by_patient' || status === 'cancelled_by_practitioner' || status === 'no_show') {
@@ -97,7 +100,7 @@ export default function AppointmentActions({ appointmentId, status }: Appointmen
           <Button
             size="icon-sm"
             variant="ghost"
-            onClick={handleNoShow}
+            onClick={() => setNoShowDialogOpen(true)}
             loading={(isOrgActor ? noShowOrgMutation : noShowMutation).isPending}
             title={t('noShow')}
             className="text-gray-500 hover:bg-gray-100"
@@ -156,6 +159,23 @@ export default function AppointmentActions({ appointmentId, status }: Appointmen
             loading={(isOrgActor ? completeOrgMutation : completeMutation).isPending}
           >
             {t('complete')}
+          </Button>
+        </div>
+      </Dialog>
+
+      {/* No-show Dialog */}
+      <Dialog open={noShowDialogOpen} onClose={() => setNoShowDialogOpen(false)} title={t('noShowTitle')}>
+        <p className="text-sm text-muted-foreground mb-4">{t('noShowMessage')}</p>
+        <div className="flex justify-end gap-3 mt-4">
+          <Button variant="outline" onClick={() => setNoShowDialogOpen(false)}>
+            {t('cancel')}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={handleNoShow}
+            loading={(isOrgActor ? noShowOrgMutation : noShowMutation).isPending}
+          >
+            {t('noShow')}
           </Button>
         </div>
       </Dialog>
