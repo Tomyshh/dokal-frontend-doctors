@@ -875,7 +875,14 @@
     "extraPractitioners": "praticien(s) supplémentaire(s)",
     "secretariesLabel": "secrétaire(s)",
     "totalMonthly": "Total mensuel",
-    "perMonth": "mois"
+    "perMonth": "mois",
+    "afterTrialShort": "Après essai",
+    "trialActiveTitle": "Essai gratuit actif",
+    "trialActiveDetails": "C’est gratuit pour le moment — aucun prélèvement ne sera effectué pendant l’essai. Les tarifs ci-dessous s’appliqueront après la fin de l’essai.",
+    "trialFreeNow": "Gratuit pendant l’essai",
+    "afterTrialPricingToggle": "Voir les tarifs après l’essai",
+    "afterTrialPricingTitle": "Tarifs appliqués après l’essai",
+    "afterTrialTotalMonthly": "Total mensuel après essai"
   },
   "calendar": {
     "title": "Calendrier",

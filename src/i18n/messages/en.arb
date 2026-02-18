@@ -875,7 +875,14 @@
     "extraPractitioners": "extra practitioner(s)",
     "secretariesLabel": "secretary(ies)",
     "totalMonthly": "Total monthly",
-    "perMonth": "month"
+    "perMonth": "month",
+    "afterTrialShort": "After trial",
+    "trialActiveTitle": "Free trial active",
+    "trialActiveDetails": "It’s free for now — you won’t be charged during the trial. The prices below apply after the trial ends.",
+    "trialFreeNow": "Free during the trial",
+    "afterTrialPricingToggle": "See prices after trial",
+    "afterTrialPricingTitle": "Prices after the trial",
+    "afterTrialTotalMonthly": "Total monthly after trial"
   },
   "calendar": {
     "title": "Calendar",

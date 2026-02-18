@@ -847,7 +847,14 @@
     "extraPractitioners": "רופא/ים נוספ/ים",
     "secretariesLabel": "מזכירה/ות",
     "totalMonthly": "סה\"כ חודשי",
-    "perMonth": "חודש"
+    "perMonth": "חודש",
+    "afterTrialShort": "אחרי הניסיון",
+    "trialActiveTitle": "ניסיון חינם פעיל",
+    "trialActiveDetails": "כרגע זה בחינם — לא יתבצע חיוב במהלך תקופת הניסיון. המחירים למטה יחולו לאחר סיום תקופת הניסיון.",
+    "trialFreeNow": "חינם במהלך הניסיון",
+    "afterTrialPricingToggle": "צפו במחירים אחרי הניסיון",
+    "afterTrialPricingTitle": "מחירים לאחר הניסיון",
+    "afterTrialTotalMonthly": "סה\"כ חודשי אחרי הניסיון"
   },
   "calendar": {
     "title": "יומן",

@@ -260,13 +260,15 @@ export default function TeamPage() {
   };
 
   const getStaffTypeBadge = (staffType: string) => {
-    const afterTrialPrefix = showTrialNotice ? `${t('afterTrialShort')}: ` : '';
     if (staffType === 'secretary') {
       return (
         <div className="flex items-center gap-1.5">
           <Badge className="bg-purple-100 text-purple-800"><ClipboardPen className="h-3 w-3 mr-1" />{t('secretary')}</Badge>
-          {orgPlan === 'clinic' && (
-            <Badge className="bg-gray-50 text-gray-500 text-[10px]">{afterTrialPrefix}{SEAT_PRICES_ILS.secretary} ₪/{t('perMonth')}</Badge>
+          {orgPlan === 'clinic' && !showTrialNotice && (
+            <Badge className="bg-gray-50 text-gray-500 text-[10px]">{SEAT_PRICES_ILS.secretary} ₪/{t('perMonth')}</Badge>
+          )}
+          {orgPlan === 'clinic' && showTrialNotice && (
+            <Badge className="bg-amber-100 text-amber-800 text-[10px]">{tsub('trialBadge')}</Badge>
           )}
         </div>
       );
@@ -274,8 +276,11 @@ export default function TeamPage() {
     return (
       <div className="flex items-center gap-1.5">
         <Badge className="bg-primary/10 text-primary"><Stethoscope className="h-3 w-3 mr-1" />{t('practitioner')}</Badge>
-        {orgPlan === 'clinic' && (
-          <Badge className="bg-gray-50 text-gray-500 text-[10px]">{afterTrialPrefix}{SEAT_PRICES_ILS.practitioner} ₪/{t('perMonth')}</Badge>
+        {orgPlan === 'clinic' && !showTrialNotice && (
+          <Badge className="bg-gray-50 text-gray-500 text-[10px]">{SEAT_PRICES_ILS.practitioner} ₪/{t('perMonth')}</Badge>
+        )}
+        {orgPlan === 'clinic' && showTrialNotice && (
+          <Badge className="bg-amber-100 text-amber-800 text-[10px]">{tsub('trialBadge')}</Badge>
         )}
       </div>
     );
@@ -487,46 +492,91 @@ export default function TeamPage() {
             </CardTitle>
           </CardHeader>
           <div className="space-y-2 text-sm">
-            {showTrialNotice && (
-              <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
-                <p className="font-semibold text-amber-900">{t('trialActiveTitle')}</p>
-                <p className="text-amber-800 text-sm mt-0.5">
-                  {trialDaysRemaining > 0
-                    ? tsub('trialBannerText', { days: trialDaysRemaining })
-                    : null}
-                  {trialDaysRemaining > 0 ? ' ' : null}
-                  {t('trialActiveDetails')}
-                </p>
-              </div>
+            {showTrialNotice ? (
+              <>
+                <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
+                  <p className="font-semibold text-amber-900">{t('trialActiveTitle')}</p>
+                  <p className="text-amber-800 text-sm mt-0.5">
+                    {trialDaysRemaining > 0 ? tsub('trialBannerText', { days: trialDaysRemaining }) : null}
+                    {trialDaysRemaining > 0 ? ' ' : null}
+                    {t('trialActiveDetails')}
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-green-50 border border-green-200 px-4 py-3 flex items-center justify-between">
+                  <span className="font-semibold text-green-900">{t('trialFreeNow')}</span>
+                  <span className="font-bold text-green-700">0 ₪</span>
+                </div>
+
+                <details className="rounded-xl bg-gray-50 border border-border/50 px-4 py-3">
+                  <summary className="cursor-pointer select-none font-medium text-gray-700">
+                    {t('afterTrialPricingToggle')}
+                  </summary>
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs text-muted-foreground">{t('afterTrialPricingTitle')}</p>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('basePlan')}</span>
+                      <span className="font-medium">{BASE_PRICES_ILS.clinic} ₪</span>
+                    </div>
+                    {practitionerCount > 1 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">
+                          {practitionerCount - 1} {t('extraPractitioners')}
+                        </span>
+                        <span className="font-medium">
+                          {(practitionerCount - 1) * SEAT_PRICES_ILS.practitioner} ₪
+                        </span>
+                      </div>
+                    )}
+                    {secretaryCount > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">
+                          {secretaryCount} {t('secretariesLabel')}
+                        </span>
+                        <span className="font-medium">
+                          {secretaryCount * SEAT_PRICES_ILS.secretary} ₪
+                        </span>
+                      </div>
+                    )}
+                    <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold">
+                      <span className="text-gray-900">{t('afterTrialTotalMonthly')}</span>
+                      <span className="text-primary">{totalMonthlyCost} ₪/{t('perMonth')}</span>
+                    </div>
+                  </div>
+                </details>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t('basePlan')}</span>
+                  <span className="font-medium">{BASE_PRICES_ILS.clinic} ₪</span>
+                </div>
+                {practitionerCount > 1 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">
+                      {practitionerCount - 1} {t('extraPractitioners')}
+                    </span>
+                    <span className="font-medium">
+                      {(practitionerCount - 1) * SEAT_PRICES_ILS.practitioner} ₪
+                    </span>
+                  </div>
+                )}
+                {secretaryCount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">
+                      {secretaryCount} {t('secretariesLabel')}
+                    </span>
+                    <span className="font-medium">
+                      {secretaryCount * SEAT_PRICES_ILS.secretary} ₪
+                    </span>
+                  </div>
+                )}
+                <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold">
+                  <span className="text-gray-900">{t('totalMonthly')}</span>
+                  <span className="text-primary">{totalMonthlyCost} ₪/{t('perMonth')}</span>
+                </div>
+              </>
             )}
-            <div className="flex justify-between">
-              <span className="text-gray-600">{t('basePlan')}</span>
-              <span className="font-medium">{BASE_PRICES_ILS.clinic} ₪</span>
-            </div>
-            {practitionerCount > 1 && (
-              <div className="flex justify-between">
-                <span className="text-gray-600">
-                  {practitionerCount - 1} {t('extraPractitioners')}
-                </span>
-                <span className="font-medium">
-                  {(practitionerCount - 1) * SEAT_PRICES_ILS.practitioner} ₪
-                </span>
-              </div>
-            )}
-            {secretaryCount > 0 && (
-              <div className="flex justify-between">
-                <span className="text-gray-600">
-                  {secretaryCount} {t('secretariesLabel')}
-                </span>
-                <span className="font-medium">
-                  {secretaryCount * SEAT_PRICES_ILS.secretary} ₪
-                </span>
-              </div>
-            )}
-            <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold">
-              <span className="text-gray-900">{t('totalMonthly')}</span>
-              <span className="text-primary">{totalMonthlyCost} ₪/{t('perMonth')}</span>
-            </div>
           </div>
         </Card>
       )}

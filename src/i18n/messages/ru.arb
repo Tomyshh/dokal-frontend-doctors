@@ -846,7 +846,14 @@
     "extraPractitioners": "доп. врач(и)",
     "secretariesLabel": "секретарь(и)",
     "totalMonthly": "Итого в месяц",
-    "perMonth": "месяц"
+    "perMonth": "месяц",
+    "afterTrialShort": "После пробного периода",
+    "trialActiveTitle": "Бесплатный пробный период активен",
+    "trialActiveDetails": "Сейчас бесплатно — списаний в течение пробного периода не будет. Цены ниже применяются после окончания пробного периода.",
+    "trialFreeNow": "Бесплатно во время пробного периода",
+    "afterTrialPricingToggle": "Посмотреть цены после пробного периода",
+    "afterTrialPricingTitle": "Цены после пробного периода",
+    "afterTrialTotalMonthly": "Итого в месяц после пробного периода"
   },
   "calendar": {
     "title": "Календарь",

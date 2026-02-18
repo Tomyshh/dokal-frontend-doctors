@@ -782,7 +782,14 @@
     "extraPractitioners": "médico(s) adicional(es)",
     "secretariesLabel": "secretario(s)",
     "totalMonthly": "Total mensual",
-    "perMonth": "mes"
+    "perMonth": "mes",
+    "afterTrialShort": "Después de la prueba",
+    "trialActiveTitle": "Prueba gratis activa",
+    "trialActiveDetails": "Por ahora es gratis — no se realizará ningún cobro durante la prueba. Los precios de abajo se aplican después de la prueba.",
+    "trialFreeNow": "Gratis durante la prueba",
+    "afterTrialPricingToggle": "Ver precios después de la prueba",
+    "afterTrialPricingTitle": "Precios después de la prueba",
+    "afterTrialTotalMonthly": "Total mensual después de la prueba"
   },
   "calendar": {
     "title": "Calendario",
