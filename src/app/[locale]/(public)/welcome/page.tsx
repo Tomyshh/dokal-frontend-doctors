@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { company } from '@/config/company';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { buildAlternatesForPath, buildDefaultMetadata, normalizeLocale } from '@/lib/seo';
+import { absoluteUrl, buildAlternatesForPath, buildDefaultMetadata, getSiteUrl, normalizeLocale } from '@/lib/seo';
 import WelcomePageClient from './WelcomePageClient';
 
 export async function generateMetadata({
@@ -71,8 +71,8 @@ export default async function WelcomePage() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: company.name,
-    url: 'https://dokal.co.il',
-    logo: 'https://dokal.co.il/branding/fulllogo.png',
+    url: getSiteUrl(),
+    logo: absoluteUrl('/branding/fulllogo.png'),
     contactPoint: [
       {
         '@type': 'ContactPoint',

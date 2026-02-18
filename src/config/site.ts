@@ -9,7 +9,8 @@ export const site = {
       process.env.NEXT_PUBLIC_SITE_URL ||
       process.env.SITE_URL ||
       // Fallback: keep deterministic URLs in non-configured envs (local/dev)
-      'https://dokal.co.il';
+      // IMPORTANT: must match the canonical production host to avoid sitemap authorization issues in GSC.
+      'https://dokal.pro';
     return raw.replace(/\/+$/, '');
   })(),
   ogImagePath: '/images/presentation-crm.png',
