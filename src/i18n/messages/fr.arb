@@ -247,6 +247,8 @@
   },
   "appointments": {
     "title": "Rendez-vous",
+    "filter": "Filtre",
+    "upcoming": "À venir",
     "backToAppointments": "Retour aux rendez-vous",
     "notFound": "Rendez-vous introuvable",
     "newAppointment": "Nouveau RDV",

@@ -1603,7 +1603,43 @@ paths:
           description: Patient data
           content:
             application/json:
-              schema: { type: object, additionalProperties: true }
+              schema:
+                type: object
+                properties:
+                  patient:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid }
+                      status: { type: string, enum: [draft, linked] }
+                      auth_user_id: { type: string, format: uuid, nullable: true }
+                      first_name: { type: string, nullable: true }
+                      last_name: { type: string, nullable: true }
+                      phone: { type: string, nullable: true }
+                      email: { type: string, format: email, nullable: true }
+                      city: { type: string, nullable: true }
+                      date_of_birth: { type: string, format: date, nullable: true }
+                      sex: { type: string, nullable: true }
+                      is_incomplete: { type: boolean }
+                      missing_fields:
+                        type: array
+                        items: { type: string }
+                      has_teudat_zehut: { type: boolean }
+                      teudat_zehut_masked: { type: string, nullable: true, description: "Teoudat Zehout masked (never returned in clear)" }
+                    required: [id, status, is_incomplete, missing_fields, has_teudat_zehut]
+                  appointment_history:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        appointment_date: { type: string, format: date }
+                        start_time: { type: string }
+                        end_time: { type: string }
+                        status: { $ref: "#/components/schemas/AppointmentStatus" }
+                        practitioner_notes: { type: string, nullable: true }
+                        source: { type: string, nullable: true }
+                      required: [id, appointment_date, start_time, end_time, status]
+                required: [patient, appointment_history]
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }

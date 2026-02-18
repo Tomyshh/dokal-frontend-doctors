@@ -247,6 +247,8 @@
   },
   "appointments": {
     "title": "Appointments",
+    "filter": "Filter",
+    "upcoming": "Upcoming",
     "backToAppointments": "Back to appointments",
     "notFound": "Appointment not found",
     "newAppointment": "New appointment",
