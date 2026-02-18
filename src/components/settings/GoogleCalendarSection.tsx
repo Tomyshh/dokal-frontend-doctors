@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Badge } from '@/components/ui/Badge';
 import { Select } from '@/components/ui/Select';
 import { Dialog } from '@/components/ui/Dialog';
+import { Switch } from '@/components/ui/Switch';
 import {
   RefreshCw,
   Unlink,
@@ -28,10 +29,12 @@ import {
   useManualGoogleCalendarSync,
 } from '@/hooks/useGoogleCalendarIntegration';
 import type { UpdateGoogleCalendarConfigRequest } from '@/types/api';
+import type { Locale } from '@/i18n/config';
 
 export default function GoogleCalendarSection() {
   const t = useTranslations('settings');
   const tc = useTranslations('common');
+  const locale = useLocale() as Locale;
 
   const { data: status, isLoading: statusLoading } = useGoogleCalendarStatus();
   const { data: calendars } = useGoogleCalendars(!!status?.connected);
@@ -52,18 +55,72 @@ export default function GoogleCalendarSection() {
   const [aiEnabled, setAiEnabled] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
 
+  // Keywords should follow the CRM language (locale). Keep per-locale draft values
+  // so switching languages doesn't lose edits.
+  const keywordsByLocaleRef = useRef<Record<string, { appointment: string; busy: string }>>({});
+  const prevLocaleRef = useRef<string>(locale);
+
+  const getDefaultKeywordsForLocale = useCallback(
+    (loc: string) => {
+      const defaults: Record<string, { appointment: string; busy: string }> = {
+        fr: { appointment: 'rdv, consultation, patient, rendez-vous', busy: 'perso, vacances, congé, absent' },
+        en: { appointment: 'appointment, consultation, patient, meeting', busy: 'personal, vacation, leave, busy' },
+        he: { appointment: 'פגישה, ייעוץ, מטופל', busy: 'אישי, חופשה, חופש' },
+        ru: { appointment: 'приём, консультация, пациент', busy: 'личное, отпуск, выходной' },
+        es: { appointment: 'cita, consulta, paciente, reunión', busy: 'personal, vacaciones, permiso, ocupado' },
+        am: { appointment: 'appointment, consultation, patient', busy: 'personal, vacation, leave, busy' },
+      };
+      return defaults[loc] || defaults.en;
+    },
+    [],
+  );
+
   // Populate form from status
   useEffect(() => {
     if (status?.connected) {
       setCalendarId(status.calendar_id || '');
       setSyncCrmToGoogle(status.sync_crm_to_google);
       setSyncGoogleToCrm(status.sync_google_to_crm);
-      setKeywordsAppointment(status.keywords_appointment?.join(', ') || '');
-      setKeywordsBusy(status.keywords_busy?.join(', ') || '');
+      const defaults = getDefaultKeywordsForLocale(locale);
+      const appointment = status.keywords_appointment?.length
+        ? status.keywords_appointment.join(', ')
+        : defaults.appointment;
+      const busy = status.keywords_busy?.length ? status.keywords_busy.join(', ') : defaults.busy;
+
+      keywordsByLocaleRef.current[locale] = { appointment, busy };
+      setKeywordsAppointment(appointment);
+      setKeywordsBusy(busy);
       setAiEnabled(status.ai_enabled);
       setAiPrompt(status.ai_prompt || '');
     }
-  }, [status]);
+  }, [status, locale, getDefaultKeywordsForLocale]);
+
+  // When the CRM language changes, swap keyword drafts accordingly.
+  useEffect(() => {
+    if (!status?.connected) return;
+
+    const prevLocale = prevLocaleRef.current;
+    if (prevLocale !== locale) {
+      keywordsByLocaleRef.current[prevLocale] = {
+        appointment: keywordsAppointment,
+        busy: keywordsBusy,
+      };
+    }
+
+    const next =
+      keywordsByLocaleRef.current[locale] || getDefaultKeywordsForLocale(locale);
+
+    setKeywordsAppointment(next.appointment);
+    setKeywordsBusy(next.busy);
+
+    prevLocaleRef.current = locale;
+  }, [
+    locale,
+    status?.connected,
+    keywordsAppointment,
+    keywordsBusy,
+    getDefaultKeywordsForLocale,
+  ]);
 
   const handleConnect = useCallback(async () => {
     const result = await connectMutation.mutateAsync();
@@ -267,46 +324,38 @@ export default function GoogleCalendarSection() {
 
                 {/* Sync toggles */}
                 <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
-                      id="sync-crm-to-google"
-                      checked={syncCrmToGoogle}
-                      onChange={(e) => setSyncCrmToGoogle(e.target.checked)}
-                      className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary/20"
-                    />
-                    <div>
-                      <label
-                        htmlFor="sync-crm-to-google"
-                        className="text-sm font-medium text-gray-700"
-                      >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div id="sync-crm-to-google-label" className="text-sm font-medium text-gray-700">
                         {t('googleCalendarSyncCrmToGoogle')}
-                      </label>
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         {t('googleCalendarSyncCrmToGoogleDesc')}
                       </p>
                     </div>
+                    <Switch
+                      aria-labelledby="sync-crm-to-google-label"
+                      checked={syncCrmToGoogle}
+                      onCheckedChange={setSyncCrmToGoogle}
+                      className="mt-0.5"
+                    />
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
-                      id="sync-google-to-crm"
-                      checked={syncGoogleToCrm}
-                      onChange={(e) => setSyncGoogleToCrm(e.target.checked)}
-                      className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary/20"
-                    />
-                    <div>
-                      <label
-                        htmlFor="sync-google-to-crm"
-                        className="text-sm font-medium text-gray-700"
-                      >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div id="sync-google-to-crm-label" className="text-sm font-medium text-gray-700">
                         {t('googleCalendarSyncGoogleToCrm')}
-                      </label>
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         {t('googleCalendarSyncGoogleToCrmDesc')}
                       </p>
                     </div>
+                    <Switch
+                      aria-labelledby="sync-google-to-crm-label"
+                      checked={syncGoogleToCrm}
+                      onCheckedChange={setSyncGoogleToCrm}
+                      className="mt-0.5"
+                    />
                   </div>
                 </div>
 
@@ -338,26 +387,25 @@ export default function GoogleCalendarSection() {
                     </p>
 
                     {/* AI toggle */}
-                    <div className="flex items-start gap-3 pt-1">
-                      <input
-                        type="checkbox"
-                        id="ai-enabled"
-                        checked={aiEnabled}
-                        onChange={(e) => setAiEnabled(e.target.checked)}
-                        className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary/20"
-                      />
-                      <div>
-                        <label
-                          htmlFor="ai-enabled"
+                    <div className="flex items-start justify-between gap-4 pt-1">
+                      <div className="min-w-0">
+                        <div
+                          id="ai-enabled-label"
                           className="text-sm font-medium text-gray-700 flex items-center gap-1.5"
                         >
                           <Sparkles className="h-3.5 w-3.5 text-primary" />
                           {t('googleCalendarAiEnabled')}
-                        </label>
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {t('googleCalendarAiEnabledDesc')}
                         </p>
                       </div>
+                      <Switch
+                        aria-labelledby="ai-enabled-label"
+                        checked={aiEnabled}
+                        onCheckedChange={setAiEnabled}
+                        className="mt-0.5"
+                      />
                     </div>
 
                     {aiEnabled && (

@@ -82,8 +82,9 @@ export default function TeamPage() {
   const t = useTranslations('team');
   const tc = useTranslations('common');
   const ts = useTranslations('settings');
+  const tsub = useTranslations('subscription');
   const locale = useLocale();
-  const { profile } = useAuth();
+  const { profile, subscriptionStatus } = useAuth();
   const router = useRouter();
   const { data: organization, isLoading: loadingOrg } = useCrmOrganization();
   const { data: members, isLoading: loadingMembers } = useOrganizationMembers(organization?.id);
@@ -107,6 +108,12 @@ export default function TeamPage() {
   // Check if current user is owner or admin
   const currentMember = members?.find((m) => m.user_id === profile?.id);
   const canManage = currentMember?.role === 'owner' || currentMember?.role === 'admin';
+
+  const isTrial =
+    !!subscriptionStatus?.trial?.isActive && !subscriptionStatus?.subscription;
+  const isTrialing = subscriptionStatus?.subscription?.status === 'trialing';
+  const showTrialNotice = isTrial || isTrialing;
+  const trialDaysRemaining = subscriptionStatus?.trial?.daysRemaining ?? 0;
 
   const handleChange = <K extends keyof InviteForm>(key: K, value: InviteForm[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -253,12 +260,13 @@ export default function TeamPage() {
   };
 
   const getStaffTypeBadge = (staffType: string) => {
+    const afterTrialPrefix = showTrialNotice ? `${t('afterTrialShort')}: ` : '';
     if (staffType === 'secretary') {
       return (
         <div className="flex items-center gap-1.5">
           <Badge className="bg-purple-100 text-purple-800"><ClipboardPen className="h-3 w-3 mr-1" />{t('secretary')}</Badge>
           {orgPlan === 'clinic' && (
-            <Badge className="bg-gray-50 text-gray-500 text-[10px]">{SEAT_PRICES_ILS.secretary} ₪/{t('perMonth')}</Badge>
+            <Badge className="bg-gray-50 text-gray-500 text-[10px]">{afterTrialPrefix}{SEAT_PRICES_ILS.secretary} ₪/{t('perMonth')}</Badge>
           )}
         </div>
       );
@@ -267,7 +275,7 @@ export default function TeamPage() {
       <div className="flex items-center gap-1.5">
         <Badge className="bg-primary/10 text-primary"><Stethoscope className="h-3 w-3 mr-1" />{t('practitioner')}</Badge>
         {orgPlan === 'clinic' && (
-          <Badge className="bg-gray-50 text-gray-500 text-[10px]">{SEAT_PRICES_ILS.practitioner} ₪/{t('perMonth')}</Badge>
+          <Badge className="bg-gray-50 text-gray-500 text-[10px]">{afterTrialPrefix}{SEAT_PRICES_ILS.practitioner} ₪/{t('perMonth')}</Badge>
         )}
       </div>
     );
@@ -479,6 +487,18 @@ export default function TeamPage() {
             </CardTitle>
           </CardHeader>
           <div className="space-y-2 text-sm">
+            {showTrialNotice && (
+              <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
+                <p className="font-semibold text-amber-900">{t('trialActiveTitle')}</p>
+                <p className="text-amber-800 text-sm mt-0.5">
+                  {trialDaysRemaining > 0
+                    ? tsub('trialBannerText', { days: trialDaysRemaining })
+                    : null}
+                  {trialDaysRemaining > 0 ? ' ' : null}
+                  {t('trialActiveDetails')}
+                </p>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-gray-600">{t('basePlan')}</span>
               <span className="font-medium">{BASE_PRICES_ILS.clinic} ₪</span>

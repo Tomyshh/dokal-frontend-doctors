@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Switch } from '@/components/ui/Switch';
 import {
   CheckCircle2,
   Building2,
@@ -216,25 +217,25 @@ export default function SettingsPage() {
               <CardTitle>{t('notifications')}</CardTitle>
             </CardHeader>
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="notif"
+              <div className="flex items-center justify-between gap-4">
+                <span id="notif-label" className="text-sm text-gray-700">
+                  {t('notificationsEnabled')}
+                </span>
+                <Switch
+                  aria-labelledby="notif-label"
                   checked={notificationsEnabled}
-                  onChange={(e) => setNotificationsEnabled(e.target.checked)}
-                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
+                  onCheckedChange={setNotificationsEnabled}
                 />
-                <label htmlFor="notif" className="text-sm text-gray-700">{t('notificationsEnabled')}</label>
               </div>
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="reminders"
+              <div className="flex items-center justify-between gap-4">
+                <span id="reminders-label" className="text-sm text-gray-700">
+                  {t('remindersEnabled')}
+                </span>
+                <Switch
+                  aria-labelledby="reminders-label"
                   checked={remindersEnabled}
-                  onChange={(e) => setRemindersEnabled(e.target.checked)}
-                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
+                  onCheckedChange={setRemindersEnabled}
                 />
-                <label htmlFor="reminders" className="text-sm text-gray-700">{t('remindersEnabled')}</label>
               </div>
               <Button onClick={handleSaveSettings} loading={updateSettings.isPending}>
                 {tc('save')}
@@ -281,15 +282,15 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 pt-1">
-                <input
-                  type="checkbox"
-                  id="accepting"
+              <div className="flex items-center justify-between gap-4 pt-1">
+                <span id="accepting-label" className="text-sm text-gray-700">
+                  {t('acceptingPatients')}
+                </span>
+                <Switch
+                  aria-labelledby="accepting-label"
                   checked={acceptingPatients}
-                  onChange={(e) => setAcceptingPatients(e.target.checked)}
-                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
+                  onCheckedChange={setAcceptingPatients}
                 />
-                <label htmlFor="accepting" className="text-sm text-gray-700">{t('acceptingPatients')}</label>
               </div>
 
               <div className="flex items-center justify-end pt-1">
