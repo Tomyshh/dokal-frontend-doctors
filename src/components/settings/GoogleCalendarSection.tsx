@@ -20,6 +20,7 @@ import {
   Calendar,
   Sparkles,
 } from 'lucide-react';
+import { useToast } from '@/providers/ToastProvider';
 import {
   useGoogleCalendarStatus,
   useGoogleCalendars,
@@ -34,6 +35,7 @@ import type { Locale } from '@/i18n/config';
 export default function GoogleCalendarSection() {
   const t = useTranslations('settings');
   const tc = useTranslations('common');
+  const toast = useToast();
   const locale = useLocale() as Locale;
 
   const { data: status, isLoading: statusLoading } = useGoogleCalendarStatus();
@@ -123,20 +125,37 @@ export default function GoogleCalendarSection() {
   ]);
 
   const handleConnect = useCallback(async () => {
-    const result = await connectMutation.mutateAsync();
-    if (result.auth_url) {
-      window.location.href = result.auth_url;
+    try {
+      const result = await connectMutation.mutateAsync();
+      if (result.auth_url) {
+        window.location.href = result.auth_url;
+      }
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+      toast.error(tc('saveErrorTitle'), msg);
     }
-  }, [connectMutation]);
+  }, [connectMutation, tc, toast]);
 
   const handleDisconnect = useCallback(async () => {
-    await disconnectMutation.mutateAsync();
-    setDisconnectDialogOpen(false);
-  }, [disconnectMutation]);
+    try {
+      await disconnectMutation.mutateAsync();
+      setDisconnectDialogOpen(false);
+      toast.success(t('googleCalendarDisconnected'));
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+      toast.error(tc('saveErrorTitle'), msg);
+    }
+  }, [disconnectMutation, t, tc, toast]);
 
   const handleSync = useCallback(async () => {
-    await syncMutation.mutateAsync();
-  }, [syncMutation]);
+    try {
+      await syncMutation.mutateAsync();
+      toast.success(t('googleCalendarSyncSuccess', { count: 0 }));
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+      toast.error(tc('saveErrorTitle'), msg);
+    }
+  }, [syncMutation, t, tc, toast]);
 
   const handleSaveConfig = useCallback(async () => {
     const data: UpdateGoogleCalendarConfigRequest = {
@@ -154,9 +173,15 @@ export default function GoogleCalendarSection() {
       ai_enabled: aiEnabled,
       ai_prompt: aiPrompt || null,
     };
-    await updateConfigMutation.mutateAsync(data);
-    setConfigSaved(true);
-    setTimeout(() => setConfigSaved(false), 3000);
+    try {
+      await updateConfigMutation.mutateAsync(data);
+      setConfigSaved(true);
+      setTimeout(() => setConfigSaved(false), 3000);
+      toast.success(tc('saveSuccess'));
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+      toast.error(tc('saveErrorTitle'), msg);
+    }
   }, [
     calendarId,
     syncCrmToGoogle,
@@ -166,6 +191,8 @@ export default function GoogleCalendarSection() {
     aiEnabled,
     aiPrompt,
     updateConfigMutation,
+    tc,
+    toast,
   ]);
 
   const formatLastSync = (iso: string | null) => {

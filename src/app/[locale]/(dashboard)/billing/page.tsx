@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/providers/AuthProvider';
+import { useToast } from '@/providers/ToastProvider';
 import { useCrmOrganization, useOrganizationMembers } from '@/hooks/useOrganization';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -69,6 +70,7 @@ function isValidExpiry(value: string) {
 export default function BillingPage() {
   const t = useTranslations('billing');
   const tc = useTranslations('common');
+  const toast = useToast();
   const tsub = useTranslations('subscription');
   const ts = useTranslations('settings');
   const locale = useLocale() as Locale;
@@ -149,10 +151,13 @@ export default function BillingPage() {
       await changePlan('clinic');
       await refreshSubscription();
       setUpgradeDialogOpen(false);
+      toast.success(tc('saveSuccess'));
       window.location.reload();
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
-      setPlanError(axiosError?.response?.data?.error?.message || tsub('genericError'));
+      const msg = axiosError?.response?.data?.error?.message || tsub('genericError');
+      setPlanError(msg);
+      toast.error(tc('saveErrorTitle'), msg);
     } finally {
       setPlanLoading(false);
     }
@@ -166,10 +171,13 @@ export default function BillingPage() {
       await downgradePlan(selectedPractitionerId);
       await refreshSubscription();
       setDowngradeDialogOpen(false);
+      toast.success(tc('saveSuccess'));
       window.location.reload();
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
-      setPlanError(axiosError?.response?.data?.error?.message || tsub('genericError'));
+      const msg = axiosError?.response?.data?.error?.message || tsub('genericError');
+      setPlanError(msg);
+      toast.error(tc('saveErrorTitle'), msg);
     } finally {
       setPlanLoading(false);
     }
@@ -260,9 +268,12 @@ export default function BillingPage() {
       });
       setAddCardOpen(false);
       resetCardForm();
+      toast.success(t('cardAddedSuccess'));
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
-      setCardFormError(axiosError?.response?.data?.error?.message || tsub('genericError'));
+      const msg = axiosError?.response?.data?.error?.message || tsub('genericError');
+      setCardFormError(msg);
+      toast.error(tc('saveErrorTitle'), msg);
     }
   };
 
@@ -640,8 +651,14 @@ export default function BillingPage() {
               variant="destructive"
               onClick={async () => {
                 if (!deleteDialog.card) return;
-                await deleteCardMutation.mutateAsync(deleteDialog.card.id);
-                setDeleteDialog({ open: false, card: null });
+                try {
+                  await deleteCardMutation.mutateAsync(deleteDialog.card.id);
+                  setDeleteDialog({ open: false, card: null });
+                  toast.success(t('cardDeletedSuccess'));
+                } catch (err: unknown) {
+                  const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+                  toast.error(tc('saveErrorTitle'), msg);
+                }
               }}
               loading={deleteCardMutation.isPending}
             >

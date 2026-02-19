@@ -12,12 +12,14 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import { getDayName, formatTime } from '@/lib/utils';
+import { useToast } from '@/providers/ToastProvider';
 import { Plus, Pencil, Trash2, CalendarOff } from 'lucide-react';
 import type { WeeklySchedule } from '@/types';
 
 export default function SchedulePage() {
   const t = useTranslations('schedule');
   const tc = useTranslations('common');
+  const toast = useToast();
   const locale = useLocale();
   const { data: schedule, isLoading } = useWeeklySchedule();
   const { data: overrides, isLoading: loadingOverrides } = useScheduleOverrides();
@@ -69,15 +71,23 @@ export default function SchedulePage() {
   };
 
   const handleSaveBlock = () => {
+    const onSuccess = () => {
+      setShowBlockDialog(false);
+      toast.success(tc('saveSuccess'));
+    };
+    const onError = (err: unknown) => {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+      toast.error(tc('saveErrorTitle'), msg);
+    };
     if (editingBlock) {
       updateBlock.mutate(
         { id: editingBlock.id, data: { start_time: blockStart, end_time: blockEnd, slot_duration_minutes: blockDuration } },
-        { onSuccess: () => setShowBlockDialog(false) }
+        { onSuccess, onError }
       );
     } else {
       addBlock.mutate(
         { day_of_week: blockDay, start_time: blockStart, end_time: blockEnd, slot_duration_minutes: blockDuration },
-        { onSuccess: () => setShowBlockDialog(false) }
+        { onSuccess, onError }
       );
     }
   };
@@ -91,7 +101,18 @@ export default function SchedulePage() {
         end_time: overrideAvailable ? overrideEnd || undefined : undefined,
         reason: overrideReason || undefined,
       },
-      { onSuccess: () => { setShowOverrideDialog(false); setOverrideDate(''); setOverrideReason(''); } }
+      {
+        onSuccess: () => {
+          setShowOverrideDialog(false);
+          setOverrideDate('');
+          setOverrideReason('');
+          toast.success(tc('saveSuccess'));
+        },
+        onError: (err: unknown) => {
+          const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+          toast.error(tc('saveErrorTitle'), msg);
+        },
+      }
     );
   };
 
@@ -154,7 +175,15 @@ export default function SchedulePage() {
                     size="icon-sm"
                     variant="ghost"
                     className="text-red-500 hover:bg-red-50"
-                    onClick={() => deleteBlock.mutate(block.id)}
+                    onClick={() =>
+                      deleteBlock.mutate(block.id, {
+                        onSuccess: () => toast.success(tc('saveSuccess')),
+                        onError: (err: unknown) => {
+                          const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+                          toast.error(tc('saveErrorTitle'), msg);
+                        },
+                      })
+                    }
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -215,7 +244,15 @@ export default function SchedulePage() {
                   size="icon-sm"
                   variant="ghost"
                   className="text-red-500 hover:bg-red-50"
-                  onClick={() => deleteOverride.mutate(override.id)}
+                  onClick={() =>
+                    deleteOverride.mutate(override.id, {
+                      onSuccess: () => toast.success(tc('saveSuccess')),
+                      onError: (err: unknown) => {
+                        const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+                        toast.error(tc('saveErrorTitle'), msg);
+                      },
+                    })
+                  }
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

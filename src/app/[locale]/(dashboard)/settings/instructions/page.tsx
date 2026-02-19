@@ -11,12 +11,14 @@ import { Dialog } from '@/components/ui/Dialog';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { useToast } from '@/providers/ToastProvider';
 import { Plus, Pencil, FileText } from 'lucide-react';
 import type { AppointmentInstruction } from '@/types';
 
 export default function InstructionsPage() {
   const t = useTranslations('settings');
   const tc = useTranslations('common');
+  const toast = useToast();
   const { data: instructions, isLoading } = useInstructions();
   const addInstruction = useAddInstruction();
   const updateInstruction = useUpdateInstruction();
@@ -44,15 +46,23 @@ export default function InstructionsPage() {
   };
 
   const handleSave = () => {
+    const onSuccess = () => {
+      setShowDialog(false);
+      toast.success(tc('saveSuccess'));
+    };
+    const onError = (err: unknown) => {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+      toast.error(tc('saveErrorTitle'), msg);
+    };
     if (editing) {
       updateInstruction.mutate(
         { id: editing.id, data: { title, content, is_active: isActive } },
-        { onSuccess: () => setShowDialog(false) }
+        { onSuccess, onError }
       );
     } else {
       addInstruction.mutate(
         { title, content, is_active: isActive },
-        { onSuccess: () => setShowDialog(false) }
+        { onSuccess, onError }
       );
     }
   };

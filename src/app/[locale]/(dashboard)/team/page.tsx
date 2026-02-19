@@ -21,6 +21,7 @@ import {
   useUpdatePractitionerLicenses,
 } from '@/hooks/useOrganization';
 import { useAuth } from '@/providers/AuthProvider';
+import { useToast } from '@/providers/ToastProvider';
 import type { InviteMemberRequest } from '@/types/api';
 import type { OrganizationMember } from '@/types';
 import { useRouter } from '@/i18n/routing';
@@ -81,6 +82,7 @@ const INITIAL_FORM: InviteForm = {
 export default function TeamPage() {
   const t = useTranslations('team');
   const tc = useTranslations('common');
+  const toast = useToast();
   const ts = useTranslations('settings');
   const tsub = useTranslations('subscription');
   const locale = useLocale();
@@ -165,18 +167,19 @@ export default function TeamPage() {
         organizationId: organization.id,
         data: payload,
       });
-      setInviteSuccess(
-        result.invite_sent ? t('inviteSentSuccess') : t('memberAddedSuccess'),
-      );
+      const successMsg = result.invite_sent ? t('inviteSentSuccess') : t('memberAddedSuccess');
+      setInviteSuccess(successMsg);
+      toast.success(successMsg);
       setForm(INITIAL_FORM);
       setTimeout(() => {
         setDialogOpen(false);
         setInviteSuccess('');
       }, 2000);
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : t('inviteError');
-      setInviteError(message);
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message
+        || (err instanceof Error ? err.message : t('inviteError'));
+      setInviteError(msg);
+      toast.error(t('inviteError'), msg);
     }
   };
 
@@ -187,8 +190,10 @@ export default function TeamPage() {
         organizationId: organization.id,
         memberId: member.id,
       });
-    } catch {
-      // Silently fail
+      toast.success(t('memberRemovedSuccess'));
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+      toast.error(tc('saveErrorTitle'), msg);
     }
     setConfirmRemove(null);
   };
@@ -228,9 +233,11 @@ export default function TeamPage() {
         },
       });
       setEditLicenseMember(null);
+      toast.success(tc('saveSuccess'));
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('inviteError');
-      setEditLicenseError(message);
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || (err instanceof Error ? err.message : t('inviteError'));
+      setEditLicenseError(msg);
+      toast.error(tc('saveErrorTitle'), msg);
     }
   };
 
@@ -243,8 +250,10 @@ export default function TeamPage() {
         memberId: member.id,
         data: { role: newRole },
       });
-    } catch {
-      // Silently fail
+      toast.success(tc('saveSuccess'));
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+      toast.error(tc('saveErrorTitle'), msg);
     }
   };
 

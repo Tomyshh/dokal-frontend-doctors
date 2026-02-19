@@ -19,6 +19,7 @@ import { useDeleteExternalEvent } from '@/hooks/useExternalEvents';
 import { Dialog } from '@/components/ui/Dialog';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
+import { useToast } from '@/providers/ToastProvider';
 import {
   formatMissingFieldLabel,
   getAppointmentSourceLabel,
@@ -42,6 +43,7 @@ export default function CalendarEventSidebar({
   const ta = useTranslations('appointments');
   const locale = useLocale();
   const tc = useTranslations('common');
+  const toast = useToast();
   const { profile } = useAuth();
   const isOrgActor = profile?.role === 'secretary' || profile?.role === 'admin';
 
@@ -168,9 +170,15 @@ export default function CalendarEventSidebar({
                 variant="destructive"
                 loading={deleteExternalMutation.isPending}
                 onClick={async () => {
-                  await deleteExternalMutation.mutateAsync(evt.id);
-                  setDeleteDialogOpen(false);
-                  onClose();
+                  try {
+                    await deleteExternalMutation.mutateAsync(evt.id);
+                    setDeleteDialogOpen(false);
+                    onClose();
+                    toast.success(tc('saveSuccess'));
+                  } catch (err: unknown) {
+                    const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+                    toast.error(tc('saveErrorTitle'), msg);
+                  }
                 }}
               >
                 {t('deleteExternalEvent')}
@@ -446,16 +454,22 @@ export default function CalendarEventSidebar({
                     className="h-8"
                     loading={updateMetaMutation.isPending}
                     onClick={async () => {
-                      await updateMetaMutation.mutateAsync({
-                        id: appointment.id,
-                        data: {
-                          external_title: extTitle.trim() || null,
-                          external_description: extDesc.trim() || null,
-                          external_location: extLoc.trim() || null,
-                          practitioner_notes: notes.trim() || null,
-                        },
-                      });
-                      setMetaEditMode(false);
+                      try {
+                        await updateMetaMutation.mutateAsync({
+                          id: appointment.id,
+                          data: {
+                            external_title: extTitle.trim() || null,
+                            external_description: extDesc.trim() || null,
+                            external_location: extLoc.trim() || null,
+                            practitioner_notes: notes.trim() || null,
+                          },
+                        });
+                        setMetaEditMode(false);
+                        toast.success(tc('saveSuccess'));
+                      } catch (err: unknown) {
+                        const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+                        toast.error(tc('saveErrorTitle'), msg);
+                      }
                     }}
                   >
                     {tc('save')}

@@ -58,6 +58,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Profile" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
     patch:
       tags: [Profile]
       summary: Update my profile
@@ -74,6 +75,17 @@ paths:
               schema: { $ref: "#/components/schemas/Profile" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/account:
+    delete:
+      tags: [Account]
+      summary: Delete my account (hard delete)
+      responses:
+        "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
 
   /api/v1/profile/avatar:
     post:
@@ -98,6 +110,7 @@ paths:
               schema: { $ref: "#/components/schemas/Profile" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
 
   /api/v1/relatives:
     get:
@@ -180,6 +193,7 @@ paths:
       description: |
         Use after POST /practitioners/register to get the practitioner without knowing the id.
         Returns 404 if the user has no practitioner row yet (onboarding not completed).
+        When 200, includes is_complete and missing_fields for profile completion tracking.
       responses:
         "200":
           description: Practitioner profile (same shape as GET /practitioners/{id})
@@ -1727,6 +1741,80 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
 
+  /api/v1/crm/profile/avatar:
+    post:
+      tags: [CRM]
+      summary: Upload practitioner avatar (stores source + generates AI doctor avatar)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+              required: [avatar]
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [CRM]
+      summary: Remove practitioner avatar (storage + profile.avatar_url)
+      responses:
+        "200":
+          description: Updated profile (avatar_url set to null)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/profile/about/improve:
+    post:
+      tags: [CRM]
+      summary: Improve About section with AI (OpenAI)
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ImproveTextRequest" }
+      responses:
+        "200":
+          description: Generated text
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImproveTextResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+  /api/v1/crm/profile/education/improve:
+    post:
+      tags: [CRM]
+      summary: Improve Education section with AI (OpenAI)
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ImproveTextRequest" }
+      responses:
+        "200":
+          description: Generated text
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImproveTextResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
   /api/v1/crm/organization:
     get:
       tags: [CRM]
@@ -1912,6 +2000,16 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    InternalServerError:
+      description: Internal server error (e.g. OpenAI API failure)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
 
   schemas:
     ErrorResponse:
@@ -2038,7 +2136,16 @@ components:
       type: object
       description: >
         Practitioner profile plus reasons/instructions/slots/reviews.
+        When fetching own profile (GET /me), includes is_complete and missing_fields.
       additionalProperties: true
+      properties:
+        is_complete:
+          type: boolean
+          description: "Profil complet (tous les champs obligatoires renseignés). Présent uniquement sur GET /me."
+        missing_fields:
+          type: array
+          items: { type: string }
+          description: "Champs manquants pour compléter le profil. Présent uniquement sur GET /me."
 
     CreateAppointmentRequest:
       type: object
@@ -2269,6 +2376,22 @@ components:
         content: { type: string }
         is_active: { type: boolean }
         sort_order: { type: integer }
+
+    ImproveTextRequest:
+      type: object
+      properties:
+        current_text:
+          type: string
+          nullable: true
+          description: Existing text to improve, or null for generation from scratch
+
+    ImproveTextResponse:
+      type: object
+      required: [generated]
+      properties:
+        generated:
+          type: string
+          description: AI-generated text
 
     UpdatePractitionerProfileRequest:
       type: object

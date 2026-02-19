@@ -18,6 +18,7 @@ import { Link } from '@/i18n/routing';
 import type { CrmPatientListItem, Appointment } from '@/types';
 import { formatMissingFieldLabel } from '@/lib/crm';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
+import { useToast } from '@/providers/ToastProvider';
 
 const INSURANCE_PROVIDER_OPTIONS = [
   'AIG',
@@ -45,6 +46,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   const locale = useLocale();
   const { data: data, isLoading, isError, error } = usePatient(id);
   const updateMutation = useUpdateCrmPatient();
+  const toast = useToast();
   const [editMode, setEditMode] = useState(false);
 
   const { crmRecord, teudatDisplay, insuranceProviderDisplay, history } = useMemo(() => {
@@ -346,21 +348,27 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
             <Button
               loading={updateMutation.isPending}
               onClick={async () => {
-                await updateMutation.mutateAsync({
-                  id: crmRecord.id,
-                  data: {
-                    first_name: firstName.trim() || null,
-                    last_name: lastName.trim() || null,
-                    phone: phone.trim() || null,
-                    email: email.trim() || null,
-                    city: city.trim() || null,
-                    date_of_birth: dob || null,
-                    sex: (sex || null) as 'male' | 'female' | 'other' | null,
-                    teudat_zehut: teudat.trim() || null,
-                    insurance_provider: insuranceProvider || null,
-                  },
-                });
-                setEditMode(false);
+                try {
+                  await updateMutation.mutateAsync({
+                    id: crmRecord.id,
+                    data: {
+                      first_name: firstName.trim() || null,
+                      last_name: lastName.trim() || null,
+                      phone: phone.trim() || null,
+                      email: email.trim() || null,
+                      city: city.trim() || null,
+                      date_of_birth: dob || null,
+                      sex: (sex || null) as 'male' | 'female' | 'other' | null,
+                      teudat_zehut: teudat.trim() || null,
+                      insurance_provider: insuranceProvider || null,
+                    },
+                  });
+                  setEditMode(false);
+                  toast.success(tc('saveSuccess'));
+                } catch (err: unknown) {
+                  const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+                  toast.error(tc('saveErrorTitle'), msg);
+                }
               }}
             >
               {tc('save')}

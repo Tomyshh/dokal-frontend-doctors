@@ -107,44 +107,62 @@ export default function SettingsPage() {
   }, [organization]);
 
   const handleSaveProfile = async () => {
-    await updateProfile.mutateAsync({
-      about: about || null,
-      education: education || null,
-      languages: languages.length > 0 ? languages : null,
-      phone: phone || null,
-      email: email || null,
-      address_line: addressLine || null,
-      zip_code: zipCode || null,
-      city: city || null,
-      is_accepting_new_patients: acceptingPatients,
-    });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      await updateProfile.mutateAsync({
+        about: about || null,
+        education: education || null,
+        languages: languages.length > 0 ? languages : null,
+        phone: phone || null,
+        email: email || null,
+        address_line: addressLine || null,
+        zip_code: zipCode || null,
+        city: city || null,
+        is_accepting_new_patients: acceptingPatients,
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+      toast.success(t('saved'));
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      toast.error(tc('saveErrorTitle'), msg || tc('saveError'));
+    }
   };
 
   const handleSaveOrganization = async () => {
     if (!organization) return;
-    await updateOrganization.mutateAsync({
-      id: organization.id,
-      data: {
-        name: orgName || undefined,
-        description: orgDescription || null,
-        website: orgWebsite || null,
-        phone: orgPhone || null,
-        email: orgEmail || null,
-      },
-    });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      await updateOrganization.mutateAsync({
+        id: organization.id,
+        data: {
+          name: orgName || undefined,
+          description: orgDescription || null,
+          website: orgWebsite || null,
+          phone: orgPhone || null,
+          email: orgEmail || null,
+        },
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+      toast.success(t('saved'));
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      toast.error(tc('saveErrorTitle'), msg || tc('saveError'));
+    }
   };
 
   const handleSaveSettings = async () => {
-    await updateSettings.mutateAsync({
-      notifications_enabled: notificationsEnabled,
-      reminders_enabled: remindersEnabled,
-    });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      await updateSettings.mutateAsync({
+        notifications_enabled: notificationsEnabled,
+        reminders_enabled: remindersEnabled,
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+      toast.success(t('saved'));
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      toast.error(tc('saveErrorTitle'), msg || tc('saveError'));
+    }
   };
 
   const switchLocale = (newLocale: Locale) => {

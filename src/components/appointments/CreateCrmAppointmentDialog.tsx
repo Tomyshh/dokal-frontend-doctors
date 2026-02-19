@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/AuthProvider';
+import { useToast } from '@/providers/ToastProvider';
 import { useCrmOrganization, useOrganizationMembers } from '@/hooks/useOrganization';
 import { useReasons } from '@/hooks/useSettings';
 import { useCreateCrmAppointment } from '@/hooks/useAppointments';
@@ -55,6 +56,7 @@ export function CreateCrmAppointmentDialog({
 }: CreateCrmAppointmentDialogProps) {
   const t = useTranslations('appointments');
   const tc = useTranslations('common');
+  const toast = useToast();
   const locale = useLocale();
   const { profile } = useAuth();
   const isSecretary = profile?.role === 'secretary';
@@ -173,8 +175,11 @@ export function CreateCrmAppointmentDialog({
       try {
         const created = await createPatientMutation.mutateAsync(payload);
         setSelectedPatient(created);
-      } catch {
-        setError(t('patientCreateFailed'));
+        toast.success(tc('saveSuccess'));
+      } catch (err: unknown) {
+        const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || t('patientCreateFailed');
+        setError(msg);
+        toast.error(tc('saveErrorTitle'), msg);
         return;
       }
     } else {
@@ -196,6 +201,8 @@ export function CreateCrmAppointmentDialog({
     selectedPatient,
     createPatientMutation,
     t,
+    tc,
+    toast,
   ]);
 
   const submitAppointment = useCallback(async () => {
@@ -232,9 +239,12 @@ export function CreateCrmAppointmentDialog({
 
     try {
       await createAppointmentMutation.mutateAsync(payload);
+      toast.success(tc('saveSuccess'));
       onClose();
-    } catch {
-      setError(t('appointmentCreateFailed'));
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || t('appointmentCreateFailed');
+      setError(msg);
+      toast.error(tc('saveErrorTitle'), msg);
     }
   }, [
     selectedPatient,
@@ -249,6 +259,8 @@ export function CreateCrmAppointmentDialog({
     createAppointmentMutation,
     onClose,
     t,
+    tc,
+    toast,
   ]);
 
   const handlePatientFocus = () => {
