@@ -15,6 +15,7 @@ import type { Profile } from '@/types';
 import type { SubscriptionStatus } from '@/lib/subscription';
 import { getSubscriptionStatus } from '@/lib/subscription';
 import api from '@/lib/api';
+import { getMyPractitionerOrNull } from '@/lib/practitioner';
 import { useLocale } from 'next-intl';
 import { LogoutScreen } from '@/components/LogoutScreen';
 
@@ -76,23 +77,44 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     ]);
 
     let profileData: Profile | null = null;
+    const profileError = results[0].status === 'rejected' ? results[0].reason as { response?: { status?: number } } : null;
+    const status = profileError?.response?.status;
 
     if (results[0].status === 'fulfilled') {
       profileData = results[0].value.data;
-    } else {
-      // If the profile doesn't exist yet (404), try to bootstrap it.
-      // This handles Google OAuth users who don't have a backend profile yet.
-      const is404 =
-        results[0].status === 'rejected' &&
-        (results[0].reason as { response?: { status?: number } })?.response?.status === 404;
-
-      if (is404) {
-        try {
-          const bootstrapRes = await api.post<Profile>('/crm/auth/bootstrap');
-          profileData = bootstrapRes.data;
-        } catch {
-          // Bootstrap failed — profile stays null, onboarding flow will handle it.
+    } else if (status === 403) {
+      // GET /profile is for patients only (requirePatient). Practitioners must use GET /practitioners/me.
+      try {
+        const practitioner = await getMyPractitionerOrNull();
+        const supabase = createClient();
+        const { data: { session: sess } } = await supabase.auth.getSession();
+        const user = sess?.user;
+        if (practitioner && user) {
+          profileData = {
+            id: user.id,
+            first_name: practitioner.profiles?.first_name ?? null,
+            last_name: practitioner.profiles?.last_name ?? null,
+            email: practitioner.email ?? user.email ?? null,
+            phone: practitioner.phone ?? null,
+            date_of_birth: null,
+            sex: null,
+            city: practitioner.city ?? null,
+            avatar_url: practitioner.profiles?.avatar_url ?? null,
+            role: 'practitioner',
+            created_at: practitioner.created_at ?? '',
+            updated_at: practitioner.updated_at ?? '',
+          };
         }
+      } catch {
+        // practitioners/me failed — profile stays null
+      }
+    } else if (status === 404) {
+      // Profile doesn't exist yet — try bootstrap (Google OAuth users).
+      try {
+        const bootstrapRes = await api.post<Profile>('/crm/auth/bootstrap');
+        profileData = bootstrapRes.data;
+      } catch {
+        // Bootstrap failed — profile stays null, onboarding flow will handle it.
       }
     }
 

@@ -15,6 +15,10 @@ export function useNotifications() {
   });
 }
 
+/**
+ * Unread notifications count. Only for patients — GET /notifications/unread-count
+ * requires requirePatient. Practitioners get 403.
+ */
 export function useUnreadCount() {
   return useQuery({
     queryKey: ['unread-count'],
@@ -23,6 +27,7 @@ export function useUnreadCount() {
       return data.count;
     },
     refetchInterval: 15000,
+    enabled: false, // Disabled: endpoint is patient-only. Enable when backend supports practitioners.
   });
 }
 
