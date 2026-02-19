@@ -11,7 +11,7 @@ import { useUploadProfileAvatar, useDeleteProfileAvatar } from '@/hooks/useSetti
 import { useToast } from '@/providers/ToastProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import { cn } from '@/lib/utils';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Download } from 'lucide-react';
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const OUTPUT_SIZE = 1024; // px (square)
@@ -189,6 +189,30 @@ export default function AvatarUploadSection({
     onPickFile();
   };
 
+  const handleDownload = useCallback(async () => {
+    if (!avatarUrl) return;
+    try {
+      const res = await fetch(avatarUrl, { mode: 'cors' });
+      if (!res.ok) throw new Error('fetch_failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const ext = blob.type.includes('png') ? 'png' : 'jpg';
+      const name = [firstName, lastName].filter(Boolean).join('-').replace(/\s+/g, '-') || 'profile';
+      const filename = `avatar-${name}.${ext}`.toLowerCase();
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(t('avatarDownloadSuccess'));
+    } catch {
+      toast.error(t('avatarDownloadErrorTitle'), t('avatarDownloadError'));
+    }
+  }, [avatarUrl, firstName, lastName, t, toast]);
+
   return (
     <div
       className={cn(
@@ -313,7 +337,11 @@ export default function AvatarUploadSection({
               <Image src={avatarUrl} alt={t('avatarTitle')} fill className="object-cover" sizes="400px" unoptimized />
             </div>
           )}
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Button type="button" variant="outline" onClick={handleDownload} disabled={isBusy}>
+              <Download className="h-4 w-4" />
+              {t('avatarDownload')}
+            </Button>
             <Button type="button" variant="outline" onClick={handleEditFromPreview} disabled={isBusy}>
               <Pencil className="h-4 w-4" />
               {t('avatarEdit')}
