@@ -229,7 +229,8 @@
     "help": "עזרה",
     "support": "תמיכה",
     "team": "צוות",
-    "calendar": "יומן"
+    "calendar": "יומן",
+    "settingsAvatarRequired": "תמונת פרופיל נדרשת"
   },
   "dashboard": {
     "title": "לוח בקרה",
@@ -382,6 +383,13 @@
     "avatarUploadProcessingHint": "יוצרים אווטאר… זה עשוי לקחת כמה שניות.",
     "avatarUploadErrorTitle": "העלאה נכשלה",
     "avatarUploadError": "לא ניתן להעלות את התמונה. נסו שוב.",
+    "avatarImproving": "משפרים את התמונה…",
+    "avatarMissingNotice": "הוסיפו תמונת פרופיל כדי להופיע בפני המטופלים.",
+    "avatarViewFull": "צפייה בגודל מלא",
+    "avatarEdit": "עריכת תמונה",
+    "avatarDelete": "מחיקת תמונה",
+    "avatarDeleteConfirm": "האם ברצונכם למחוק את תמונת הפרופיל?",
+    "avatarDeletedSuccess": "התמונה נמחקה",
     "about": "אודות",
     "languages": "שפות",
     "languagesPlaceholder": "Français, English, עברית",

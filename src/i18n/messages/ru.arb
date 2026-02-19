@@ -228,7 +228,8 @@
     "help": "Помощь",
     "support": "Поддержка",
     "team": "Команда",
-    "calendar": "Календарь"
+    "calendar": "Календарь",
+    "settingsAvatarRequired": "Требуется фото профиля"
   },
   "dashboard": {
     "title": "Панель управления",
@@ -381,6 +382,13 @@
     "avatarUploadProcessingHint": "Генерируем аватар… это может занять несколько секунд.",
     "avatarUploadErrorTitle": "Ошибка загрузки",
     "avatarUploadError": "Не удалось загрузить фото. Попробуйте ещё раз.",
+    "avatarImproving": "Улучшение изображения…",
+    "avatarMissingNotice": "Добавьте фото профиля, чтобы отображаться перед пациентами.",
+    "avatarViewFull": "Просмотр в полном размере",
+    "avatarEdit": "Изменить фото",
+    "avatarDelete": "Удалить фото",
+    "avatarDeleteConfirm": "Удалить фото профиля?",
+    "avatarDeletedSuccess": "Фото удалено",
     "about": "О себе",
     "languages": "Языки",
     "languagesPlaceholder": "Французский, английский, иврит",

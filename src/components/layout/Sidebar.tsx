@@ -48,6 +48,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     icon: typeof LayoutDashboard;
     label: string;
     exact?: boolean;
+    badge?: boolean;
   };
 
   // Build main links based on role
@@ -73,7 +74,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       links.push({ href: '/reviews', icon: Star, label: t('reviews') });
     }
 
-    links.push({ href: '/settings', icon: Settings, label: t('settings') });
+    links.push({
+      href: '/settings',
+      icon: Settings,
+      label: t('settings'),
+      badge: !isSecretary && !profile?.avatar_url,
+    });
 
     // Billing is not for secretaries (clinic pays)
     if (!isSecretary) {
@@ -154,7 +160,15 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             )}
             title={collapsed ? link.label : undefined}
           >
-            <link.icon className="h-5 w-5 shrink-0" />
+            <span className="relative">
+              <link.icon className="h-5 w-5 shrink-0" />
+              {link.badge && (
+                <span
+                  className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-white"
+                  aria-label={t('settingsAvatarRequired')}
+                />
+              )}
+            </span>
             {!collapsed && <span className="truncate">{link.label}</span>}
           </Link>
         ))}

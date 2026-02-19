@@ -66,7 +66,19 @@ export function useUploadProfileAvatar() {
       return data;
     },
     onSuccess: () => {
-      // Some screens may rely on a React Query "profile" key (even if AuthProvider also keeps its own copy).
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+  });
+}
+
+// Delete profile avatar (backend: DELETE /crm/profile/avatar)
+export function useDeleteProfileAvatar() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      await api.delete('/crm/profile/avatar');
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
   });

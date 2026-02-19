@@ -229,7 +229,8 @@
     "help": "Aide",
     "support": "Support",
     "team": "Équipe",
-    "calendar": "Calendrier"
+    "calendar": "Calendrier",
+    "settingsAvatarRequired": "Photo de profil requise"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -410,6 +411,13 @@
     "avatarUploadProcessingHint": "Génération de l'avatar en cours… cela peut prendre quelques secondes.",
     "avatarUploadErrorTitle": "Échec de l'envoi",
     "avatarUploadError": "Impossible d'envoyer la photo. Réessayez.",
+    "avatarImproving": "Amélioration de l'image en cours…",
+    "avatarMissingNotice": "Ajoutez votre photo de profil pour apparaître auprès de vos patients.",
+    "avatarViewFull": "Voir en grand",
+    "avatarEdit": "Modifier la photo",
+    "avatarDelete": "Supprimer la photo",
+    "avatarDeleteConfirm": "Voulez-vous supprimer votre photo de profil ?",
+    "avatarDeletedSuccess": "Photo supprimée",
     "about": "À propos",
     "languages": "Langues parlées",
     "languagesPlaceholder": "Français, English, עברית",
