@@ -109,6 +109,7 @@
     "signupMinimalSubtitle": "צור/י חשבון בשניות. לאחר מכן נבקש פרטים מקצועיים.",
     "completeProfileTitle": "השלמת פרופיל",
     "completeProfileSubtitle": "הפרטים האלה נדרשים כדי להפעיל את החשבון.",
+    "completeProfileMissingFields": "נא למלא את השדות הבאים:",
     "saveAndContinue": "שמירה והמשך"
   },
   "subscription": {

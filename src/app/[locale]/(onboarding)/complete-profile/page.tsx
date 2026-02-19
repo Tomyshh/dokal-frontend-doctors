@@ -13,7 +13,7 @@ import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { CityCombobox } from '@/components/auth/CityCombobox';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
 import { Spinner } from '@/components/ui/Spinner';
-import { getMyPractitionerOrNull, isPractitionerProfileComplete, unwrapPractitioner } from '@/lib/practitioner';
+import { getMyPractitionerOrNull, isPractitionerCompleteFromBackend, unwrapPractitioner } from '@/lib/practitioner';
 import { isRtl } from '@/i18n/config';
 import { LogOut } from 'lucide-react';
 
@@ -54,6 +54,7 @@ export default function CompleteProfilePage() {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
 
   // Resolve email and user ID: prefer backend profile, fall back to Supabase user (Google OAuth)
   const resolvedEmail = profile?.email || user?.email || null;
@@ -80,6 +81,7 @@ export default function CompleteProfilePage() {
         const data = await getMyPractitionerOrNull();
         if (!data) return;
         if (cancelled) return;
+        setMissingFields(data.missing_fields ?? []);
         const dataObj = data as unknown as Record<string, unknown>;
         const specialtyId =
           (dataObj.specialty_id as string) ||
@@ -106,6 +108,18 @@ export default function CompleteProfilePage() {
       cancelled = true;
     };
   }, [user]);
+
+  const missingFieldLabels: Record<string, string> = {
+    first_name: t('firstName'),
+    last_name: t('lastName'),
+    email: t('email'),
+    phone: t('phone'),
+    city: t('city'),
+    address_line: t('addressLine'),
+    zip_code: t('zipCode'),
+    specialty_id: t('specialty'),
+    license_number: t('licenseNumber'),
+  };
 
   const phoneInvalid = useMemo(() => {
     if (form.phone.length === 0) return false;
@@ -135,7 +149,7 @@ export default function CompleteProfilePage() {
       while (Date.now() - started < 25_000) {
         try {
           const data = await getMyPractitionerOrNull();
-          if (isPractitionerProfileComplete(data)) return true;
+          if (isPractitionerCompleteFromBackend(data)) return true;
         } catch {
           // not ready yet
         }
@@ -199,7 +213,7 @@ export default function CompleteProfilePage() {
       await refreshUserData();
 
       // If the 201 response already has complete data, navigate immediately.
-      if (isPractitionerProfileComplete(registered)) {
+      if (registered?.is_complete === true) {
         window.location.assign(`/${locale}/subscription`);
         return;
       }
@@ -258,6 +272,15 @@ export default function CompleteProfilePage() {
         <h1 className="text-2xl font-bold text-gray-900">{t('completeProfileTitle')}</h1>
         <p className="text-sm text-muted-foreground mt-2">{t('completeProfileSubtitle')}</p>
       </div>
+
+      {missingFields.length > 0 && (
+        <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800 mb-6">
+          <p className="font-medium mb-1">{t('completeProfileMissingFields')}</p>
+          <p className="text-amber-700">
+            {missingFields.map((f) => missingFieldLabels[f] ?? f).join(', ')}
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 mb-6">

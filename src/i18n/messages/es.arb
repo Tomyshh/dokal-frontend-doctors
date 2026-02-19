@@ -103,6 +103,7 @@
     "signupMinimalSubtitle": "Create your account in seconds. We'll ask for professional details next.",
     "completeProfileTitle": "Complete your profile",
     "completeProfileSubtitle": "These details are required to activate your account.",
+    "completeProfileMissingFields": "Por favor, complete los siguientes campos:",
     "saveAndContinue": "Save and continue"
   },
   "subscription": {

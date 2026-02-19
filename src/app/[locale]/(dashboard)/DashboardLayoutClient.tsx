@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation';
 import { Clock, X } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useQuery } from '@tanstack/react-query';
-import { getMyPractitionerOrNull, isPractitionerProfileComplete } from '@/lib/practitioner';
+import { getMyPractitionerOrNull, isPractitionerCompleteFromBackend } from '@/lib/practitioner';
 
 export default function DashboardLayoutClient({ children }: { children: ReactNode }) {
   const { loading, user, profile, subscriptionStatus, signOut } = useAuth();
@@ -52,7 +52,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
     // Avoid redirect loops on transient API/network errors.
     if (practitionerError) return false;
     if (!practitioner) return true;
-    return !isPractitionerProfileComplete(practitioner);
+    return !isPractitionerCompleteFromBackend(practitioner);
   })();
 
   // Redirect to onboarding if we know for sure the user has no access

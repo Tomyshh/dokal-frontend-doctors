@@ -125,6 +125,10 @@ export interface Practitioner {
   address_line: string | null;
   zip_code: string | null;
   city: string | null;
+  /** From GET /practitioners/me only: true if profile is complete, false otherwise */
+  is_complete?: boolean;
+  /** From GET /practitioners/me only: list of required fields not filled when is_complete is false */
+  missing_fields?: string[];
   latitude: number | null;
   longitude: number | null;
   about: string | null;

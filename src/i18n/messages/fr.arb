@@ -109,6 +109,7 @@
     "signupMinimalSubtitle": "Créez votre compte en quelques secondes. Nous demanderons les informations professionnelles ensuite.",
     "completeProfileTitle": "Complétez votre profil",
     "completeProfileSubtitle": "Ces informations sont indispensables pour activer votre compte.",
+    "completeProfileMissingFields": "Veuillez renseigner les champs suivants :",
     "saveAndContinue": "Enregistrer et continuer"
   },
   "subscription": {

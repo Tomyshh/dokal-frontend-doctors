@@ -109,6 +109,7 @@
     "signupMinimalSubtitle": "Создайте аккаунт за секунды. Профессиональные данные заполним далее.",
     "completeProfileTitle": "Заполните профиль",
     "completeProfileSubtitle": "Эти данные необходимы для активации аккаунта.",
+    "completeProfileMissingFields": "Пожалуйста, заполните следующие поля:",
     "saveAndContinue": "Сохранить и продолжить"
   },
   "subscription": {

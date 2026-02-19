@@ -35,7 +35,7 @@ import type { Practitioner } from '@/types';
 import { useRouter } from 'next/navigation';
 import { Spinner } from '@/components/ui/Spinner';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
-import { getMyPractitionerOrNull, isPractitionerProfileComplete } from '@/lib/practitioner';
+import { getMyPractitionerOrNull, isPractitionerCompleteFromBackend } from '@/lib/practitioner';
 
 type CardForm = {
   cardNumber: string;
@@ -305,7 +305,7 @@ export default function OnboardingSubscriptionPage() {
     // do not bounce back to the form. We'll show an error state with retry instead.
     if (practitionerError) return false;
     if (!practitioner) return true;
-    return !isPractitionerProfileComplete(practitioner);
+    return !isPractitionerCompleteFromBackend(practitioner);
   })();
 
   const [waitingForProfile, setWaitingForProfile] = useState(false);
@@ -364,7 +364,7 @@ export default function OnboardingSubscriptionPage() {
       try {
         const res = await refetchPractitioner();
         const next = res.data;
-        if (isPractitionerProfileComplete(next)) {
+        if (isPractitionerCompleteFromBackend(next)) {
           if (!cancelled) setWaitingForProfile(false);
           return;
         }
