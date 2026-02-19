@@ -71,58 +71,48 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   // ─── Helpers ─────────────────────────────────────────────────────
 
   const fetchUserData = useCallback(async () => {
-    const results = await Promise.allSettled([
-      api.get<Profile>('/profile'),
-      getSubscriptionStatus(),
-    ]);
-
+    // CRM app = practitioners only. GET /profile is for patients (requirePatient) → 403.
+    // Use GET /practitioners/me first to avoid 403.
     let profileData: Profile | null = null;
-    const profileError = results[0].status === 'rejected' ? results[0].reason as { response?: { status?: number } } : null;
-    const status = profileError?.response?.status;
 
-    if (results[0].status === 'fulfilled') {
-      profileData = results[0].value.data;
-    } else if (status === 403) {
-      // GET /profile is for patients only (requirePatient). Practitioners must use GET /practitioners/me.
-      try {
-        const practitioner = await getMyPractitionerOrNull();
-        const supabase = createClient();
-        const { data: { session: sess } } = await supabase.auth.getSession();
-        const user = sess?.user;
-        if (practitioner && user) {
-          profileData = {
-            id: user.id,
-            first_name: practitioner.profiles?.first_name ?? null,
-            last_name: practitioner.profiles?.last_name ?? null,
-            email: practitioner.email ?? user.email ?? null,
-            phone: practitioner.phone ?? null,
-            date_of_birth: null,
-            sex: null,
-            city: practitioner.city ?? null,
-            avatar_url: practitioner.profiles?.avatar_url ?? null,
-            role: 'practitioner',
-            created_at: practitioner.created_at ?? '',
-            updated_at: practitioner.updated_at ?? '',
-          };
-        }
-      } catch {
-        // practitioners/me failed — profile stays null
+    try {
+      const practitioner = await getMyPractitionerOrNull();
+      const supabase = createClient();
+      const { data: { session: sess } } = await supabase.auth.getSession();
+      const user = sess?.user;
+
+      if (practitioner && user) {
+        profileData = {
+          id: user.id,
+          first_name: practitioner.profiles?.first_name ?? null,
+          last_name: practitioner.profiles?.last_name ?? null,
+          email: practitioner.email ?? user.email ?? null,
+          phone: practitioner.phone ?? null,
+          date_of_birth: null,
+          sex: null,
+          city: practitioner.city ?? null,
+          avatar_url: practitioner.profiles?.avatar_url ?? null,
+          role: 'practitioner',
+          created_at: practitioner.created_at ?? '',
+          updated_at: practitioner.updated_at ?? '',
+        };
       }
-    } else if (status === 404) {
-      // Profile doesn't exist yet — try bootstrap (Google OAuth users).
+    } catch {
+      // 404 or error — try bootstrap for new practitioners (Google OAuth)
       try {
         const bootstrapRes = await api.post<Profile>('/crm/auth/bootstrap');
         profileData = bootstrapRes.data;
       } catch {
-        // Bootstrap failed — profile stays null, onboarding flow will handle it.
+        // Bootstrap failed — profile stays null
       }
     }
 
     setProfile(profileData);
 
-    if (results[1].status === 'fulfilled') {
-      setSubscriptionStatus(results[1].value);
-    } else {
+    try {
+      const status = await getSubscriptionStatus();
+      setSubscriptionStatus(status);
+    } catch {
       setSubscriptionStatus(null);
     }
   }, []);
