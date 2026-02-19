@@ -14,6 +14,7 @@ import { Switch } from '@/components/ui/Switch';
 import {
   CheckCircle2,
   Building2,
+  Sparkles,
 } from 'lucide-react';
 import { useCrmOrganization, useUpdateOrganization } from '@/hooks/useOrganization';
 import { useQuery } from '@tanstack/react-query';
@@ -23,6 +24,9 @@ import { usePathname, useRouter } from '@/i18n/routing';
 import { getMyPractitionerOrNull } from '@/lib/practitioner';
 import GoogleCalendarSection from '@/components/settings/GoogleCalendarSection';
 import AvatarUploadSection from '@/components/settings/AvatarUploadSection';
+import { LanguagesCombobox } from '@/components/settings/LanguagesCombobox';
+import { useGenerateAboutWithAI, useGenerateEducationWithAI } from '@/hooks/useSettings';
+import { useToast } from '@/providers/ToastProvider';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
@@ -31,11 +35,14 @@ export default function SettingsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { profile } = useAuth();
+  const toast = useToast();
   const { data: settings, isLoading: loadingSettings } = useSettings();
   const updateSettings = useUpdateSettings();
   const updateProfile = useUpdatePractitionerProfile();
   const { data: organization, isLoading: loadingOrganization } = useCrmOrganization();
   const updateOrganization = useUpdateOrganization();
+  const generateAbout = useGenerateAboutWithAI();
+  const generateEducation = useGenerateEducationWithAI();
   const [saved, setSaved] = useState(false);
 
   // Organization form state
@@ -57,7 +64,7 @@ export default function SettingsPage() {
   // Form state
   const [about, setAbout] = useState('');
   const [education, setEducation] = useState('');
-  const [languages, setLanguages] = useState('');
+  const [languages, setLanguages] = useState<string[]>([]);
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [addressLine, setAddressLine] = useState('');
@@ -72,7 +79,7 @@ export default function SettingsPage() {
     if (practitioner) {
       setAbout(practitioner.about || '');
       setEducation(practitioner.education || '');
-      setLanguages(practitioner.languages?.join(', ') || '');
+      setLanguages(practitioner.languages ?? []);
       setPhone(practitioner.phone || '');
       setEmail(practitioner.email || '');
       setAddressLine(practitioner.address_line || '');
@@ -103,7 +110,7 @@ export default function SettingsPage() {
     await updateProfile.mutateAsync({
       about: about || null,
       education: education || null,
-      languages: languages ? languages.split(',').map((l) => l.trim()) : null,
+      languages: languages.length > 0 ? languages : null,
       phone: phone || null,
       email: email || null,
       address_line: addressLine || null,
@@ -142,6 +149,26 @@ export default function SettingsPage() {
 
   const switchLocale = (newLocale: Locale) => {
     router.replace(pathname, { locale: newLocale });
+  };
+
+  const handleImproveAbout = async () => {
+    try {
+      const generated = await generateAbout.mutateAsync(about || undefined);
+      setAbout(generated);
+      toast.success(t('aiImproveSuccess'));
+    } catch {
+      toast.error(t('aiImproveErrorTitle'), t('aiImproveError'));
+    }
+  };
+
+  const handleImproveEducation = async () => {
+    try {
+      const generated = await generateEducation.mutateAsync(education || undefined);
+      setEducation(generated);
+      toast.success(t('aiImproveSuccess'));
+    } catch {
+      toast.error(t('aiImproveErrorTitle'), t('aiImproveError'));
+    }
   };
 
   if (loadingPractitioner || loadingSettings || loadingOrganization) {
@@ -207,7 +234,7 @@ export default function SettingsPage() {
                 }))}
               />
               <p className="text-xs text-muted-foreground">
-                {t('languagesPlaceholder')}
+                {t('interfaceLanguageHint')}
               </p>
             </div>
           </Card>
@@ -264,12 +291,54 @@ export default function SettingsPage() {
               <div className="h-px bg-border/50" />
 
               <div className="grid grid-cols-1 gap-4">
-                <Textarea label={t('about')} value={about} onChange={(e) => setAbout(e.target.value)} rows={4} />
-                <Input label={t('education')} value={education} onChange={(e) => setEducation(e.target.value)} />
-                <Input
+                <div className="space-y-2">
+                  <Textarea
+                    label={t('about')}
+                    value={about}
+                    onChange={(e) => setAbout(e.target.value)}
+                    rows={4}
+                    placeholder={t('aboutHint')}
+                  />
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleImproveAbout}
+                      loading={generateAbout.isPending}
+                      disabled={generateAbout.isPending}
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      {t('aiImprove')}
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Input
+                    label={t('education')}
+                    value={education}
+                    onChange={(e) => setEducation(e.target.value)}
+                    placeholder={t('educationHint')}
+                  />
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleImproveEducation}
+                      loading={generateEducation.isPending}
+                      disabled={generateEducation.isPending}
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      {t('aiImprove')}
+                    </Button>
+                  </div>
+                </div>
+                <LanguagesCombobox
+                  id="languages"
                   label={t('languages')}
                   value={languages}
-                  onChange={(e) => setLanguages(e.target.value)}
+                  onChange={setLanguages}
                   placeholder={t('languagesPlaceholder')}
                 />
               </div>

@@ -71,6 +71,30 @@ export function useUploadProfileAvatar() {
   });
 }
 
+// AI: Improve About (backend: POST /crm/profile/about/improve)
+export function useGenerateAboutWithAI() {
+  return useMutation({
+    mutationFn: async (currentText?: string) => {
+      const { data } = await api.post<{ generated: string }>('/crm/profile/about/improve', {
+        current_text: currentText || null,
+      });
+      return data.generated;
+    },
+  });
+}
+
+// AI: Improve Education (backend: POST /crm/profile/education/improve)
+export function useGenerateEducationWithAI() {
+  return useMutation({
+    mutationFn: async (currentText?: string) => {
+      const { data } = await api.post<{ generated: string }>('/crm/profile/education/improve', {
+        current_text: currentText || null,
+      });
+      return data.generated;
+    },
+  });
+}
+
 // Delete profile avatar (backend: DELETE /crm/profile/avatar)
 export function useDeleteProfileAvatar() {
   const queryClient = useQueryClient();
