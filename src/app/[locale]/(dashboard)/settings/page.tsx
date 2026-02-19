@@ -22,6 +22,7 @@ import { localeNames, type Locale } from '@/i18n/config';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { getMyPractitionerOrNull } from '@/lib/practitioner';
 import GoogleCalendarSection from '@/components/settings/GoogleCalendarSection';
+import AvatarUploadSection from '@/components/settings/AvatarUploadSection';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
@@ -255,6 +256,13 @@ export default function SettingsPage() {
               <CardTitle>{t('profile')}</CardTitle>
             </CardHeader>
             <div className="space-y-5">
+              <AvatarUploadSection
+                avatarUrl={profile?.avatar_url}
+                firstName={profile?.first_name}
+                lastName={profile?.last_name}
+              />
+              <div className="h-px bg-border/50" />
+
               <div className="grid grid-cols-1 gap-4">
                 <Textarea label={t('about')} value={about} onChange={(e) => setAbout(e.target.value)} rows={4} />
                 <Input label={t('education')} value={education} onChange={(e) => setEducation(e.target.value)} />

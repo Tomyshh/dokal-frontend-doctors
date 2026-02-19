@@ -50,6 +50,28 @@ export function useUpdatePractitionerProfile() {
   });
 }
 
+// Profile Avatar (multipart)
+export function useUploadProfileAvatar() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const form = new FormData();
+      form.append('avatar', file, file.name);
+      const { data } = await api.post('/crm/profile/avatar', form, {
+        headers: {
+          // Override api default JSON header; let the browser set the boundary.
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return data;
+    },
+    onSuccess: () => {
+      // Some screens may rely on a React Query "profile" key (even if AuthProvider also keeps its own copy).
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+  });
+}
+
 // Reasons
 export function useReasons() {
   return useQuery({
