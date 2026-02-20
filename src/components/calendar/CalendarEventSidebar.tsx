@@ -47,13 +47,40 @@ export default function CalendarEventSidebar({
   const { profile } = useAuth();
   const isOrgActor = profile?.role === 'secretary' || profile?.role === 'admin';
 
+  // Tous les hooks doivent être appelés inconditionnellement (règles des hooks React)
+  const deleteExternalMutation = useDeleteExternalEvent();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const updateMutation = useUpdateCrmAppointment();
+  const updateOrgMutation = useUpdateCrmOrganizationAppointment();
+  const updateMetaMutation = isOrgActor ? updateOrgMutation : updateMutation;
+  const [metaEditMode, setMetaEditMode] = useState(false);
+  const [extTitle, setExtTitle] = useState<string>('');
+  const [extDesc, setExtDesc] = useState<string>('');
+  const [extLoc, setExtLoc] = useState<string>('');
+  const [notes, setNotes] = useState<string>('');
+
+  const appointment = item?.kind === 'crm_appointment' ? item.data : null;
+  const missingFields = appointment?.patient_missing_fields || [];
+  const hasMissingInfo = appointment?.patient_info_missing === true;
+  const missingFieldsLabel = useMemo(() => {
+    if (!hasMissingInfo || missingFields.length === 0) return '';
+    return missingFields.map((f) => formatMissingFieldLabel(t, f)).join(', ');
+  }, [hasMissingInfo, missingFields, t]);
+
+  useEffect(() => {
+    if (!appointment) return;
+    setMetaEditMode(false);
+    setExtTitle(appointment.external_title || '');
+    setExtDesc(appointment.external_description || '');
+    setExtLoc(appointment.external_location || '');
+    setNotes(appointment.practitioner_notes || '');
+  }, [appointment?.id]);
+
   if (!item) return null;
 
   const colors = getItemColors(item);
   const startTime = getItemStartTime(item);
   const endTime = getItemEndTime(item);
-  const deleteExternalMutation = useDeleteExternalEvent();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // ─── External event sidebar ──────────────────────────────────────────
   if (item.kind === 'external_event') {
@@ -191,8 +218,7 @@ export default function CalendarEventSidebar({
   }
 
   // ─── CRM appointment sidebar ─────────────────────────────────────────
-  const appointment = item.data;
-
+  if (!appointment) return null;
   const patientName = getCrmAppointmentPatientDisplayName(appointment);
   const patientPhone = getCrmAppointmentPatientPhone(appointment);
   const patientRecordId = getCrmAppointmentPatientRecordId(appointment);
@@ -210,30 +236,6 @@ export default function CalendarEventSidebar({
         ? appointment.appointment_reasons?.label_fr ||
           appointment.appointment_reasons?.label
         : appointment.appointment_reasons?.label;
-
-  const missingFields = appointment.patient_missing_fields || [];
-  const hasMissingInfo = appointment.patient_info_missing === true;
-  const missingFieldsLabel = useMemo(() => {
-    if (!hasMissingInfo || missingFields.length === 0) return '';
-    return missingFields.map((f) => formatMissingFieldLabel(t, f)).join(', ');
-  }, [hasMissingInfo, missingFields, t]);
-
-  const updateMutation = useUpdateCrmAppointment();
-  const updateOrgMutation = useUpdateCrmOrganizationAppointment();
-  const updateMetaMutation = isOrgActor ? updateOrgMutation : updateMutation;
-  const [metaEditMode, setMetaEditMode] = useState(false);
-  const [extTitle, setExtTitle] = useState<string>('');
-  const [extDesc, setExtDesc] = useState<string>('');
-  const [extLoc, setExtLoc] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
-
-  useEffect(() => {
-    setMetaEditMode(false);
-    setExtTitle(appointment.external_title || '');
-    setExtDesc(appointment.external_description || '');
-    setExtLoc(appointment.external_location || '');
-    setNotes(appointment.practitioner_notes || '');
-  }, [appointment.id]);
 
   return (
     <div className="fixed inset-y-0 right-0 z-30 w-full sm:w-[380px] bg-white border-l border-border shadow-xl flex flex-col transition-transform duration-200">
