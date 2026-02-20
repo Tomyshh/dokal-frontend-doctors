@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import { useTranslations, useLocale } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
+import { usePractitionerProfile } from '@/providers/PractitionerProfileProvider';
 import { useCrmOrganization } from '@/hooks/useOrganization';
 import { Avatar } from '@/components/ui/Avatar';
 import { cn } from '@/lib/utils';
@@ -37,8 +38,15 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const locale = useLocale();
   const { profile, signOut } = useAuth();
   const { data: organization } = useCrmOrganization();
+  const practitionerProfile = usePractitionerProfile();
 
   const isSecretary = profile?.role === 'secretary';
+  const showSettingsBadge = Boolean(
+    !isSecretary &&
+      practitionerProfile &&
+      !practitionerProfile.isLoading &&
+      practitionerProfile.completionPercent < 100
+  );
 
   const pathnameWithoutLocale =
     pathname.startsWith(`/${locale}`) ? pathname.slice(`/${locale}`.length) || '/' : pathname;
@@ -78,7 +86,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       href: '/settings',
       icon: Settings,
       label: t('settings'),
-      badge: !isSecretary && !profile?.avatar_url,
+      badge: showSettingsBadge,
     });
 
     // Billing is not for secretaries (clinic pays)
@@ -164,9 +172,16 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <link.icon className="h-5 w-5 shrink-0" />
               {link.badge && (
                 <span
-                  className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-white"
-                  aria-label={t('settingsAvatarRequired')}
-                />
+                  className={cn(
+                    'absolute -top-0.5 -right-0.5 rounded-full bg-amber-500 ring-2 ring-white',
+                    collapsed
+                      ? 'h-2.5 w-2.5'
+                      : 'flex h-5 min-w-5 items-center justify-center px-1 text-[10px] font-bold text-white'
+                  )}
+                  aria-label={t('profileIncompleteBadge')}
+                >
+                  {!collapsed && `${practitionerProfile?.completionPercent ?? 0}%`}
+                </span>
               )}
             </span>
             {!collapsed && <span className="truncate">{link.label}</span>}

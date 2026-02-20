@@ -21,7 +21,9 @@ import { useQuery } from '@tanstack/react-query';
 import { Select } from '@/components/ui/Select';
 import { localeNames, type Locale } from '@/i18n/config';
 import { usePathname, useRouter } from '@/i18n/routing';
-import { getMyPractitionerOrNull, computeProfileCompletionPercent } from '@/lib/practitioner';
+import { getMyPractitionerOrNull } from '@/lib/practitioner';
+import { usePractitionerProfile } from '@/providers/PractitionerProfileProvider';
+import ProfileCompletionCard from '@/components/settings/ProfileCompletionCard';
 import GoogleCalendarSection from '@/components/settings/GoogleCalendarSection';
 import AvatarUploadSection from '@/components/settings/AvatarUploadSection';
 import { LanguagesCombobox } from '@/components/settings/LanguagesCombobox';
@@ -36,6 +38,7 @@ export default function SettingsPage() {
   const pathname = usePathname();
   const { profile } = useAuth();
   const toast = useToast();
+  const practitionerProfile = usePractitionerProfile();
   const { data: settings, isLoading: loadingSettings } = useSettings();
   const updateSettings = useUpdateSettings();
   const updateProfile = useUpdatePractitionerProfile();
@@ -200,6 +203,11 @@ export default function SettingsPage() {
     }
   };
 
+  const scrollToSection = (section: 'avatar' | 'about' | 'contact' | 'address' | 'pricing') => {
+    const el = document.getElementById(`profile-section-${section}`);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const handleImproveEducation = async () => {
     try {
       const generated = await generateEducation.mutateAsync(education || undefined);
@@ -322,35 +330,24 @@ export default function SettingsPage() {
               <CardTitle>{t('profile')}</CardTitle>
             </CardHeader>
             <div className="space-y-5">
-              {/* Profile completion progress */}
-              {practitioner && (
-                <div className="rounded-lg border border-border/50 bg-muted/30 p-4 space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-gray-700">{t('profileCompletion')}</span>
-                    <span className="font-semibold text-primary">
-                      {t('profileCompletionPercent', {
-                        percent: computeProfileCompletionPercent(practitioner, profile ?? undefined),
-                      })}
-                    </span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                    <div
-                      className="h-full bg-primary transition-all duration-300 rounded-full"
-                      style={{
-                        width: `${computeProfileCompletionPercent(practitioner, profile ?? undefined)}%`,
-                      }}
-                    />
-                  </div>
-                </div>
+              {/* Profile completion - modern circular progress + checklist */}
+              {practitionerProfile && (
+                <ProfileCompletionCard
+                  completionPercent={practitionerProfile.completionPercent}
+                  completionItems={practitionerProfile.completionItems}
+                  onScrollToSection={scrollToSection}
+                />
               )}
-              <AvatarUploadSection
+              <div id="profile-section-avatar">
+                <AvatarUploadSection
                 avatarUrl={profile?.avatar_url}
                 firstName={profile?.first_name}
                 lastName={profile?.last_name}
               />
+              </div>
               <div className="h-px bg-border/50" />
 
-              <div className="grid grid-cols-1 gap-4">
+              <div id="profile-section-about" className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
                   <Textarea
                     label={t('about')}
@@ -403,12 +400,23 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div id="profile-section-contact" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label={tc('phone')} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
                 <Input label={tc('email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
 
-              <div className="space-y-3">
+              <div id="profile-section-address" className="pt-1">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('address')}</h3>
+                <div className="space-y-3">
+                  <Input label={t('addressLine')} value={addressLine} onChange={(e) => setAddressLine(e.target.value)} />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input label={t('zipCode')} value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
+                    <Input label={t('city')} value={city} onChange={(e) => setCity(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+
+              <div id="profile-section-pricing" className="space-y-3">
                 <h3 className="text-sm font-semibold text-gray-700">{t('priceRange')}</h3>
                 <p className="text-xs text-muted-foreground">{t('priceRangeHint')}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -430,17 +438,6 @@ export default function SettingsPage() {
                     onChange={(e) => setPriceMaxShekels(e.target.value)}
                     placeholder="300"
                   />
-                </div>
-              </div>
-
-              <div className="pt-1">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('address')}</h3>
-                <div className="space-y-3">
-                  <Input label={t('addressLine')} value={addressLine} onChange={(e) => setAddressLine(e.target.value)} />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input label={t('zipCode')} value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
-                    <Input label={t('city')} value={city} onChange={(e) => setCity(e.target.value)} />
-                  </div>
                 </div>
               </div>
 

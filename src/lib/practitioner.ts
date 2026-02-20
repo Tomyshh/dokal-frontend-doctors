@@ -79,3 +79,33 @@ export function computeProfileCompletionPercent(
   return Math.round((filled / PROFILE_COMPLETION_FIELDS.length) * 100);
 }
 
+export type ProfileCompletionItem = {
+  key: string;
+  completed: boolean;
+  section: 'avatar' | 'about' | 'contact' | 'address' | 'pricing';
+};
+
+/**
+ * Get list of profile completion items with their status for display.
+ */
+export function getProfileCompletionItems(
+  practitioner: Practitioner | null | undefined,
+  profile: Profile | null | undefined
+): ProfileCompletionItem[] {
+  const p = practitioner ?? null;
+  const prof = profile ?? null;
+  return [
+    { key: 'avatar', completed: !!prof?.avatar_url, section: 'avatar' },
+    { key: 'about', completed: !!(p?.about?.trim()), section: 'about' },
+    { key: 'education', completed: !!(p?.education?.trim()), section: 'about' },
+    { key: 'languages', completed: !!(p?.languages?.length), section: 'about' },
+    { key: 'phone', completed: !!(p?.phone?.trim()), section: 'contact' },
+    { key: 'email', completed: !!(p?.email?.trim()), section: 'contact' },
+    { key: 'address_line', completed: !!(p?.address_line?.trim()), section: 'address' },
+    { key: 'zip_code', completed: !!(p?.zip_code?.trim()), section: 'address' },
+    { key: 'city', completed: !!(p?.city?.trim()), section: 'address' },
+    { key: 'price_min', completed: p?.price_min_agorot != null, section: 'pricing' },
+    { key: 'price_max', completed: p?.price_max_agorot != null, section: 'pricing' },
+  ];
+}
+

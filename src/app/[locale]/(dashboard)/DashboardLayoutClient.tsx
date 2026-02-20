@@ -15,7 +15,8 @@ import { useRouter } from 'next/navigation';
 import { Clock, X } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useQuery } from '@tanstack/react-query';
-import { getMyPractitionerOrNull, isPractitionerCompleteFromBackend } from '@/lib/practitioner';
+import { getMyPractitionerOrNull } from '@/lib/practitioner';
+import { PractitionerProfileProvider } from '@/providers/PractitionerProfileProvider';
 
 export default function DashboardLayoutClient({ children }: { children: ReactNode }) {
   const { loading, user, profile, subscriptionStatus, signOut } = useAuth();
@@ -35,9 +36,8 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
   const {
     data: practitioner,
     isLoading: loadingPractitioner,
-    isError: practitionerError,
   } = useQuery({
-    queryKey: ['practitioner', 'me', profile?.id],
+    queryKey: ['practitioner-profile'],
     queryFn: async () => {
       return await getMyPractitionerOrNull();
     },
@@ -45,36 +45,17 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
     retry: 1,
   });
 
-  const needsProfileCompletion = (() => {
-    if (!profile) return false;
-    if (profile.role !== 'practitioner' && profile.role !== 'admin') return false;
-    if (loadingPractitioner) return false;
-    // Avoid redirect loops on transient API/network errors.
-    if (practitionerError) return false;
-    if (!practitioner) return true;
-    return !isPractitionerCompleteFromBackend(practitioner);
-  })();
-
-  // Redirect to onboarding if we know for sure the user has no access
-  // Secretaries don't manage their own subscription (the clinic pays)
+  // Redirect to onboarding: only when user has no practitioner profile at all (not yet registered)
+  // No longer redirect when profile is incomplete — user completes via Settings with live progress
   useEffect(() => {
     if (loading) return;
     if (!user) return;
 
     // No profile or not a practitioner/secretary/admin → send to complete-profile
-    // (same flow as Google signup: they can onboard as a practitioner)
     const notPractitioner =
       !profile ||
       (profile.role !== 'practitioner' && profile.role !== 'secretary' && profile.role !== 'admin');
     if (notPractitioner) {
-      router.replace(`/${locale}/complete-profile`);
-      return;
-    }
-
-    // Must complete practitioner details before subscription step
-    // Exception: if user already has an active subscription, they completed their profile
-    // (avoids redirect loop when API returns practitioner without specialty in some edge cases)
-    if (needsProfileCompletion && !hasAccess) {
       router.replace(`/${locale}/complete-profile`);
       return;
     }
@@ -87,7 +68,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
     ) {
       router.replace(`/${locale}/subscription`);
     }
-  }, [loading, user, profile, subscriptionStatus, hasAccess, router, locale, needsProfileCompletion]);
+  }, [loading, user, profile, subscriptionStatus, hasAccess, router, locale]);
 
   // ─── Loading state ─────────────────────────────────────────────────
   if (loading) {
@@ -155,10 +136,15 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
     (subscriptionStatus.trial.daysRemaining ?? 0) <= 14;
 
   return (
-    <SocketProvider>
-      <div className="min-h-screen bg-background">
-        {/* Trial Banner */}
-        {showTrialBanner && subscriptionStatus?.trial && (
+    <PractitionerProfileProvider
+      practitioner={practitioner ?? null}
+      profile={profile ?? null}
+      isLoading={loadingPractitioner}
+    >
+      <SocketProvider>
+        <div className="min-h-screen bg-background">
+          {/* Trial Banner */}
+          {showTrialBanner && subscriptionStatus?.trial && (
           <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2.5 text-sm">
             <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
               <div className="flex items-center gap-2">
@@ -209,6 +195,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
         </div>
       </div>
     </SocketProvider>
+    </PractitionerProfileProvider>
   );
 }
 
