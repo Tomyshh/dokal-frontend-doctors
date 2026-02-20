@@ -10,6 +10,8 @@ import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { localeNames, type Locale } from '@/i18n/config';
 import { useAuth } from '@/providers/AuthProvider';
+import { useUpdateSettings } from '@/hooks/useSettings';
+import { useToast } from '@/providers/ToastProvider';
 import {
   useGoogleCalendarStatus,
   useStartGoogleCalendarConnect,
@@ -27,13 +29,20 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
   const { data: unreadCount } = useUnreadCount();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const { profile, user } = useAuth();
+  const updateSettings = useUpdateSettings();
+  const toast = useToast();
 
   const { data: gcalStatus, isLoading: gcalStatusLoading } = useGoogleCalendarStatus();
   const gcalConnectMutation = useStartGoogleCalendarConnect();
 
-  const switchLocale = (newLocale: Locale) => {
-    router.replace(pathname, { locale: newLocale });
+  const switchLocale = async (newLocale: Locale) => {
     setShowLangMenu(false);
+    try {
+      await updateSettings.mutateAsync({ locale: newLocale });
+    } catch {
+      toast.error(t('saveErrorTitle'), t('saveError'));
+    }
+    router.replace(pathname, { locale: newLocale });
   };
 
   const displayName =
@@ -128,7 +137,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
                 {(Object.entries(localeNames) as [Locale, string][]).map(([loc, name]) => (
                   <button
                     key={loc}
-                    onClick={() => switchLocale(loc)}
+                    onClick={() => void switchLocale(loc)}
                     className={cn(
                       'w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors',
                       loc === locale && 'text-primary font-medium bg-primary-50'

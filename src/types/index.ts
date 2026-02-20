@@ -139,6 +139,8 @@ export interface Practitioner {
   education: string | null;
   years_of_experience: number | null;
   consultation_duration_minutes: number;
+  price_min_agorot?: number | null;
+  price_max_agorot?: number | null;
   is_accepting_new_patients: boolean;
   is_active: boolean;
   created_at: string;

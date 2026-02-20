@@ -1,5 +1,5 @@
 import api from '@/lib/api';
-import type { Practitioner } from '@/types';
+import type { Practitioner, Profile } from '@/types';
 
 function getHttpStatus(err: unknown): number | undefined {
   return (err as { response?: { status?: number } })?.response?.status;
@@ -49,5 +49,33 @@ export async function getMyPractitionerOrNull(): Promise<Practitioner | null> {
 export function isPractitionerCompleteFromBackend(practitioner: Practitioner | null | undefined): boolean {
   if (!practitioner) return false;
   return practitioner.is_complete === true;
+}
+
+/** Fields used to compute profile completion percentage (UX indicator) */
+const PROFILE_COMPLETION_FIELDS = [
+  (p: Practitioner | null, profile: Profile | null) => !!profile?.avatar_url,
+  (p: Practitioner | null) => !!(p?.about?.trim()),
+  (p: Practitioner | null) => !!(p?.education?.trim()),
+  (p: Practitioner | null) => !!(p?.languages?.length),
+  (p: Practitioner | null) => !!(p?.phone?.trim()),
+  (p: Practitioner | null) => !!(p?.email?.trim()),
+  (p: Practitioner | null) => !!(p?.address_line?.trim()),
+  (p: Practitioner | null) => !!(p?.zip_code?.trim()),
+  (p: Practitioner | null) => !!(p?.city?.trim()),
+  (p: Practitioner | null) => p?.price_min_agorot != null,
+  (p: Practitioner | null) => p?.price_max_agorot != null,
+] as const;
+
+/**
+ * Compute profile completion percentage (0-100) for UX display.
+ * Based on avatar, about, education, languages, phone, email, address, zip, city, price range.
+ */
+export function computeProfileCompletionPercent(
+  practitioner: Practitioner | null | undefined,
+  profile: Profile | null | undefined
+): number {
+  if (!practitioner) return 0;
+  const filled = PROFILE_COMPLETION_FIELDS.filter((fn) => fn(practitioner, profile ?? null)).length;
+  return Math.round((filled / PROFILE_COMPLETION_FIELDS.length) * 100);
 }
 

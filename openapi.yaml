@@ -1744,7 +1744,7 @@ paths:
   /api/v1/crm/profile/avatar:
     post:
       tags: [CRM]
-      summary: Upload practitioner avatar (stores source + generates AI doctor avatar)
+      summary: Upload practitioner avatar (Storage + mise à jour profiles.avatar_url)
       requestBody:
         required: true
         content:
@@ -2146,6 +2146,14 @@ components:
           type: array
           items: { type: string }
           description: "Champs manquants pour compléter le profil. Présent uniquement sur GET /me."
+        price_min_agorot:
+          type: integer
+          nullable: true
+          description: "Prix minimum en agorot (1 ILS = 100 agorot)"
+        price_max_agorot:
+          type: integer
+          nullable: true
+          description: "Prix maximum en agorot (1 ILS = 100 agorot)"
 
     CreateAppointmentRequest:
       type: object
@@ -2408,6 +2416,14 @@ components:
         address_line: { type: string, nullable: true }
         zip_code: { type: string, nullable: true }
         city: { type: string, nullable: true }
+        price_min_agorot:
+          type: integer
+          nullable: true
+          description: "Prix minimum en agorot (1 ILS = 100 agorot)"
+        price_max_agorot:
+          type: integer
+          nullable: true
+          description: "Prix maximum en agorot (1 ILS = 100 agorot)"
 
     RegisterPractitionerRequest:
       type: object

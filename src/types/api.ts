@@ -101,6 +101,8 @@ export interface UpdatePractitionerProfileRequest {
   address_line?: string | null;
   zip_code?: string | null;
   city?: string | null;
+  price_min_agorot?: number | null;
+  price_max_agorot?: number | null;
 }
 
 export interface UpdateSettingsRequest {

@@ -21,7 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Select } from '@/components/ui/Select';
 import { localeNames, type Locale } from '@/i18n/config';
 import { usePathname, useRouter } from '@/i18n/routing';
-import { getMyPractitionerOrNull } from '@/lib/practitioner';
+import { getMyPractitionerOrNull, computeProfileCompletionPercent } from '@/lib/practitioner';
 import GoogleCalendarSection from '@/components/settings/GoogleCalendarSection';
 import AvatarUploadSection from '@/components/settings/AvatarUploadSection';
 import { LanguagesCombobox } from '@/components/settings/LanguagesCombobox';
@@ -73,6 +73,8 @@ export default function SettingsPage() {
   const [acceptingPatients, setAcceptingPatients] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
+  const [priceMinShekels, setPriceMinShekels] = useState('');
+  const [priceMaxShekels, setPriceMaxShekels] = useState('');
 
   // Populate form
   useEffect(() => {
@@ -86,6 +88,12 @@ export default function SettingsPage() {
       setZipCode(practitioner.zip_code || '');
       setCity(practitioner.city || '');
       setAcceptingPatients(practitioner.is_accepting_new_patients);
+      setPriceMinShekels(
+        practitioner.price_min_agorot != null ? String(Math.round(practitioner.price_min_agorot / 100)) : ''
+      );
+      setPriceMaxShekels(
+        practitioner.price_max_agorot != null ? String(Math.round(practitioner.price_max_agorot / 100)) : ''
+      );
     }
   }, [practitioner]);
 
@@ -107,6 +115,12 @@ export default function SettingsPage() {
   }, [organization]);
 
   const handleSaveProfile = async () => {
+    const minVal = priceMinShekels.trim() ? Math.round(parseFloat(priceMinShekels) * 100) : null;
+    const maxVal = priceMaxShekels.trim() ? Math.round(parseFloat(priceMaxShekels) * 100) : null;
+    if (minVal != null && maxVal != null && minVal > maxVal) {
+      toast.error(t('priceRangeInvalidTitle'), t('priceRangeInvalid'));
+      return;
+    }
     try {
       await updateProfile.mutateAsync({
         about: about || null,
@@ -118,6 +132,8 @@ export default function SettingsPage() {
         zip_code: zipCode || null,
         city: city || null,
         is_accepting_new_patients: acceptingPatients,
+        price_min_agorot: minVal,
+        price_max_agorot: maxVal,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -165,7 +181,12 @@ export default function SettingsPage() {
     }
   };
 
-  const switchLocale = (newLocale: Locale) => {
+  const switchLocale = async (newLocale: Locale) => {
+    try {
+      await updateSettings.mutateAsync({ locale: newLocale });
+    } catch {
+      toast.error(tc('saveErrorTitle'), tc('saveError'));
+    }
     router.replace(pathname, { locale: newLocale });
   };
 
@@ -245,7 +266,7 @@ export default function SettingsPage() {
                 id="interface-language"
                 label={t('language')}
                 value={locale}
-                onChange={(e) => switchLocale(e.target.value as Locale)}
+                onChange={(e) => void switchLocale(e.target.value as Locale)}
                 options={(Object.entries(localeNames) as [Locale, string][]).map(([value, label]) => ({
                   value,
                   label,
@@ -301,6 +322,27 @@ export default function SettingsPage() {
               <CardTitle>{t('profile')}</CardTitle>
             </CardHeader>
             <div className="space-y-5">
+              {/* Profile completion progress */}
+              {practitioner && (
+                <div className="rounded-lg border border-border/50 bg-muted/30 p-4 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-gray-700">{t('profileCompletion')}</span>
+                    <span className="font-semibold text-primary">
+                      {t('profileCompletionPercent', {
+                        percent: computeProfileCompletionPercent(practitioner, profile ?? undefined),
+                      })}
+                    </span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full bg-primary transition-all duration-300 rounded-full"
+                      style={{
+                        width: `${computeProfileCompletionPercent(practitioner, profile ?? undefined)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
               <AvatarUploadSection
                 avatarUrl={profile?.avatar_url}
                 firstName={profile?.first_name}
@@ -364,6 +406,31 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label={tc('phone')} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
                 <Input label={tc('email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-700">{t('priceRange')}</h3>
+                <p className="text-xs text-muted-foreground">{t('priceRangeHint')}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input
+                    label={t('priceMin')}
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={priceMinShekels}
+                    onChange={(e) => setPriceMinShekels(e.target.value)}
+                    placeholder="150"
+                  />
+                  <Input
+                    label={t('priceMax')}
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={priceMaxShekels}
+                    onChange={(e) => setPriceMaxShekels(e.target.value)}
+                    placeholder="300"
+                  />
+                </div>
               </div>
 
               <div className="pt-1">

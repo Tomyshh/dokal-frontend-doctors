@@ -46,6 +46,7 @@ export function useUpdatePractitionerProfile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['practitioner-profile'] });
     },
   });
 }
