@@ -78,6 +78,7 @@ export default function SettingsPage() {
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [priceMinShekels, setPriceMinShekels] = useState('');
   const [priceMaxShekels, setPriceMaxShekels] = useState('');
+  const [consultationDurationMinutes, setConsultationDurationMinutes] = useState(30);
 
   // Populate form
   useEffect(() => {
@@ -97,6 +98,7 @@ export default function SettingsPage() {
       setPriceMaxShekels(
         practitioner.price_max_agorot != null ? String(Math.round(practitioner.price_max_agorot / 100)) : ''
       );
+      setConsultationDurationMinutes(practitioner.consultation_duration_minutes ?? 30);
     }
   }, [practitioner]);
 
@@ -124,6 +126,11 @@ export default function SettingsPage() {
       toast.error(t('priceRangeInvalidTitle'), t('priceRangeInvalid'));
       return;
     }
+    const duration = consultationDurationMinutes;
+    if (duration < 5 || duration > 240) {
+      toast.error(t('consultationDurationInvalidTitle'), t('consultationDurationInvalid'));
+      return;
+    }
     try {
       await updateProfile.mutateAsync({
         about: about || null,
@@ -137,6 +144,7 @@ export default function SettingsPage() {
         is_accepting_new_patients: acceptingPatients,
         price_min_agorot: minVal,
         price_max_agorot: maxVal,
+        consultation_duration_minutes: duration,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -203,7 +211,7 @@ export default function SettingsPage() {
     }
   };
 
-  const scrollToSection = (section: 'avatar' | 'about' | 'contact' | 'address' | 'pricing') => {
+  const scrollToSection = (section: 'avatar' | 'about' | 'contact' | 'address' | 'consultation' | 'pricing') => {
     const el = document.getElementById(`profile-section-${section}`);
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -414,6 +422,20 @@ export default function SettingsPage() {
                     <Input label={t('city')} value={city} onChange={(e) => setCity(e.target.value)} />
                   </div>
                 </div>
+              </div>
+
+              <div id="profile-section-consultation" className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-700">{t('consultationDuration')}</h3>
+                <p className="text-xs text-muted-foreground">{t('consultationDurationHint')}</p>
+                <Input
+                  label={t('consultationDurationMinutes')}
+                  type="number"
+                  min={5}
+                  max={240}
+                  value={consultationDurationMinutes}
+                  onChange={(e) => setConsultationDurationMinutes(Number(e.target.value) || 30)}
+                  placeholder="30"
+                />
               </div>
 
               <div id="profile-section-pricing" className="space-y-3">

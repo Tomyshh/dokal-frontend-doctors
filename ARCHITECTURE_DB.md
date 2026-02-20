@@ -415,6 +415,8 @@ CREATE TABLE public.practitioners (
   license_number text,
   site_id uuid,
   specialization_license text,
+  price_min_agorot integer,
+  price_max_agorot integer,
   CONSTRAINT practitioners_pkey PRIMARY KEY (id),
   CONSTRAINT practitioners_id_fkey FOREIGN KEY (id) REFERENCES public.profiles(id),
   CONSTRAINT practitioners_specialty_id_fkey FOREIGN KEY (specialty_id) REFERENCES public.specialties(id),

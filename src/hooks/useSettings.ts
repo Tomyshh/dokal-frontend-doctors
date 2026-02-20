@@ -69,6 +69,7 @@ export function useUploadProfileAvatar() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['practitioner-profile'] });
     },
   });
 }
@@ -106,6 +107,7 @@ export function useDeleteProfileAvatar() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['practitioner-profile'] });
     },
   });
 }

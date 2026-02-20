@@ -103,6 +103,8 @@ export interface UpdatePractitionerProfileRequest {
   city?: string | null;
   price_min_agorot?: number | null;
   price_max_agorot?: number | null;
+  /** Durée d'une consultation en minutes (5–240). Valeur par défaut pour affichage et création de créneaux. */
+  consultation_duration_minutes?: number;
 }
 
 export interface UpdateSettingsRequest {

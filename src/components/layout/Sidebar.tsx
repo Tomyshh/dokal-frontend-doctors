@@ -95,7 +95,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     }
 
     return links;
-  }, [t, isSecretary]);
+  }, [t, isSecretary, showSettingsBadge]);
 
   // Build management links based on role & organization type
   const managementLinks = useMemo(() => {
@@ -170,21 +170,26 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           >
             <span className="relative">
               <link.icon className="h-5 w-5 shrink-0" />
-              {link.badge && (
+              {link.badge && collapsed && (
                 <span
-                  className={cn(
-                    'absolute -top-0.5 -right-0.5 rounded-full bg-amber-500 ring-2 ring-white',
-                    collapsed
-                      ? 'h-2.5 w-2.5'
-                      : 'flex h-5 min-w-5 items-center justify-center px-1 text-[10px] font-bold text-white'
-                  )}
+                  className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white"
                   aria-label={t('profileIncompleteBadge')}
-                >
-                  {!collapsed && `${practitionerProfile?.completionPercent ?? 0}%`}
-                </span>
+                />
               )}
             </span>
-            {!collapsed && <span className="truncate">{link.label}</span>}
+            {!collapsed && (
+              <>
+                <span className="truncate">{link.label}</span>
+                {link.badge && (
+                  <span
+                    className="ml-auto shrink-0 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                    aria-label={t('profileIncompleteBadge')}
+                  >
+                    {practitionerProfile?.completionPercent ?? 0}%
+                  </span>
+                )}
+              </>
+            )}
           </Link>
         ))}
 

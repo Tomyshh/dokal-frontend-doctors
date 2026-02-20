@@ -90,7 +90,7 @@ paths:
   /api/v1/profile/avatar:
     post:
       tags: [Profile]
-      summary: Upload avatar (Supabase Storage bucket `avatars`)
+      summary: Upload avatar (Storage + mise à jour profiles.avatar_url)
       requestBody:
         required: true
         content:
@@ -109,6 +109,17 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Profile" }
         "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [Profile]
+      summary: Supprimer l'avatar (Storage + profiles.avatar_url = null)
+      responses:
+        "200":
+          description: Profil mis à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
 
@@ -1744,7 +1755,7 @@ paths:
   /api/v1/crm/profile/avatar:
     post:
       tags: [CRM]
-      summary: Upload practitioner avatar (Storage + mise à jour profiles.avatar_url)
+      summary: Upload practitioner avatar (IA docteur + Storage + mise à jour profiles.avatar_url)
       requestBody:
         required: true
         content:
@@ -2148,12 +2159,14 @@ components:
           description: "Champs manquants pour compléter le profil. Présent uniquement sur GET /me."
         price_min_agorot:
           type: integer
+          minimum: 0
           nullable: true
-          description: "Prix minimum en agorot (1 ILS = 100 agorot)"
+          description: "Prix min consultation en agorot (ILS × 100)"
         price_max_agorot:
           type: integer
+          minimum: 0
           nullable: true
-          description: "Prix maximum en agorot (1 ILS = 100 agorot)"
+          description: "Prix max consultation en agorot (ILS × 100)"
 
     CreateAppointmentRequest:
       type: object
@@ -2418,12 +2431,19 @@ components:
         city: { type: string, nullable: true }
         price_min_agorot:
           type: integer
+          minimum: 0
           nullable: true
-          description: "Prix minimum en agorot (1 ILS = 100 agorot)"
+          description: "Prix min consultation en agorot (ILS × 100)"
         price_max_agorot:
           type: integer
+          minimum: 0
           nullable: true
-          description: "Prix maximum en agorot (1 ILS = 100 agorot)"
+          description: "Prix max consultation en agorot (ILS × 100)"
+        consultation_duration_minutes:
+          type: integer
+          minimum: 5
+          maximum: 240
+          description: "Durée d'une consultation en minutes (5-240)"
 
     RegisterPractitionerRequest:
       type: object
