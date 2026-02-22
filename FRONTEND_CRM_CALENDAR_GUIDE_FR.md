@@ -73,7 +73,9 @@ Définition :
 - `appointments.patient_id == null`
 - donc pas de compte mobile, pas de conversation, pas de notifications patient
 
-Affichage recommandé :
+**Exception** : RDV créés via `source=dokal_app` → ne jamais afficher "Patient non inscrit (draft)" car le patient a forcément un compte (authentifié dans l'app). Si `patient_id` est null, c'est une incohérence backend à corriger.
+
+Affichage recommandé (hors dokal_app) :
 - indiquer “Patient non inscrit (draft)”
 - CTA principal: “Compléter dossier patient” (Teoudat, contact, etc.)
 

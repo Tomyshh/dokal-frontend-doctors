@@ -254,6 +254,33 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/Slot" }
 
+  /api/v1/practitioners/{id}/reviews/summary:
+    get:
+      tags: [Practitioners]
+      security: []
+      summary: Get practitioner average rating (from patient reviews)
+      description: >
+        Returns the average rating and total count of reviews for a practitioner.
+        Used by the mobile app to display the practitioner's rating summary.
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Rating summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  average_rating:
+                    type: number
+                    nullable: true
+                    description: "Note moyenne (1-5), null si aucune review"
+                  count:
+                    type: integer
+                    description: Nombre total de reviews
+                required: [average_rating, count]
+
   /api/v1/practitioners/{id}/reviews:
     get:
       tags: [Practitioners]
@@ -642,6 +669,30 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/appointments/{id}/reschedule:
+    patch:
+      tags: [Appointments]
+      summary: Reschedule appointment (patient)
+      description: >
+        Replanifie un rendez-vous. Le créneau doit être disponible (vérifié via les slots du praticien).
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RescheduleAppointmentRequest" }
+      responses:
+        "200":
+          description: Rendez-vous replanifié (même structure que GET /api/v1/appointments/{id})
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
 
   /api/v1/conversations:
     get:
@@ -2141,6 +2192,22 @@ components:
       type: object
       description: >
         Shape returned by Supabase join selection in practitioners search.
+      properties:
+        average_rating:
+          type: number
+          nullable: true
+          description: "Note moyenne (1–5), null si aucune review"
+        review_count:
+          type: integer
+          description: "Nombre total de reviews"
+        price_min_agorot:
+          type: integer
+          nullable: true
+          description: "Prix min consultation en agorot (ILS × 100)"
+        price_max_agorot:
+          type: integer
+          nullable: true
+          description: "Prix max consultation en agorot (ILS × 100)"
       additionalProperties: true
 
     PractitionerDetail:
@@ -2182,6 +2249,14 @@ components:
         patient_city: { type: string, nullable: true }
         visited_before: { type: boolean, default: false }
       required: [practitioner_id, appointment_date, start_time, end_time]
+
+    RescheduleAppointmentRequest:
+      type: object
+      properties:
+        appointment_date: { type: string, format: date, description: "YYYY-MM-DD" }
+        start_time: { type: string, description: "HH:mm ou HH:mm:ss" }
+        end_time: { type: string, description: "HH:mm ou HH:mm:ss" }
+      required: [appointment_date, start_time, end_time]
 
     Message:
       type: object

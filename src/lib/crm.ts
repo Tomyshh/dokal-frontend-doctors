@@ -64,6 +64,10 @@ export function getCrmAppointmentPatientRecordId(appt: Appointment): string | nu
 }
 
 export function isDraftPatientAppointment(appt: Appointment): boolean {
+  // RDV créés via l'app mobile : le patient est forcément inscrit (authentifié).
+  // Ne pas afficher "Patient not registered" pour ces RDV même si patient_id est null
+  // (incohérence backend à corriger côté API).
+  if (appt.source === 'dokal_app') return false;
   // Backend contract: appointments.patient_id can be NULL until mobile signup.
   return !appt.patient_id;
 }
