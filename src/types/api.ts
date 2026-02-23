@@ -101,6 +101,8 @@ export interface UpdatePractitionerProfileRequest {
   address_line?: string | null;
   zip_code?: string | null;
   city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   price_min_agorot?: number | null;
   price_max_agorot?: number | null;
   /** Durée d'une consultation en minutes (5–240). Valeur par défaut pour affichage et création de créneaux. */
@@ -210,6 +212,8 @@ export interface RegisterPractitionerRequest {
   specialization_license?: string;
   address_line: string;
   zip_code: string;
+  latitude?: number;
+  longitude?: number;
   // Optional: join existing clinic
   organization_id?: string;
   // Optional: create a new clinic

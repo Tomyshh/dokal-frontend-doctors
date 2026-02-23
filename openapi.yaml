@@ -154,6 +154,25 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
 
   /api/v1/relatives/{id}:
+    patch:
+      tags: [Relatives]
+      summary: Update a relative
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddRelativeRequest" }
+      responses:
+        "200":
+          description: Updated relative
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Relative" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
     delete:
       tags: [Relatives]
       summary: Delete a relative
@@ -161,6 +180,37 @@ paths:
         - $ref: "#/components/parameters/IdParam"
       responses:
         "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/relatives/{id}/avatar:
+    post:
+      tags: [Relatives]
+      summary: Upload avatar for a relative
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+              required: [avatar]
+      responses:
+        "200":
+          description: Avatar uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  avatar_url: { type: string, format: uri }
+                required: [avatar_url]
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
 
@@ -642,10 +692,15 @@ paths:
         - $ref: "#/components/parameters/IdParam"
       responses:
         "200":
-          description: Appointment
+          description: Appointment (inclut conversation_id pour le bouton "Contacter le cabinet")
           content:
             application/json:
-              schema: { type: object, additionalProperties: true }
+              schema:
+                allOf:
+                  - { type: object, additionalProperties: true }
+                  - type: object
+                    properties:
+                      conversation_id: { type: string, format: uuid, nullable: true }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -705,8 +760,40 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { type: object, additionalProperties: true }
+                items: { $ref: "#/components/schemas/ConversationListItem" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Messaging]
+      summary: Create a new conversation (page "Nouveau message")
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateConversationRequest" }
+      responses:
+        "201":
+          description: Conversation créée
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Conversation" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/conversations/{id}:
+    get:
+      tags: [Messaging]
+      summary: Get conversation details (deep links, notifications)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Détails de la conversation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConversationDetail" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
   /api/v1/conversations/{id}/messages:
     get:
@@ -2110,6 +2197,11 @@ components:
       type: string
       enum: [child, parent, spouse, sibling, other]
 
+    KupatHolimType:
+      type: string
+      enum: [clalit, maccabi, meuhedet, leumit, other]
+      description: Caisse maladie israélienne (optionnel)
+
     AppointmentStatus:
       type: string
       enum:
@@ -2169,6 +2261,10 @@ components:
         last_name: { type: string }
         relation: { $ref: "#/components/schemas/RelationType" }
         date_of_birth: { type: string, format: date, nullable: true }
+        teudat_zehut: { type: string, nullable: true }
+        kupat_holim: { type: string, nullable: true }
+        insurance_provider: { type: string, nullable: true }
+        avatar_url: { type: string, format: uri, nullable: true }
       required: [id, first_name, last_name, relation]
 
     AddRelativeRequest:
@@ -2176,9 +2272,13 @@ components:
       properties:
         first_name: { type: string, minLength: 1 }
         last_name: { type: string, minLength: 1 }
+        teudat_zehut: { type: string, minLength: 9, maxLength: 9 }
         relation: { $ref: "#/components/schemas/RelationType" }
-        date_of_birth: { type: string, nullable: true }
-      required: [first_name, last_name, relation]
+        date_of_birth: { type: string, format: date, nullable: true }
+        kupat_holim: { $ref: "#/components/schemas/KupatHolimType", nullable: true }
+        insurance_provider: { type: string, nullable: true }
+        avatar_url: { type: string, format: uri, nullable: true }
+      required: [first_name, last_name, teudat_zehut, date_of_birth, relation]
 
     Slot:
       type: object
@@ -2268,6 +2368,59 @@ components:
         is_read: { type: boolean }
         created_at: { type: string, format: date-time }
       required: [id, sender_id, content, message_type, is_read, created_at]
+
+    ConversationListItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        last_message_at: { type: string, format: date-time, nullable: true }
+        unread_count: { type: integer }
+        practitioners:
+          type: object
+          properties:
+            profiles:
+              type: object
+              properties:
+                first_name: { type: string, nullable: true }
+                last_name: { type: string, nullable: true }
+                avatar_url: { type: string, nullable: true }
+        last_message:
+          type: object
+          nullable: true
+          properties:
+            content: { type: string }
+        appointments:
+          type: object
+          nullable: true
+          properties:
+            id: { type: string, format: uuid }
+            status: { type: string }
+            appointment_date: { type: string, format: date }
+
+    ConversationDetail:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        practitioners: { type: object }
+        is_online: { type: boolean }
+
+    Conversation:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        patient_id: { type: string, format: uuid }
+        practitioner_id: { type: string, format: uuid }
+        last_message_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    CreateConversationRequest:
+      type: object
+      properties:
+        practitioner_id: { type: string, format: uuid }
+        subject: { type: string }
+        content: { type: string }
+      required: [practitioner_id]
 
     SendMessageRequest:
       type: object
@@ -2504,6 +2657,8 @@ components:
         address_line: { type: string, nullable: true }
         zip_code: { type: string, nullable: true }
         city: { type: string, nullable: true }
+        latitude: { type: number, nullable: true, description: "Latitude pour la recherche par distance (PostGIS)" }
+        longitude: { type: number, nullable: true, description: "Longitude pour la recherche par distance (PostGIS)" }
         price_min_agorot:
           type: integer
           minimum: 0
@@ -2532,6 +2687,8 @@ components:
         license_number: { type: string, pattern: '^\d{1,6}$' }
         address_line: { type: string, minLength: 1 }
         zip_code: { type: string, minLength: 1 }
+        latitude: { type: number, description: "Latitude pour la recherche par distance (PostGIS)" }
+        longitude: { type: number, description: "Longitude pour la recherche par distance (PostGIS)" }
         organization_id:
           type: string
           format: uuid

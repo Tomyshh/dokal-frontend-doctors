@@ -27,6 +27,7 @@ import ProfileCompletionCard from '@/components/settings/ProfileCompletionCard';
 import GoogleCalendarSection from '@/components/settings/GoogleCalendarSection';
 import AvatarUploadSection from '@/components/settings/AvatarUploadSection';
 import { LanguagesCombobox } from '@/components/settings/LanguagesCombobox';
+import { AddressAutocomplete, type AddressResult } from '@/components/auth/AddressAutocomplete';
 import { useGenerateAboutWithAI, useGenerateEducationWithAI } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -73,6 +74,8 @@ export default function SettingsPage() {
   const [addressLine, setAddressLine] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [city, setCity] = useState('');
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const [acceptingPatients, setAcceptingPatients] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
@@ -91,6 +94,8 @@ export default function SettingsPage() {
       setAddressLine(practitioner.address_line || '');
       setZipCode(practitioner.zip_code || '');
       setCity(practitioner.city || '');
+      setLatitude(practitioner.latitude ?? null);
+      setLongitude(practitioner.longitude ?? null);
       setAcceptingPatients(practitioner.is_accepting_new_patients);
       setPriceMinShekels(
         practitioner.price_min_agorot != null ? String(Math.round(practitioner.price_min_agorot / 100)) : ''
@@ -141,6 +146,8 @@ export default function SettingsPage() {
         address_line: addressLine || null,
         zip_code: zipCode || null,
         city: city || null,
+        latitude: latitude ?? null,
+        longitude: longitude ?? null,
         is_accepting_new_patients: acceptingPatients,
         price_min_agorot: minVal,
         price_max_agorot: maxVal,
@@ -416,7 +423,26 @@ export default function SettingsPage() {
               <div id="profile-section-address" className="pt-1">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('address')}</h3>
                 <div className="space-y-3">
-                  <Input label={t('addressLine')} value={addressLine} onChange={(e) => setAddressLine(e.target.value)} />
+                  <AddressAutocomplete
+                    id="addressLine"
+                    label={t('addressLine')}
+                    value={addressLine}
+                    placeholder={t('addressSelectHint')}
+                    onChange={(data: AddressResult) => {
+                      setAddressLine(data.address_line);
+                      setZipCode(data.zip_code);
+                      setCity(data.city);
+                      setLatitude(data.latitude);
+                      setLongitude(data.longitude);
+                    }}
+                    onClear={() => {
+                      setAddressLine('');
+                      setZipCode('');
+                      setCity('');
+                      setLatitude(null);
+                      setLongitude(null);
+                    }}
+                  />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input label={t('zipCode')} value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
                     <Input label={t('city')} value={city} onChange={(e) => setCity(e.target.value)} />

@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { CityCombobox } from '@/components/auth/CityCombobox';
+import { AddressAutocomplete, type AddressResult } from '@/components/auth/AddressAutocomplete';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
 import { Spinner } from '@/components/ui/Spinner';
 import { getMyPractitionerOrNull, isPractitionerCompleteFromBackend, unwrapPractitioner } from '@/lib/practitioner';
@@ -28,6 +29,9 @@ type FormState = {
   specializationLicense: string;
   addressLine: string;
   zipCode: string;
+  /** Coordonnées géographiques (requises pour la recherche par distance) */
+  latitude: number | null;
+  longitude: number | null;
 };
 
 export default function CompleteProfilePage() {
@@ -50,6 +54,8 @@ export default function CompleteProfilePage() {
     specializationLicense: '',
     addressLine: '',
     zipCode: '',
+    latitude: null,
+    longitude: null,
   });
 
   const [error, setError] = useState('');
@@ -97,6 +103,8 @@ export default function CompleteProfilePage() {
           specialtyId: prev.specialtyId || specialtyId || '',
           addressLine: prev.addressLine || data.address_line || '',
           zipCode: prev.zipCode || data.zip_code || '',
+          latitude: prev.latitude ?? data.latitude ?? null,
+          longitude: prev.longitude ?? data.longitude ?? null,
           licenseNumber: prev.licenseNumber || data.license_number || '',
           specializationLicense: prev.specializationLicense || data.specialization_license || '',
         }));
@@ -188,6 +196,11 @@ export default function CompleteProfilePage() {
       return;
     }
 
+    if (!form.addressLine.trim() || form.latitude == null || form.longitude == null) {
+      setError(t('addressSelectHint'));
+      return;
+    }
+
     setLoading(true);
     try {
       const normalizedPhone = normalizeIsraelPhoneToE164(form.phone);
@@ -202,6 +215,8 @@ export default function CompleteProfilePage() {
         specialization_license: form.specializationLicense || undefined,
         address_line: form.addressLine,
         zip_code: form.zipCode,
+        latitude: form.latitude ?? undefined,
+        longitude: form.longitude ?? undefined,
         organization_name: `Cabinet Dr ${form.lastName}`.trim(),
         organization_type: 'individual',
       };
@@ -359,13 +374,28 @@ export default function CompleteProfilePage() {
 
         <div className="grid grid-cols-4 gap-3">
           <div className="col-span-3">
-            <Input
+            <AddressAutocomplete
               id="addressLine"
               label={t('addressLine')}
               value={form.addressLine}
-              onChange={(e) => handleChange('addressLine', e.target.value)}
+              placeholder={t('addressSelectHint')}
               required
-              autoComplete="street-address"
+              onChange={(data: AddressResult) => {
+                handleChange('addressLine', data.address_line);
+                handleChange('zipCode', data.zip_code);
+                handleChange('city', data.city);
+                setForm((prev) => ({
+                  ...prev,
+                  latitude: data.latitude,
+                  longitude: data.longitude,
+                }));
+              }}
+              onClear={() => {
+                handleChange('addressLine', '');
+                handleChange('zipCode', '');
+                handleChange('city', '');
+                setForm((prev) => ({ ...prev, latitude: null, longitude: null }));
+              }}
             />
           </div>
           <Input
@@ -375,6 +405,7 @@ export default function CompleteProfilePage() {
             onChange={(e) => handleChange('zipCode', e.target.value)}
             required
             autoComplete="postal-code"
+            placeholder={t('zipCode')}
           />
         </div>
 

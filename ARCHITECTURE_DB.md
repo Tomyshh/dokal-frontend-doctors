@@ -447,6 +447,11 @@ CREATE TABLE public.relatives (
   relation USER-DEFINED NOT NULL,
   date_of_birth date,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
+  teudat_zehut_encrypted text,
+  teudat_zehut_hash text,
+  kupat_holim text,
+  insurance_provider text,
+  avatar_url text,
   CONSTRAINT relatives_pkey PRIMARY KEY (id),
   CONSTRAINT relatives_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );
