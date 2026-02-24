@@ -28,6 +28,7 @@ import {
   getCrmAppointmentPatientRecordId,
   isDraftPatientAppointment,
 } from '@/lib/crm';
+import { CompletePatientInfoDialog } from '@/components/appointments/CompletePatientInfoDialog';
 import { useUpdateCrmAppointment, useUpdateCrmOrganizationAppointment } from '@/hooks/useAppointments';
 
 interface CalendarEventSidebarProps {
@@ -58,6 +59,7 @@ export default function CalendarEventSidebar({
   const [extDesc, setExtDesc] = useState<string>('');
   const [extLoc, setExtLoc] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
+  const [completeInfoOpen, setCompleteInfoOpen] = useState(false);
 
   const appointment = item?.kind === 'crm_appointment' ? item.data : null;
   const missingFields = appointment?.patient_missing_fields || [];
@@ -70,6 +72,7 @@ export default function CalendarEventSidebar({
   useEffect(() => {
     if (!appointment) return;
     setMetaEditMode(false);
+    setCompleteInfoOpen(false);
     setExtTitle(appointment.external_title || '');
     setExtDesc(appointment.external_description || '');
     setExtLoc(appointment.external_location || '');
@@ -299,20 +302,35 @@ export default function CalendarEventSidebar({
 
             {hasMissingInfo && (
               <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium text-red-900">{t('missingInfoTitle')}</p>
-                  <Badge className="bg-red-100 text-red-700">{t('missingInfoBadge')}</Badge>
-                </div>
-                {missingFieldsLabel && (
-                  <p className="text-xs text-red-800 mt-1">
-                    {t('missingInfoFields')}: {missingFieldsLabel}
-                  </p>
-                )}
+                <button
+                  type="button"
+                  onClick={() => patientRecordId && setCompleteInfoOpen(true)}
+                  className="w-full text-left focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-1 rounded-lg -m-1 p-1"
+                  aria-label={t('completePatientInfoTitle')}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-medium text-red-900">{t('missingInfoTitle')}</p>
+                    <Badge className="bg-red-100 text-red-700">{t('missingInfoBadge')}</Badge>
+                  </div>
+                  {missingFieldsLabel && (
+                    <p className="text-xs text-red-800 mt-1">
+                      {t('missingInfoFields')}: {missingFieldsLabel}
+                    </p>
+                  )}
+                </button>
                 {patientRecordId && (
-                  <div className="mt-2">
+                  <div className="mt-2 flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 border-red-200 text-red-700 hover:bg-red-100"
+                      onClick={() => setCompleteInfoOpen(true)}
+                    >
+                      {t('completePatient')}
+                    </Button>
                     <Link href={`/patients/${patientRecordId}`}>
-                      <Button size="sm" variant="outline" className="h-8 border-red-200 text-red-700 hover:bg-red-100">
-                        {t('completePatient')}
+                      <Button size="sm" variant="ghost" className="h-8 text-red-700">
+                        {t('viewPatient')}
                       </Button>
                     </Link>
                   </div>
@@ -515,6 +533,15 @@ export default function CalendarEventSidebar({
           </Link>
         </div>
       </div>
+
+      {patientRecordId && (
+        <CompletePatientInfoDialog
+          open={completeInfoOpen}
+          onClose={() => setCompleteInfoOpen(false)}
+          patientRecordId={patientRecordId}
+          missingFields={missingFields}
+        />
+      )}
     </div>
   );
 }

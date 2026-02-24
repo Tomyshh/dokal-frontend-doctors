@@ -65,6 +65,7 @@ export function useUpdateCrmPatient() {
       queryClient.invalidateQueries({ queryKey: ['crm-patient-search'] });
       queryClient.invalidateQueries({ queryKey: ['crm-patients'] });
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['appointment'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
     },
   });

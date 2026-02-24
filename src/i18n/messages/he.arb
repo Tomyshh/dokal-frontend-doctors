@@ -983,7 +983,10 @@
     "externalEventTimeRequired": "נדרשים זמני התחלה וסיום.",
     "externalEventEndAfterStart": "זמן הסיום חייב להיות אחרי זמן ההתחלה.",
     "deleteExternalEvent": "מחק אירוע",
-    "deleteExternalEventConfirm": "האם אתם בטוחים שברצונכם למחוק אירוע זה?"
+    "deleteExternalEventConfirm": "האם אתם בטוחים שברצונכם למחוק אירוע זה?",
+    "completePatientInfoTitle": "השלם פרטי מטופל",
+    "completedFieldsLabel": "שדות שהושלמו",
+    "missingFieldsToCompleteLabel": "שדות להשלמה"
   }
 }
 

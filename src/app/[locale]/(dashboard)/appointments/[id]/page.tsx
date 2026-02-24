@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import AppointmentActions from '@/components/appointments/AppointmentActions';
+import { CompletePatientInfoDialog } from '@/components/appointments/CompletePatientInfoDialog';
 import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { ArrowLeft, Calendar, Clock, MapPin, User, FileText } from 'lucide-react';
@@ -88,6 +89,7 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
   const patientName = getCrmAppointmentPatientDisplayName(appointment);
   const patientRecordId = getCrmAppointmentPatientRecordId(appointment);
   const isDraft = isDraftPatientAppointment(appointment);
+  const [completeInfoOpen, setCompleteInfoOpen] = useState(false);
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -138,9 +140,22 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
                     </Badge>
                   )}
                   {appointment.patient_info_missing && (
-                    <Badge className="bg-red-50 text-red-700 border border-red-200">
-                      {tcal('missingInfoBadge')}
-                    </Badge>
+                    patientRecordId ? (
+                      <button
+                        type="button"
+                        onClick={() => setCompleteInfoOpen(true)}
+                        className="cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-1 rounded-full"
+                        aria-label={tcal('completePatientInfoTitle')}
+                      >
+                        <Badge className="bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors">
+                          {tcal('missingInfoBadge')}
+                        </Badge>
+                      </button>
+                    ) : (
+                      <Badge className="bg-red-50 text-red-700 border border-red-200">
+                        {tcal('missingInfoBadge')}
+                      </Badge>
+                    )
                   )}
                 </div>
               </div>
@@ -226,6 +241,16 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
           <AppointmentActions appointmentId={appointment.id} status={appointment.status} />
         </div>
       </Card>
+
+      {/* Dialog pour compléter les infos patient */}
+      {patientRecordId && (
+        <CompletePatientInfoDialog
+          open={completeInfoOpen}
+          onClose={() => setCompleteInfoOpen(false)}
+          patientRecordId={patientRecordId}
+          missingFields={appointment.patient_missing_fields ?? []}
+        />
+      )}
     </div>
   );
 }
