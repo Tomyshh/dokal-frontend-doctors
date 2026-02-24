@@ -129,18 +129,13 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     >
       {/* Logo */}
       <div className="flex items-center justify-between p-4 h-16 border-b border-border/50">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex-1 min-w-0 h-8 relative rounded-sm overflow-hidden">
           <Image
-            // Use colored icon (avoid white-on-white)
-            src="/branding/icononly.png"
+            src="/images/banderolle.png"
             alt="Dokal"
-            width={36}
-            height={36}
-            className="shrink-0"
+            fill
+            className="object-contain object-left rounded-sm"
           />
-          {!collapsed && (
-            <span className="text-xl font-bold text-primary truncate">DOKAL</span>
-          )}
         </div>
         <button
           onClick={onToggle}
