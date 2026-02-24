@@ -41,6 +41,12 @@ export function formatRelativeDate(date: string | Date, locale: string = 'fr') {
   return formatDate(d, 'dd MMM yyyy', locale);
 }
 
+/** Format date and time for display (e.g. "24 Feb 2026 15:06") */
+export function formatDateTime(date: string | Date, locale: string = 'fr') {
+  const d = typeof date === 'string' ? parseISO(date) : date;
+  return format(d, 'dd MMM yyyy HH:mm', { locale: localeMap[locale] || fr });
+}
+
 export function getInitials(firstName?: string | null, lastName?: string | null): string {
   const f = firstName?.charAt(0)?.toUpperCase() || '';
   const l = lastName?.charAt(0)?.toUpperCase() || '';

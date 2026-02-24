@@ -1,7 +1,10 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
+import { useQueries } from '@tanstack/react-query';
+import api from '@/lib/api';
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from '@/hooks/useNotifications';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -9,9 +12,9 @@ import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Bell, CheckCheck, CalendarCheck, MessageSquare, Star, Clock } from 'lucide-react';
-import { formatRelativeDate } from '@/lib/utils';
-import { cn } from '@/lib/utils';
-import type { NotificationType } from '@/types';
+import { formatDateTime, formatDate, formatTime, cn } from '@/lib/utils';
+import { getCrmAppointmentPatientDisplayName } from '@/lib/crm';
+import type { NotificationType, Notification, Appointment } from '@/types';
 import type { LucideIcon } from 'lucide-react';
 
 const notifIcons: Record<NotificationType, LucideIcon> = {
@@ -80,6 +83,15 @@ function getNotificationDeepLink(
   return null;
 }
 
+function getAppointmentId(notif: Notification): string | null {
+  const id = notif.data?.appointment_id;
+  return typeof id === 'string' ? id : null;
+}
+
+function needsAppointmentFetch(type: string): boolean {
+  return type === 'appointment_request' || type === 'appointment_cancelled';
+}
+
 export default function NotificationsPage() {
   const t = useTranslations('notifications');
   const locale = useLocale();
@@ -87,6 +99,41 @@ export default function NotificationsPage() {
   const { data: notifications, isLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
+
+  const appointmentIds = useMemo(() => {
+    if (!notifications) return [];
+    const ids: string[] = [];
+    const seen = new Set<string>();
+    for (const n of notifications) {
+      if (needsAppointmentFetch(n.type)) {
+        const id = getAppointmentId(n);
+        if (id && !seen.has(id)) {
+          seen.add(id);
+          ids.push(id);
+        }
+      }
+    }
+    return ids;
+  }, [notifications]);
+
+  const appointmentQueries = useQueries({
+    queries: appointmentIds.map((id) => ({
+      queryKey: ['appointment', id],
+      queryFn: async () => {
+        const { data } = await api.get<Appointment>(`/crm/appointments/${id}`);
+        return data;
+      },
+      enabled: !!id,
+    })),
+  });
+
+  const appointmentsById = useMemo(() => {
+    const map = new Map<string, Appointment>();
+    appointmentQueries.forEach((q, i) => {
+      if (q.data && appointmentIds[i]) map.set(appointmentIds[i], q.data);
+    });
+    return map;
+  }, [appointmentQueries, appointmentIds]);
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -124,7 +171,33 @@ export default function NotificationsPage() {
               const Icon = notifIcons[notif.type] || Bell;
               const colorClass = notifColors[notif.type] || 'bg-gray-50 text-gray-600';
               const title = notif.type in notifTitleKey ? t(notifTitleKey[notif.type]) : notif.title;
-              const body = notif.type in notifBodyKey ? t(notifBodyKey[notif.type]) : notif.body;
+
+              const appointmentId = getAppointmentId(notif);
+              const appointment = appointmentId ? appointmentsById.get(appointmentId) : null;
+
+              let body: string;
+              if (
+                (notif.type === 'appointment_request' || notif.type === 'appointment_cancelled') &&
+                appointment
+              ) {
+                const patientName = getCrmAppointmentPatientDisplayName(appointment);
+                const dateStr = formatDate(appointment.appointment_date, 'dd MMM yyyy', locale);
+                const timeStr = formatTime(appointment.start_time);
+                body =
+                  notif.type === 'appointment_request'
+                    ? t('appointmentRequestBodyWithDetails', {
+                        patientName,
+                        date: dateStr,
+                        time: timeStr,
+                      })
+                    : t('appointmentCancelledBodyWithDetails', {
+                        patientName,
+                        date: dateStr,
+                        time: timeStr,
+                      });
+              } else {
+                body = notif.type in notifBodyKey ? t(notifBodyKey[notif.type]) : notif.body;
+              }
 
               const deepLink = getNotificationDeepLink(notif.type, notif.data ?? {});
 
@@ -157,7 +230,7 @@ export default function NotificationsPage() {
                       <p className="text-sm font-medium text-gray-900">{title}</p>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs text-muted-foreground">
-                          {formatRelativeDate(notif.created_at, locale)}
+                          {formatDateTime(notif.created_at, locale)}
                         </span>
                         {!notif.is_read && (
                           <Badge variant="default" className="h-2 w-2 p-0 rounded-full" />
