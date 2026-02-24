@@ -16,18 +16,19 @@ export function useNotifications() {
 }
 
 /**
- * Unread notifications count. Only for patients — GET /notifications/unread-count
- * requires requirePatient. Practitioners get 403.
+ * Unread notifications count. GET /notifications/unread-count
+ * Pour praticiens : activé quand l'utilisateur est connecté.
  */
-export function useUnreadCount() {
+export function useUnreadCount(enabled = true) {
   return useQuery({
     queryKey: ['unread-count'],
     queryFn: async () => {
       const { data } = await api.get<{ count: number }>('/notifications/unread-count');
       return data.count;
     },
-    refetchInterval: 15000,
-    enabled: false, // Disabled: endpoint is patient-only. Enable when backend supports practitioners.
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true,
+    enabled,
   });
 }
 

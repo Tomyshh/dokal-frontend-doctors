@@ -1,6 +1,7 @@
 import { getMessages } from 'next-intl/server';
 import { isRtl } from '@/i18n/config';
 import AuthProvider from '@/providers/AuthProvider';
+import OneSignalProvider from '@/providers/OneSignalProvider';
 import QueryProvider from '@/providers/QueryProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import IntlProvider from '@/providers/IntlProvider';
@@ -51,9 +52,11 @@ export default async function LocaleLayout({
         <IntlProvider locale={locale} messages={messages}>
           <QueryProvider>
             <AuthProvider>
-              <ToastProvider>
-                {children}
-              </ToastProvider>
+              <OneSignalProvider>
+                <ToastProvider>
+                  {children}
+                </ToastProvider>
+              </OneSignalProvider>
             </AuthProvider>
           </QueryProvider>
         </IntlProvider>

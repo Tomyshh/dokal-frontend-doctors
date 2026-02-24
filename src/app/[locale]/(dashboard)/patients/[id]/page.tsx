@@ -261,14 +261,16 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               <Button
                 variant="outline"
                 onClick={async () => {
-                  const existing = conversations?.find((c) => c.patient_id === crmRecord.auth_user_id);
+                  const patientId = crmRecord.auth_user_id;
+                  if (!patientId) return;
+                  const existing = conversations?.find((c) => c.patient_id === patientId);
                   if (existing) {
                     router.push(`/messages/${existing.id}`);
                     return;
                   }
                   try {
                     const conv = await createConversation.mutateAsync({
-                      patient_id: crmRecord.auth_user_id,
+                      patient_id: patientId,
                     });
                     router.push(`/messages/${conv.id}`);
                   } catch (err: unknown) {

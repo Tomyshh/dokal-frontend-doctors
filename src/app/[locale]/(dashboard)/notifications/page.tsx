@@ -1,8 +1,9 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from '@/i18n/routing';
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from '@/hooks/useNotifications';
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -61,9 +62,28 @@ const notifBodyKey: Record<NotificationType, string> = {
   review_received: 'reviewReceivedBody',
 };
 
+function getNotificationDeepLink(
+  type: string,
+  data: Record<string, unknown>
+): string | null {
+  const conversationId = typeof data?.conversation_id === 'string' ? data.conversation_id : null;
+  const appointmentId = typeof data?.appointment_id === 'string' ? data.appointment_id : null;
+
+  if (type === 'new_message' && conversationId) return `/messages/${conversationId}`;
+  if (
+    (type === 'appointment_cancelled' || type === 'appointment_request') &&
+    appointmentId
+  )
+    return `/appointments/${appointmentId}`;
+  if (type === 'review_received') return '/reviews';
+
+  return null;
+}
+
 export default function NotificationsPage() {
   const t = useTranslations('notifications');
   const locale = useLocale();
+  const router = useRouter();
   const { data: notifications, isLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
@@ -106,14 +126,28 @@ export default function NotificationsPage() {
               const title = notif.type in notifTitleKey ? t(notifTitleKey[notif.type]) : notif.title;
               const body = notif.type in notifBodyKey ? t(notifBodyKey[notif.type]) : notif.body;
 
+              const deepLink = getNotificationDeepLink(notif.type, notif.data ?? {});
+
               return (
                 <div
                   key={notif.id}
+                  role="button"
+                  tabIndex={0}
                   className={cn(
                     'flex items-start gap-4 p-4 hover:bg-muted/30 transition-colors cursor-pointer',
                     !notif.is_read && 'bg-primary-50/30'
                   )}
-                  onClick={() => { if (!notif.is_read) markRead.mutate(notif.id); }}
+                  onClick={() => {
+                    if (!notif.is_read) markRead.mutate(notif.id);
+                    if (deepLink) router.push(deepLink);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      if (!notif.is_read) markRead.mutate(notif.id);
+                      if (deepLink) router.push(deepLink);
+                    }
+                  }}
                 >
                   <div className={cn('rounded-xl p-2.5 shrink-0', colorClass)}>
                     <Icon className="h-5 w-5" />
