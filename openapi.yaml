@@ -9,6 +9,8 @@ info:
 servers:
   - url: http://localhost:3000
     description: Local development
+  - url: https://dokal-backend.onrender.com
+    description: Production (Render)
 
 tags:
   - name: Healthcheck
@@ -219,33 +221,48 @@ paths:
       tags: [Practitioners]
       security: []
       summary: Search practitioners
+      description: |
+        Recherche de praticiens par texte (q, city, specialty) ou par distance (lat, lng).
+        Si lat et lng sont fournis, les résultats sont triés par distance (PostGIS) et incluent distance_km.
+        lat et lng doivent être fournis ensemble, sinon 400.
       parameters:
         - name: q
           in: query
           schema: { type: string }
+          description: Recherche texte (ville, about)
         - name: specialty
           in: query
           schema: { type: string, format: uuid }
+          description: UUID de la spécialité
         - name: city
           in: query
           schema: { type: string }
+          description: Filtre par ville
         - name: lat
           in: query
           schema: { type: number }
+          description: "Latitude patient (recherche par distance). Doit être fourni avec lng."
         - name: lng
           in: query
           schema: { type: number }
+          description: "Longitude patient (recherche par distance). Doit être fourni avec lat."
         - name: limit
           in: query
           schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+          description: Nombre max de résultats
       responses:
         "200":
-          description: Results
+          description: Liste de praticiens (triés par distance si lat/lng fournis)
           content:
             application/json:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/PractitionerSearchResult" }
+        "400":
+          description: "lat et lng doivent être fournis ensemble"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
 
   /api/v1/practitioners/me:
     get:
@@ -821,6 +838,9 @@ paths:
     post:
       tags: [Messaging]
       summary: Send a message
+      description: >
+        Envoie un message. Déclenche une notification push (new_message) au patient
+        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters:
         - $ref: "#/components/parameters/IdParam"
       requestBody:
@@ -1159,6 +1179,9 @@ paths:
     patch:
       tags: [Reviews]
       summary: Reply to a review (practitioner)
+      description: >
+        Répond à un avis. Déclenche une notification push (review_received) au patient
+        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters:
         - $ref: "#/components/parameters/IdParam"
       requestBody:
@@ -1260,6 +1283,9 @@ paths:
     post:
       tags: [CRM]
       summary: Create a CRM appointment (confirmed)
+      description: >
+        Crée un RDV confirmé. Si le patient a un compte (auth_user_id), déclenche une
+        notification push (appointment_created). Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       requestBody:
         required: true
         content:
@@ -1350,6 +1376,9 @@ paths:
     patch:
       tags: [CRM]
       summary: Confirm appointment
+      description: >
+        Confirme le RDV. Déclenche une notification push (appointment_confirmed) au patient
+        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       responses:
         "204": { description: Confirmed }
@@ -1362,6 +1391,9 @@ paths:
     patch:
       tags: [CRM]
       summary: Cancel appointment
+      description: >
+        Annule le RDV. Déclenche une notification push (appointment_cancelled) au patient
+        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       requestBody:
         required: true
@@ -1382,6 +1414,9 @@ paths:
     patch:
       tags: [CRM]
       summary: Complete appointment
+      description: >
+        Marque la consultation comme terminée. Déclenche une notification push
+        (appointment_completed) au patient si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       requestBody:
         required: true
@@ -1855,6 +1890,9 @@ paths:
     patch:
       tags: [CRM]
       summary: Reply to a review (practitioner)
+      description: >
+        Répond à un avis. Déclenche une notification push (review_received) au patient
+        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       requestBody:
         required: true
@@ -1875,6 +1913,9 @@ paths:
     patch:
       tags: [CRM]
       summary: Update practitioner profile
+      description: |
+        Met à jour le profil praticien. Si latitude/longitude sont fournis (ex. depuis AddressAutocomplete),
+        ils sont enregistrés. Sinon, géocodage automatique via address_line si GOOGLE_API_KEY configurée.
       requestBody:
         required: true
         content:
@@ -2045,6 +2086,9 @@ paths:
     patch:
       tags: [CRM]
       summary: Confirm appointment (org admin/secretary)
+      description: >
+        Confirme le RDV. Déclenche une notification push (appointment_confirmed) au patient
+        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       responses:
         "204": { description: Confirmed }
@@ -2057,6 +2101,9 @@ paths:
     patch:
       tags: [CRM]
       summary: Cancel appointment (org admin/secretary)
+      description: >
+        Annule le RDV. Déclenche une notification push (appointment_cancelled) au patient
+        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       requestBody:
         required: true
@@ -2077,6 +2124,9 @@ paths:
     patch:
       tags: [CRM]
       summary: Complete appointment (org admin/secretary)
+      description: >
+        Marque la consultation comme terminée. Déclenche une notification push
+        (appointment_completed) au patient si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       requestBody:
         required: true
@@ -2218,10 +2268,17 @@ components:
 
     NotificationType:
       type: string
+      description: >
+        Types de notification. Les types appointment_* sont utilisés pour les push OneSignal.
+        appointment_request = patient crée un RDV (notifie praticien).
+        appointment_reminder = rappels automatiques (cron, hors scope frontend).
       enum:
         - appointment_request
         - appointment_confirmed
         - appointment_cancelled
+        - appointment_created
+        - appointment_rescheduled
+        - appointment_completed
         - appointment_reminder
         - new_message
         - review_received
@@ -2291,8 +2348,35 @@ components:
     PractitionerSearchResult:
       type: object
       description: >
-        Shape returned by Supabase join selection in practitioners search.
+        Praticien dans les résultats de recherche. Si lat/lng fournis, inclut distance_km.
       properties:
+        id: { type: string, format: uuid }
+        address_line: { type: string, nullable: true }
+        zip_code: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        latitude: { type: number, nullable: true }
+        longitude: { type: number, nullable: true }
+        profiles:
+          type: object
+          properties:
+            first_name: { type: string }
+            last_name: { type: string }
+            avatar_url: { type: string, format: uri, nullable: true }
+        specialties:
+          type: object
+          nullable: true
+          properties:
+            name: { type: string }
+            name_fr: { type: string, nullable: true }
+            name_he: { type: string, nullable: true }
+        organizations:
+          type: object
+          nullable: true
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+            type: { $ref: "#/components/schemas/OrganizationType" }
+            avatar_url: { type: string, nullable: true }
         average_rating:
           type: number
           nullable: true
@@ -2308,15 +2392,25 @@ components:
           type: integer
           nullable: true
           description: "Prix max consultation en agorot (ILS × 100)"
+        distance_km:
+          type: number
+          nullable: true
+          description: "Distance en km depuis la position du patient (présent uniquement si lat/lng fournis)"
       additionalProperties: true
 
     PractitionerDetail:
       type: object
       description: >
-        Practitioner profile plus reasons/instructions/slots/reviews.
-        When fetching own profile (GET /me), includes is_complete and missing_fields.
+        Profil praticien complet (reasons, instructions, slots, reviews).
+        GET /me inclut is_complete et missing_fields.
       additionalProperties: true
       properties:
+        id: { type: string, format: uuid }
+        address_line: { type: string, nullable: true }
+        zip_code: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        latitude: { type: number, nullable: true }
+        longitude: { type: number, nullable: true }
         is_complete:
           type: boolean
           description: "Profil complet (tous les champs obligatoires renseignés). Présent uniquement sur GET /me."
@@ -2416,11 +2510,13 @@ components:
 
     CreateConversationRequest:
       type: object
+      description: |
+        Patient sends practitioner_id. Practitioner sends patient_id (auth_user_id of CRM patient).
       properties:
-        practitioner_id: { type: string, format: uuid }
+        practitioner_id: { type: string, format: uuid, description: "Required when caller is patient" }
+        patient_id: { type: string, format: uuid, description: "Required when caller is practitioner (CRM patient auth_user_id)" }
         subject: { type: string }
         content: { type: string }
-      required: [practitioner_id]
 
     SendMessageRequest:
       type: object
@@ -2644,6 +2740,7 @@ components:
 
     UpdatePractitionerProfileRequest:
       type: object
+      description: Mise à jour profil praticien (paramètres CRM). latitude/longitude depuis AddressAutocomplete.
       properties:
         about: { type: string, nullable: true }
         languages:
@@ -2657,8 +2754,14 @@ components:
         address_line: { type: string, nullable: true }
         zip_code: { type: string, nullable: true }
         city: { type: string, nullable: true }
-        latitude: { type: number, nullable: true, description: "Latitude pour la recherche par distance (PostGIS)" }
-        longitude: { type: number, nullable: true, description: "Longitude pour la recherche par distance (PostGIS)" }
+        latitude:
+          type: number
+          nullable: true
+          description: "Latitude (depuis AddressAutocomplete / Place Details)"
+        longitude:
+          type: number
+          nullable: true
+          description: "Longitude (depuis AddressAutocomplete / Place Details)"
         price_min_agorot:
           type: integer
           minimum: 0
@@ -2677,28 +2780,40 @@ components:
 
     RegisterPractitionerRequest:
       type: object
+      description: Inscription praticien (complete-profile). latitude/longitude depuis AddressAutocomplete.
       properties:
         first_name: { type: string, minLength: 1 }
         last_name: { type: string, minLength: 1 }
         email: { type: string, format: email }
-        phone: { type: string, pattern: '^\+[1-9]\d{1,14}$' }
+        phone: { type: string, pattern: '^\+[1-9]\d{1,14}$', description: "Format E.164 (ex: +972501234567)" }
         city: { type: string, minLength: 1 }
-        specialty: { type: string, minLength: 1 }
-        license_number: { type: string, pattern: '^\d{1,6}$' }
+        specialty_id: { type: string, format: uuid, description: "UUID de la spécialité" }
+        license_number: { type: string, pattern: '^\d{1,6}$', description: "1 à 6 chiffres" }
+        specialization_license:
+          type: string
+          pattern: '^\d{1,6}$'
+          nullable: true
+          description: "Numéro de licence de spécialité (optionnel)"
         address_line: { type: string, minLength: 1 }
         zip_code: { type: string, minLength: 1 }
-        latitude: { type: number, description: "Latitude pour la recherche par distance (PostGIS)" }
-        longitude: { type: number, description: "Longitude pour la recherche par distance (PostGIS)" }
+        latitude:
+          type: number
+          nullable: true
+          description: "Latitude (depuis AddressAutocomplete / Place Details)"
+        longitude:
+          type: number
+          nullable: true
+          description: "Longitude (depuis AddressAutocomplete / Place Details)"
         organization_id:
           type: string
           format: uuid
-          description: Join an existing organization (optional)
+          description: Rejoindre une organisation existante (optionnel)
         organization_name:
           type: string
-          description: Name for a new organization (optional)
+          description: Nom pour une nouvelle organisation (optionnel)
         organization_type:
           $ref: "#/components/schemas/OrganizationType"
-      required: [first_name, last_name, email, phone, city, specialty, license_number, address_line, zip_code]
+      required: [first_name, last_name, email, phone, city, specialty_id, license_number, address_line, zip_code]
 
     # ── Organizations ──────────────────────────────────────────────────
 

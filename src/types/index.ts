@@ -26,6 +26,9 @@ export type NotificationType =
   | 'appointment_request'
   | 'appointment_confirmed'
   | 'appointment_cancelled'
+  | 'appointment_created'
+  | 'appointment_rescheduled'
+  | 'appointment_completed'
   | 'appointment_reminder'
   | 'new_message'
   | 'review_received';

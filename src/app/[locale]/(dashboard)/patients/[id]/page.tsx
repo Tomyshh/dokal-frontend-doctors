@@ -3,6 +3,7 @@
 import { use, useEffect, useMemo, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePatient } from '@/hooks/usePatient';
+import { useConversations, useCreateConversation } from '@/hooks/useMessages';
 import { useUpdateCrmPatient } from '@/hooks/useCrmPatients';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
@@ -13,8 +14,8 @@ import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { ArrowLeft, Phone, Mail, MapPin, Calendar, AlertTriangle } from 'lucide-react';
-import { Link } from '@/i18n/routing';
+import { ArrowLeft, Phone, Mail, MapPin, Calendar, AlertTriangle, MessageSquare } from 'lucide-react';
+import { Link, useRouter } from '@/i18n/routing';
 import type { CrmPatientListItem, Appointment } from '@/types';
 import { formatMissingFieldLabel } from '@/lib/crm';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
@@ -44,8 +45,11 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   const ta = useTranslations('appointments');
   const tcal = useTranslations('calendar');
   const locale = useLocale();
+  const router = useRouter();
   const { data: data, isLoading, isError, error } = usePatient(id);
   const updateMutation = useUpdateCrmPatient();
+  const { data: conversations } = useConversations();
+  const createConversation = useCreateConversation();
   const toast = useToast();
   const [editMode, setEditMode] = useState(false);
 
@@ -253,6 +257,33 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           <div className="flex gap-2">
+            {crmRecord.auth_user_id && (
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  const existing = conversations?.find((c) => c.patient_id === crmRecord.auth_user_id);
+                  if (existing) {
+                    router.push(`/messages/${existing.id}`);
+                    return;
+                  }
+                  try {
+                    const conv = await createConversation.mutateAsync({
+                      patient_id: crmRecord.auth_user_id,
+                    });
+                    router.push(`/messages/${conv.id}`);
+                  } catch (err: unknown) {
+                    const msg =
+                      (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error
+                        ?.message || tc('saveError');
+                    toast.error(tc('saveErrorTitle'), msg);
+                  }
+                }}
+                loading={createConversation.isPending}
+              >
+                <MessageSquare className="h-4 w-4 rtl:ml-2 rtl:mr-0 ml-0 mr-2" />
+                {t('sendMessage')}
+              </Button>
+            )}
             <Button
               variant={editMode ? 'outline' : 'default'}
               onClick={() => setEditMode((v) => !v)}

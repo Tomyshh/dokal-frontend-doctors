@@ -5,6 +5,27 @@ import api from '@/lib/api';
 import type { Conversation, Message } from '@/types';
 import type { SendMessageRequest } from '@/types/api';
 
+/** Request to create a conversation. Patient sends practitioner_id, practitioner sends patient_id. */
+export interface CreateConversationRequest {
+  practitioner_id?: string;
+  patient_id?: string;
+  subject?: string;
+  content?: string;
+}
+
+export function useCreateConversation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: CreateConversationRequest) => {
+      const { data: result } = await api.post<Conversation>('/conversations', data);
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}
+
 export function useConversations() {
   return useQuery({
     queryKey: ['conversations'],
