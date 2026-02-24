@@ -79,14 +79,17 @@ export function CompletePatientInfoDialog({
 
   const record = (data as { patient?: CrmPatientListItem })?.patient ?? (data as CrmPatientListItem | undefined);
   const normalize = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null);
+  const recordObj = (record ?? null) as unknown as Record<string, unknown> | null;
+  const dataObj = (data ?? null) as unknown as Record<string, unknown> | null;
+  const healthProfileObj = (dataObj?.health_profile ?? null) as unknown as Record<string, unknown> | null;
   const teudatDisplay =
-    normalize((record as Record<string, unknown>)?.teudat_zehut) ||
-    normalize((data as Record<string, unknown>)?.health_profile?.teudat_zehut) ||
-    normalize((record as Record<string, unknown>)?.teudat_zehut_masked) ||
+    normalize(recordObj?.teudat_zehut) ||
+    normalize(healthProfileObj?.teudat_zehut) ||
+    normalize(recordObj?.teudat_zehut_masked) ||
     '';
   const insuranceDisplay =
-    normalize((data as Record<string, unknown>)?.health_profile?.insurance_provider) ||
-    normalize((record as Record<string, unknown>)?.insurance_provider) ||
+    normalize(healthProfileObj?.insurance_provider) ||
+    normalize(recordObj?.insurance_provider) ||
     '';
 
   const [firstName, setFirstName] = useState('');

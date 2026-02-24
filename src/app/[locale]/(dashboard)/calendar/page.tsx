@@ -99,6 +99,11 @@ export default function CalendarPage() {
     [data?.appointments, externalEvents],
   );
 
+  const selectedAppointmentId = selectedItem?.kind === 'crm_appointment' ? selectedItem.data.id : null;
+  const selectedAppointmentStatus = selectedItem?.kind === 'crm_appointment' ? selectedItem.data.status : null;
+  const selectedAppointmentCancellationReason =
+    selectedItem?.kind === 'crm_appointment' ? selectedItem.data.cancellation_reason : null;
+
   // ─── Sync selectedItem when data refetches (e.g. after cancel/complete/no-show) ───
   useEffect(() => {
     if (!selectedItem || selectedItem.kind !== 'crm_appointment' || !data?.appointments) return;
@@ -106,7 +111,7 @@ export default function CalendarPage() {
     if (updated && (updated.status !== selectedItem.data.status || updated.cancellation_reason !== selectedItem.data.cancellation_reason)) {
       setSelectedItem({ kind: 'crm_appointment', data: updated });
     }
-  }, [data?.appointments, selectedItem?.kind, selectedItem?.data?.id, selectedItem?.data?.status, selectedItem?.data?.cancellation_reason]);
+  }, [data?.appointments, selectedAppointmentId, selectedAppointmentStatus, selectedAppointmentCancellationReason]);
 
   // ─── Handlers ───────────────────────────────────────────────────────
   const handleDayClick = useCallback(
