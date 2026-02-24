@@ -123,6 +123,10 @@ export interface Practitioner {
   organization_id: string;
   site_id: string | null;
   specialty_id: string | null;
+  /** True if a Teudat Zehut is stored for this practitioner (never returned in clear). */
+  has_teudat_zehut?: boolean;
+  /** Teudat Zehut masked (never returned in clear). */
+  teudat_zehut_masked?: string | null;
   license_number: string | null;
   specialization_license: string | null;
   address_line: string | null;

@@ -97,6 +97,13 @@ export interface UpdatePractitionerProfileRequest {
   education?: string | null;
   phone?: string | null;
   email?: string | null;
+  /** UUID of the specialty from GET /api/v1/specialties */
+  specialty_id?: string | null;
+  /**
+   * Teudat Zehut (Israeli national ID).
+   * Backend should store securely (encrypted + hash) and never return in clear.
+   */
+  teudat_zehut?: string | null;
   is_accepting_new_patients?: boolean;
   address_line?: string | null;
   zip_code?: string | null;

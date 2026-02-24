@@ -2386,6 +2386,24 @@ components:
       additionalProperties: true
       properties:
         id: { type: string, format: uuid }
+        specialty_id: { type: string, format: uuid, nullable: true }
+        specialties:
+          type: object
+          nullable: true
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+            name_fr: { type: string, nullable: true }
+            name_he: { type: string, nullable: true }
+            icon_url: { type: string, nullable: true }
+        has_teudat_zehut:
+          type: boolean
+          nullable: true
+          description: "true si une teudat_zehut est enregistrée (jamais renvoyée en clair)"
+        teudat_zehut_masked:
+          type: string
+          nullable: true
+          description: "Teudat Zehut masquée (jamais renvoyée en clair)"
         address_line: { type: string, nullable: true }
         zip_code: { type: string, nullable: true }
         city: { type: string, nullable: true }
@@ -2728,6 +2746,17 @@ components:
         education: { type: string, nullable: true }
         phone: { type: string, nullable: true }
         email: { type: string, format: email, nullable: true }
+        specialty_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: "UUID de la spécialité (GET /api/v1/specialties)"
+        teudat_zehut:
+          type: string
+          nullable: true
+          description: >
+            Teudat Zehut (9 chiffres). Le backend doit stocker de manière sécurisée
+            (chiffré + hash) et ne jamais renvoyer en clair.
         is_accepting_new_patients: { type: boolean }
         address_line: { type: string, nullable: true }
         zip_code: { type: string, nullable: true }

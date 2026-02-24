@@ -28,6 +28,7 @@ import GoogleCalendarSection from '@/components/settings/GoogleCalendarSection';
 import AvatarUploadSection from '@/components/settings/AvatarUploadSection';
 import { LanguagesCombobox } from '@/components/settings/LanguagesCombobox';
 import { AddressAutocomplete, type AddressResult } from '@/components/auth/AddressAutocomplete';
+import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { useGenerateAboutWithAI, useGenerateEducationWithAI } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -71,6 +72,8 @@ export default function SettingsPage() {
   const [languages, setLanguages] = useState<string[]>([]);
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [specialtyId, setSpecialtyId] = useState('');
+  const [teudatZehut, setTeudatZehut] = useState('');
   const [addressLine, setAddressLine] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [city, setCity] = useState('');
@@ -91,6 +94,7 @@ export default function SettingsPage() {
       setLanguages(practitioner.languages ?? []);
       setPhone(practitioner.phone || '');
       setEmail(practitioner.email || '');
+      setSpecialtyId(practitioner.specialty_id || '');
       setAddressLine(practitioner.address_line || '');
       setZipCode(practitioner.zip_code || '');
       setCity(practitioner.city || '');
@@ -125,6 +129,11 @@ export default function SettingsPage() {
   }, [organization]);
 
   const handleSaveProfile = async () => {
+    const tz = teudatZehut.trim();
+    if (tz && !/^\d{9}$/.test(tz)) {
+      toast.error(t('teudatZehutInvalidTitle'), t('teudatZehutInvalid'));
+      return;
+    }
     const minVal = priceMinShekels.trim() ? Math.round(parseFloat(priceMinShekels) * 100) : null;
     const maxVal = priceMaxShekels.trim() ? Math.round(parseFloat(priceMaxShekels) * 100) : null;
     if (minVal != null && maxVal != null && minVal > maxVal) {
@@ -137,7 +146,7 @@ export default function SettingsPage() {
       return;
     }
     try {
-      await updateProfile.mutateAsync({
+      const payload: Parameters<typeof updateProfile.mutateAsync>[0] = {
         about: about || null,
         education: education || null,
         languages: languages.length > 0 ? languages : null,
@@ -152,9 +161,14 @@ export default function SettingsPage() {
         price_min_agorot: minVal,
         price_max_agorot: maxVal,
         consultation_duration_minutes: duration,
-      });
+      };
+      if (specialtyId) payload.specialty_id = specialtyId;
+      if (tz) payload.teudat_zehut = tz;
+
+      await updateProfile.mutateAsync(payload);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+      setTeudatZehut('');
       toast.success(t('saved'));
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
@@ -363,6 +377,13 @@ export default function SettingsPage() {
               <div className="h-px bg-border/50" />
 
               <div id="profile-section-about" className="grid grid-cols-1 gap-4">
+                <SpecialtyCombobox
+                  id="specialty"
+                  label={t('specialty')}
+                  value={specialtyId}
+                  onChange={setSpecialtyId}
+                  placeholder={t('specialtyPlaceholder')}
+                />
                 <div className="space-y-2">
                   <Textarea
                     label={t('about')}
@@ -418,6 +439,22 @@ export default function SettingsPage() {
               <div id="profile-section-contact" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label={tc('phone')} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
                 <Input label={tc('email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <div className="sm:col-span-2 space-y-2">
+                  <Input
+                    label={t('teudatZehut')}
+                    value={teudatZehut}
+                    onChange={(e) => setTeudatZehut(e.target.value)}
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder={practitioner?.teudat_zehut_masked || '000000000'}
+                  />
+                  <p className="text-xs text-muted-foreground">{t('teudatZehutHint')}</p>
+                  {practitioner?.has_teudat_zehut && (
+                    <p className="text-xs text-muted-foreground">
+                      {t('teudatZehutCurrent')}: <span className="font-medium text-gray-900">{practitioner.teudat_zehut_masked || '•••••••••'}</span>
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div id="profile-section-address" className="pt-1">
