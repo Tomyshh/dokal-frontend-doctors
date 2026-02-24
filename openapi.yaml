@@ -1336,6 +1336,23 @@ paths:
         "403": { $ref: "#/components/responses/Forbidden" }
 
   /api/v1/crm/appointments/{id}:
+    get:
+      tags: [CRM]
+      summary: Get appointment by id (practitioner only)
+      description: >
+        Returns appointment details for the CRM. Required for deep linking from
+        notifications (appointment_request, appointment_cancelled) when practitioner
+        clicks to view the appointment.
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      responses:
+        "200":
+          description: Appointment (same structure as list items)
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
     patch:
       tags: [CRM]
       summary: Update appointment metadata (practitioner only)

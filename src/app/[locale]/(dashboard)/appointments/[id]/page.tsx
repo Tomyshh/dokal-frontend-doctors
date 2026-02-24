@@ -32,7 +32,9 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
   const { data: appointment, isLoading } = useQuery({
     queryKey: ['appointment', id],
     queryFn: async () => {
-      const { data } = await api.get<Appointment>(`/appointments/${id}`);
+      // CRM context: use /crm/appointments/{id} so practitioner can view any appointment
+      // (GET /appointments/{id} is patient-only and returns 404 for practitioner)
+      const { data } = await api.get<Appointment>(`/crm/appointments/${id}`);
       return data;
     },
     enabled: !!id,
