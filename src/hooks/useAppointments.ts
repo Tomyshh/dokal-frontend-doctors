@@ -72,6 +72,7 @@ export function useConfirmAppointment() {
       await api.patch(`/crm/appointments/${id}/confirm`);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointment'] });
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
@@ -86,6 +87,7 @@ export function useConfirmOrganizationAppointment() {
       await api.patch(`/crm/organization/appointments/${id}/confirm`);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointment'] });
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
@@ -100,6 +102,7 @@ export function useCancelAppointment() {
       await api.patch(`/crm/appointments/${id}/cancel`, data);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointment'] });
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
@@ -114,6 +117,7 @@ export function useCancelOrganizationAppointment() {
       await api.patch(`/crm/organization/appointments/${id}/cancel`, data);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointment'] });
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
@@ -128,6 +132,7 @@ export function useCompleteAppointment() {
       await api.patch(`/crm/appointments/${id}/complete`, data);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointment'] });
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
@@ -142,6 +147,7 @@ export function useCompleteOrganizationAppointment() {
       await api.patch(`/crm/organization/appointments/${id}/complete`, data);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointment'] });
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
@@ -156,6 +162,7 @@ export function useNoShowAppointment() {
       await api.patch(`/crm/appointments/${id}/no-show`);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointment'] });
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
@@ -170,6 +177,7 @@ export function useNoShowOrganizationAppointment() {
       await api.patch(`/crm/organization/appointments/${id}/no-show`);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointment'] });
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-stats'] });

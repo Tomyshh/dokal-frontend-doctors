@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
 import { Textarea } from '@/components/ui/Textarea';
+import { useToast } from '@/providers/ToastProvider';
 import {
   useConfirmAppointment,
   useConfirmOrganizationAppointment,
@@ -24,9 +25,15 @@ interface AppointmentActionsProps {
   status: AppointmentStatus;
 }
 
+function getErrorMessage(err: unknown): string {
+  return (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || '';
+}
+
 export default function AppointmentActions({ appointmentId, status }: AppointmentActionsProps) {
   const t = useTranslations('appointments');
+  const tc = useTranslations('common');
   const { profile } = useAuth();
+  const toast = useToast();
   const isOrgActor = profile?.role === 'secretary' || profile?.role === 'admin';
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
@@ -44,26 +51,51 @@ export default function AppointmentActions({ appointmentId, status }: Appointmen
   const noShowOrgMutation = useNoShowOrganizationAppointment();
 
   const handleConfirm = () => {
-    (isOrgActor ? confirmOrgMutation : confirmMutation).mutate(appointmentId);
+    const mutation = isOrgActor ? confirmOrgMutation : confirmMutation;
+    mutation.mutate(appointmentId, {
+      onSuccess: () => toast.success(tc('saveSuccess')),
+      onError: (err) => toast.error(tc('saveErrorTitle'), getErrorMessage(err) || tc('saveError')),
+    });
   };
 
   const handleCancel = () => {
-    (isOrgActor ? cancelOrgMutation : cancelMutation).mutate(
+    const mutation = isOrgActor ? cancelOrgMutation : cancelMutation;
+    mutation.mutate(
       { id: appointmentId, data: { cancellation_reason: cancelReason || undefined } },
-      { onSuccess: () => setCancelDialogOpen(false) }
+      {
+        onSuccess: () => {
+          setCancelDialogOpen(false);
+          setCancelReason('');
+          toast.success(tc('saveSuccess'));
+        },
+        onError: (err) => toast.error(tc('saveErrorTitle'), getErrorMessage(err) || tc('saveError')),
+      }
     );
   };
 
   const handleComplete = () => {
-    (isOrgActor ? completeOrgMutation : completeMutation).mutate(
+    const mutation = isOrgActor ? completeOrgMutation : completeMutation;
+    mutation.mutate(
       { id: appointmentId, data: { practitioner_notes: practitionerNotes || undefined } },
-      { onSuccess: () => setCompleteDialogOpen(false) }
+      {
+        onSuccess: () => {
+          setCompleteDialogOpen(false);
+          setPractitionerNotes('');
+          toast.success(tc('saveSuccess'));
+        },
+        onError: (err) => toast.error(tc('saveErrorTitle'), getErrorMessage(err) || tc('saveError')),
+      }
     );
   };
 
   const handleNoShow = () => {
-    (isOrgActor ? noShowOrgMutation : noShowMutation).mutate(appointmentId, {
-      onSuccess: () => setNoShowDialogOpen(false),
+    const mutation = isOrgActor ? noShowOrgMutation : noShowMutation;
+    mutation.mutate(appointmentId, {
+      onSuccess: () => {
+        setNoShowDialogOpen(false);
+        toast.success(tc('saveSuccess'));
+      },
+      onError: (err) => toast.error(tc('saveErrorTitle'), getErrorMessage(err) || tc('saveError')),
     });
   };
 

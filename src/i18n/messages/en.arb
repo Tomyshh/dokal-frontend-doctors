@@ -997,6 +997,7 @@
     "missingInfoBadge": "To complete",
     "missingInfoFields": "Missing fields",
     "completePatientInfoTitle": "Complete patient information",
+    "completePatientInfoClickHint": "Click to view and complete missing information",
     "completedFieldsLabel": "Completed fields",
     "missingFieldsToCompleteLabel": "Fields to complete",
     "appointmentMeta": "Appointment details (CRM)",

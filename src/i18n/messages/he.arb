@@ -985,6 +985,7 @@
     "deleteExternalEvent": "מחק אירוע",
     "deleteExternalEventConfirm": "האם אתם בטוחים שברצונכם למחוק אירוע זה?",
     "completePatientInfoTitle": "השלם פרטי מטופל",
+    "completePatientInfoClickHint": "לחץ לצפייה והשלמת המידע החסר",
     "completedFieldsLabel": "שדות שהושלמו",
     "missingFieldsToCompleteLabel": "שדות להשלמה"
   }

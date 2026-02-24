@@ -997,6 +997,7 @@
     "missingInfoBadge": "À compléter",
     "missingInfoFields": "Champs manquants",
     "completePatientInfoTitle": "Compléter les informations du patient",
+    "completePatientInfoClickHint": "Cliquez pour voir et compléter les informations manquantes",
     "completedFieldsLabel": "Champs complétés",
     "missingFieldsToCompleteLabel": "Champs à compléter",
     "appointmentMeta": "Détails RDV (CRM)",

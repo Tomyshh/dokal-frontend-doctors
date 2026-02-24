@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   format,
@@ -98,6 +98,15 @@ export default function CalendarPage() {
       ),
     [data?.appointments, externalEvents],
   );
+
+  // ─── Sync selectedItem when data refetches (e.g. after cancel/complete/no-show) ───
+  useEffect(() => {
+    if (!selectedItem || selectedItem.kind !== 'crm_appointment' || !data?.appointments) return;
+    const updated = data.appointments.find((a) => a.id === selectedItem.data.id);
+    if (updated && (updated.status !== selectedItem.data.status || updated.cancellation_reason !== selectedItem.data.cancellation_reason)) {
+      setSelectedItem({ kind: 'crm_appointment', data: updated });
+    }
+  }, [data?.appointments, selectedItem?.kind, selectedItem?.data?.id, selectedItem?.data?.status, selectedItem?.data?.cancellation_reason]);
 
   // ─── Handlers ───────────────────────────────────────────────────────
   const handleDayClick = useCallback(

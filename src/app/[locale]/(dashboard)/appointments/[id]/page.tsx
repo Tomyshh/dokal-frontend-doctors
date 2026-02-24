@@ -13,7 +13,7 @@ import AppointmentActions from '@/components/appointments/AppointmentActions';
 import { CompletePatientInfoDialog } from '@/components/appointments/CompletePatientInfoDialog';
 import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
-import { ArrowLeft, Calendar, Clock, MapPin, User, FileText } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, User, FileText, ChevronRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import type { Appointment } from '@/types';
 import {
@@ -29,6 +29,7 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
   const tc = useTranslations('common');
   const tcal = useTranslations('calendar');
   const locale = useLocale();
+  const [completeInfoOpen, setCompleteInfoOpen] = useState(false);
 
   const { data: appointment, isLoading } = useQuery({
     queryKey: ['appointment', id],
@@ -89,7 +90,6 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
   const patientName = getCrmAppointmentPatientDisplayName(appointment);
   const patientRecordId = getCrmAppointmentPatientRecordId(appointment);
   const isDraft = isDraftPatientAppointment(appointment);
-  const [completeInfoOpen, setCompleteInfoOpen] = useState(false);
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -144,12 +144,12 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
                       <button
                         type="button"
                         onClick={() => setCompleteInfoOpen(true)}
-                        className="cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-1 rounded-full"
+                        title={tcal('completePatientInfoClickHint')}
+                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:border-red-300 cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-1"
                         aria-label={tcal('completePatientInfoTitle')}
                       >
-                        <Badge className="bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors">
-                          {tcal('missingInfoBadge')}
-                        </Badge>
+                        {tcal('missingInfoBadge')}
+                        <ChevronRight className="h-3.5 w-3.5 opacity-70" />
                       </button>
                     ) : (
                       <Badge className="bg-red-50 text-red-700 border border-red-200">
