@@ -34,6 +34,15 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
 
   const { data: gcalStatus, isLoading: gcalStatusLoading } = useGoogleCalendarStatus();
   const gcalConnectMutation = useStartGoogleCalendarConnect();
+  const showEnergyRing = !(gcalStatusLoading || gcalConnectMutation.isPending);
+  const isGcalSynced = Boolean(
+    gcalStatus?.connected && gcalStatus?.last_sync_at && !gcalStatus?.last_error
+  );
+  const energyRingClass = showEnergyRing
+    ? isGcalSynced
+      ? 'energy-sync energy-sync--ok'
+      : 'energy-sync energy-sync--ko'
+    : '';
 
   const switchLocale = async (newLocale: Locale) => {
     setShowLangMenu(false);
@@ -100,6 +109,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
             aria-label={gcalTitle}
             className={cn(
               'relative h-10 min-w-[72px] px-1 rounded-xl flex items-center justify-center transition-colors',
+              energyRingClass,
               gcalStatus?.connected
                 ? 'text-emerald-600 hover:bg-emerald-50'
                 : 'text-gray-500 hover:bg-muted',

@@ -88,6 +88,80 @@
   }
 }
 
+/* Google Calendar sync "energy ring" indicator */
+@keyframes energy-sync-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.energy-sync {
+  position: relative;
+  isolation: isolate;
+}
+
+.energy-sync > * {
+  position: relative;
+  z-index: 1;
+}
+
+.energy-sync::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--energy-color) 35deg,
+    rgba(var(--energy-rgb), 0.35) 70deg,
+    transparent 120deg,
+    var(--energy-color) 210deg,
+    rgba(var(--energy-rgb), 0.35) 260deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: energy-sync-spin 6s linear infinite;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.energy-sync::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(var(--energy-rgb), 0.22) 0%,
+    rgba(var(--energy-rgb), 0.08) 35%,
+    transparent 65%
+  );
+  filter: blur(6px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.energy-sync--ok {
+  --energy-color: #10b981;
+  --energy-rgb: 16, 185, 129;
+}
+
+.energy-sync--ko {
+  --energy-color: #ef4444;
+  --energy-rgb: 239, 68, 68;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .energy-sync::before {
+    animation: none;
+  }
+}
+
 /* RTL support */
 [dir='rtl'] .sidebar-link {
   @apply flex-row-reverse;

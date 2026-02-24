@@ -35,7 +35,8 @@ export default function LoginPage() {
       });
 
       if (authError) {
-        setError(t('invalidCredentials'));
+        // Expose Supabase error message for faster diagnosis (disabled provider, bad key, etc.)
+        setError(authError.message || t('invalidCredentials'));
         return;
       }
 

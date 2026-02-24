@@ -23,8 +23,9 @@ export default function IntlProvider({ locale, messages, children }: Props) {
         }
       }}
       getMessageFallback={({ namespace, key }) => {
-        // Show a stable placeholder instead of throwing on missing translations.
-        // Example: calendar.googleEvent
+        // In production, never leak raw i18n keys in the UI.
+        // In dev, keep a stable placeholder for fast debugging.
+        if (process.env.NODE_ENV === 'production') return '';
         return namespace ? `${namespace}.${key}` : key;
       }}
     >
