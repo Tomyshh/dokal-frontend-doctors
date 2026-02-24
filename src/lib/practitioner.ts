@@ -51,6 +51,32 @@ export function isPractitionerCompleteFromBackend(practitioner: Practitioner | n
   return practitioner.is_complete === true;
 }
 
+/**
+ * During onboarding we allow the user to proceed even if pricing is missing,
+ * but we still keep pricing as part of the Settings "profile completion" progress.
+ *
+ * Backend currently reports missing pricing fields as:
+ * - price_min_agorot
+ * - price_max_agorot
+ */
+const ONBOARDING_OPTIONAL_MISSING_FIELDS = new Set<string>(['price_min_agorot', 'price_max_agorot']);
+
+export function filterOnboardingOptionalMissingFields(fields: string[] | null | undefined): string[] {
+  return (fields ?? []).filter((f) => !ONBOARDING_OPTIONAL_MISSING_FIELDS.has(f));
+}
+
+/**
+ * True when the practitioner can proceed in onboarding flows (subscription, dashboard),
+ * even if backend `is_complete` is false solely because of optional fields (pricing).
+ */
+export function isPractitionerOnboardingReady(practitioner: Practitioner | null | undefined): boolean {
+  if (!practitioner) return false;
+  if (practitioner.is_complete === true) return true;
+  const missing = practitioner.missing_fields ?? [];
+  if (missing.length === 0) return true;
+  return missing.every((f) => ONBOARDING_OPTIONAL_MISSING_FIELDS.has(f));
+}
+
 /** Fields used to compute profile completion percentage (UX indicator) */
 const PROFILE_COMPLETION_FIELDS = [
   (p: Practitioner | null, profile: Profile | null) => !!profile?.avatar_url,

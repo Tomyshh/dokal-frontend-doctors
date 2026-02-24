@@ -85,6 +85,7 @@ export default function SettingsPage() {
   const [priceMinShekels, setPriceMinShekels] = useState('');
   const [priceMaxShekels, setPriceMaxShekels] = useState('');
   const [consultationDurationMinutes, setConsultationDurationMinutes] = useState(30);
+  const pricingIncomplete = practitioner?.price_min_agorot == null || practitioner?.price_max_agorot == null;
 
   // Populate form
   useEffect(() => {
@@ -502,7 +503,20 @@ export default function SettingsPage() {
               </div>
 
               <div id="profile-section-pricing" className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-700">{t('priceRange')}</h3>
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold text-gray-700">{t('priceRange')}</h3>
+                  {pricingIncomplete && (
+                    <Badge className="bg-amber-100 text-amber-900 text-xs">
+                      {t('toCompleteBadge')}
+                    </Badge>
+                  )}
+                </div>
+                {pricingIncomplete && (
+                  <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+                    <p className="font-medium">{t('pricingRequiredTitle')}</p>
+                    <p className="text-xs text-amber-700 mt-1">{t('pricingRequiredDesc')}</p>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">{t('priceRangeHint')}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input

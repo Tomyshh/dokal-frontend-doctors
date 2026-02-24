@@ -13,7 +13,7 @@ import { CityCombobox } from '@/components/auth/CityCombobox';
 import { AddressAutocomplete, type AddressResult } from '@/components/auth/AddressAutocomplete';
 import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/PhoneInputIL';
 import { Spinner } from '@/components/ui/Spinner';
-import { getMyPractitionerOrNull, isPractitionerCompleteFromBackend, unwrapPractitioner } from '@/lib/practitioner';
+import { filterOnboardingOptionalMissingFields, getMyPractitionerOrNull, isPractitionerCompleteFromBackend, unwrapPractitioner } from '@/lib/practitioner';
 import { isRtl } from '@/i18n/config';
 import { LogOut } from 'lucide-react';
 
@@ -85,7 +85,7 @@ export default function CompleteProfilePage() {
         const data = await getMyPractitionerOrNull();
         if (!data) return;
         if (cancelled) return;
-        setMissingFields(data.missing_fields ?? []);
+        setMissingFields(filterOnboardingOptionalMissingFields(data.missing_fields));
         const dataObj = data as unknown as Record<string, unknown>;
         const specialtyId =
           (dataObj.specialty_id as string) ||
