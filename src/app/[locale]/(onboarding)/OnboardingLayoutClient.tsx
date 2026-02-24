@@ -2,11 +2,14 @@
 
 import type { ReactNode } from 'react';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { Spinner } from '@/components/ui/Spinner';
 
 export default function OnboardingLayoutClient({ children }: { children: ReactNode }) {
   const { loading } = useAuth();
+  const pathname = usePathname();
+  const isCompleteProfile = pathname?.endsWith('/complete-profile') ?? false;
 
   if (loading) {
     return (
@@ -17,27 +20,45 @@ export default function OnboardingLayoutClient({ children }: { children: ReactNo
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-900 via-primary to-primary-700">
-      <div className="max-w-5xl mx-auto px-6 py-10 lg:py-16">
+    <div
+      className={
+        isCompleteProfile
+          ? 'h-[100dvh] overflow-hidden bg-gradient-to-br from-primary-900 via-primary to-primary-700'
+          : 'min-h-screen bg-gradient-to-br from-primary-900 via-primary to-primary-700'
+      }
+    >
+      <div
+        className={
+          isCompleteProfile
+            ? 'max-w-5xl mx-auto px-6 py-6 lg:py-8 h-full flex flex-col'
+            : 'max-w-5xl mx-auto px-6 py-10 lg:py-16'
+        }
+      >
         {/* Logo */}
-        <div className="flex justify-center mb-10">
+        <div className={isCompleteProfile ? 'flex justify-center mb-6' : 'flex justify-center mb-10'}>
           <Image
             src="/branding/fulllogo_transparent_nobuffer.png"
             alt="Dokal"
-            width={160}
-            height={52}
+            width={isCompleteProfile ? 140 : 160}
+            height={isCompleteProfile ? 46 : 52}
             priority
             className="brightness-0 invert"
           />
         </div>
 
         {/* Main panel */}
-        <div className="bg-white rounded-3xl shadow-2xl shadow-black/20 border border-white/20 p-8 sm:p-10">
+        <div
+          className={
+            isCompleteProfile
+              ? 'bg-white rounded-3xl shadow-2xl shadow-black/20 border border-white/20 p-6 sm:p-8 flex-1 overflow-hidden'
+              : 'bg-white rounded-3xl shadow-2xl shadow-black/20 border border-white/20 p-8 sm:p-10'
+          }
+        >
           {children}
         </div>
 
         {/* Footer branding */}
-        <p className="text-center text-xs text-white/40 mt-8">
+        <p className={isCompleteProfile ? 'text-center text-xs text-white/40 mt-6' : 'text-center text-xs text-white/40 mt-8'}>
           © 2026 Dokal. All rights reserved.
         </p>
       </div>

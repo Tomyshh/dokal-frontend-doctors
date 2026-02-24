@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import api from '@/lib/api';
 import type { RegisterPractitionerRequest } from '@/types/api';
@@ -38,7 +37,6 @@ export default function CompleteProfilePage() {
   const t = useTranslations('auth');
   const locale = useLocale();
   const rtl = isRtl(locale);
-  const router = useRouter();
   const { user, profile, loading: authLoading, refreshUserData, signOut, loggingOut } = useAuth();
 
   // Google user_metadata may contain given_name, family_name, full_name, avatar_url
@@ -252,14 +250,14 @@ export default function CompleteProfilePage() {
   };
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       {authLoading && !user ? (
         <div className="flex items-center justify-center py-10">
           <Spinner size="lg" />
         </div>
       ) : null}
 
-      <div className={rtl ? 'flex items-center justify-end mb-6' : 'flex items-center justify-start mb-6'}>
+      <div className={rtl ? 'flex items-center justify-end mb-4' : 'flex items-center justify-start mb-4'}>
         <Button
           type="button"
           variant="ghost"
@@ -283,13 +281,13 @@ export default function CompleteProfilePage() {
         </Button>
       </div>
 
-      <div className="text-center mb-8">
+      <div className="text-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">{t('completeProfileTitle')}</h1>
         <p className="text-sm text-muted-foreground mt-2">{t('completeProfileSubtitle')}</p>
       </div>
 
       {missingFields.length > 0 && (
-        <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800 mb-6">
+        <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800 mb-4">
           <p className="font-medium mb-1">{t('completeProfileMissingFields')}</p>
           <p className="text-amber-700">
             {missingFields.map((f) => missingFieldLabels[f] ?? f).join(', ')}
@@ -298,12 +296,13 @@ export default function CompleteProfilePage() {
       )}
 
       {error && (
-        <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 mb-6">
+        <div className="rounded-2xl bg-red-50 border border-red-200 p-3 text-sm text-red-700 mb-4">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
+        <div className="space-y-3 flex-1 min-h-0">
         <div className="grid grid-cols-2 gap-3">
           <Input
             id="firstName"
@@ -408,8 +407,9 @@ export default function CompleteProfilePage() {
             placeholder={t('zipCode')}
           />
         </div>
+        </div>
 
-        <Button type="submit" className="w-full rounded-full h-12" loading={loading}>
+        <Button type="submit" className="w-full rounded-full h-11 mt-4" loading={loading}>
           {t('saveAndContinue')}
         </Button>
       </form>

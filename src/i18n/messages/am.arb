@@ -72,6 +72,7 @@
     "signupTitle": "Create your practitioner account",
     "signupSubtitle": "Enter the essential information to access the CRM.",
     "addressLine": "Office address",
+    "addressSelectHint": "Type and select an address from the suggestions",
     "zipCode": "Zip code",
     "termsLabel": "I confirm I am a practitioner and accept the platform terms of use.",
     "termsError": "Please accept the terms to continue.",
