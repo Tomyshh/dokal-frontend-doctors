@@ -61,22 +61,13 @@ export default function OneSignalProvider({ children }: { children: React.ReactN
     });
   }, [user?.id, profile?.role]);
 
-  // Déconnexion : supprimer le token backend puis logout OneSignal
+  // Déconnexion : supprimer le token backend (si encore authentifié) puis logout OneSignal
+  // Ne jamais appeler api.delete quand !user?.id : on n'est pas authentifié, l'API
+  // retournerait 401 et déclencherait la redirection de l'intercepteur (boucle de refresh).
   useEffect(() => {
     if (!user?.id) {
       runWhenOneSignalReady(async (OneSignal) => {
-        const subId =
-          OneSignal.User?.PushSubscription?.id ?? tokenRegisteredRef.current;
-        if (subId) {
-          try {
-            await api.delete('/notifications/push-tokens', {
-              data: { token: subId },
-            });
-          } catch {
-            // Silently fail
-          }
-          tokenRegisteredRef.current = null;
-        }
+        tokenRegisteredRef.current = null;
         await OneSignal.logout();
       });
     }
