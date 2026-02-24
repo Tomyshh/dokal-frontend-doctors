@@ -217,11 +217,11 @@ export default function AvatarUploadSection({
     <div
       className={cn(
         'rounded-2xl p-4 transition-colors',
-        !hasAvatar && 'border-2 border-destructive/50 bg-destructive/5'
+        !hasAvatar && 'border-2 border-dashed border-amber-300 bg-amber-50/50'
       )}
     >
       {!hasAvatar && (
-        <div className="mb-4 rounded-xl bg-destructive/10 border border-destructive/30 px-4 py-3 text-sm text-destructive font-medium">
+        <div className="mb-4 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800 font-medium">
           {t('avatarMissingNotice')}
         </div>
       )}

@@ -449,6 +449,7 @@
     "teudatZehutCurrent": "Actual",
     "teudatZehutInvalidTitle": "Teudat Zehut inválido",
     "teudatZehutInvalid": "Introduce un número de 9 dígitos (solo dígitos).",
+    "contactInfo": "Datos de contacto",
     "address": "Office address",
     "addressLine": "Address",
     "addressSelectHint": "Escribe y selecciona una dirección de las sugerencias",

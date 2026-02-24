@@ -450,6 +450,7 @@
     "teudatZehutCurrent": "Current",
     "teudatZehutInvalidTitle": "Invalid Teudat Zehut",
     "teudatZehutInvalid": "Enter a 9-digit number (digits only).",
+    "contactInfo": "Contact information",
     "address": "Office address",
     "addressLine": "Address",
     "addressSelectHint": "Type and select an address from the suggestions",

@@ -449,6 +449,7 @@
     "teudatZehutCurrent": "Текущая",
     "teudatZehutInvalidTitle": "Неверный Teudat Zehut",
     "teudatZehutInvalid": "Введите 9-значный номер (только цифры).",
+    "contactInfo": "Контактные данные",
     "address": "Адрес клиники",
     "addressLine": "Адрес",
     "addressSelectHint": "Введите и выберите адрес из списка",

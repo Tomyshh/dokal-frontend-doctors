@@ -15,7 +15,17 @@ import {
   CheckCircle2,
   Building2,
   Sparkles,
+  Settings2,
+  Globe,
+  Bell,
+  User,
+  FileText,
+  Phone,
+  MapPin,
+  Banknote,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useCrmOrganization, useUpdateOrganization } from '@/hooks/useOrganization';
 import { useQuery } from '@tanstack/react-query';
 import { Select } from '@/components/ui/Select';
@@ -31,6 +41,32 @@ import { AddressAutocomplete, type AddressResult } from '@/components/auth/Addre
 import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { useGenerateAboutWithAI, useGenerateEducationWithAI } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
+
+function SectionHeader({ icon: Icon, title, subtitle, badge }: {
+  icon: LucideIcon;
+  title: string;
+  subtitle?: string;
+  badge?: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 mb-5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+          {badge && (
+            <span className="inline-flex items-center rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+              {badge}
+            </span>
+          )}
+        </div>
+        {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
+      </div>
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
@@ -86,6 +122,13 @@ export default function SettingsPage() {
   const [priceMaxShekels, setPriceMaxShekels] = useState('');
   const [consultationDurationMinutes, setConsultationDurationMinutes] = useState(30);
   const pricingIncomplete = practitioner?.price_min_agorot == null || practitioner?.price_max_agorot == null;
+
+  const isSectionComplete = (section: string) => {
+    if (!practitionerProfile?.completionItems) return true;
+    return practitionerProfile.completionItems
+      .filter(item => item.section === section)
+      .every(item => item.completed);
+  };
 
   // Populate form
   useEffect(() => {
@@ -276,28 +319,61 @@ export default function SettingsPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('title')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {t('language')}, {t('notifications')}, {t('profile')}…
-          </p>
-        </div>
-        {saved && (
-          <div className="flex items-center gap-2 text-green-600 text-sm">
-            <CheckCircle2 className="h-4 w-4" />
-            {t('saved')}
+      {/* Page header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Settings2 className="h-6 w-6" />
           </div>
-        )}
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('title')}</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {t('language')}, {t('notifications')}, {t('profile')}…
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          {saved && (
+            <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
+              <CheckCircle2 className="h-4 w-4" />
+              {t('saved')}
+            </div>
+          )}
+          {practitionerProfile && (
+            <div className="flex items-center gap-2.5 rounded-full bg-primary/5 border border-primary/15 px-4 py-2">
+              <div className="relative h-7 w-7">
+                <svg className="h-7 w-7 -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="3" className="text-primary/15" />
+                  <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="text-primary transition-all duration-700 ease-out" strokeDasharray={`${practitionerProfile.completionPercent * 0.94} 94`} />
+                </svg>
+              </div>
+              <span className="text-sm font-bold text-primary tabular-nums">{practitionerProfile.completionPercent}%</span>
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* Profile completion banner - full width */}
+      {practitionerProfile && practitionerProfile.completionPercent < 100 && (
+        <ProfileCompletionCard
+          completionPercent={practitionerProfile.completionPercent}
+          completionItems={practitionerProfile.completionItems}
+          onScrollToSection={scrollToSection}
+        />
+      )}
+
       <div className="grid gap-6 lg:grid-cols-12">
-        {/* Colonne gauche: réglages rapides + intégrations */}
+        {/* Left column: quick settings + integrations */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Interface */}
-          <Card>
+          {/* Language */}
+          <Card className="settings-section">
             <CardHeader>
-              <CardTitle>{t('language')}</CardTitle>
+              <CardTitle className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Globe className="h-4 w-4" />
+                </div>
+                {t('language')}
+              </CardTitle>
             </CardHeader>
             <div className="space-y-4">
               <Select
@@ -316,13 +392,18 @@ export default function SettingsPage() {
             </div>
           </Card>
 
-          {/* Notification Settings */}
-          <Card>
+          {/* Notifications */}
+          <Card className="settings-section">
             <CardHeader>
-              <CardTitle>{t('notifications')}</CardTitle>
+              <CardTitle className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Bell className="h-4 w-4" />
+                </div>
+                {t('notifications')}
+              </CardTitle>
             </CardHeader>
             <div className="space-y-4">
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center justify-between gap-4 rounded-xl bg-muted/40 px-4 py-3">
                 <span id="notif-label" className="text-sm text-gray-700">
                   {t('notificationsEnabled')}
                 </span>
@@ -332,7 +413,7 @@ export default function SettingsPage() {
                   onCheckedChange={setNotificationsEnabled}
                 />
               </div>
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center justify-between gap-4 rounded-xl bg-muted/40 px-4 py-3">
                 <span id="reminders-label" className="text-sm text-gray-700">
                   {t('remindersEnabled')}
                 </span>
@@ -342,154 +423,180 @@ export default function SettingsPage() {
                   onCheckedChange={setRemindersEnabled}
                 />
               </div>
-              <Button onClick={handleSaveSettings} loading={updateSettings.isPending}>
-                {tc('save')}
-              </Button>
+              <div className="flex justify-end">
+                <Button onClick={handleSaveSettings} loading={updateSettings.isPending}>
+                  {tc('save')}
+                </Button>
+              </div>
             </div>
           </Card>
 
-          {/* Google Calendar Integration */}
+          {/* Google Calendar */}
           <GoogleCalendarSection />
         </div>
 
-        {/* Colonne droite: profil + organisation */}
+        {/* Right column: profile sections + organization */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Practitioner Profile */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('profile')}</CardTitle>
-            </CardHeader>
-            <div className="space-y-5">
-              {/* Profile completion - modern circular progress + checklist */}
-              {practitionerProfile && (
-                <ProfileCompletionCard
-                  completionPercent={practitionerProfile.completionPercent}
-                  completionItems={practitionerProfile.completionItems}
-                  onScrollToSection={scrollToSection}
-                />
-              )}
-              <div id="profile-section-avatar">
-                <AvatarUploadSection
-                avatarUrl={profile?.avatar_url}
-                firstName={profile?.first_name}
-                lastName={profile?.last_name}
+          {/* Section 1: Photo & Identity */}
+          <Card className={cn('settings-section', !isSectionComplete('avatar') && 'border-l-4 border-l-amber-400')} id="profile-section-avatar">
+            <SectionHeader
+              icon={User}
+              title={t('avatarTitle')}
+              badge={!isSectionComplete('avatar') ? t('toCompleteBadge') : undefined}
+            />
+            <AvatarUploadSection
+              avatarUrl={profile?.avatar_url}
+              firstName={profile?.first_name}
+              lastName={profile?.last_name}
+            />
+            <div className="mt-5">
+              <SpecialtyCombobox
+                id="specialty"
+                label={t('specialty')}
+                value={specialtyId}
+                onChange={setSpecialtyId}
+                placeholder={t('specialtyPlaceholder')}
               />
-              </div>
-              <div className="h-px bg-border/50" />
+            </div>
+          </Card>
 
-              <div id="profile-section-about" className="grid grid-cols-1 gap-4">
-                <SpecialtyCombobox
-                  id="specialty"
-                  label={t('specialty')}
-                  value={specialtyId}
-                  onChange={setSpecialtyId}
-                  placeholder={t('specialtyPlaceholder')}
+          {/* Section 2: About & Education */}
+          <Card className={cn('settings-section', !isSectionComplete('about') && 'border-l-4 border-l-amber-400')} id="profile-section-about">
+            <SectionHeader
+              icon={FileText}
+              title={t('about')}
+              subtitle={t('aboutHint')}
+              badge={!isSectionComplete('about') ? t('toCompleteBadge') : undefined}
+            />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Textarea
+                  label={t('about')}
+                  value={about}
+                  onChange={(e) => setAbout(e.target.value)}
+                  rows={4}
+                  placeholder={t('aboutHint')}
                 />
-                <div className="space-y-2">
-                  <Textarea
-                    label={t('about')}
-                    value={about}
-                    onChange={(e) => setAbout(e.target.value)}
-                    rows={4}
-                    placeholder={t('aboutHint')}
-                  />
-                  <div className="flex justify-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleImproveAbout}
-                      loading={generateAbout.isPending}
-                      disabled={generateAbout.isPending}
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      {t('aiImprove')}
-                    </Button>
-                  </div>
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleImproveAbout}
+                    loading={generateAbout.isPending}
+                    disabled={generateAbout.isPending}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    {t('aiImprove')}
+                  </Button>
                 </div>
-                <div className="space-y-2">
-                  <Input
-                    label={t('education')}
-                    value={education}
-                    onChange={(e) => setEducation(e.target.value)}
-                    placeholder={t('educationHint')}
-                  />
-                  <div className="flex justify-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleImproveEducation}
-                      loading={generateEducation.isPending}
-                      disabled={generateEducation.isPending}
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      {t('aiImprove')}
-                    </Button>
-                  </div>
-                </div>
-                <LanguagesCombobox
-                  id="languages"
-                  label={t('languages')}
-                  value={languages}
-                  onChange={setLanguages}
-                  placeholder={t('languagesPlaceholder')}
-                />
               </div>
+              <div className="space-y-2">
+                <Input
+                  label={t('education')}
+                  value={education}
+                  onChange={(e) => setEducation(e.target.value)}
+                  placeholder={t('educationHint')}
+                />
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleImproveEducation}
+                    loading={generateEducation.isPending}
+                    disabled={generateEducation.isPending}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    {t('aiImprove')}
+                  </Button>
+                </div>
+              </div>
+              <LanguagesCombobox
+                id="languages"
+                label={t('languages')}
+                value={languages}
+                onChange={setLanguages}
+                placeholder={t('languagesPlaceholder')}
+              />
+            </div>
+          </Card>
 
-              <div id="profile-section-contact" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Section 3: Contact */}
+          <Card className={cn('settings-section', !isSectionComplete('contact') && 'border-l-4 border-l-amber-400')} id="profile-section-contact">
+            <SectionHeader
+              icon={Phone}
+              title={t('contactInfo')}
+              badge={!isSectionComplete('contact') ? t('toCompleteBadge') : undefined}
+            />
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label={tc('phone')} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
                 <Input label={tc('email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                <div className="sm:col-span-2 space-y-2">
-                  <Input
-                    label={t('teudatZehut')}
-                    value={teudatZehut}
-                    onChange={(e) => setTeudatZehut(e.target.value)}
-                    inputMode="numeric"
-                    autoComplete="off"
-                    placeholder={practitioner?.teudat_zehut_masked || '000000000'}
-                  />
-                  <p className="text-xs text-muted-foreground">{t('teudatZehutHint')}</p>
-                  {practitioner?.has_teudat_zehut && (
-                    <p className="text-xs text-muted-foreground">
-                      {t('teudatZehutCurrent')}: <span className="font-medium text-gray-900">{practitioner.teudat_zehut_masked || '•••••••••'}</span>
-                    </p>
-                  )}
-                </div>
               </div>
-
-              <div id="profile-section-address" className="pt-1">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('address')}</h3>
-                <div className="space-y-3">
-                  <AddressAutocomplete
-                    id="addressLine"
-                    label={t('addressLine')}
-                    value={addressLine}
-                    placeholder={t('addressSelectHint')}
-                    onChange={(data: AddressResult) => {
-                      setAddressLine(data.address_line);
-                      setZipCode(data.zip_code);
-                      setCity(data.city);
-                      setLatitude(data.latitude);
-                      setLongitude(data.longitude);
-                    }}
-                    onClear={() => {
-                      setAddressLine('');
-                      setZipCode('');
-                      setCity('');
-                      setLatitude(null);
-                      setLongitude(null);
-                    }}
-                  />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input label={t('zipCode')} value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
-                    <Input label={t('city')} value={city} onChange={(e) => setCity(e.target.value)} />
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <Input
+                  label={t('teudatZehut')}
+                  value={teudatZehut}
+                  onChange={(e) => setTeudatZehut(e.target.value)}
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder={practitioner?.teudat_zehut_masked || '000000000'}
+                />
+                <p className="text-xs text-muted-foreground">{t('teudatZehutHint')}</p>
+                {practitioner?.has_teudat_zehut && (
+                  <p className="text-xs text-muted-foreground">
+                    {t('teudatZehutCurrent')}: <span className="font-medium text-gray-900">{practitioner.teudat_zehut_masked || '•••••••••'}</span>
+                  </p>
+                )}
               </div>
+            </div>
+          </Card>
 
-              <div id="profile-section-consultation" className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-700">{t('consultationDuration')}</h3>
+          {/* Section 4: Address */}
+          <Card className={cn('settings-section', !isSectionComplete('address') && 'border-l-4 border-l-amber-400')} id="profile-section-address">
+            <SectionHeader
+              icon={MapPin}
+              title={t('address')}
+              badge={!isSectionComplete('address') ? t('toCompleteBadge') : undefined}
+            />
+            <div className="space-y-3">
+              <AddressAutocomplete
+                id="addressLine"
+                label={t('addressLine')}
+                value={addressLine}
+                placeholder={t('addressSelectHint')}
+                onChange={(data: AddressResult) => {
+                  setAddressLine(data.address_line);
+                  setZipCode(data.zip_code);
+                  setCity(data.city);
+                  setLatitude(data.latitude);
+                  setLongitude(data.longitude);
+                }}
+                onClear={() => {
+                  setAddressLine('');
+                  setZipCode('');
+                  setCity('');
+                  setLatitude(null);
+                  setLongitude(null);
+                }}
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input label={t('zipCode')} value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
+                <Input label={t('city')} value={city} onChange={(e) => setCity(e.target.value)} />
+              </div>
+            </div>
+          </Card>
+
+          {/* Section 5: Consultation & Pricing */}
+          <Card className={cn('settings-section', !isSectionComplete('pricing') && 'border-l-4 border-l-amber-400')} id="profile-section-consultation">
+            <SectionHeader
+              icon={Banknote}
+              title={t('consultationDuration')}
+              badge={!isSectionComplete('pricing') ? t('toCompleteBadge') : undefined}
+            />
+            <div className="space-y-5">
+              <div className="space-y-3">
                 <p className="text-xs text-muted-foreground">{t('consultationDurationHint')}</p>
                 <Input
                   label={t('consultationDurationMinutes')}
@@ -502,9 +609,11 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <div id="profile-section-pricing" className="space-y-3">
+              <div className="h-px bg-border/50" />
+
+              <div className="space-y-3" id="profile-section-pricing">
                 <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold text-gray-700">{t('priceRange')}</h3>
+                  <h4 className="text-sm font-semibold text-gray-700">{t('priceRange')}</h4>
                   {pricingIncomplete && (
                     <Badge className="bg-amber-100 text-amber-900 text-xs">
                       {t('toCompleteBadge')}
@@ -512,7 +621,7 @@ export default function SettingsPage() {
                   )}
                 </div>
                 {pricingIncomplete && (
-                  <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+                  <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
                     <p className="font-medium">{t('pricingRequiredTitle')}</p>
                     <p className="text-xs text-amber-700 mt-1">{t('pricingRequiredDesc')}</p>
                   </div>
@@ -540,7 +649,9 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-4 pt-1">
+              <div className="h-px bg-border/50" />
+
+              <div className="flex items-center justify-between gap-4 rounded-xl bg-muted/40 px-4 py-3">
                 <span id="accepting-label" className="text-sm text-gray-700">
                   {t('acceptingPatients')}
                 </span>
@@ -550,21 +661,30 @@ export default function SettingsPage() {
                   onCheckedChange={setAcceptingPatients}
                 />
               </div>
-
-              <div className="flex items-center justify-end pt-1">
-                <Button onClick={handleSaveProfile} loading={updateProfile.isPending}>
-                  {tc('save')}
-                </Button>
-              </div>
             </div>
           </Card>
 
+          {/* Sticky save bar */}
+          <div className="sticky bottom-4 z-10">
+            <div className="rounded-2xl border border-border/80 bg-white/95 backdrop-blur-md shadow-lg px-6 py-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="h-2 w-2 shrink-0 rounded-full bg-primary animate-pulse" />
+                <span className="text-sm font-medium text-gray-600 truncate">{t('profile')}</span>
+              </div>
+              <Button onClick={handleSaveProfile} loading={updateProfile.isPending} className="shrink-0 shadow-sm">
+                {tc('save')}
+              </Button>
+            </div>
+          </div>
+
           {/* Organization */}
           {organization && (
-            <Card>
+            <Card className="settings-section">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-primary" />
+                <CardTitle className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Building2 className="h-4 w-4" />
+                  </div>
                   {t('organization')}
                 </CardTitle>
                 <Badge className="bg-primary/10 text-primary text-xs">

@@ -450,6 +450,7 @@
     "teudatZehutCurrent": "Actuelle",
     "teudatZehutInvalidTitle": "Teudat Zehut invalide",
     "teudatZehutInvalid": "Entrez un numéro à 9 chiffres (uniquement des chiffres).",
+    "contactInfo": "Coordonnées",
     "address": "Adresse du cabinet",
     "addressLine": "Adresse",
     "addressSelectHint": "Saisissez et sélectionnez une adresse dans la liste",
