@@ -499,6 +499,8 @@
     "instructionTitle": "Instruction title",
     "instructionContent": "Instruction content",
     "saved": "Changes saved",
+    "unsavedChanges": "Unsaved changes",
+    "saveChanges": "Save changes",
     "myPlan": "My plan",
     "myPlanDescription": "Manage your subscription plan. You can switch plans at any time.",
     "organization": "Organization",

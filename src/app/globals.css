@@ -211,8 +211,24 @@
 .settings-section:nth-child(5) { animation-delay: 0.2s; }
 .settings-section:nth-child(6) { animation-delay: 0.25s; }
 
+@keyframes save-bar-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.save-bar-enter {
+  animation: save-bar-enter 0.3s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .settings-section {
+  .settings-section,
+  .save-bar-enter {
     animation: none;
   }
 }

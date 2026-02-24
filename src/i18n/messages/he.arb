@@ -500,6 +500,8 @@
     "instructionTitle": "כותרת ההנחיה",
     "instructionContent": "תוכן ההנחיה",
     "saved": "השינויים נשמרו",
+    "unsavedChanges": "שינויים שלא נשמרו",
+    "saveChanges": "שמור שינויים",
     "myPlan": "המסלול שלי",
     "myPlanDescription": "נהלו את מסלול המנוי שלכם. ניתן לשנות מסלול בכל עת.",
     "organization": "ארגון",

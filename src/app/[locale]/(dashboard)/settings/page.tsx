@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
 import { useSettings, useUpdateSettings, useUpdatePractitionerProfile } from '@/hooks/useSettings';
@@ -123,6 +123,18 @@ export default function SettingsPage() {
   const [consultationDurationMinutes, setConsultationDurationMinutes] = useState(30);
   const pricingIncomplete = practitioner?.price_min_agorot == null || practitioner?.price_max_agorot == null;
 
+  const currentProfileKey = useMemo(() => JSON.stringify({
+    about, education, languages, phone, email, specialtyId,
+    addressLine, zipCode, city, acceptingPatients,
+    priceMinShekels, priceMaxShekels, consultationDurationMinutes,
+    teudatZehut: teudatZehut.trim(),
+  }), [about, education, languages, phone, email, specialtyId, teudatZehut,
+    addressLine, zipCode, city, acceptingPatients, priceMinShekels,
+    priceMaxShekels, consultationDurationMinutes]);
+
+  const [savedProfileKey, setSavedProfileKey] = useState<string | null>(null);
+  const hasProfileChanges = savedProfileKey !== null && currentProfileKey !== savedProfileKey;
+
   const isSectionComplete = (section: string) => {
     if (!practitionerProfile?.completionItems) return true;
     return practitionerProfile.completionItems
@@ -152,6 +164,23 @@ export default function SettingsPage() {
         practitioner.price_max_agorot != null ? String(Math.round(practitioner.price_max_agorot / 100)) : ''
       );
       setConsultationDurationMinutes(practitioner.consultation_duration_minutes ?? 30);
+
+      setSavedProfileKey(JSON.stringify({
+        about: practitioner.about || '',
+        education: practitioner.education || '',
+        languages: practitioner.languages ?? [],
+        phone: practitioner.phone || '',
+        email: practitioner.email || '',
+        specialtyId: practitioner.specialty_id || '',
+        addressLine: practitioner.address_line || '',
+        zipCode: practitioner.zip_code || '',
+        city: practitioner.city || '',
+        acceptingPatients: practitioner.is_accepting_new_patients,
+        priceMinShekels: practitioner.price_min_agorot != null ? String(Math.round(practitioner.price_min_agorot / 100)) : '',
+        priceMaxShekels: practitioner.price_max_agorot != null ? String(Math.round(practitioner.price_max_agorot / 100)) : '',
+        consultationDurationMinutes: practitioner.consultation_duration_minutes ?? 30,
+        teudatZehut: '',
+      }));
     }
   }, [practitioner]);
 
@@ -210,6 +239,12 @@ export default function SettingsPage() {
       if (tz) payload.teudat_zehut = tz;
 
       await updateProfile.mutateAsync(payload);
+      setSavedProfileKey(JSON.stringify({
+        about, education, languages, phone, email, specialtyId,
+        addressLine, zipCode, city, acceptingPatients,
+        priceMinShekels, priceMaxShekels, consultationDurationMinutes,
+        teudatZehut: '',
+      }));
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       setTeudatZehut('');
@@ -664,18 +699,20 @@ export default function SettingsPage() {
             </div>
           </Card>
 
-          {/* Sticky save bar */}
-          <div className="sticky bottom-4 z-10">
-            <div className="rounded-2xl border border-border/80 bg-white/95 backdrop-blur-md shadow-lg px-6 py-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="h-2 w-2 shrink-0 rounded-full bg-primary animate-pulse" />
-                <span className="text-sm font-medium text-gray-600 truncate">{t('profile')}</span>
+          {/* Sticky save bar - only visible when profile has unsaved changes */}
+          {hasProfileChanges && (
+            <div className="sticky bottom-4 z-10 save-bar-enter">
+              <div className="rounded-2xl border border-primary/20 bg-white/95 backdrop-blur-md shadow-lg px-6 py-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="h-2 w-2 shrink-0 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-sm font-medium text-gray-700 truncate">{t('unsavedChanges')}</span>
+                </div>
+                <Button onClick={handleSaveProfile} loading={updateProfile.isPending} className="shrink-0 shadow-sm">
+                  {t('saveChanges')}
+                </Button>
               </div>
-              <Button onClick={handleSaveProfile} loading={updateProfile.isPending} className="shrink-0 shadow-sm">
-                {tc('save')}
-              </Button>
             </div>
-          </div>
+          )}
 
           {/* Organization */}
           {organization && (

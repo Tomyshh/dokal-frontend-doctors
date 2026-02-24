@@ -500,6 +500,8 @@
     "instructionTitle": "Titre de l'instruction",
     "instructionContent": "Contenu de l'instruction",
     "saved": "Modifications enregistrées",
+    "unsavedChanges": "Modifications non enregistrées",
+    "saveChanges": "Sauvegarder les modifications",
     "myPlan": "Mon forfait",
     "myPlanDescription": "Gérez votre forfait d'abonnement. Vous pouvez changer de forfait à tout moment.",
     "organization": "Organisation",
