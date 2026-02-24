@@ -4,6 +4,67 @@
 @tailwind components;
 @tailwind utilities;
 
+:root,
+:root[data-theme-palette='mint'] {
+  --color-primary: 11 143 120;
+  --color-primary-50: 231 247 240;
+  --color-primary-100: 195 238 221;
+  --color-primary-200: 157 228 202;
+  --color-primary-300: 116 217 181;
+  --color-primary-400: 74 205 160;
+  --color-primary-500: 11 143 120;
+  --color-primary-600: 10 126 106;
+  --color-primary-700: 8 107 90;
+  --color-primary-800: 6 88 73;
+  --color-primary-900: 4 66 55;
+  --color-primary-950: 2 39 33;
+}
+
+:root[data-theme-palette='ocean'] {
+  --color-primary: 59 130 246;
+  --color-primary-50: 234 244 255;
+  --color-primary-100: 207 229 255;
+  --color-primary-200: 179 214 255;
+  --color-primary-300: 139 195 255;
+  --color-primary-400: 97 174 255;
+  --color-primary-500: 59 130 246;
+  --color-primary-600: 45 111 211;
+  --color-primary-700: 31 89 178;
+  --color-primary-800: 28 74 140;
+  --color-primary-900: 23 59 111;
+  --color-primary-950: 15 37 74;
+}
+
+:root[data-theme-palette='violet'] {
+  --color-primary: 139 92 246;
+  --color-primary-50: 244 240 255;
+  --color-primary-100: 230 219 255;
+  --color-primary-200: 212 191 255;
+  --color-primary-300: 187 153 255;
+  --color-primary-400: 161 114 255;
+  --color-primary-500: 139 92 246;
+  --color-primary-600: 122 76 224;
+  --color-primary-700: 106 63 200;
+  --color-primary-800: 89 47 166;
+  --color-primary-900: 75 44 132;
+  --color-primary-950: 46 26 86;
+}
+
+:root[data-theme-palette='sunset'] {
+  --color-primary: 232 93 58;
+  --color-primary-50: 254 241 238;
+  --color-primary-100: 253 216 209;
+  --color-primary-200: 250 184 171;
+  --color-primary-300: 246 143 128;
+  --color-primary-400: 241 112 89;
+  --color-primary-500: 232 93 58;
+  --color-primary-600: 213 74 42;
+  --color-primary-700: 176 59 36;
+  --color-primary-800: 143 50 33;
+  --color-primary-900: 116 42 29;
+  --color-primary-950: 67 22 15;
+}
+
 @layer base {
   * {
     @apply border-border;

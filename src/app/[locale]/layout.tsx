@@ -5,6 +5,7 @@ import OneSignalProvider from '@/providers/OneSignalProvider';
 import QueryProvider from '@/providers/QueryProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import IntlProvider from '@/providers/IntlProvider';
+import ThemePaletteProvider from '@/providers/ThemePaletteProvider';
 import type { Metadata } from 'next';
 import { buildDefaultMetadata, normalizeLocale } from '@/lib/seo';
 import Script from 'next/script';
@@ -49,13 +50,28 @@ export default async function LocaleLayout({
             });
           `}
         </Script>
+        <Script id="theme-palette-init" strategy="beforeInteractive">
+          {`
+            (function() {
+              try {
+                var key = 'dokal-theme-palette';
+                var value = window.localStorage.getItem(key);
+                if (value) {
+                  document.documentElement.setAttribute('data-theme-palette', value);
+                }
+              } catch (e) {}
+            })();
+          `}
+        </Script>
         <IntlProvider locale={locale} messages={messages}>
           <QueryProvider>
             <AuthProvider>
               <OneSignalProvider>
-                <ToastProvider>
-                  {children}
-                </ToastProvider>
+                <ThemePaletteProvider>
+                  <ToastProvider>
+                    {children}
+                  </ToastProvider>
+                </ThemePaletteProvider>
               </OneSignalProvider>
             </AuthProvider>
           </QueryProvider>

@@ -17,6 +17,7 @@ import {
   Sparkles,
   Settings2,
   Globe,
+  Palette,
   Bell,
   User,
   FileText,
@@ -41,6 +42,8 @@ import { AddressAutocomplete, type AddressResult } from '@/components/auth/Addre
 import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { useGenerateAboutWithAI, useGenerateEducationWithAI } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
+import { THEME_PALETTES } from '@/lib/themePalettes';
+import { useThemePalette } from '@/providers/ThemePaletteProvider';
 
 function SectionHeader({ icon: Icon, title, subtitle, badge }: {
   icon: LucideIcon;
@@ -74,6 +77,7 @@ export default function SettingsPage() {
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
+  const { paletteId, setPaletteId } = useThemePalette();
   const { profile } = useAuth();
   const toast = useToast();
   const practitionerProfile = usePractitionerProfile();
@@ -326,6 +330,14 @@ export default function SettingsPage() {
     }
   };
 
+  const paletteSectionTitle = locale === 'fr' ? 'Palette de couleurs' : 'Color palette';
+  const paletteSectionHint = locale === 'fr'
+    ? 'Choisissez le style visuel de votre CRM. Modifiable à tout moment.'
+    : 'Choose your CRM visual style. You can change it anytime.';
+  const paletteSavedHint = locale === 'fr'
+    ? 'Préférence enregistrée sur cet appareil.'
+    : 'Preference saved on this device.';
+
   if (loadingPractitioner || loadingSettings || loadingOrganization) {
     return (
       <div className="w-full max-w-7xl mx-auto space-y-6" aria-label="Chargement">
@@ -424,6 +436,54 @@ export default function SettingsPage() {
               <p className="text-xs text-muted-foreground">
                 {t('interfaceLanguageHint')}
               </p>
+            </div>
+          </Card>
+
+          {/* Theme palette */}
+          <Card className="settings-section">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Palette className="h-4 w-4" />
+                </div>
+                {paletteSectionTitle}
+              </CardTitle>
+            </CardHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {THEME_PALETTES.map((palette) => {
+                  const isActive = paletteId === palette.id;
+                  return (
+                    <button
+                      key={palette.id}
+                      type="button"
+                      onClick={() => setPaletteId(palette.id)}
+                      className={cn(
+                        'rounded-xl border text-left p-3 transition-colors',
+                        isActive
+                          ? 'border-primary bg-primary/5 shadow-sm'
+                          : 'border-border hover:border-primary/40 hover:bg-primary/5'
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 mb-2">
+                        {palette.swatches.map((color) => (
+                          <span
+                            key={color}
+                            className="h-5 w-5 rounded-full border border-white/80 shadow-sm"
+                            style={{ backgroundColor: color }}
+                          />
+                        ))}
+                      </div>
+                      <p className={cn('text-sm font-semibold', isActive ? 'text-primary' : 'text-gray-800')}>
+                        {palette.label}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{palette.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">{paletteSectionHint}</p>
+              <p className="text-xs text-primary">{paletteSavedHint}</p>
             </div>
           </Card>
 
