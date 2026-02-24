@@ -838,9 +838,6 @@ paths:
     post:
       tags: [Messaging]
       summary: Send a message
-      description: >
-        Envoie un message. Déclenche une notification push (new_message) au patient
-        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters:
         - $ref: "#/components/parameters/IdParam"
       requestBody:
@@ -1179,9 +1176,6 @@ paths:
     patch:
       tags: [Reviews]
       summary: Reply to a review (practitioner)
-      description: >
-        Répond à un avis. Déclenche une notification push (review_received) au patient
-        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters:
         - $ref: "#/components/parameters/IdParam"
       requestBody:
@@ -1283,9 +1277,6 @@ paths:
     post:
       tags: [CRM]
       summary: Create a CRM appointment (confirmed)
-      description: >
-        Crée un RDV confirmé. Si le patient a un compte (auth_user_id), déclenche une
-        notification push (appointment_created). Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       requestBody:
         required: true
         content:
@@ -1376,9 +1367,6 @@ paths:
     patch:
       tags: [CRM]
       summary: Confirm appointment
-      description: >
-        Confirme le RDV. Déclenche une notification push (appointment_confirmed) au patient
-        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       responses:
         "204": { description: Confirmed }
@@ -1391,9 +1379,6 @@ paths:
     patch:
       tags: [CRM]
       summary: Cancel appointment
-      description: >
-        Annule le RDV. Déclenche une notification push (appointment_cancelled) au patient
-        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       requestBody:
         required: true
@@ -1414,9 +1399,6 @@ paths:
     patch:
       tags: [CRM]
       summary: Complete appointment
-      description: >
-        Marque la consultation comme terminée. Déclenche une notification push
-        (appointment_completed) au patient si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       requestBody:
         required: true
@@ -1890,9 +1872,6 @@ paths:
     patch:
       tags: [CRM]
       summary: Reply to a review (practitioner)
-      description: >
-        Répond à un avis. Déclenche une notification push (review_received) au patient
-        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       requestBody:
         required: true
@@ -2086,9 +2065,6 @@ paths:
     patch:
       tags: [CRM]
       summary: Confirm appointment (org admin/secretary)
-      description: >
-        Confirme le RDV. Déclenche une notification push (appointment_confirmed) au patient
-        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       responses:
         "204": { description: Confirmed }
@@ -2101,9 +2077,6 @@ paths:
     patch:
       tags: [CRM]
       summary: Cancel appointment (org admin/secretary)
-      description: >
-        Annule le RDV. Déclenche une notification push (appointment_cancelled) au patient
-        si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       requestBody:
         required: true
@@ -2124,9 +2097,6 @@ paths:
     patch:
       tags: [CRM]
       summary: Complete appointment (org admin/secretary)
-      description: >
-        Marque la consultation comme terminée. Déclenche une notification push
-        (appointment_completed) au patient si notifications_enabled=true. Voir docs/NOTIFICATIONS_BACKEND_SPEC.md.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       requestBody:
         required: true
@@ -2268,17 +2238,10 @@ components:
 
     NotificationType:
       type: string
-      description: >
-        Types de notification. Les types appointment_* sont utilisés pour les push OneSignal.
-        appointment_request = patient crée un RDV (notifie praticien).
-        appointment_reminder = rappels automatiques (cron, hors scope frontend).
       enum:
         - appointment_request
         - appointment_confirmed
         - appointment_cancelled
-        - appointment_created
-        - appointment_rescheduled
-        - appointment_completed
         - appointment_reminder
         - new_message
         - review_received
@@ -2510,13 +2473,11 @@ components:
 
     CreateConversationRequest:
       type: object
-      description: |
-        Patient sends practitioner_id. Practitioner sends patient_id (auth_user_id of CRM patient).
       properties:
-        practitioner_id: { type: string, format: uuid, description: "Required when caller is patient" }
-        patient_id: { type: string, format: uuid, description: "Required when caller is practitioner (CRM patient auth_user_id)" }
+        practitioner_id: { type: string, format: uuid }
         subject: { type: string }
         content: { type: string }
+      required: [practitioner_id]
 
     SendMessageRequest:
       type: object
