@@ -41,8 +41,6 @@ export default async function LegalPage() {
   const rows: Array<{ label: string; value: string; ltr?: boolean }> = [
     { label: t('companyName'), value: company.legalName },
     { label: t('registrationNumber'), value: company.registrationNumber, ltr: true },
-    { label: t('director'), value: company.director },
-    { label: t('host'), value: company.host },
     { label: t('address'), value: company.address, ltr: true },
     { label: t('email'), value: company.email, ltr: true },
     { label: t('phone'), value: company.phoneE164, ltr: true },

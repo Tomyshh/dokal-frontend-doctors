@@ -213,8 +213,7 @@
     "downgradeDeactivatedLabel": "Membres qui seront désactivés :",
     "planChanged": "Forfait modifié",
     "planUpgraded": "Forfait amélioré avec succès",
-    "planDowngraded": "Forfait rétrogradé avec succès"
-    ,
+    "planDowngraded": "Forfait rétrogradé avec succès",
     "retry": "Réessayer",
     "backToProfile": "Retour au profil"
   },
@@ -732,15 +731,25 @@
   },
   "legal": {
     "title": "Mentions légales",
-    "lastUpdated": "Dernière mise à jour : 15 février 2026",
-    "intro": "Les informations suivantes identifient l’éditeur et l’hébergeur du service Dokal.",
+    "lastUpdated": "Dernière mise à jour : 25 février 2026",
+    "intro": "Conformément à la réglementation en vigueur, les informations suivantes identifient l’éditeur de la plateforme Dokal.",
     "companyName": "Nom légal",
-    "registrationNumber": "Numéro d’enregistrement / registre",
-    "director": "Responsable / directeur",
-    "host": "Hébergeur",
+    "registrationNumber": "Numéro d’enregistrement",
     "address": "Adresse",
     "email": "E-mail",
-    "phone": "Téléphone"
+    "phone": "Téléphone",
+    "section1Title": "1. Identification de l’éditeur",
+    "section1Content": "La plateforme Dokal est éditée par Dokal, société enregistrée en Israël sous le numéro 342872132. Contact : tom@dokal.life.",
+    "section2Title": "2. Hébergement",
+    "section2Content": "La plateforme Dokal est hébergée sur une infrastructure cloud sécurisée. Les données sont stockées conformément aux réglementations applicables en matière de protection des données. Pour toute question relative à l’hébergement, contactez-nous à : tom@dokal.life.",
+    "section3Title": "3. Propriété intellectuelle",
+    "section3Content": "L’ensemble des éléments de la plateforme Dokal — incluant notamment l’interface, le code source, les logos, les graphismes, les textes et la documentation — sont protégés par le droit de la propriété intellectuelle. Toute reproduction, modification, distribution ou utilisation sans autorisation écrite préalable est strictement interdite.",
+    "section4Title": "4. Limitation de responsabilité",
+    "section4Content": "Dokal s’efforce d’assurer l’exactitude et la fiabilité des informations diffusées sur la plateforme. Toutefois, Dokal ne saurait être tenu responsable :\n\n• Des erreurs, omissions ou inexactitudes dans le contenu.\n• Des interruptions de service liées à la maintenance ou à des problèmes techniques.\n• De tout dommage indirect ou consécutif résultant de l’utilisation du service.\n• De la perte de données en cas de force majeure.",
+    "section5Title": "5. Données personnelles",
+    "section5Content": "La collecte et le traitement des données personnelles via la plateforme Dokal sont régis par notre Politique de confidentialité, accessible depuis le pied de page de chaque page. Dokal s’engage à respecter le RGPD et toute réglementation applicable en matière de protection des données. Pour toute question relative à vos données personnelles, contactez-nous à : tom@dokal.life.",
+    "section6Title": "6. Contact",
+    "section6Content": "Pour toute question relative aux présentes mentions légales ou à la plateforme Dokal, vous pouvez nous contacter à :\n\n• E-mail : tom@dokal.life\n• Adresse : Chicago 136, Haifa 320004, Israël"
   },
   "privacy": {
     "title": "Politique de confidentialité",
@@ -1065,4 +1074,3 @@
     "deleteExternalEventConfirm": "Voulez-vous vraiment supprimer cet événement ?"
   }
 }
-

@@ -731,15 +731,25 @@
   },
   "legal": {
     "title": "Legal Notice",
-    "lastUpdated": "Last updated: February 15, 2026",
-    "intro": "The following information identifies the publisher and hosting provider of the Dokal service.",
+    "lastUpdated": "Last updated: February 25, 2026",
+    "intro": "In accordance with applicable regulations, the following information identifies the publisher of the Dokal platform.",
     "companyName": "Legal name",
-    "registrationNumber": "Registration number / registry",
-    "director": "Director / responsible person",
-    "host": "Hosting provider",
+    "registrationNumber": "Registration number",
     "address": "Address",
     "email": "Email",
-    "phone": "Phone"
+    "phone": "Phone",
+    "section1Title": "1. Publisher Identification",
+    "section1Content": "The Dokal platform is published by Dokal, a company registered in Israel under number 342872132. Contact: tom@dokal.life.",
+    "section2Title": "2. Hosting",
+    "section2Content": "The Dokal platform is hosted on secure cloud infrastructure. Data is stored in compliance with applicable data protection regulations. For any hosting-related inquiries, contact us at: tom@dokal.life.",
+    "section3Title": "3. Intellectual Property",
+    "section3Content": "All elements of the Dokal platform — including but not limited to the interface, source code, logos, graphics, texts, and documentation — are protected by intellectual property rights. Any reproduction, modification, distribution, or use without prior written authorization is strictly prohibited.",
+    "section4Title": "4. Limitation of Liability",
+    "section4Content": "Dokal strives to ensure the accuracy and reliability of the information provided on the platform. However, Dokal cannot be held liable for:\n\n• Errors, omissions, or inaccuracies in the content.\n• Service interruptions due to maintenance or technical issues.\n• Any indirect or consequential damages arising from the use of the service.\n• Data loss in the event of force majeure.",
+    "section5Title": "5. Personal Data",
+    "section5Content": "The collection and processing of personal data through the Dokal platform is governed by our Privacy Policy, accessible from the footer of every page. Dokal is committed to complying with the GDPR and all applicable data protection regulations. For any questions regarding your personal data, contact us at: tom@dokal.life.",
+    "section6Title": "6. Contact",
+    "section6Content": "For any questions regarding this legal notice or the Dokal platform, you can contact us at:\n\n• Email: tom@dokal.life\n• Address: Chicago 136, Haifa 320004, Israel"
   },
   "privacy": {
     "title": "Privacy Policy",
@@ -1047,4 +1057,3 @@
     "deleteExternalEventConfirm": "Are you sure you want to delete this event?"
   }
 }
-
