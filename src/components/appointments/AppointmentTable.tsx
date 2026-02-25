@@ -78,7 +78,7 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
                     size="sm"
                   />
                   <div>
-                    <p className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
+                    <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                       {getCrmAppointmentPatientDisplayName(appt)}
                     </p>
                     {getCrmAppointmentPatientPhone(appt) && (
@@ -108,19 +108,19 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
                       lastName={appt.practitioners?.profiles?.last_name}
                       size="xs"
                     />
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-foreground/90">
                       {appt.practitioners?.profiles?.first_name} {appt.practitioners?.profiles?.last_name}
                     </span>
                   </div>
                 </td>
               )}
-              <td className="py-3 px-3 text-sm text-gray-600">
+              <td className="py-3 px-3 text-sm text-muted-foreground">
                 {formatDate(appt.appointment_date, 'dd/MM/yyyy', locale)}
               </td>
-              <td className="py-3 px-3 text-sm text-gray-600">
+              <td className="py-3 px-3 text-sm text-muted-foreground">
                 {formatTime(appt.start_time)} - {formatTime(appt.end_time)}
               </td>
-              <td className="py-3 px-3 text-sm text-gray-600">
+              <td className="py-3 px-3 text-sm text-muted-foreground">
                 {locale === 'he'
                   ? appt.appointment_reasons?.label_he || appt.appointment_reasons?.label || '-'
                   : locale === 'fr'
@@ -128,7 +128,7 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
                     : appt.appointment_reasons?.label || '-'}
               </td>
               <td className="py-3 px-3">
-                <Badge className="bg-gray-100 text-gray-700">
+                <Badge className="bg-muted text-foreground/90">
                   {getAppointmentSourceLabel(tc, appt.source)}
                 </Badge>
               </td>

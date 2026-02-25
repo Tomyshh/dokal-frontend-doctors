@@ -207,7 +207,7 @@ export function SpecialtyCombobox({
   return (
     <div ref={containerRef} className="space-y-1.5 relative">
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-gray-700">
+        <label htmlFor={id} className="text-sm font-medium text-foreground">
           {label}
         </label>
       )}
@@ -228,14 +228,14 @@ export function SpecialtyCombobox({
         aria-controls={`${id}-listbox`}
         disabled={isLoading}
         className={cn(
-          'flex h-10 w-full rounded-xl border border-border bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
+          'flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
         )}
       />
       {showList && (
         <ul
           id={`${id}-listbox`}
           role="listbox"
-          className="absolute z-50 mt-1 w-full max-h-56 overflow-auto rounded-xl border border-border bg-white py-1 shadow-lg"
+          className="absolute z-50 mt-1 w-full max-h-56 overflow-auto rounded-xl border border-border bg-card py-1 shadow-lg"
         >
           {suggestions.map((s) => (
             <li

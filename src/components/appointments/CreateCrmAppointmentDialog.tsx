@@ -277,10 +277,10 @@ export function CreateCrmAppointmentDialog({
       <div className="space-y-4">
         {/* Step indicator */}
         <div className="flex items-center gap-2 text-xs">
-          <Badge className={cn(step === 'patient' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600')}>
+          <Badge className={cn(step === 'patient' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
             1. {t('stepPatient')}
           </Badge>
-          <Badge className={cn(step === 'details' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600')}>
+          <Badge className={cn(step === 'details' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
             2. {t('stepDetails')}
           </Badge>
         </div>
@@ -300,7 +300,7 @@ export function CreateCrmAppointmentDialog({
                 className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary/20"
               />
               <div>
-                <label htmlFor="create-new-patient" className="text-sm font-medium text-gray-700">
+                <label htmlFor="create-new-patient" className="text-sm font-medium text-foreground">
                   {t('createPatientToggle')}
                 </label>
                 <p className="text-xs text-muted-foreground">{t('createPatientToggleDesc')}</p>
@@ -309,7 +309,7 @@ export function CreateCrmAppointmentDialog({
 
             {!createNewPatient ? (
               <div className="space-y-1.5 relative">
-                <label htmlFor="patient-search" className="text-sm font-medium text-gray-700">
+                <label htmlFor="patient-search" className="text-sm font-medium text-foreground">
                   {t('selectPatient')}
                 </label>
                 <input
@@ -329,7 +329,7 @@ export function CreateCrmAppointmentDialog({
                   autoComplete="off"
                   dir={locale === 'he' ? 'rtl' : 'ltr'}
                   className={cn(
-                    'flex h-10 w-full rounded-xl border border-border bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors'
+                    'flex h-10 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors'
                   )}
                   disabled={submitting}
                 />
@@ -337,7 +337,7 @@ export function CreateCrmAppointmentDialog({
                 {showPatientList && (
                   <ul
                     role="listbox"
-                    className="absolute z-50 mt-1 w-full max-h-64 overflow-auto rounded-xl border border-border bg-white py-1 shadow-lg"
+                    className="absolute z-50 mt-1 w-full max-h-64 overflow-auto rounded-xl border border-border bg-card py-1 shadow-lg"
                   >
                     {patientSuggestions.map((p) => {
                       const name = `${p.first_name || ''} ${p.last_name || ''}`.trim() || '-';
@@ -361,7 +361,7 @@ export function CreateCrmAppointmentDialog({
                             size="xs"
                           />
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-gray-900 truncate">{name}</p>
+                            <p className="text-sm font-medium text-foreground truncate">{name}</p>
                             <p className="text-xs text-muted-foreground truncate">
                               {p.phone || ''}{p.email ? ` • ${p.email}` : ''}
                             </p>
@@ -471,7 +471,7 @@ export function CreateCrmAppointmentDialog({
           <div className="space-y-4">
             {/* Selected patient recap */}
             {selectedPatient && (
-              <div className="rounded-xl bg-gray-50 border border-border/50 p-3 flex items-center gap-3">
+              <div className="rounded-xl bg-muted border border-border/50 p-3 flex items-center gap-3">
                 <Avatar
                   src={selectedPatient.avatar_url}
                   firstName={selectedPatient.first_name}
@@ -479,7 +479,7 @@ export function CreateCrmAppointmentDialog({
                   size="sm"
                 />
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{patientDisplayName}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{patientDisplayName}</p>
                   <p className="text-xs text-muted-foreground truncate">
                     {selectedPatient.phone || ''}{selectedPatient.email ? ` • ${selectedPatient.email}` : ''}
                   </p>
@@ -572,7 +572,7 @@ export function CreateCrmAppointmentDialog({
                 disabled={submitting}
               />
               <div>
-                <label htmlFor="visitedBefore" className="text-sm font-medium text-gray-700">
+                <label htmlFor="visitedBefore" className="text-sm font-medium text-foreground">
                   {t('visitedBefore')}
                 </label>
                 <p className="text-xs text-muted-foreground">{t('visitedBeforeDesc')}</p>

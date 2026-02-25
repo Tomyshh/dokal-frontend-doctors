@@ -12,7 +12,7 @@ const variantClasses: Record<string, string> = {
   success: 'bg-green-100 text-green-800',
   warning: 'bg-yellow-100 text-yellow-800',
   destructive: 'bg-red-100 text-red-800',
-  secondary: 'bg-gray-100 text-gray-700',
+  secondary: 'bg-muted text-foreground',
 };
 
 export function Badge({ children, className, variant = 'default' }: BadgeProps) {

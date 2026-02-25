@@ -60,7 +60,7 @@ export default function ColleagueSelector({ value, onChange }: ColleagueSelector
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          'flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-white text-sm',
+          'flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-card text-sm',
           'hover:bg-muted/50 transition-colors min-w-[180px]',
           open && 'ring-2 ring-primary/20 border-primary'
         )}
@@ -75,12 +75,12 @@ export default function ColleagueSelector({ value, onChange }: ColleagueSelector
         ) : (
           <Users className="h-4 w-4 text-muted-foreground" />
         )}
-        <span className="truncate flex-1 text-left text-gray-700">{label}</span>
+        <span className="truncate flex-1 text-left text-foreground/90">{label}</span>
         <ChevronDown className={cn('h-3.5 w-3.5 text-muted-foreground transition-transform', open && 'rotate-180')} />
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-[260px] bg-white rounded-xl border border-border shadow-lg z-50 py-1 max-h-[320px] overflow-y-auto">
+        <div className="absolute top-full left-0 mt-1 w-[260px] bg-card rounded-xl border border-border shadow-lg z-50 py-1 max-h-[320px] overflow-y-auto">
           {/* My calendar */}
           <button
             type="button"
@@ -105,8 +105,8 @@ export default function ColleagueSelector({ value, onChange }: ColleagueSelector
               value === 'all' && 'bg-primary-50 text-primary font-medium'
             )}
           >
-            <div className="h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-              <Users className="h-3.5 w-3.5 text-gray-500" />
+            <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center shrink-0">
+              <Users className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
             <span>{t('allPractitioners')}</span>
           </button>
@@ -134,7 +134,7 @@ export default function ColleagueSelector({ value, onChange }: ColleagueSelector
                 size="sm"
               />
               <div className="min-w-0 text-left">
-                <p className="truncate font-medium text-gray-900">
+                <p className="truncate font-medium text-foreground">
                   {member.profiles?.first_name} {member.profiles?.last_name}
                 </p>
                 {member.practitioner?.specialty && (

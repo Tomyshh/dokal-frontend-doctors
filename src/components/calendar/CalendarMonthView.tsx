@@ -59,7 +59,7 @@ export default function CalendarMonthView({
   }, [dateFnsLocale]);
 
   return (
-    <div className="bg-white rounded-2xl border border-border overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden">
       {/* Weekday header row */}
       <div className="grid grid-cols-7 border-b border-border">
         {weekDayHeaders.map((day, i) => (
@@ -100,7 +100,7 @@ export default function CalendarMonthView({
                   className={cn(
                     'inline-flex items-center justify-center text-xs font-medium w-6 h-6 rounded-full transition-colors',
                     today && 'bg-primary text-white',
-                    !today && isCurrentMonth && 'text-gray-900 group-hover:bg-muted',
+                    !today && isCurrentMonth && 'text-foreground group-hover:bg-muted',
                     !today && !isCurrentMonth && 'text-gray-400'
                   )}
                 >

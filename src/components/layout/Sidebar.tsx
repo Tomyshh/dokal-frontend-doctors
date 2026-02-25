@@ -123,7 +123,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 z-40 h-screen bg-white border-r border-border/50 flex flex-col transition-all duration-300',
+        'fixed left-0 top-0 z-40 h-screen bg-card border-r border-border/50 flex flex-col transition-all duration-300',
         collapsed ? 'w-[72px]' : 'w-[260px]'
       )}
     >
@@ -139,7 +139,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </div>
         <button
           onClick={onToggle}
-          className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-muted transition-colors shrink-0"
+          className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
         >
           <ChevronLeft className={cn('h-4 w-4 transition-transform rtl-flip-arrow', collapsed && 'rotate-180')} />
         </button>
@@ -148,7 +148,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Main Menu */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {!collapsed && (
-          <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+          <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
             {t('menu')}
           </p>
         )}
@@ -192,7 +192,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {managementLinks.length > 0 && (
           <div className="pt-4">
             {!collapsed && (
-              <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+              <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 {t('management')}
               </p>
             )}
@@ -226,7 +226,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           />
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-foreground truncate">
                 {profile?.first_name} {profile?.last_name}
               </p>
               <p className="text-xs text-muted-foreground truncate">{profile?.email}</p>
@@ -235,7 +235,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           {!collapsed && (
             <button
               onClick={signOut}
-              className="rounded-lg p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+              className="rounded-lg p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
               title={ta('logout')}
             >
               <LogOut className="h-4 w-4" />

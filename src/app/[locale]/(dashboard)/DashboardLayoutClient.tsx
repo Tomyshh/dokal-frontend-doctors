@@ -116,7 +116,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-6">
         <Card className="max-w-md w-full text-center">
-          <h1 className="text-xl font-bold text-gray-900">{t('accessDenied')}</h1>
+          <h1 className="text-xl font-bold text-foreground">{t('accessDenied')}</h1>
           <p className="text-sm text-muted-foreground mt-2">
             {t('accessDeniedDetail')}
           </p>

@@ -1,5 +1,7 @@
 export const THEME_PALETTE_STORAGE_KEY = 'dokal-theme-palette';
 export const THEME_PALETTE_ATTRIBUTE = 'data-theme-palette';
+export const THEME_MODE_STORAGE_KEY = 'dokal-theme-mode';
+export const THEME_MODE_ATTRIBUTE = 'data-theme-mode';
 
 export const THEME_PALETTES = [
   {
@@ -29,10 +31,16 @@ export const THEME_PALETTES = [
 ] as const;
 
 export type ThemePaletteId = (typeof THEME_PALETTES)[number]['id'];
+export type ThemeMode = 'light' | 'dark';
 
 export const DEFAULT_THEME_PALETTE_ID: ThemePaletteId = 'mint';
+export const DEFAULT_THEME_MODE: ThemeMode = 'light';
 
 export function isThemePaletteId(value: string | null | undefined): value is ThemePaletteId {
   if (!value) return false;
   return THEME_PALETTES.some((palette) => palette.id === value);
+}
+
+export function isThemeMode(value: string | null | undefined): value is ThemeMode {
+  return value === 'light' || value === 'dark';
 }

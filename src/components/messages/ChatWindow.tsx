@@ -73,7 +73,7 @@ export default function ChatWindow({ conversationId, patientName, patientAvatar 
       <div className="flex items-center gap-3 p-4 border-b border-border">
         <Avatar src={patientAvatar} firstName={patientName.split(' ')[0]} lastName={patientName.split(' ')[1]} size="md" />
         <div>
-          <p className="text-sm font-semibold text-gray-900">{patientName}</p>
+          <p className="text-sm font-semibold text-foreground">{patientName}</p>
         </div>
       </div>
 
@@ -109,7 +109,7 @@ export default function ChatWindow({ conversationId, patientName, patientAvatar 
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={t('typeMessage')}
-          className="flex-1 h-10 rounded-xl border border-border bg-muted/50 px-4 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          className="flex-1 h-10 rounded-xl border border-border bg-muted/50 px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
         />
         <Button type="submit" size="icon" loading={sendMessage.isPending} disabled={!message.trim()}>
           <Send className="h-4 w-4" />

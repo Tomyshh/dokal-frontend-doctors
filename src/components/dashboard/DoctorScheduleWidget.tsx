@@ -46,7 +46,7 @@ export default function DoctorScheduleWidget() {
               >
                 <div className="flex items-center gap-3">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-medium text-foreground">
                     {getDayName(block.day_of_week, locale)}
                   </span>
                 </div>

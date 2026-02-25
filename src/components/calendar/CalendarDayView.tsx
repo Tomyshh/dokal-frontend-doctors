@@ -57,7 +57,7 @@ export default function CalendarDayView({
   );
 
   return (
-    <div className="bg-white rounded-2xl border border-border overflow-hidden flex flex-col">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden flex flex-col">
       {/* Scrollable time grid */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto max-h-[calc(100vh-240px)] relative">
         <div
@@ -92,7 +92,7 @@ export default function CalendarDayView({
             {HOURS.map((hour) => (
               <div
                 key={`${hour}-half`}
-                className="absolute w-full border-t border-gray-100"
+                className="absolute w-full border-t border-border/20"
                 style={{ top: (hour - START_HOUR) * HOUR_HEIGHT + HOUR_HEIGHT / 2 }}
               />
             ))}
@@ -222,7 +222,7 @@ export default function CalendarDayView({
       {/* Empty state */}
       {sorted.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <p className="text-sm text-muted-foreground bg-white/80 px-4 py-2 rounded-lg">
+          <p className="text-sm text-muted-foreground bg-card/80 px-4 py-2 rounded-lg">
             {t('noEvents')}
           </p>
         </div>

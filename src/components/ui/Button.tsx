@@ -12,9 +12,9 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-primary text-white hover:bg-primary-600 shadow-sm',
         destructive: 'bg-destructive text-white hover:bg-red-600 shadow-sm',
-        outline: 'border border-border bg-white hover:bg-muted text-gray-700',
-        secondary: 'bg-muted text-gray-700 hover:bg-gray-200',
-        ghost: 'hover:bg-muted text-gray-700',
+        outline: 'border border-border bg-card hover:bg-muted text-foreground',
+        secondary: 'bg-muted text-foreground hover:bg-muted/80',
+        ghost: 'hover:bg-muted text-muted-foreground hover:text-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
         success: 'bg-success text-white hover:bg-green-600 shadow-sm',
         warning: 'bg-warning text-white hover:bg-yellow-600 shadow-sm',

@@ -140,7 +140,7 @@ export default function CalendarPage() {
     <div className="space-y-4">
       {/* Page title + actions */}
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
         <div className="flex items-center gap-2">
           <Button onClick={() => setCreateAppointmentOpen(true)} className="gap-2">
             <CalendarPlus className="h-4 w-4" />

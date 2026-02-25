@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useCallback, type ReactNode } from 'react';
+import { useEffect, useCallback, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 
@@ -15,6 +16,7 @@ interface DialogProps {
 }
 
 export function Dialog({ open, onClose, children, className, title, bodyClassName, overlayClassName }: DialogProps) {
+  const [mounted, setMounted] = useState(false);
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -23,19 +25,25 @@ export function Dialog({ open, onClose, children, className, title, bodyClassNam
   );
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (open) {
       document.addEventListener('keydown', handleKeyDown);
+      const prevOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = prevOverflow;
+      };
     }
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
-    };
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [open, handleKeyDown]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  const content = (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
         className={cn('fixed inset-0 bg-black/40 backdrop-blur-sm', overlayClassName)}
@@ -43,16 +51,16 @@ export function Dialog({ open, onClose, children, className, title, bodyClassNam
       />
       <div
         className={cn(
-          'relative z-50 bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-y-auto w-full max-w-lg mx-4 animate-in fade-in zoom-in-95',
+          'relative z-50 bg-card rounded-2xl border border-border shadow-xl max-h-[90vh] overflow-y-auto w-full max-w-lg mx-4 animate-in fade-in zoom-in-95',
           className
         )}
       >
         {title && (
           <div className="flex items-center justify-between p-6 pb-0">
-            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+            <h2 className="text-lg font-semibold text-foreground">{title}</h2>
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-muted transition-colors"
+              className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -62,4 +70,6 @@ export function Dialog({ open, onClose, children, className, title, bodyClassNam
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }

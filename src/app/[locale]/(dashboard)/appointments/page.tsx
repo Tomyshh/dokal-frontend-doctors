@@ -81,7 +81,7 @@ export default function AppointmentsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
         <div className="flex items-center gap-2">
           <Button onClick={() => setCreateAppointmentOpen(true)} className="gap-2">
             <Plus className="h-4 w-4" />
@@ -109,7 +109,7 @@ export default function AppointmentsPage() {
             {Array.from({ length: 3 }).map((_, g) => (
               <div key={g} className="space-y-2">
                 <Skeleton className="h-4 w-40 rounded-md" />
-                <div className="divide-y divide-border/60 rounded-xl border border-border/60 bg-white overflow-hidden">
+                <div className="divide-y divide-border/60 rounded-xl border border-border/60 bg-card overflow-hidden">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <div key={i} className="p-4 flex items-center justify-between gap-4">
                       <div className="min-w-0 flex items-start gap-4 flex-1">
@@ -132,11 +132,11 @@ export default function AppointmentsPage() {
           <div className="space-y-6">
             {Array.from(grouped.entries()).map(([dateKey, appts]) => (
               <div key={dateKey} className="space-y-2">
-                <h2 className="text-sm font-semibold text-gray-900">
+                <h2 className="text-sm font-semibold text-foreground">
                   {formatDate(dateKey, 'EEEE d MMMM', locale)}
                 </h2>
 
-                <div className="divide-y divide-border/60 rounded-xl border border-border/60 bg-white overflow-hidden">
+                <div className="divide-y divide-border/60 rounded-xl border border-border/60 bg-card overflow-hidden">
                   {appts.map((appt) => {
                     const patientName = getCrmAppointmentPatientDisplayName(appt);
                     const patientRecordId = getCrmAppointmentPatientRecordId(appt);
@@ -151,7 +151,7 @@ export default function AppointmentsPage() {
                     return (
                       <div key={appt.id} className="p-4 flex items-center justify-between gap-4 hover:bg-muted/20">
                         <div className="min-w-0 flex items-start gap-4">
-                          <div className="shrink-0 text-sm font-semibold text-gray-900 w-[92px]">
+                          <div className="shrink-0 text-sm font-semibold text-foreground w-[92px]">
                             {formatTime(appt.start_time)} - {formatTime(appt.end_time)}
                           </div>
 
@@ -159,7 +159,7 @@ export default function AppointmentsPage() {
                             <div className="flex items-center gap-2 min-w-0">
                               <Link
                                 href={`/appointments/${appt.id}`}
-                                className="text-sm font-semibold text-gray-900 hover:text-primary truncate"
+                                className="text-sm font-semibold text-foreground hover:text-primary truncate"
                               >
                                 {patientName}
                               </Link>

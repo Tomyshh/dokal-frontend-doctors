@@ -135,7 +135,7 @@ export default function AppointmentActions({ appointmentId, status }: Appointmen
             onClick={() => setNoShowDialogOpen(true)}
             loading={(isOrgActor ? noShowOrgMutation : noShowMutation).isPending}
             title={t('noShow')}
-            className="text-gray-500 hover:bg-gray-100"
+            className="text-muted-foreground hover:bg-muted"
           >
             <UserX className="h-4 w-4" />
           </Button>

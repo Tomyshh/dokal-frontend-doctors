@@ -27,7 +27,7 @@ export default function StatCard({
           <p className="text-sm text-muted-foreground font-medium leading-snug break-words whitespace-normal">
             {title}
           </p>
-          <p className="text-3xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-3xl font-bold text-foreground mt-1">{value}</p>
           {subtitle && (
             <p className="text-xs text-muted-foreground mt-1 break-words whitespace-normal">{subtitle}</p>
           )}

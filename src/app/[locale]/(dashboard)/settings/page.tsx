@@ -18,6 +18,8 @@ import {
   Settings2,
   Globe,
   Palette,
+  Moon,
+  Sun,
   Bell,
   User,
   FileText,
@@ -77,7 +79,7 @@ export default function SettingsPage() {
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
-  const { paletteId, setPaletteId } = useThemePalette();
+  const { mode, setMode, paletteId, setPaletteId } = useThemePalette();
   const { profile } = useAuth();
   const toast = useToast();
   const practitionerProfile = usePractitionerProfile();
@@ -337,6 +339,10 @@ export default function SettingsPage() {
   const paletteSavedHint = locale === 'fr'
     ? 'Préférence enregistrée sur cet appareil.'
     : 'Preference saved on this device.';
+  const appearanceTitle = locale === 'fr' ? 'Apparence' : 'Appearance';
+  const appearanceHint = locale === 'fr'
+    ? 'Passez entre thème clair et dark.'
+    : 'Switch between light and dark theme.';
 
   if (loadingPractitioner || loadingSettings || loadingOrganization) {
     return (
@@ -439,51 +445,46 @@ export default function SettingsPage() {
             </div>
           </Card>
 
-          {/* Theme palette */}
+          {/* Appearance */}
           <Card className="settings-section">
             <CardHeader>
               <CardTitle className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Palette className="h-4 w-4" />
+                  {mode === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
                 </div>
-                {paletteSectionTitle}
+                {appearanceTitle}
               </CardTitle>
             </CardHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {THEME_PALETTES.map((palette) => {
-                  const isActive = paletteId === palette.id;
-                  return (
-                    <button
-                      key={palette.id}
-                      type="button"
-                      onClick={() => setPaletteId(palette.id)}
-                      className={cn(
-                        'rounded-xl border text-left p-3 transition-colors',
-                        isActive
-                          ? 'border-primary bg-primary/5 shadow-sm'
-                          : 'border-border hover:border-primary/40 hover:bg-primary/5'
-                      )}
-                    >
-                      <div className="flex items-center gap-1.5 mb-2">
-                        {palette.swatches.map((color) => (
-                          <span
-                            key={color}
-                            className="h-5 w-5 rounded-full border border-white/80 shadow-sm"
-                            style={{ backgroundColor: color }}
-                          />
-                        ))}
-                      </div>
-                      <p className={cn('text-sm font-semibold', isActive ? 'text-primary' : 'text-gray-800')}>
-                        {palette.label}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{palette.description}</p>
-                    </button>
-                  );
-                })}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setMode('light')}
+                  className={cn(
+                    'rounded-xl border p-3 flex items-center gap-2.5 text-sm font-medium transition-colors',
+                    mode === 'light'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-border text-muted-foreground hover:bg-muted'
+                  )}
+                >
+                  <Sun className="h-4 w-4" />
+                  {locale === 'fr' ? 'Clair' : 'Light'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('dark')}
+                  className={cn(
+                    'rounded-xl border p-3 flex items-center gap-2.5 text-sm font-medium transition-colors',
+                    mode === 'dark'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-border text-muted-foreground hover:bg-muted'
+                  )}
+                >
+                  <Moon className="h-4 w-4" />
+                  {locale === 'fr' ? 'Sombre' : 'Dark'}
+                </button>
               </div>
-              <p className="text-xs text-muted-foreground">{paletteSectionHint}</p>
-              <p className="text-xs text-primary">{paletteSavedHint}</p>
+              <p className="text-xs text-muted-foreground">{appearanceHint}</p>
             </div>
           </Card>
 
@@ -829,6 +830,54 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
+
+      {/* Palette en tout bas (moins utile) */}
+      <Card className="settings-section">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Palette className="h-4 w-4" />
+            </div>
+            {paletteSectionTitle}
+          </CardTitle>
+        </CardHeader>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {THEME_PALETTES.map((palette) => {
+              const isActive = paletteId === palette.id;
+              return (
+                <button
+                  key={palette.id}
+                  type="button"
+                  onClick={() => setPaletteId(palette.id)}
+                  className={cn(
+                    'rounded-xl border text-left p-3 transition-colors',
+                    isActive
+                      ? 'border-primary bg-primary/5 shadow-sm'
+                      : 'border-border hover:border-primary/40 hover:bg-primary/5'
+                  )}
+                >
+                  <div className="flex items-center gap-1.5 mb-2">
+                    {palette.swatches.map((color) => (
+                      <span
+                        key={color}
+                        className="h-5 w-5 rounded-full border border-white/80 shadow-sm"
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                  <p className={cn('text-sm font-semibold', isActive ? 'text-primary' : 'text-gray-800')}>
+                    {palette.label}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{palette.description}</p>
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">{paletteSectionHint}</p>
+          <p className="text-xs text-primary">{paletteSavedHint}</p>
+        </div>
+      </Card>
     </div>
   );
 }

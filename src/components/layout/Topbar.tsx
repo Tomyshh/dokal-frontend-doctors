@@ -82,18 +82,18 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
       : t('gcalSyncDisabledEnable');
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-border/50">
+    <header className="sticky top-0 z-30 h-16 bg-card/80 backdrop-blur-md border-b border-border/50">
       <div className="flex items-center justify-between h-full px-6">
         {/* Left: hamburger on mobile + greeting */}
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuToggle}
-            className="lg:hidden rounded-lg p-2 text-gray-500 hover:bg-muted transition-colors"
+            className="lg:hidden rounded-lg p-2 text-muted-foreground hover:bg-muted transition-colors"
           >
             <Menu className="h-5 w-5" />
           </button>
           <div className="min-w-0">
-            <div className="truncate text-sm sm:text-base font-semibold text-gray-900">
+            <div className="truncate text-sm sm:text-base font-semibold text-foreground">
               {displayName ? t('helloName', { name: displayName }) : t('hello')}
             </div>
           </div>
@@ -112,7 +112,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
               energyRingClass,
               gcalStatus?.connected
                 ? 'text-emerald-600 hover:bg-emerald-50'
-                : 'text-gray-500 hover:bg-muted',
+                : 'text-muted-foreground hover:bg-muted',
               (gcalStatusLoading || gcalConnectMutation.isPending) && 'opacity-80'
             )}
           >
@@ -137,19 +137,19 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
           <div className="relative">
             <button
               onClick={() => setShowLangMenu(!showLangMenu)}
-              className="flex items-center gap-2 h-10 px-3 rounded-xl text-sm text-gray-600 hover:bg-muted transition-colors"
+              className="flex items-center gap-2 h-10 px-3 rounded-xl text-sm text-muted-foreground hover:bg-muted transition-colors"
             >
               <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">{localeNames[locale]}</span>
             </button>
             {showLangMenu && (
-              <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-border py-1 min-w-[140px] z-50">
+              <div className="absolute right-0 top-full mt-1 bg-card rounded-xl shadow-lg border border-border py-1 min-w-[140px] z-50">
                 {(Object.entries(localeNames) as [Locale, string][]).map(([loc, name]) => (
                   <button
                     key={loc}
                     onClick={() => void switchLocale(loc)}
                     className={cn(
-                      'w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors',
+                      'w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors',
                       loc === locale && 'text-primary font-medium bg-primary-50'
                     )}
                   >
@@ -163,7 +163,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
           {/* Notifications */}
           <Link
             href="/notifications"
-            className="relative h-10 w-10 rounded-xl flex items-center justify-center text-gray-500 hover:bg-muted transition-colors"
+            className="relative h-10 w-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
           >
             <Bell className="h-5 w-5" />
             {unreadCount && unreadCount > 0 ? (

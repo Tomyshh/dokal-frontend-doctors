@@ -50,7 +50,7 @@ export default function PatientsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">{t('patientsTitle')}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('patientsTitle')}</h1>
       </div>
 
       <Card>
@@ -142,7 +142,7 @@ export default function PatientsPage() {
                       <tr key={p.id} className="hover:bg-muted/30 transition-colors">
                         <td className="py-3 px-3">
                           <Link href={`/patients/${p.id}`} className="group">
-                            <p className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
+                            <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                               {p.name}
                             </p>
                             {(p.status === 'draft' || p.is_incomplete) && (
@@ -161,11 +161,11 @@ export default function PatientsPage() {
                             )}
                           </Link>
                         </td>
-                        <td className="py-3 px-3 text-sm text-gray-600 whitespace-nowrap">
+                        <td className="py-3 px-3 text-sm text-muted-foreground whitespace-nowrap">
                           {p.teudat_zehut || '-'}
                         </td>
-                        <td className="py-3 px-3 text-sm text-gray-600">{p.phone || '-'}</td>
-                        <td className="py-3 px-3 text-sm text-gray-600">{p.email || '-'}</td>
+                        <td className="py-3 px-3 text-sm text-muted-foreground">{p.phone || '-'}</td>
+                        <td className="py-3 px-3 text-sm text-muted-foreground">{p.email || '-'}</td>
                         <td className="py-3 px-3">
                           {p.status ? (
                             <Badge className={p.status === 'linked' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'}>
@@ -175,7 +175,7 @@ export default function PatientsPage() {
                             '-'
                           )}
                         </td>
-                        <td className="py-3 px-3 text-sm text-gray-600" title={missingLabel || undefined}>
+                        <td className="py-3 px-3 text-sm text-muted-foreground" title={missingLabel || undefined}>
                           {missing.length ? (
                             <span>
                               {missing.slice(0, 2).map((f) => formatMissingFieldLabel(tcal, f)).join(', ')}
@@ -214,7 +214,7 @@ export default function PatientsPage() {
                   >
                     <ChevronLeft className="h-4 w-4 rtl-flip-arrow" />
                   </Button>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-muted-foreground">
                     {currentPage} / {totalPages}
                   </span>
                   <Button

@@ -54,10 +54,18 @@ export default async function LocaleLayout({
           {`
             (function() {
               try {
-                var key = 'dokal-theme-palette';
-                var value = window.localStorage.getItem(key);
-                if (value) {
-                  document.documentElement.setAttribute('data-theme-palette', value);
+                var palette = window.localStorage.getItem('dokal-theme-palette');
+                if (palette) {
+                  document.documentElement.setAttribute('data-theme-palette', palette);
+                }
+                var mode = window.localStorage.getItem('dokal-theme-mode');
+                if (mode === 'dark' || mode === 'light') {
+                  document.documentElement.setAttribute('data-theme-mode', mode);
+                  if (mode === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
                 }
               } catch (e) {}
             })();

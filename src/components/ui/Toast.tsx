@@ -28,28 +28,28 @@ const variantConfig: Record<
   success: {
     icon: CheckCircle2,
     containerClass:
-      'bg-white border-success/30 shadow-[0_8px_32px_-4px_rgba(16,185,129,0.18)]',
+      'bg-card border-success/30 shadow-[0_8px_32px_-4px_rgba(16,185,129,0.18)]',
     iconClass: 'text-success bg-success/10',
     progressClass: 'bg-success',
   },
   error: {
     icon: XCircle,
     containerClass:
-      'bg-white border-destructive/30 shadow-[0_8px_32px_-4px_rgba(239,68,68,0.18)]',
+      'bg-card border-destructive/30 shadow-[0_8px_32px_-4px_rgba(239,68,68,0.18)]',
     iconClass: 'text-destructive bg-destructive/10',
     progressClass: 'bg-destructive',
   },
   warning: {
     icon: AlertTriangle,
     containerClass:
-      'bg-white border-warning/30 shadow-[0_8px_32px_-4px_rgba(245,158,11,0.18)]',
+      'bg-card border-warning/30 shadow-[0_8px_32px_-4px_rgba(245,158,11,0.18)]',
     iconClass: 'text-warning bg-warning/10',
     progressClass: 'bg-warning',
   },
   info: {
     icon: Info,
     containerClass:
-      'bg-white border-primary/30 shadow-[0_8px_32px_-4px_rgba(0,80,68,0.14)]',
+      'bg-card border-primary/30 shadow-[0_8px_32px_-4px_rgba(0,80,68,0.14)]',
     iconClass: 'text-primary bg-primary/10',
     progressClass: 'bg-primary',
   },
@@ -124,7 +124,7 @@ function ToastItem({
 
         {/* Text */}
         <div className="flex-1 min-w-0 pt-0.5">
-          <p className="text-sm font-semibold text-gray-900 leading-tight">
+          <p className="text-sm font-semibold text-foreground leading-tight">
             {toast.title}
           </p>
           {toast.message && (
@@ -137,7 +137,7 @@ function ToastItem({
         {/* Close */}
         <button
           onClick={handleDismiss}
-          className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           aria-label="Close"
         >
           <X className="h-4 w-4" />
@@ -145,7 +145,7 @@ function ToastItem({
       </div>
 
       {/* Progress bar */}
-      <div className="h-[3px] w-full bg-gray-100">
+      <div className="h-[3px] w-full bg-muted">
         <div
           className={cn('h-full rounded-full', config.progressClass)}
           style={{

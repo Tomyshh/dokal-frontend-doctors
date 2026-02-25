@@ -72,11 +72,11 @@ export function AuthBrandedLayout({ children }: { children: ReactNode }) {
               />
             </div>
 
-            <div className="bg-white rounded-3xl shadow-2xl shadow-black/20 border border-white/20 p-8 sm:p-10">
+            <div className="bg-card rounded-3xl shadow-2xl shadow-black/20 border border-border p-8 sm:p-10">
               {children}
 
-              <div className="mt-6 pt-6 border-t border-gray-100">
-                <p className="text-sm font-medium text-gray-900">{t('helpTitle')}</p>
+              <div className="mt-6 pt-6 border-t border-border">
+                <p className="text-sm font-medium text-foreground">{t('helpTitle')}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{t('helpSubtitle')}</p>
 
                 <div className="mt-3 flex flex-col gap-1 text-sm">

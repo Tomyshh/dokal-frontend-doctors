@@ -89,18 +89,18 @@ export default function CalendarEventSidebar({
   if (item.kind === 'external_event') {
     const evt = item.data;
     return (
-      <div className="fixed inset-y-0 right-0 z-30 w-full sm:w-[380px] bg-white border-l border-border shadow-xl flex flex-col transition-transform duration-200">
+      <div className="fixed inset-y-0 right-0 z-30 w-full sm:w-[380px] bg-card border-l border-border shadow-xl flex flex-col transition-transform duration-200">
         {/* Header */}
         <div className={cn('px-5 py-4 border-b border-border flex items-center justify-between', colors.bg)}>
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">{t('externalEvent')}</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t('externalEvent')}</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
               {formatDate(evt.date, 'EEEE d MMMM yyyy', locale)}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-white/60 transition-colors"
+            className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -110,9 +110,9 @@ export default function CalendarEventSidebar({
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {/* Title */}
           <div>
-            <p className="text-lg font-semibold text-gray-900">{evt.title || '-'}</p>
+            <p className="text-lg font-semibold text-foreground">{evt.title || '-'}</p>
             {evt.description && (
-              <p className="text-sm text-gray-600 mt-1 whitespace-pre-line">{evt.description}</p>
+              <p className="text-sm text-muted-foreground mt-1 whitespace-pre-line">{evt.description}</p>
             )}
           </div>
 
@@ -122,7 +122,7 @@ export default function CalendarEventSidebar({
               <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">{t('time')}</p>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-foreground">
                   {formatTime(startTime)} - {formatTime(endTime)}
                 </p>
               </div>
@@ -162,7 +162,7 @@ export default function CalendarEventSidebar({
                 <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Location</p>
-                  <p className="text-sm text-gray-700">{evt.location}</p>
+                  <p className="text-sm text-foreground/90">{evt.location}</p>
                 </div>
               </div>
             )}
@@ -191,7 +191,7 @@ export default function CalendarEventSidebar({
           title={t('deleteExternalEvent')}
         >
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">{t('deleteExternalEventConfirm')}</p>
+            <p className="text-sm text-muted-foreground">{t('deleteExternalEventConfirm')}</p>
             <div className="flex gap-3 justify-end pt-2">
               <Button variant="ghost" onClick={() => setDeleteDialogOpen(false)}>
                 {tc('cancel')}
@@ -241,18 +241,18 @@ export default function CalendarEventSidebar({
         : appointment.appointment_reasons?.label;
 
   return (
-    <div className="fixed inset-y-0 right-0 z-30 w-full sm:w-[380px] bg-white border-l border-border shadow-xl flex flex-col transition-transform duration-200">
+    <div className="fixed inset-y-0 right-0 z-30 w-full sm:w-[380px] bg-card border-l border-border shadow-xl flex flex-col transition-transform duration-200">
       {/* Header */}
       <div className={cn('px-5 py-4 border-b border-border flex items-center justify-between', colors.bg)}>
         <div>
-          <h3 className="text-sm font-semibold text-gray-900">{t('eventDetails')}</h3>
+          <h3 className="text-sm font-semibold text-foreground">{t('eventDetails')}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             {formatDate(appointment.appointment_date, 'EEEE d MMMM yyyy', locale)}
           </p>
         </div>
         <button
           onClick={onClose}
-          className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-white/60 transition-colors"
+          className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
@@ -269,7 +269,7 @@ export default function CalendarEventSidebar({
             size="md"
           />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-gray-900 truncate">{patientName}</p>
+            <p className="text-sm font-semibold text-foreground truncate">{patientName}</p>
             {patientPhone && (
               <p className="text-xs text-muted-foreground">{patientPhone}</p>
             )}
@@ -347,7 +347,7 @@ export default function CalendarEventSidebar({
             <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
             <div>
               <p className="text-xs text-muted-foreground">{t('time')}</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-medium text-foreground">
                 {formatTime(appointment.start_time)} - {formatTime(appointment.end_time)}
               </p>
             </div>
@@ -371,7 +371,7 @@ export default function CalendarEventSidebar({
             <Globe className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
             <div>
               <p className="text-xs text-muted-foreground">{t('source')}</p>
-              <Badge className="bg-gray-100 text-gray-700">
+              <Badge className="bg-muted text-foreground/90">
                 {getAppointmentSourceLabel(t, appointment.source)}
               </Badge>
             </div>
@@ -383,7 +383,7 @@ export default function CalendarEventSidebar({
               <Stethoscope className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">{t('reason')}</p>
-                <p className="text-sm text-gray-900">{reasonLabel}</p>
+                <p className="text-sm text-foreground">{reasonLabel}</p>
               </div>
             </div>
           )}
@@ -401,7 +401,7 @@ export default function CalendarEventSidebar({
                     lastName={appointment.practitioners?.profiles?.last_name}
                     size="xs"
                   />
-                  <p className="text-sm text-gray-900">{practitionerName}</p>
+                  <p className="text-sm text-foreground">{practitionerName}</p>
                 </div>
               </div>
             </div>
@@ -410,7 +410,7 @@ export default function CalendarEventSidebar({
           {/* Editable metadata (Google import / CRM clarity) */}
           <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-xs font-semibold text-gray-700 uppercase">{t('appointmentMeta')}</p>
+              <p className="text-xs font-semibold text-foreground/80 uppercase">{t('appointmentMeta')}</p>
               <Button
                 size="sm"
                 variant="ghost"
@@ -501,20 +501,20 @@ export default function CalendarEventSidebar({
                 {(appointment.external_title || appointment.external_description || appointment.external_location) ? (
                   <>
                     {appointment.external_title && (
-                      <p className="text-sm font-medium text-gray-900">{appointment.external_title}</p>
+                      <p className="text-sm font-medium text-foreground">{appointment.external_title}</p>
                     )}
                     {appointment.external_description && (
-                      <p className="text-sm text-gray-700 whitespace-pre-line">{appointment.external_description}</p>
+                      <p className="text-sm text-foreground/90 whitespace-pre-line">{appointment.external_description}</p>
                     )}
                     {appointment.external_location && (
-                      <p className="text-sm text-gray-700">{appointment.external_location}</p>
+                      <p className="text-sm text-foreground/90">{appointment.external_location}</p>
                     )}
                   </>
                 ) : (
                   <p className="text-sm text-muted-foreground">{t('noExternalMeta')}</p>
                 )}
                 {appointment.practitioner_notes && (
-                  <p className="text-sm text-gray-700 whitespace-pre-line">{appointment.practitioner_notes}</p>
+                  <p className="text-sm text-foreground/90 whitespace-pre-line">{appointment.practitioner_notes}</p>
                 )}
               </div>
             )}
