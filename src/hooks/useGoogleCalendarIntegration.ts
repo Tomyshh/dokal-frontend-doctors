@@ -15,13 +15,32 @@ const GCAL_QUERY_KEY = ['google-calendar-status'];
 /**
  * Fetch the current Google Calendar integration status & config.
  */
-export function useGoogleCalendarStatus() {
+export type GoogleCalendarStatusQueryOptions = {
+  /**
+   * When enabled, periodically refetches status so UI indicators update
+   * without requiring a full page reload.
+   */
+  autoRefresh?: boolean;
+  /**
+   * Poll interval used when autoRefresh is enabled.
+   * Defaults to 30 seconds.
+   */
+  refetchIntervalMs?: number;
+};
+
+export function useGoogleCalendarStatus(options: GoogleCalendarStatusQueryOptions = {}) {
+  const { autoRefresh = false, refetchIntervalMs = 30_000 } = options;
   return useQuery({
     queryKey: GCAL_QUERY_KEY,
     queryFn: async () => {
       const { data } = await api.get<GoogleCalendarStatus>(`${GCAL_BASE}/status`);
       return data;
     },
+    // QueryProvider disables refetch-on-focus globally; we re-enable it here
+    // so the header indicator stays accurate when returning to the tab.
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchInterval: autoRefresh ? refetchIntervalMs : false,
   });
 }
 

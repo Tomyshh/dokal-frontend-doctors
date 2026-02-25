@@ -117,8 +117,9 @@ export function CityCombobox({
   return (
     <div className="space-y-1.5 relative">
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-gray-700">
-          {label}
+        <label htmlFor={id} className="text-sm font-medium text-gray-700 flex items-center gap-1">
+          <span>{label}</span>
+          {required && <span className="text-destructive">*</span>}
         </label>
       )}
 

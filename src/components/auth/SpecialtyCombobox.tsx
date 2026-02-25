@@ -207,8 +207,9 @@ export function SpecialtyCombobox({
   return (
     <div ref={containerRef} className="space-y-1.5 relative">
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-foreground">
-          {label}
+        <label htmlFor={id} className="text-sm font-medium text-foreground flex items-center gap-1">
+          <span>{label}</span>
+          {required && <span className="text-destructive">*</span>}
         </label>
       )}
       <input

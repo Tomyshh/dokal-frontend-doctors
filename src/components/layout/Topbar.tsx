@@ -32,7 +32,10 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
   const updateSettings = useUpdateSettings();
   const toast = useToast();
 
-  const { data: gcalStatus, isLoading: gcalStatusLoading } = useGoogleCalendarStatus();
+  const { data: gcalStatus, isLoading: gcalStatusLoading } = useGoogleCalendarStatus({
+    autoRefresh: true,
+    refetchIntervalMs: 30_000,
+  });
   const gcalConnectMutation = useStartGoogleCalendarConnect();
   const showEnergyRing = !(gcalStatusLoading || gcalConnectMutation.isPending);
   const isGcalSynced = Boolean(

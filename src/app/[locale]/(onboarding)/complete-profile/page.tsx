@@ -33,6 +33,16 @@ type FormState = {
   longitude: number | null;
 };
 
+function hasStreetNumber(address: string) {
+  const s = (address || '').trim();
+  if (!s) return false;
+  // Accept both "12 Rothschild" and "Rothschild 12"
+  if (/^\d+\s+\S+/.test(s)) return true;
+  if (/\S+\s+\d+[a-zA-Z]?$/.test(s)) return true;
+  // Fallback: any digit somewhere (covers some formatted addresses)
+  return /\d/.test(s);
+}
+
 export default function CompleteProfilePage() {
   const t = useTranslations('auth');
   const locale = useLocale();
@@ -59,6 +69,7 @@ export default function CompleteProfilePage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [addressFieldError, setAddressFieldError] = useState<string | undefined>(undefined);
 
   // Resolve email and user ID: prefer backend profile, fall back to Supabase user (Google OAuth)
   const resolvedEmail = profile?.email || user?.email || null;
@@ -170,6 +181,7 @@ export default function CompleteProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setAddressFieldError(undefined);
 
     if (!resolvedEmail) {
       setError(t('registrationBackendError'));
@@ -194,8 +206,18 @@ export default function CompleteProfilePage() {
       return;
     }
 
+    if (!form.city.trim()) {
+      setError(t('cityInvalid'));
+      return;
+    }
+
     if (!form.addressLine.trim() || form.latitude == null || form.longitude == null) {
       setError(t('addressSelectHint'));
+      return;
+    }
+
+    if (!hasStreetNumber(form.addressLine)) {
+      setError(t('addressMustIncludeStreetNumber'));
       return;
     }
 
@@ -212,7 +234,7 @@ export default function CompleteProfilePage() {
         license_number: form.licenseNumber,
         specialization_license: form.specializationLicense || undefined,
         address_line: form.addressLine,
-        zip_code: form.zipCode,
+        zip_code: form.zipCode || '',
         latitude: form.latitude ?? undefined,
         longitude: form.longitude ?? undefined,
         organization_name: `Cabinet Dr ${form.lastName}`.trim(),
@@ -302,116 +324,132 @@ export default function CompleteProfilePage() {
       )}
 
       <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
-        <div className="space-y-3 flex-1 min-h-0">
-        <div className="grid grid-cols-2 gap-3">
-          <Input
-            id="firstName"
-            label={t('firstName')}
-            value={form.firstName}
-            onChange={(e) => handleChange('firstName', e.target.value)}
-            required
-            autoComplete="given-name"
-          />
-          <Input
-            id="lastName"
-            label={t('lastName')}
-            value={form.lastName}
-            onChange={(e) => handleChange('lastName', e.target.value)}
-            required
-            autoComplete="family-name"
-          />
-        </div>
+        <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+          <div className="space-y-3 pb-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                id="firstName"
+                label={t('firstName')}
+                value={form.firstName}
+                onChange={(e) => handleChange('firstName', e.target.value)}
+                required
+                autoComplete="given-name"
+              />
+              <Input
+                id="lastName"
+                label={t('lastName')}
+                value={form.lastName}
+                onChange={(e) => handleChange('lastName', e.target.value)}
+                required
+                autoComplete="family-name"
+              />
+            </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <PhoneInputIL
-            id="phone"
-            label={t('phone')}
-            value={form.phone}
-            onChange={(v) => handleChange('phone', v)}
-            required
-            error={phoneInvalid ? t('phoneInvalid') : undefined}
-          />
-          <CityCombobox
-            id="city"
-            label={t('city')}
-            value={form.city}
-            onChange={(v) => handleChange('city', v)}
-            required
-            placeholder={t('city')}
-          />
-          <SpecialtyCombobox
-            id="specialty"
-            label={t('specialty')}
-            value={form.specialtyId}
-            onChange={(v) => handleChange('specialtyId', v)}
-            required
-            placeholder={t('specialty')}
-          />
-        </div>
+            <div className="grid grid-cols-3 gap-3">
+              <PhoneInputIL
+                id="phone"
+                label={t('phone')}
+                value={form.phone}
+                onChange={(v) => handleChange('phone', v)}
+                required
+                error={phoneInvalid ? t('phoneInvalid') : undefined}
+              />
+              <CityCombobox
+                id="city"
+                label={t('city')}
+                value={form.city}
+                onChange={(v) => handleChange('city', v)}
+                required
+                placeholder={t('city')}
+              />
+              <SpecialtyCombobox
+                id="specialty"
+                label={t('specialty')}
+                value={form.specialtyId}
+                onChange={(v) => handleChange('specialtyId', v)}
+                required
+                placeholder={t('specialty')}
+              />
+            </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Input
-            id="licenseNumber"
-            label={t('licenseNumber')}
-            value={form.licenseNumber}
-            onChange={(e) => handleChange('licenseNumber', e.target.value.replace(/\D/g, '').slice(0, 6))}
-            required
-            inputMode="numeric"
-            maxLength={6}
-            error={licenseNumberInvalid ? t('licenseNumberInvalid') : undefined}
-          />
-          <Input
-            id="specializationLicense"
-            label={t('specializationLicense')}
-            value={form.specializationLicense}
-            onChange={(e) => handleChange('specializationLicense', e.target.value.replace(/\D/g, '').slice(0, 6))}
-            inputMode="numeric"
-            maxLength={6}
-            error={specializationLicenseInvalid ? t('specializationLicenseInvalid') : undefined}
-          />
-        </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                id="licenseNumber"
+                label={t('licenseNumber')}
+                value={form.licenseNumber}
+                onChange={(e) => handleChange('licenseNumber', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                required
+                inputMode="numeric"
+                maxLength={6}
+                error={licenseNumberInvalid ? t('licenseNumberInvalid') : undefined}
+              />
+              <Input
+                id="specializationLicense"
+                label={t('specializationLicense')}
+                value={form.specializationLicense}
+                onChange={(e) => handleChange('specializationLicense', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                inputMode="numeric"
+                maxLength={6}
+                error={specializationLicenseInvalid ? t('specializationLicenseInvalid') : undefined}
+              />
+            </div>
 
-        <div className="grid grid-cols-4 gap-3">
-          <div className="col-span-3">
-            <AddressAutocomplete
-              id="addressLine"
-              label={t('addressLine')}
-              value={form.addressLine}
-              placeholder={t('addressSelectHint')}
-              required
-              onChange={(data: AddressResult) => {
-                handleChange('addressLine', data.address_line);
-                handleChange('zipCode', data.zip_code);
-                handleChange('city', data.city);
-                setForm((prev) => ({
-                  ...prev,
-                  latitude: data.latitude,
-                  longitude: data.longitude,
-                }));
-              }}
-              onClear={() => {
-                handleChange('addressLine', '');
-                handleChange('zipCode', '');
-                handleChange('city', '');
-                setForm((prev) => ({ ...prev, latitude: null, longitude: null }));
-              }}
-            />
+            <div className="grid grid-cols-4 gap-3">
+              <div className="col-span-3">
+                <AddressAutocomplete
+                  id="addressLine"
+                  label={t('addressLine')}
+                  value={form.addressLine}
+                  placeholder={t('addressSelectHint')}
+                  required
+                  error={addressFieldError}
+                  onChange={(data: AddressResult) => {
+                    const nextAddress = (data.address_line || '').trim();
+                    if (!hasStreetNumber(nextAddress)) {
+                      setAddressFieldError(t('addressMustIncludeStreetNumber'));
+                      return;
+                    }
+                    if (!data.city?.trim()) {
+                      setAddressFieldError(t('addressMustIncludeCity'));
+                      return;
+                    }
+
+                    setAddressFieldError(undefined);
+                    handleChange('addressLine', nextAddress);
+                    handleChange('zipCode', data.zip_code);
+                    handleChange('city', data.city);
+                    setForm((prev) => ({
+                      ...prev,
+                      latitude: data.latitude,
+                      longitude: data.longitude,
+                    }));
+                  }}
+                  onClear={() => {
+                    setAddressFieldError(undefined);
+                    handleChange('addressLine', '');
+                    handleChange('zipCode', '');
+                    handleChange('city', '');
+                    setForm((prev) => ({ ...prev, latitude: null, longitude: null }));
+                  }}
+                />
+              </div>
+              <Input
+                id="zipCode"
+                label={t('zipCode')}
+                value={form.zipCode}
+                onChange={(e) => handleChange('zipCode', e.target.value)}
+                autoComplete="postal-code"
+                placeholder={t('zipCode')}
+              />
+            </div>
           </div>
-          <Input
-            id="zipCode"
-            label={t('zipCode')}
-            value={form.zipCode}
-            onChange={(e) => handleChange('zipCode', e.target.value)}
-            required
-            autoComplete="postal-code"
-            placeholder={t('zipCode')}
-          />
-        </div>
         </div>
 
-        <Button type="submit" className="w-full rounded-full h-11 mt-4" loading={loading}>
-          {t('saveAndContinue')}
-        </Button>
+        <div className="pt-4 border-t border-border/60 bg-white/95 backdrop-blur-sm">
+          <Button type="submit" className="w-full rounded-full h-11" loading={loading}>
+            {t('saveAndContinue')}
+          </Button>
+        </div>
       </form>
     </div>
   );

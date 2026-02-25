@@ -10,11 +10,13 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, label, error, id, ...props }, ref) => {
+    const isRequired = props.required === true;
     return (
       <div className="space-y-1.5">
         {label && (
-          <label htmlFor={id} className="text-sm font-medium text-foreground">
-            {label}
+          <label htmlFor={id} className="text-sm font-medium text-foreground flex items-center gap-1">
+            <span>{label}</span>
+            {isRequired && <span className="text-destructive">*</span>}
           </label>
         )}
         <input
