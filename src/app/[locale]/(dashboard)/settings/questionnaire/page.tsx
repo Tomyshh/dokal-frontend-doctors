@@ -6,13 +6,13 @@ import {
   useProfileQuestionnaireConfig,
   useUpdateProfileQuestionnaireConfig,
 } from '@/hooks/useQuestionnaire';
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PreVisitInstructionsEditor } from '@/components/appointments/PreVisitInstructionsEditor';
 import { QuestionnaireFieldsBuilder } from '@/components/appointments/QuestionnaireFieldsBuilder';
 import { useToast } from '@/providers/ToastProvider';
-import { ListChecks, ClipboardList } from 'lucide-react';
+import { ListChecks, ClipboardList, Info } from 'lucide-react';
 import type { QuestionnaireField } from '@/types';
 
 export default function QuestionnairePage() {
@@ -67,9 +67,10 @@ export default function QuestionnairePage() {
     return (
       <div className="space-y-6 max-w-3xl" aria-label="Chargement">
         <Skeleton className="h-8 w-64 rounded-lg" />
-        <div className="space-y-4">
+        <Skeleton className="h-4 w-[80%] rounded-md" />
+        <div className="space-y-4 mt-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-10 w-full rounded-xl" />
+            <Skeleton key={i} className="h-12 w-full rounded-xl" />
           ))}
         </div>
       </div>
@@ -78,27 +79,27 @@ export default function QuestionnairePage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('pageTitle')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t('pageSubtitle')}</p>
-        </div>
-        {dirty && (
-          <Button onClick={handleSave} loading={updateConfig.isPending}>
-            {tc('save')}
-          </Button>
-        )}
+      {/* ── Page header ── */}
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">{t('pageTitle')}</h1>
+        <p className="text-sm text-muted-foreground mt-1 max-w-2xl">{t('pageSubtitle')}</p>
       </div>
 
-      {/* Pre-visit instructions */}
+      {/* ── Info banner ── */}
+      <div className="flex gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20">
+        <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+        <p className="text-sm text-foreground/80">{t('infoBanner')}</p>
+      </div>
+
+      {/* ── Section 1: Pre-visit instructions ── */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
             <ListChecks className="h-5 w-5 text-primary" />
             {t('preVisitInstructions')}
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">{t('preVisitInstructionsHint')}</p>
-        </CardHeader>
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">{t('preVisitInstructionsHint')}</p>
+        </div>
         <PreVisitInstructionsEditor
           value={instructions}
           onChange={handleInstructionsChange}
@@ -106,15 +107,15 @@ export default function QuestionnairePage() {
         />
       </Card>
 
-      {/* Questionnaire fields */}
+      {/* ── Section 2: Questionnaire fields ── */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-primary" />
             {t('questionnaireFields')}
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">{t('questionnaireFieldsHint')}</p>
-        </CardHeader>
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">{t('questionnaireFieldsHint')}</p>
+        </div>
         <QuestionnaireFieldsBuilder
           value={fields}
           onChange={handleFieldsChange}
@@ -122,9 +123,14 @@ export default function QuestionnairePage() {
         />
       </Card>
 
+      {/* ── Save bar ── */}
       {dirty && (
-        <div className="flex justify-end">
-          <Button onClick={handleSave} loading={updateConfig.isPending}>
+        <div className="sticky bottom-4 flex justify-end">
+          <Button
+            onClick={handleSave}
+            loading={updateConfig.isPending}
+            className="shadow-lg"
+          >
             {tc('save')}
           </Button>
         </div>

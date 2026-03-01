@@ -203,7 +203,7 @@
     "management": "Management",
     "reasons": "Appointment reasons",
     "instructions": "Pre-appointment instructions",
-    "questionnaire": "Questionnaire",
+    "questionnaire": "Pre-visit questionnaire",
     "help": "Help",
     "support": "Support",
     "team": "Team"
@@ -760,6 +760,7 @@
   "questionnaire": {
     "pageTitle": "Questionnaire & Pre-visit instructions",
     "pageSubtitle": "Configure default instructions and questionnaire fields applied to all your appointments. You can also override these on a per-appointment basis.",
+    "infoBanner": "These settings are your defaults. They will be automatically applied to every new appointment. You can also customize them individually from any appointment detail page.",
     "preVisitInstructions": "Pre-visit instructions",
     "preVisitInstructionsHint": "Text items displayed to the patient before their appointment (e.g. \"Bring your ID card\", \"Fast 4h before\").",
     "questionnaireFields": "Questionnaire fields",

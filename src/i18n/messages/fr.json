@@ -203,7 +203,7 @@
     "management": "Gestion",
     "reasons": "Motifs de consultation",
     "instructions": "Instructions pré-RDV",
-    "questionnaire": "Questionnaire",
+    "questionnaire": "Questionnaire pré-visite",
     "help": "Aide",
     "support": "Support",
     "team": "Équipe"
@@ -760,6 +760,7 @@
   "questionnaire": {
     "pageTitle": "Questionnaire & Instructions pré-visite",
     "pageSubtitle": "Configurez les instructions et les champs de questionnaire appliqués par défaut à tous vos rendez-vous. Vous pouvez aussi les remplacer au niveau d'un RDV spécifique.",
+    "infoBanner": "Ces paramètres sont vos valeurs par défaut. Ils seront automatiquement appliqués à chaque nouveau rendez-vous. Vous pouvez aussi les personnaliser individuellement depuis la page de détail d'un rendez-vous.",
     "preVisitInstructions": "Instructions pré-visite",
     "preVisitInstructionsHint": "Textes affichés au patient avant le rendez-vous (ex. : « Apportez votre carte d'identité », « Jeûnez 4h avant »).",
     "questionnaireFields": "Champs du questionnaire",

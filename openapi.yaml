@@ -1420,14 +1420,44 @@ paths:
     get:
       tags: [CRM]
       summary: Get appointment by ID (CRM)
-      description: Returns the full appointment for the practitioner or secretary/admin. Same structure as list items from GET /crm/appointments.
+      description: >
+        Returns the full appointment for the practitioner or secretary/admin.
+        Includes pre_visit_instructions, questionnaire_fields, questionnaire_answers
+        and questionnaire_submitted_at when configured/submitted.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       responses:
         "200":
-          description: Appointment details
+          description: Appointment details (includes questionnaire data)
           content:
             application/json:
-              schema: { type: object, additionalProperties: true }
+              schema:
+                allOf:
+                  - { type: object, additionalProperties: true }
+                  - type: object
+                    properties:
+                      pre_visit_instructions:
+                        type: array
+                        items: { type: string }
+                        description: "Pre-visit instructions for this appointment"
+                      questionnaire_fields:
+                        type: array
+                        items: { $ref: "#/components/schemas/QuestionnaireField" }
+                        description: "Questionnaire fields configured for this appointment"
+                      questionnaire_submitted_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        description: "When the patient submitted the questionnaire"
+                      questionnaire_answers:
+                        type: object
+                        nullable: true
+                        additionalProperties: { type: string }
+                        description: "Patient answers keyed by questionnaire field id"
+                      instructions_read_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        description: "When the patient marked the instructions as read"
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -1517,6 +1547,72 @@ paths:
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       responses:
         "204": { description: Updated }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ── Questionnaire & Pre-visit Instructions ──
+
+  /api/v1/crm/profile/questionnaire-config:
+    get:
+      tags: [CRM]
+      summary: Get practitioner default questionnaire config
+      description: >
+        Returns the practitioner-level default pre-visit instructions and
+        questionnaire fields. These defaults are applied to all new appointments
+        unless overridden at the appointment level.
+      responses:
+        "200":
+          description: Questionnaire config
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuestionnaireConfig" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    patch:
+      tags: [CRM]
+      summary: Update practitioner default questionnaire config
+      description: >
+        Upsert (create or update) the practitioner-level default pre-visit
+        instructions and/or questionnaire fields. Partial updates are supported:
+        only the fields present in the request body are updated.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateQuestionnaireConfigRequest" }
+      responses:
+        "200":
+          description: Updated config
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuestionnaireConfig" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/v1/crm/appointments/{id}/questionnaire-config:
+    patch:
+      tags: [CRM]
+      summary: Override questionnaire config for a specific appointment
+      description: >
+        Set or update the pre-visit instructions and/or questionnaire fields
+        for a specific appointment, overriding the practitioner defaults.
+        The appointment response (GET /crm/appointments/{id}) will include
+        the resulting pre_visit_instructions and questionnaire_fields.
+      parameters: [{ $ref: "#/components/parameters/IdParam" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateQuestionnaireConfigRequest" }
+      responses:
+        "200":
+          description: Updated appointment with questionnaire config
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -3148,3 +3244,71 @@ components:
           type: boolean
           description: true if an invite email was sent (false for existing users)
       required: [member, is_existing_user, invite_sent]
+
+    # ── Questionnaire & Pre-visit Instructions ──
+
+    QuestionnaireField:
+      type: object
+      description: >
+        A single configurable field in the pre-visit questionnaire.
+        Label keys support i18n (label = EN, label_fr = FR, label_he = HE).
+      properties:
+        id:
+          type: string
+          description: "Unique slug identifier (lowercase, digits, underscores, e.g. 'symptoms')"
+          pattern: '^[a-z0-9_]+$'
+          example: symptoms
+        label:
+          type: string
+          description: "Field label in English (default language)"
+          example: "Reason / symptoms"
+        label_fr:
+          type: string
+          nullable: true
+          description: "Field label in French"
+          example: "Motif / symptômes"
+        label_he:
+          type: string
+          nullable: true
+          description: "Field label in Hebrew"
+          example: "סיבה / תסמינים"
+        required:
+          type: boolean
+          description: "Whether the patient must fill this field"
+          default: false
+        max_lines:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 1
+          description: "Number of text input lines (1 = single line, 2+ = textarea)"
+      required: [id, label, required, max_lines]
+
+    QuestionnaireConfig:
+      type: object
+      description: >
+        Pre-visit instructions (string array) and questionnaire fields
+        configured by the practitioner. Used both at profile level (defaults)
+        and at appointment level (overrides).
+      properties:
+        pre_visit_instructions:
+          type: array
+          items: { type: string }
+          description: "Ordered list of instruction texts shown to the patient before the visit"
+          example: ["Bring your ID card", "Arrive 10 minutes early", "Fast 4 hours before"]
+        questionnaire_fields:
+          type: array
+          items: { $ref: "#/components/schemas/QuestionnaireField" }
+          description: "Ordered list of form fields the patient fills in before the appointment"
+      required: [pre_visit_instructions, questionnaire_fields]
+
+    UpdateQuestionnaireConfigRequest:
+      type: object
+      description: "Partial update for questionnaire config. Only provided fields are updated."
+      properties:
+        pre_visit_instructions:
+          type: array
+          items: { type: string }
+        questionnaire_fields:
+          type: array
+          items: { $ref: "#/components/schemas/QuestionnaireField" }
