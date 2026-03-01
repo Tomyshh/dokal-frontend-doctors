@@ -261,9 +261,10 @@ export interface AppointmentInstruction {
 
 export interface QuestionnaireField {
   id: string;
+  /** Label in the practitioner's language (source). Backend translates to other locales via AI. */
   label: string;
-  label_fr: string | null;
-  label_he: string | null;
+  /** Translated labels keyed by locale (populated by backend AI translation) */
+  translations?: Record<string, string> | null;
   required: boolean;
   max_lines: number;
 }

@@ -739,8 +739,11 @@ paths:
                           properties:
                             id: { type: string, example: symptoms }
                             label: { type: string, example: "Reason / symptoms" }
-                            label_fr: { type: string, example: "Motif / symptômes" }
-                            label_he: { type: string, example: "סיבה / תסמינים" }
+                            translations:
+                              type: object
+                              nullable: true
+                              additionalProperties: { type: string }
+                              example: { en: "Reason / symptoms", fr: "Motif / symptômes", he: "סיבה / תסמינים" }
                             required: { type: boolean }
                             max_lines: { type: integer, example: 3 }
                       questionnaire_submitted_at:
@@ -3251,7 +3254,9 @@ components:
       type: object
       description: >
         A single configurable field in the pre-visit questionnaire.
-        Label keys support i18n (label = EN, label_fr = FR, label_he = HE).
+        The practitioner writes the label in their own language.
+        The backend translates it to other supported locales via OpenAI
+        and stores translations in the `translations` map.
       properties:
         id:
           type: string
@@ -3260,18 +3265,20 @@ components:
           example: symptoms
         label:
           type: string
-          description: "Field label in English (default language)"
+          description: "Field label in the practitioner's language (source text for AI translation)"
           example: "Reason / symptoms"
-        label_fr:
-          type: string
+        translations:
+          type: object
           nullable: true
-          description: "Field label in French"
-          example: "Motif / symptômes"
-        label_he:
-          type: string
-          nullable: true
-          description: "Field label in Hebrew"
-          example: "סיבה / תסמינים"
+          additionalProperties: { type: string }
+          description: >
+            AI-translated labels keyed by locale code (e.g. {"en":"Symptoms","fr":"Symptômes","he":"תסמינים"}).
+            Populated by backend after saving. CRM sends only `label`; backend generates this field.
+            Patient app reads translations[locale] to display in the patient's language.
+          example:
+            en: "Reason / symptoms"
+            fr: "Motif / symptômes"
+            he: "סיבה / תסמינים"
         required:
           type: boolean
           description: "Whether the patient must fill this field"

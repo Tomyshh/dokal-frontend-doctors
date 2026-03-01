@@ -29,8 +29,6 @@ function slugify(text: string): string {
 const EMPTY_FIELD: QuestionnaireField = {
   id: '',
   label: '',
-  label_fr: null,
-  label_he: null,
   required: false,
   max_lines: 1,
 };
@@ -81,8 +79,6 @@ export function QuestionnaireFieldsBuilder({
       ...form,
       label: form.label.trim(),
       id: form.id.trim(),
-      label_fr: form.label_fr?.trim() || null,
-      label_he: form.label_he?.trim() || null,
     };
 
     if (editingIndex !== null) {
@@ -107,7 +103,7 @@ export function QuestionnaireFieldsBuilder({
           <GripVertical className="h-4 w-4 text-muted-foreground shrink-0 cursor-grab" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-medium text-gray-900 truncate">{field.label}</span>
+              <span className="text-sm font-medium text-foreground truncate">{field.label}</span>
               {field.required && (
                 <Badge variant="warning" className="text-xs px-1.5 py-0">
                   {t('required')}
@@ -119,8 +115,6 @@ export function QuestionnaireFieldsBuilder({
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
               {t('linesLabel', { count: field.max_lines })}
-              {field.label_fr && ` · FR: ${field.label_fr}`}
-              {field.label_he && ` · HE: ${field.label_he}`}
             </p>
           </div>
           <div className="flex items-center gap-1 shrink-0">
@@ -163,7 +157,6 @@ export function QuestionnaireFieldsBuilder({
         {t('addField')}
       </Button>
 
-      {/* Add / Edit Dialog */}
       <Dialog
         open={showDialog}
         onClose={() => setShowDialog(false)}
@@ -171,14 +164,16 @@ export function QuestionnaireFieldsBuilder({
       >
         <div className="space-y-4">
           <Input
-            label={t('labelEn')}
+            label={t('fieldLabel')}
             value={form.label}
             onChange={(e) => handleLabelChange(e.target.value)}
             required
           />
 
+          <p className="text-xs text-muted-foreground -mt-2">{t('fieldLabelHint')}</p>
+
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-foreground/80">
               {t('fieldId')} <span className="text-red-500">*</span>
             </label>
             <input
@@ -197,19 +192,6 @@ export function QuestionnaireFieldsBuilder({
             <p className="text-xs text-muted-foreground">{t('fieldIdHint')}</p>
           </div>
 
-          <Input
-            label={t('labelFr')}
-            value={form.label_fr ?? ''}
-            onChange={(e) => setForm((prev) => ({ ...prev, label_fr: e.target.value }))}
-          />
-
-          <Input
-            label={t('labelHe')}
-            value={form.label_he ?? ''}
-            onChange={(e) => setForm((prev) => ({ ...prev, label_he: e.target.value }))}
-            dir="rtl"
-          />
-
           <Select
             label={t('maxLines')}
             value={String(form.max_lines)}
@@ -227,7 +209,7 @@ export function QuestionnaireFieldsBuilder({
               onChange={(e) => setForm((prev) => ({ ...prev, required: e.target.checked }))}
               className="h-4 w-4 rounded border-border text-primary"
             />
-            <label htmlFor="qf-required" className="text-sm text-gray-700">
+            <label htmlFor="qf-required" className="text-sm text-foreground/80">
               {t('required')}
             </label>
           </div>

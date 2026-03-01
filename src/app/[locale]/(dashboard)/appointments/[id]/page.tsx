@@ -365,12 +365,7 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
           <div className="space-y-4">
             {appointment.questionnaire_fields?.map((field) => {
               const answer = appointment.questionnaire_answers![field.id];
-              const label =
-                locale === 'fr'
-                  ? field.label_fr || field.label
-                  : locale === 'he'
-                  ? field.label_he || field.label
-                  : field.label;
+              const label = field.translations?.[locale] || field.label;
               return (
                 <div key={field.id}>
                   <p className="text-xs font-semibold text-gray-500 uppercase">{label}</p>
