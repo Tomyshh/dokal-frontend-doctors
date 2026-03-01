@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -9,13 +9,29 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Dialog } from '@/components/ui/Dialog';
 import AppointmentActions from '@/components/appointments/AppointmentActions';
 import { CompletePatientInfoDialog } from '@/components/appointments/CompletePatientInfoDialog';
+import { PreVisitInstructionsEditor } from '@/components/appointments/PreVisitInstructionsEditor';
+import { QuestionnaireFieldsBuilder } from '@/components/appointments/QuestionnaireFieldsBuilder';
+import { useUpdateAppointmentQuestionnaireConfig } from '@/hooks/useQuestionnaire';
 import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
-import { ArrowLeft, Calendar, Clock, MapPin, User, FileText, ChevronRight } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  MapPin,
+  User,
+  FileText,
+  ChevronRight,
+  ListChecks,
+  ClipboardList,
+  CheckCircle2,
+  Pencil,
+} from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import type { Appointment } from '@/types';
+import type { Appointment, QuestionnaireField } from '@/types';
 import {
   getAppointmentSourceLabel,
   getCrmAppointmentPatientDisplayName,
@@ -27,20 +43,39 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
   const { id } = use(params);
   const t = useTranslations('appointments');
   const tc = useTranslations('common');
+  const tq = useTranslations('questionnaire');
   const tcal = useTranslations('calendar');
   const locale = useLocale();
   const [completeInfoOpen, setCompleteInfoOpen] = useState(false);
+  const [configOpen, setConfigOpen] = useState(false);
 
   const { data: appointment, isLoading } = useQuery({
     queryKey: ['appointment', id],
     queryFn: async () => {
-      // CRM context: use /crm/appointments/{id} so practitioner can view any appointment
-      // (GET /appointments/{id} is patient-only and returns 404 for practitioner)
       const { data } = await api.get<Appointment>(`/crm/appointments/${id}`);
       return data;
     },
     enabled: !!id,
   });
+
+  // Local questionnaire config state for the per-appointment dialog
+  const [instructions, setInstructions] = useState<string[]>([]);
+  const [fields, setFields] = useState<QuestionnaireField[]>([]);
+  const updateConfig = useUpdateAppointmentQuestionnaireConfig(id);
+
+  useEffect(() => {
+    if (appointment) {
+      setInstructions(appointment.pre_visit_instructions ?? []);
+      setFields(appointment.questionnaire_fields ?? []);
+    }
+  }, [appointment]);
+
+  const handleConfigSave = () => {
+    updateConfig.mutate(
+      { pre_visit_instructions: instructions, questionnaire_fields: fields },
+      { onSuccess: () => setConfigOpen(false) },
+    );
+  };
 
   if (isLoading) {
     return (
@@ -79,6 +114,7 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
       </div>
     );
   }
+
   if (!appointment) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -90,6 +126,12 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
   const patientName = getCrmAppointmentPatientDisplayName(appointment);
   const patientRecordId = getCrmAppointmentPatientRecordId(appointment);
   const isDraft = isDraftPatientAppointment(appointment);
+
+  const hasQuestionnaireConfig =
+    (appointment.pre_visit_instructions?.length ?? 0) > 0 ||
+    (appointment.questionnaire_fields?.length ?? 0) > 0;
+
+  const questionnaireSubmitted = !!appointment.questionnaire_submitted_at;
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -198,7 +240,6 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
                 </span>
               </div>
             )}
-
             <div className="flex items-center gap-2 text-sm">
               <FileText className="h-4 w-4 text-muted-foreground" />
               <span>{getAppointmentSourceLabel(tcal, appointment.source)}</span>
@@ -241,6 +282,149 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
           <AppointmentActions appointmentId={appointment.id} status={appointment.status} />
         </div>
       </Card>
+
+      {/* ── Pre-visit Instructions & Questionnaire ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ClipboardList className="h-5 w-5 text-primary" />
+            {tq('appointmentConfigTitle')}
+          </CardTitle>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setInstructions(appointment.pre_visit_instructions ?? []);
+              setFields(appointment.questionnaire_fields ?? []);
+              setConfigOpen(true);
+            }}
+          >
+            <Pencil className="h-4 w-4" />
+            {tc('edit')}
+          </Button>
+        </CardHeader>
+
+        {/* Pre-visit instructions summary */}
+        {(appointment.pre_visit_instructions?.length ?? 0) > 0 && (
+          <div className="mb-4">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2 flex items-center gap-1.5">
+              <ListChecks className="h-3.5 w-3.5" />
+              {tq('preVisitInstructions')}
+            </h4>
+            <ul className="space-y-1">
+              {appointment.pre_visit_instructions!.map((instr, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                  {instr}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Questionnaire fields summary */}
+        {(appointment.questionnaire_fields?.length ?? 0) > 0 && (
+          <div>
+            <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2 flex items-center gap-1.5">
+              <ClipboardList className="h-3.5 w-3.5" />
+              {tq('questionnaireFields')}
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {appointment.questionnaire_fields!.map((field) => (
+                <span
+                  key={field.id}
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs bg-muted/60 text-gray-700 border border-border/50"
+                >
+                  {field.label}
+                  {field.required && <span className="text-red-500">*</span>}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!hasQuestionnaireConfig && (
+          <p className="text-sm text-muted-foreground">{tq('noConfigForAppointment')}</p>
+        )}
+      </Card>
+
+      {/* ── Questionnaire Responses (patient side) ── */}
+      {questionnaireSubmitted && appointment.questionnaire_answers && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              {tq('patientResponses')}
+            </CardTitle>
+            <span className="text-xs text-muted-foreground">
+              {tq('submittedAt', {
+                date: formatDate(appointment.questionnaire_submitted_at!, 'dd/MM/yyyy HH:mm', locale),
+              })}
+            </span>
+          </CardHeader>
+          <div className="space-y-4">
+            {appointment.questionnaire_fields?.map((field) => {
+              const answer = appointment.questionnaire_answers![field.id];
+              const label =
+                locale === 'fr'
+                  ? field.label_fr || field.label
+                  : locale === 'he'
+                  ? field.label_he || field.label
+                  : field.label;
+              return (
+                <div key={field.id}>
+                  <p className="text-xs font-semibold text-gray-500 uppercase">{label}</p>
+                  <p className="text-sm text-gray-800 mt-1 whitespace-pre-line">
+                    {answer || <span className="italic text-muted-foreground">{tq('noAnswer')}</span>}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
+
+      {/* ── Config Dialog ── */}
+      <Dialog
+        open={configOpen}
+        onClose={() => setConfigOpen(false)}
+        title={tq('appointmentConfigTitle')}
+      >
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <ListChecks className="h-4 w-4 text-primary" />
+              {tq('preVisitInstructions')}
+            </h3>
+            <PreVisitInstructionsEditor
+              value={instructions}
+              onChange={setInstructions}
+              disabled={updateConfig.isPending}
+            />
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <ClipboardList className="h-4 w-4 text-primary" />
+              {tq('questionnaireFields')}
+            </h3>
+            <QuestionnaireFieldsBuilder
+              value={fields}
+              onChange={setFields}
+              disabled={updateConfig.isPending}
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={() => setConfigOpen(false)}>
+              {tc('cancel')}
+            </Button>
+            <Button onClick={handleConfigSave} loading={updateConfig.isPending}>
+              {tc('save')}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
 
       {/* Dialog pour compléter les infos patient */}
       {patientRecordId && (

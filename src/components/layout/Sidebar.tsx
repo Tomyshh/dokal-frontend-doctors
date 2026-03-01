@@ -24,6 +24,7 @@ import {
   LogOut,
   ChevronLeft,
   Users,
+  ClipboardCheck,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -101,11 +102,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const managementLinks = useMemo(() => {
     const links: { href: string; icon: typeof ClipboardList; label: string }[] = [];
 
-    // Reasons & instructions are for practitioners
+    // Reasons, instructions & questionnaire are for practitioners
     if (!isSecretary) {
       links.push(
         { href: '/settings/reasons', icon: ClipboardList, label: t('reasons') },
         { href: '/settings/instructions', icon: FileText, label: t('instructions') },
+        { href: '/settings/questionnaire', icon: ClipboardCheck, label: t('questionnaire') },
       );
     }
 

@@ -28,6 +28,8 @@ tags:
   - name: Subscription
   - name: Reviews
   - name: CRM
+  - name: Places
+    description: Google Places autocomplete & details (adresses pour app mobile patients)
 
 security:
   - bearerAuth: []
@@ -709,7 +711,9 @@ paths:
         - $ref: "#/components/parameters/IdParam"
       responses:
         "200":
-          description: Appointment (inclut conversation_id pour le bouton "Contacter le cabinet")
+          description: >
+            Appointment complet. Inclut conversation_id, les instructions pré-visite du praticien,
+            les champs du questionnaire et le statut de soumission.
           content:
             application/json:
               schema:
@@ -717,7 +721,84 @@ paths:
                   - { type: object, additionalProperties: true }
                   - type: object
                     properties:
-                      conversation_id: { type: string, format: uuid, nullable: true }
+                      conversation_id:
+                        type: string
+                        format: uuid
+                        nullable: true
+                      pre_visit_instructions:
+                        type: array
+                        description: Instructions pré-visite définies par le praticien (actives, triées).
+                        items: { type: string }
+                        example: ["Apportez une pièce d'identité", "Arrivez 10 minutes en avance"]
+                      questionnaire_fields:
+                        type: array
+                        description: Champs du questionnaire configurés par le praticien pour ce RDV.
+                        items:
+                          type: object
+                          required: [id, label, required]
+                          properties:
+                            id: { type: string, example: symptoms }
+                            label: { type: string, example: "Reason / symptoms" }
+                            label_fr: { type: string, example: "Motif / symptômes" }
+                            label_he: { type: string, example: "סיבה / תסמינים" }
+                            required: { type: boolean }
+                            max_lines: { type: integer, example: 3 }
+                      questionnaire_submitted_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        description: Date de soumission du questionnaire par le patient, null si non soumis.
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/appointments/{id}/questionnaire:
+    post:
+      tags: [Appointments]
+      summary: Soumettre les réponses au questionnaire pré-visite (patient)
+      description: >
+        Le patient soumet ses réponses au questionnaire configuré par le praticien.
+        Met à jour `appointment_questionnaires.answers` et `completed_at`.
+        Idempotent : peut être resoumis (écrase les réponses précédentes).
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [consent, answers]
+              properties:
+                consent:
+                  type: boolean
+                  enum: [true]
+                  description: Le patient doit explicitement consentir (doit être true).
+                answers:
+                  type: object
+                  additionalProperties: { type: string }
+                  description: Dictionnaire field_id → réponse textuelle.
+                  example:
+                    symptoms: "Maux de tête depuis 3 jours"
+                    allergies: "Aucune"
+      responses:
+        "204": { description: Réponses enregistrées }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/appointments/{id}/instructions/read:
+    post:
+      tags: [Appointments]
+      summary: Marquer les instructions pré-visite comme lues (patient)
+      description: >
+        Traçabilité optionnelle — indique que le patient a consulté les instructions.
+        Retourne toujours 204 même si déjà marqué.
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204": { description: Marqué comme lu }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -884,7 +965,7 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
     put:
       tags: [Health]
-      summary: Upsert my health profile
+      summary: Upsert my health profile (source of truth for teudat_zehut)
       requestBody:
         required: true
         content:
@@ -1338,15 +1419,12 @@ paths:
   /api/v1/crm/appointments/{id}:
     get:
       tags: [CRM]
-      summary: Get appointment by id (practitioner only)
-      description: >
-        Returns appointment details for the CRM. Required for deep linking from
-        notifications (appointment_request, appointment_cancelled) when practitioner
-        clicks to view the appointment.
+      summary: Get appointment by ID (CRM)
+      description: Returns the full appointment for the practitioner or secretary/admin. Same structure as list items from GET /crm/appointments.
       parameters: [{ $ref: "#/components/parameters/IdParam" }]
       responses:
         "200":
-          description: Appointment (same structure as list items)
+          description: Appointment details
           content:
             application/json:
               schema: { type: object, additionalProperties: true }
@@ -2141,6 +2219,101 @@ paths:
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
 
+  # ── Places (Google Places API proxy) ───────────────────────────────────────
+  /api/v1/places/autocomplete:
+    get:
+      tags: [Places]
+      security: []
+      summary: Autocomplete d'adresses (proxy Google Places)
+      description: |
+        Retourne des suggestions d'adresses via l'API Google Places.
+        Utilisé par l'app mobile patients pour la saisie d'adresse.
+      parameters:
+        - name: input
+          in: query
+          required: true
+          schema: { type: string }
+          description: Texte saisi par l'utilisateur
+        - name: country
+          in: query
+          schema: { type: string, default: il }
+          description: Code pays (ex. il pour Israël)
+        - name: language
+          in: query
+          schema: { type: string, default: he }
+          description: Code langue (ex. he pour hébreu)
+      responses:
+        "200":
+          description: Liste de prédictions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  predictions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        place_id: { type: string }
+                        description: { type: string }
+                        main_text: { type: string }
+                      required: [place_id, description, main_text]
+                required: [predictions]
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "429": { $ref: "#/components/responses/RateLimitExceeded" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+        "503":
+          description: Google Places API non configurée
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /api/v1/places/details:
+    get:
+      tags: [Places]
+      security: []
+      summary: Détails d'un lieu (proxy Google Place Details)
+      description: |
+        Retourne les détails d'une adresse à partir d'un place_id.
+        Utilisé par l'app mobile patients après sélection d'une suggestion.
+      parameters:
+        - name: place_id
+          in: query
+          required: true
+          schema: { type: string }
+          description: Identifiant Google du lieu (depuis autocomplete)
+        - name: language
+          in: query
+          schema: { type: string }
+          description: Code langue (optionnel)
+      responses:
+        "200":
+          description: Détails du lieu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address_line: { type: string }
+                  zip_code: { type: string }
+                  city: { type: string }
+                  formatted_address: { type: string }
+                required: [address_line, zip_code, city, formatted_address]
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404":
+          description: Lieu non trouvé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "429": { $ref: "#/components/responses/RateLimitExceeded" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+        "503":
+          description: Google Places API non configurée
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -2193,6 +2366,11 @@ components:
           schema: { $ref: "#/components/schemas/ErrorResponse" }
     InternalServerError:
       description: Internal server error (e.g. OpenAI API failure)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    RateLimitExceeded:
+      description: Too many requests (rate limit)
       content:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorResponse" }
@@ -2289,6 +2467,13 @@ components:
         city: { type: string, nullable: true }
         date_of_birth: { type: string, nullable: true }
         sex: { $ref: "#/components/schemas/SexType", nullable: true }
+        teudat_zehut:
+          type: string
+          nullable: true
+          pattern: "^(?:\\D*\\d){9}\\D*$"
+          description: >
+            Teoudat Zehout (Israeli national ID). Stockée dans `health_profiles` (chiffrée) et utilisée pour lier un dossier `patients` si besoin.
+            Jamais retournée en clair dans `Profile`.
 
     Relative:
       type: object
@@ -2395,15 +2580,13 @@ components:
             name: { type: string }
             name_fr: { type: string, nullable: true }
             name_he: { type: string, nullable: true }
-            icon_url: { type: string, nullable: true }
         has_teudat_zehut:
           type: boolean
-          nullable: true
-          description: "true si une teudat_zehut est enregistrée (jamais renvoyée en clair)"
+          description: "Indique si le praticien a déjà une Teoudat Zehout enregistrée. Présent uniquement sur GET /practitioners/me."
         teudat_zehut_masked:
           type: string
           nullable: true
-          description: "Teudat Zehut masquée (jamais renvoyée en clair)"
+          description: "Teoudat Zehout masquée (jamais renvoyée en clair). Présent uniquement sur GET /practitioners/me."
         address_line: { type: string, nullable: true }
         zip_code: { type: string, nullable: true }
         city: { type: string, nullable: true }
@@ -2508,11 +2691,12 @@ components:
 
     CreateConversationRequest:
       type: object
+      description: Patient envoie practitioner_id, praticien envoie patient_id
       properties:
-        practitioner_id: { type: string, format: uuid }
+        practitioner_id: { type: string, format: uuid, description: "Requis si l'appelant est un patient" }
+        patient_id: { type: string, format: uuid, description: "Requis si l'appelant est un praticien" }
         subject: { type: string }
         content: { type: string }
-      required: [practitioner_id]
 
     SendMessageRequest:
       type: object
@@ -2544,7 +2728,11 @@ components:
     UpsertHealthProfileRequest:
       type: object
       properties:
-        teudat_zehut: { type: string, nullable: true }
+        teudat_zehut:
+          type: string
+          nullable: true
+          pattern: "^(?:\\D*\\d){9}\\D*$"
+          description: "Teoudat Zehout (9 chiffres). Les séparateurs non numériques sont ignorés."
         date_of_birth: { type: string, nullable: true }
         sex: { $ref: "#/components/schemas/SexType", nullable: true }
         blood_type: { type: string, nullable: true }
@@ -2738,6 +2926,7 @@ components:
       type: object
       description: Mise à jour profil praticien (paramètres CRM). latitude/longitude depuis AddressAutocomplete.
       properties:
+        specialty_id: { type: string, format: uuid, description: "UUID de la spécialité" }
         about: { type: string, nullable: true }
         languages:
           type: array
@@ -2746,17 +2935,10 @@ components:
         education: { type: string, nullable: true }
         phone: { type: string, nullable: true }
         email: { type: string, format: email, nullable: true }
-        specialty_id:
-          type: string
-          format: uuid
-          nullable: true
-          description: "UUID de la spécialité (GET /api/v1/specialties)"
         teudat_zehut:
           type: string
-          nullable: true
-          description: >
-            Teudat Zehut (9 chiffres). Le backend doit stocker de manière sécurisée
-            (chiffré + hash) et ne jamais renvoyer en clair.
+          pattern: '^\d{9}$'
+          description: "Teoudat Zehout (9 chiffres). Stockée chiffrée + hashée; jamais renvoyée en clair."
         is_accepting_new_patients: { type: boolean }
         address_line: { type: string, nullable: true }
         zip_code: { type: string, nullable: true }

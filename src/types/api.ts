@@ -390,6 +390,15 @@ export interface CreateExternalEventRequest {
 }
 
 // ==========================================
+// Questionnaire & Pre-visit Instructions
+// ==========================================
+
+export interface UpdateQuestionnaireConfigRequest {
+  pre_visit_instructions?: string[];
+  questionnaire_fields?: import('@/types').QuestionnaireField[];
+}
+
+// ==========================================
 // API Error Response
 // ==========================================
 

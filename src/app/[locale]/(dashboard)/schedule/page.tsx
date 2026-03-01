@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useWeeklySchedule, useAddScheduleBlock, useUpdateScheduleBlock, useDeleteScheduleBlock, useScheduleOverrides, useUpsertOverride, useDeleteOverride } from '@/hooks/useSchedule';
+import { useExternalEvents, useCreateExternalEvent, useDeleteExternalEvent } from '@/hooks/useExternalEvents';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
@@ -13,8 +14,20 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import { getDayName, formatTime } from '@/lib/utils';
 import { useToast } from '@/providers/ToastProvider';
-import { Plus, Pencil, Trash2, CalendarOff } from 'lucide-react';
+import { Plus, Pencil, Trash2, CalendarOff, Coffee, Clock } from 'lucide-react';
 import type { WeeklySchedule } from '@/types';
+
+function padTime(t: string) {
+  if (!t) return t;
+  if (t.length === 5) return `${t}:00`;
+  return t;
+}
+
+function toMinutes(t: string) {
+  const norm = padTime(t);
+  const [h, m] = norm.split(':').map((x) => Number(x));
+  return h * 60 + m;
+}
 
 export default function SchedulePage() {
   const t = useTranslations('schedule');
@@ -30,9 +43,26 @@ export default function SchedulePage() {
   const upsertOverride = useUpsertOverride();
   const deleteOverride = useDeleteOverride();
 
+  // Breaks: fetch external events (busy = indisponibilité) for the next 30 days
+  const breakDateRange = useMemo(() => {
+    const today = new Date();
+    const from = today.toISOString().slice(0, 10);
+    const to = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    return { from, to };
+  }, []);
+  const { data: externalEvents, isLoading: loadingBreaks } = useExternalEvents(breakDateRange);
+  const createExternalEvent = useCreateExternalEvent();
+  const deleteExternalEvent = useDeleteExternalEvent();
+
+  const breaks = useMemo(
+    () => (externalEvents ?? []).filter((e) => e.type_detected === 'busy').sort((a, b) => `${a.date}${a.start_at}`.localeCompare(`${b.date}${b.start_at}`)),
+    [externalEvents],
+  );
+
   const [showBlockDialog, setShowBlockDialog] = useState(false);
   const [editingBlock, setEditingBlock] = useState<WeeklySchedule | null>(null);
   const [showOverrideDialog, setShowOverrideDialog] = useState(false);
+  const [showBreakDialog, setShowBreakDialog] = useState(false);
 
   // Block form
   const [blockDay, setBlockDay] = useState(0);
@@ -46,6 +76,15 @@ export default function SchedulePage() {
   const [overrideStart, setOverrideStart] = useState('');
   const [overrideEnd, setOverrideEnd] = useState('');
   const [overrideReason, setOverrideReason] = useState('');
+
+  // Break form
+  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const [breakTitle, setBreakTitle] = useState('');
+  const [breakDate, setBreakDate] = useState(todayStr);
+  const [breakStartTime, setBreakStartTime] = useState('12:00');
+  const [breakEndTime, setBreakEndTime] = useState('13:00');
+  const [breakDescription, setBreakDescription] = useState('');
+  const [breakError, setBreakError] = useState('');
 
   const dayOptions = Array.from({ length: 7 }, (_, i) => ({
     value: String(i),
@@ -90,6 +129,70 @@ export default function SchedulePage() {
         { onSuccess, onError }
       );
     }
+  };
+
+  const breakPresets = [
+    { label: t('breakLunch'), start: '12:00', end: '13:00' },
+    { label: t('breakPersonal'), start: '14:00', end: '14:30' },
+    { label: t('breakMeeting'), start: '10:00', end: '11:00' },
+    { label: t('breakTraining'), start: '15:00', end: '17:00' },
+  ];
+
+  const openBreakDialog = () => {
+    setBreakTitle('');
+    setBreakDate(todayStr);
+    setBreakStartTime('12:00');
+    setBreakEndTime('13:00');
+    setBreakDescription('');
+    setBreakError('');
+    setShowBreakDialog(true);
+  };
+
+  const applyBreakPreset = (preset: { label: string; start: string; end: string }) => {
+    setBreakTitle(preset.label);
+    setBreakStartTime(preset.start);
+    setBreakEndTime(preset.end);
+  };
+
+  const handleSaveBreak = () => {
+    setBreakError('');
+    if (!breakTitle.trim()) {
+      setBreakError(t('breakTitleRequired'));
+      return;
+    }
+    if (!breakDate) {
+      setBreakError(t('breakDateRequired'));
+      return;
+    }
+    if (!breakStartTime || !breakEndTime) {
+      setBreakError(t('breakTimeRequired'));
+      return;
+    }
+    if (toMinutes(breakEndTime) <= toMinutes(breakStartTime)) {
+      setBreakError(t('breakEndAfterStart'));
+      return;
+    }
+
+    createExternalEvent.mutate(
+      {
+        title: breakTitle.trim(),
+        date: breakDate,
+        start_time: padTime(breakStartTime),
+        end_time: padTime(breakEndTime),
+        description: breakDescription.trim() || null,
+        type_detected: 'busy',
+      },
+      {
+        onSuccess: () => {
+          setShowBreakDialog(false);
+          toast.success(tc('saveSuccess'));
+        },
+        onError: (err: unknown) => {
+          const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+          toast.error(tc('saveErrorTitle'), msg);
+        },
+      },
+    );
   };
 
   const handleSaveOverride = () => {
@@ -188,6 +291,79 @@ export default function SchedulePage() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      {/* Breaks / Pauses */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('breaks')}</CardTitle>
+          <Button size="sm" onClick={openBreakDialog}>
+            <Plus className="h-4 w-4" />
+            {t('addBreak')}
+          </Button>
+        </CardHeader>
+
+        {loadingBreaks ? (
+          <div className="space-y-2" aria-label="Chargement">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between py-3 px-4 rounded-xl bg-muted/50">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-4 w-4 rounded-md" />
+                  <Skeleton className="h-4 w-24 rounded-md" />
+                  <Skeleton className="h-4 w-32 rounded-md" />
+                  <Skeleton className="h-6 w-28 rounded-full" />
+                </div>
+                <Skeleton className="h-8 w-8 rounded-lg" />
+              </div>
+            ))}
+          </div>
+        ) : breaks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <Coffee className="h-10 w-10 text-muted-foreground/40 mb-3" />
+            <p className="text-sm font-medium text-gray-900">{t('noBreaks')}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('noBreaksDescription')}</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {breaks.map((brk) => (
+              <div
+                key={brk.id}
+                className="flex items-center justify-between py-3 px-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <Coffee className="h-4 w-4 text-amber-500" />
+                  <span className="text-sm font-medium text-gray-900">{brk.date}</span>
+                  <span className="text-sm text-gray-600">
+                    <Clock className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
+                    {formatTime(brk.start_at)} - {formatTime(brk.end_at)}
+                  </span>
+                  <Badge variant="secondary">{brk.title}</Badge>
+                  {brk.description && (
+                    <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+                      {brk.description}
+                    </span>
+                  )}
+                </div>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  className="text-red-500 hover:bg-red-50"
+                  onClick={() =>
+                    deleteExternalEvent.mutate(brk.id, {
+                      onSuccess: () => toast.success(tc('saveSuccess')),
+                      onError: (err: unknown) => {
+                        const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+                        toast.error(tc('saveErrorTitle'), msg);
+                      },
+                    })
+                  }
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             ))}
           </div>
@@ -358,6 +534,87 @@ export default function SchedulePage() {
               {tc('cancel')}
             </Button>
             <Button onClick={handleSaveOverride} loading={upsertOverride.isPending}>
+              {tc('save')}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* Break Dialog */}
+      <Dialog
+        open={showBreakDialog}
+        onClose={() => setShowBreakDialog(false)}
+        title={t('addBreak')}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t('breakPresets')}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {breakPresets.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => applyBreakPreset(preset)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:border-primary/30 hover:text-primary transition-colors"
+                >
+                  <Coffee className="h-3 w-3" />
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Input
+            label={t('breakTitle')}
+            value={breakTitle}
+            onChange={(e) => setBreakTitle(e.target.value)}
+            placeholder={t('breakTitlePlaceholder')}
+          />
+
+          <Input
+            type="date"
+            label={t('breakDate')}
+            value={breakDate}
+            onChange={(e) => setBreakDate(e.target.value)}
+            min={todayStr}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              type="time"
+              label={t('breakStart')}
+              value={breakStartTime}
+              onChange={(e) => setBreakStartTime(e.target.value)}
+            />
+            <Input
+              type="time"
+              label={t('breakEnd')}
+              value={breakEndTime}
+              onChange={(e) => setBreakEndTime(e.target.value)}
+            />
+          </div>
+
+          <Textarea
+            label={t('breakDescription')}
+            value={breakDescription}
+            onChange={(e) => setBreakDescription(e.target.value)}
+            placeholder={t('breakDescriptionPlaceholder')}
+            rows={2}
+          />
+
+          {breakError && (
+            <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {breakError}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowBreakDialog(false)}>
+              {tc('cancel')}
+            </Button>
+            <Button onClick={handleSaveBreak} loading={createExternalEvent.isPending}>
               {tc('save')}
             </Button>
           </div>

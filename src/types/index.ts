@@ -228,6 +228,14 @@ export interface Appointment {
    * We keep this permissive because OpenAPI uses additionalProperties.
    */
   patient_record?: CrmPatientListItem | null;
+  /** Pre-visit instructions (string array) configured by the practitioner for this appointment */
+  pre_visit_instructions?: string[] | null;
+  /** Questionnaire fields configured by the practitioner for this appointment */
+  questionnaire_fields?: QuestionnaireField[] | null;
+  /** ISO timestamp when the patient submitted the questionnaire, null if not yet submitted */
+  questionnaire_submitted_at?: string | null;
+  /** Patient questionnaire answers, keyed by field id */
+  questionnaire_answers?: Record<string, string> | null;
 }
 
 export interface AppointmentReason {
@@ -249,6 +257,20 @@ export interface AppointmentInstruction {
   is_active: boolean;
   sort_order: number;
   created_at: string;
+}
+
+export interface QuestionnaireField {
+  id: string;
+  label: string;
+  label_fr: string | null;
+  label_he: string | null;
+  required: boolean;
+  max_lines: number;
+}
+
+export interface QuestionnaireConfig {
+  pre_visit_instructions: string[];
+  questionnaire_fields: QuestionnaireField[];
 }
 
 export interface Slot {
