@@ -150,6 +150,18 @@ export interface Practitioner {
   price_max_agorot?: number | null;
   is_accepting_new_patients: boolean;
   is_active: boolean;
+  website_url?: string | null;
+  facebook_url?: string | null;
+  instagram_url?: string | null;
+  whatsapp_number?: string | null;
+  linkedin_url?: string | null;
+  tiktok_url?: string | null;
+  youtube_url?: string | null;
+  waze_link?: string | null;
+  google_maps_link?: string | null;
+  card_slug?: string | null;
+  card_headline?: string | null;
+  card_theme?: string | null;
   created_at: string;
   updated_at: string;
   profiles?: Pick<Profile, 'first_name' | 'last_name' | 'avatar_url'>;

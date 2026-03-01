@@ -393,6 +393,25 @@ export interface CreateExternalEventRequest {
 // Questionnaire & Pre-visit Instructions
 // ==========================================
 
+// ==========================================
+// Social Links / Business Card
+// ==========================================
+
+export interface UpdateSocialLinksRequest {
+  website_url?: string | null;
+  facebook_url?: string | null;
+  instagram_url?: string | null;
+  whatsapp_number?: string | null;
+  linkedin_url?: string | null;
+  tiktok_url?: string | null;
+  youtube_url?: string | null;
+  waze_link?: string | null;
+  google_maps_link?: string | null;
+  card_headline?: string | null;
+  card_slug?: string | null;
+  card_theme?: string | null;
+}
+
 export interface UpdateQuestionnaireConfigRequest {
   pre_visit_instructions?: string[];
   questionnaire_fields?: import('@/types').QuestionnaireField[];

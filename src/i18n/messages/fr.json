@@ -402,7 +402,20 @@
     "organizationRole": "Rôle",
     "organizationOwner": "Propriétaire",
     "organizationAdmin": "Administrateur",
-    "organizationMember": "Membre"
+    "organizationMember": "Membre",
+    "organizationTypeEnterprise": "Entreprise",
+    "businessCardTitle": "Carte de visite",
+    "cardLinkLabel": "Le lien de votre carte de visite",
+    "shareCard": "Partager",
+    "previewCard": "Aperçu",
+    "cardHeadline": "Titre personnalisé",
+    "cardHeadlinePlaceholder": "ex : Médecine familiale et pédiatrie",
+    "cardSlug": "Slug URL personnalisé",
+    "socialLinksTitle": "Réseaux sociaux",
+    "navigationLinksTitle": "Liens de navigation",
+    "whatsapp": "Numéro WhatsApp",
+    "website": "Site web",
+    "linkCopied": "Lien copié dans le presse-papiers"
   },
   "notifications": {
     "title": "Notifications",

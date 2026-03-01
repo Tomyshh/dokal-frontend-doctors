@@ -402,7 +402,20 @@
     "organizationRole": "Role",
     "organizationOwner": "Owner",
     "organizationAdmin": "Admin",
-    "organizationMember": "Member"
+    "organizationMember": "Member",
+    "organizationTypeEnterprise": "Enterprise",
+    "businessCardTitle": "Business Card",
+    "cardLinkLabel": "Your business card link",
+    "shareCard": "Share",
+    "previewCard": "Preview",
+    "cardHeadline": "Custom headline",
+    "cardHeadlinePlaceholder": "e.g. Family Medicine & Pediatrics",
+    "cardSlug": "Custom URL slug",
+    "socialLinksTitle": "Social networks",
+    "navigationLinksTitle": "Navigation links",
+    "whatsapp": "WhatsApp number",
+    "website": "Website",
+    "linkCopied": "Link copied to clipboard"
   },
   "notifications": {
     "title": "Notifications",

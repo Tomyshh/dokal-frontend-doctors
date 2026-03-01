@@ -400,7 +400,20 @@
     "organizationRole": "Роль",
     "organizationOwner": "Владелец",
     "organizationAdmin": "Администратор",
-    "organizationMember": "Участник"
+    "organizationMember": "Участник",
+    "organizationTypeEnterprise": "Организация",
+    "businessCardTitle": "Визитная карточка",
+    "cardLinkLabel": "Ссылка на вашу визитку",
+    "shareCard": "Поделиться",
+    "previewCard": "Предпросмотр",
+    "cardHeadline": "Заголовок",
+    "cardHeadlinePlaceholder": "напр.: Семейная медицина и педиатрия",
+    "cardSlug": "URL-адрес",
+    "socialLinksTitle": "Социальные сети",
+    "navigationLinksTitle": "Навигационные ссылки",
+    "whatsapp": "Номер WhatsApp",
+    "website": "Веб-сайт",
+    "linkCopied": "Ссылка скопирована"
   },
   "notifications": {
     "title": "Уведомления",

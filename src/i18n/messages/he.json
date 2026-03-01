@@ -401,7 +401,20 @@
     "organizationRole": "תפקיד",
     "organizationOwner": "בעלים",
     "organizationAdmin": "מנהל",
-    "organizationMember": "חבר"
+    "organizationMember": "חבר",
+    "organizationTypeEnterprise": "ארגון",
+    "businessCardTitle": "כרטיס ביקור",
+    "cardLinkLabel": "הקישור לכרטיס הביקור שלך",
+    "shareCard": "שתף",
+    "previewCard": "תצוגה מקדימה",
+    "cardHeadline": "כותרת מותאמת",
+    "cardHeadlinePlaceholder": "למשל: רפואת משפחה וילדים",
+    "cardSlug": "כתובת URL מותאמת",
+    "socialLinksTitle": "רשתות חברתיות",
+    "navigationLinksTitle": "קישורי ניווט",
+    "whatsapp": "מספר וואטסאפ",
+    "website": "אתר אינטרנט",
+    "linkCopied": "הקישור הועתק"
   },
   "notifications": {
     "title": "התראות",

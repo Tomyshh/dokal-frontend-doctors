@@ -39,6 +39,7 @@ import { usePractitionerProfile } from '@/providers/PractitionerProfileProvider'
 import ProfileCompletionCard from '@/components/settings/ProfileCompletionCard';
 import GoogleCalendarSection from '@/components/settings/GoogleCalendarSection';
 import AvatarUploadSection from '@/components/settings/AvatarUploadSection';
+import SocialLinksSection from '@/components/settings/SocialLinksSection';
 import { LanguagesCombobox } from '@/components/settings/LanguagesCombobox';
 import { AddressAutocomplete, type AddressResult } from '@/components/auth/AddressAutocomplete';
 import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
@@ -830,6 +831,11 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
+
+      {/* Business Card / Social Links */}
+      {practitioner && (
+        <SocialLinksSection practitioner={practitioner} t={t} tc={tc} />
+      )}
 
       {/* Palette en tout bas (moins utile) */}
       <Card className="settings-section">
