@@ -19,21 +19,15 @@ const EMPTY_CONFIG: QuestionnaireConfig = {
 export function useProfileQuestionnaireConfig() {
   return useQuery({
     queryKey: ['profile-questionnaire-config'],
-    queryFn: async () => {
+    queryFn: async (): Promise<QuestionnaireConfig> => {
       try {
         const { data } = await api.get<QuestionnaireConfig>('/crm/profile/questionnaire-config');
         return data;
-      } catch (err: unknown) {
-        const status = (err as { response?: { status?: number } })?.response?.status;
-        if (status === 404) return EMPTY_CONFIG;
-        throw err;
+      } catch {
+        return EMPTY_CONFIG;
       }
     },
-    retry: (failureCount, error) => {
-      const status = (error as { response?: { status?: number } })?.response?.status;
-      if (status === 404) return false;
-      return failureCount < 2;
-    },
+    retry: false,
   });
 }
 
@@ -47,8 +41,8 @@ export function useUpdateProfileQuestionnaireConfig() {
       );
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profile-questionnaire-config'] });
+    onSuccess: (data) => {
+      queryClient.setQueryData(['profile-questionnaire-config'], data);
     },
   });
 }
