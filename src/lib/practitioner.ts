@@ -59,22 +59,27 @@ export function isPractitionerCompleteFromBackend(practitioner: Practitioner | n
  * - price_min_agorot
  * - price_max_agorot
  */
-const ONBOARDING_OPTIONAL_MISSING_FIELDS = new Set<string>(['price_min_agorot', 'price_max_agorot']);
+const ONBOARDING_OPTIONAL_MISSING_FIELDS = new Set<string>([
+  'price_min_agorot',
+  'price_max_agorot',
+  'about',
+  'education',
+  'languages',
+  'avatar_url',
+]);
 
 export function filterOnboardingOptionalMissingFields(fields: string[] | null | undefined): string[] {
   return (fields ?? []).filter((f) => !ONBOARDING_OPTIONAL_MISSING_FIELDS.has(f));
 }
 
 /**
- * True when the practitioner can proceed in onboarding flows (subscription, dashboard),
- * even if backend `is_complete` is false solely because of optional fields (pricing).
+ * True when the practitioner can proceed in onboarding flows (subscription, dashboard).
+ * As long as the practitioner record exists (i.e. initial registration was submitted),
+ * they should never be blocked. Missing optional fields can be filled later via Settings.
  */
 export function isPractitionerOnboardingReady(practitioner: Practitioner | null | undefined): boolean {
   if (!practitioner) return false;
-  if (practitioner.is_complete === true) return true;
-  const missing = practitioner.missing_fields ?? [];
-  if (missing.length === 0) return true;
-  return missing.every((f) => ONBOARDING_OPTIONAL_MISSING_FIELDS.has(f));
+  return true;
 }
 
 /** Fields used to compute profile completion percentage (UX indicator) */
