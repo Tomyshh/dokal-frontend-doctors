@@ -475,6 +475,21 @@ export interface GoogleCalendarEntry {
   accessRole: string;
 }
 
+export interface CrmBreak {
+  id: string;
+  practitioner_id: string;
+  title: string;
+  description: string | null;
+  is_recurring: boolean;
+  date: string | null;
+  recurring_days: number[] | null;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ExternalEvent {
   id: string;
   practitioner_id: string;

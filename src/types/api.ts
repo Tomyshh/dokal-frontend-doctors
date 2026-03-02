@@ -377,6 +377,16 @@ export interface CalendarItemsResponse {
 // CRM External Events (manual + imported)
 // ==========================================
 
+export interface CreateBreakRequest {
+  title: string;
+  description?: string | null;
+  is_recurring: boolean;
+  date?: string | null;
+  recurring_days?: number[] | null;
+  start_time: string;
+  end_time: string;
+}
+
 export interface CreateExternalEventRequest {
   /** yyyy-MM-dd */
   date: string;

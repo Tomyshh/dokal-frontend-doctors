@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useWeeklySchedule, useAddScheduleBlock, useUpdateScheduleBlock, useDeleteScheduleBlock, useScheduleOverrides, useUpsertOverride, useDeleteOverride } from '@/hooks/useSchedule';
-import { useExternalEvents, useCreateExternalEvent, useDeleteExternalEvent } from '@/hooks/useExternalEvents';
+import { useBreaks, useCreateBreak, useDeleteBreak } from '@/hooks/useBreaks';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import { getDayName, formatTime } from '@/lib/utils';
 import { useToast } from '@/providers/ToastProvider';
-import { Plus, Pencil, Trash2, CalendarOff, Coffee, Clock, Info, CalendarDays, Timer, Utensils, User, Users, GraduationCap, ArrowRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, CalendarOff, Coffee, Clock, Info, CalendarDays, Timer, Utensils, User, Users, GraduationCap, ArrowRight, Repeat, CalendarCheck } from 'lucide-react';
 import type { WeeklySchedule } from '@/types';
 
 function padTime(t: string) {
@@ -43,20 +43,17 @@ export default function SchedulePage() {
   const upsertOverride = useUpsertOverride();
   const deleteOverride = useDeleteOverride();
 
-  // Breaks: fetch external events (busy = indisponibilité) for the next 30 days
-  const breakDateRange = useMemo(() => {
-    const today = new Date();
-    const from = today.toISOString().slice(0, 10);
-    const to = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    return { from, to };
-  }, []);
-  const { data: externalEvents, isLoading: loadingBreaks } = useExternalEvents(breakDateRange);
-  const createExternalEvent = useCreateExternalEvent();
-  const deleteExternalEvent = useDeleteExternalEvent();
+  // Breaks
+  const { data: breaksData, isLoading: loadingBreaks } = useBreaks();
+  const createBreakMutation = useCreateBreak();
+  const deleteBreakMutation = useDeleteBreak();
 
   const breaks = useMemo(
-    () => (externalEvents ?? []).filter((e) => e.type_detected === 'busy').sort((a, b) => `${a.date}${a.start_at}`.localeCompare(`${b.date}${b.start_at}`)),
-    [externalEvents],
+    () => (breaksData ?? []).sort((a, b) => {
+      if (a.is_recurring !== b.is_recurring) return a.is_recurring ? -1 : 1;
+      return a.start_time.localeCompare(b.start_time);
+    }),
+    [breaksData],
   );
 
   const [showBlockDialog, setShowBlockDialog] = useState(false);
@@ -80,7 +77,9 @@ export default function SchedulePage() {
   // Break form
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [breakTitle, setBreakTitle] = useState('');
+  const [breakIsRecurring, setBreakIsRecurring] = useState(false);
   const [breakDate, setBreakDate] = useState(todayStr);
+  const [breakRecurringDays, setBreakRecurringDays] = useState<number[]>([]);
   const [breakStartTime, setBreakStartTime] = useState('12:00');
   const [breakEndTime, setBreakEndTime] = useState('13:00');
   const [breakDescription, setBreakDescription] = useState('');
@@ -140,7 +139,9 @@ export default function SchedulePage() {
 
   const openBreakDialog = () => {
     setBreakTitle('');
+    setBreakIsRecurring(false);
     setBreakDate(todayStr);
+    setBreakRecurringDays([]);
     setBreakStartTime('12:00');
     setBreakEndTime('13:00');
     setBreakDescription('');
@@ -154,14 +155,24 @@ export default function SchedulePage() {
     setBreakEndTime(preset.end);
   };
 
+  const toggleRecurringDay = (day: number) => {
+    setBreakRecurringDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort(),
+    );
+  };
+
   const handleSaveBreak = () => {
     setBreakError('');
     if (!breakTitle.trim()) {
       setBreakError(t('breakTitleRequired'));
       return;
     }
-    if (!breakDate) {
+    if (!breakIsRecurring && !breakDate) {
       setBreakError(t('breakDateRequired'));
+      return;
+    }
+    if (breakIsRecurring && breakRecurringDays.length === 0) {
+      setBreakError(t('breakSelectDays'));
       return;
     }
     if (!breakStartTime || !breakEndTime) {
@@ -173,14 +184,15 @@ export default function SchedulePage() {
       return;
     }
 
-    createExternalEvent.mutate(
+    createBreakMutation.mutate(
       {
         title: breakTitle.trim(),
-        date: breakDate,
+        is_recurring: breakIsRecurring,
+        date: breakIsRecurring ? null : breakDate,
+        recurring_days: breakIsRecurring ? breakRecurringDays : null,
         start_time: padTime(breakStartTime),
         end_time: padTime(breakEndTime),
         description: breakDescription.trim() || null,
-        type_detected: 'busy',
       },
       {
         onSuccess: () => {
@@ -334,14 +346,28 @@ export default function SchedulePage() {
                 key={brk.id}
                 className="flex items-center justify-between py-3 px-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
               >
-                <div className="flex items-center gap-4">
-                  <Coffee className="h-4 w-4 text-amber-500" />
-                  <span className="text-sm font-medium text-gray-900">{brk.date}</span>
-                  <span className="text-sm text-gray-600">
+                <div className="flex items-center gap-4 min-w-0">
+                  <Coffee className="h-4 w-4 text-amber-500 shrink-0" />
+                  {brk.is_recurring ? (
+                    <span className="text-sm font-medium text-gray-900 truncate">
+                      {(brk.recurring_days ?? []).map((d) => getDayName(d, locale)).join(', ')}
+                    </span>
+                  ) : (
+                    <span className="text-sm font-medium text-gray-900">{brk.date}</span>
+                  )}
+                  <span className="text-sm text-gray-600 shrink-0">
                     <Clock className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
-                    {formatTime(brk.start_at)} - {formatTime(brk.end_at)}
+                    {formatTime(brk.start_time)} - {formatTime(brk.end_time)}
                   </span>
                   <Badge variant="secondary">{brk.title}</Badge>
+                  {brk.is_recurring ? (
+                    <Badge variant="success" className="shrink-0">
+                      <Repeat className="h-3 w-3 mr-1" />
+                      {t('breakRecurringBadge')}
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="shrink-0">{t('breakOnceBadge')}</Badge>
+                  )}
                   {brk.description && (
                     <span className="text-sm text-muted-foreground truncate max-w-[200px]">
                       {brk.description}
@@ -351,9 +377,9 @@ export default function SchedulePage() {
                 <Button
                   size="icon-sm"
                   variant="ghost"
-                  className="text-red-500 hover:bg-red-50"
+                  className="text-red-500 hover:bg-red-50 shrink-0"
                   onClick={() =>
-                    deleteExternalEvent.mutate(brk.id, {
+                    deleteBreakMutation.mutate(brk.id, {
                       onSuccess: () => toast.success(tc('saveSuccess')),
                       onError: (err: unknown) => {
                         const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
@@ -680,18 +706,83 @@ export default function SchedulePage() {
                 <p className="mt-1 text-[11px] text-muted-foreground ml-0.5">{t('breakTitleHint')}</p>
               </div>
 
-              {/* Date */}
+              {/* Mode: One-time vs Recurring */}
               <div>
-                <Input
-                  type="date"
-                  label={t('breakDate')}
-                  value={breakDate}
-                  onChange={(e) => setBreakDate(e.target.value)}
-                  min={todayStr}
-                  required
-                />
-                <p className="mt-1 text-[11px] text-muted-foreground ml-0.5">{t('breakDateHint')}</p>
+                <label className="text-sm font-medium text-foreground mb-2 block">{t('breakModeLabel')}</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBreakIsRecurring(false)}
+                    className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all ${
+                      !breakIsRecurring
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                        : 'border-border bg-card hover:border-primary/30 hover:bg-muted/40'
+                    }`}
+                  >
+                    <CalendarCheck className={`h-4 w-4 shrink-0 ${!breakIsRecurring ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <div>
+                      <span className={`block text-sm font-medium ${!breakIsRecurring ? 'text-primary' : 'text-foreground'}`}>{t('breakModeOnce')}</span>
+                      <span className="block text-[11px] text-muted-foreground">{t('breakModeOnceDesc')}</span>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBreakIsRecurring(true)}
+                    className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all ${
+                      breakIsRecurring
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                        : 'border-border bg-card hover:border-primary/30 hover:bg-muted/40'
+                    }`}
+                  >
+                    <Repeat className={`h-4 w-4 shrink-0 ${breakIsRecurring ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <div>
+                      <span className={`block text-sm font-medium ${breakIsRecurring ? 'text-primary' : 'text-foreground'}`}>{t('breakModeRecurring')}</span>
+                      <span className="block text-[11px] text-muted-foreground">{t('breakModeRecurringDesc')}</span>
+                    </div>
+                  </button>
+                </div>
               </div>
+
+              {/* Date (one-time) OR Day picker (recurring) */}
+              {breakIsRecurring ? (
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
+                    {t('breakSelectDays')} <span className="text-destructive">*</span>
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {Array.from({ length: 7 }, (_, i) => {
+                      const isSelected = breakRecurringDays.includes(i);
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => toggleRecurringDay(i)}
+                          className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                            isSelected
+                              ? 'bg-primary text-white shadow-sm'
+                              : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                          }`}
+                        >
+                          {getDayName(i, locale)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-1.5 text-[11px] text-muted-foreground ml-0.5">{t('breakSelectDaysHint')}</p>
+                </div>
+              ) : (
+                <div>
+                  <Input
+                    type="date"
+                    label={t('breakDate')}
+                    value={breakDate}
+                    onChange={(e) => setBreakDate(e.target.value)}
+                    min={todayStr}
+                    required
+                  />
+                  <p className="mt-1 text-[11px] text-muted-foreground ml-0.5">{t('breakDateHint')}</p>
+                </div>
+              )}
 
               {/* Time range */}
               <div>
@@ -749,7 +840,7 @@ export default function SchedulePage() {
             <Button variant="outline" onClick={() => setShowBreakDialog(false)}>
               {tc('cancel')}
             </Button>
-            <Button onClick={handleSaveBreak} loading={createExternalEvent.isPending}>
+            <Button onClick={handleSaveBreak} loading={createBreakMutation.isPending}>
               <Coffee className="h-4 w-4" />
               {t('breakSave')}
             </Button>
