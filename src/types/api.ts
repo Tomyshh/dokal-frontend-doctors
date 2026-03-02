@@ -92,6 +92,8 @@ export interface UpdateInstructionRequest {
 }
 
 export interface UpdatePractitionerProfileRequest {
+  first_name?: string | null;
+  last_name?: string | null;
   about?: string | null;
   languages?: string[] | null;
   education?: string | null;

@@ -3025,6 +3025,8 @@ components:
       type: object
       description: Mise à jour profil praticien (paramètres CRM). latitude/longitude depuis AddressAutocomplete.
       properties:
+        first_name: { type: string, nullable: true, description: "Prénom (profiles)" }
+        last_name: { type: string, nullable: true, description: "Nom (profiles)" }
         specialty_id: { type: string, format: uuid, description: "UUID de la spécialité" }
         about: { type: string, nullable: true }
         languages:

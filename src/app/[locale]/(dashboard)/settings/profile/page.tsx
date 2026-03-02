@@ -61,7 +61,7 @@ function SectionHeader({ icon: Icon, title, subtitle, badge }: {
 export default function ProfileSettingsPage() {
   const t = useTranslations('settings');
   const tc = useTranslations('common');
-  const { profile } = useAuth();
+  const { profile, refreshUserData } = useAuth();
   const toast = useToast();
   const practitionerProfile = usePractitionerProfile();
   const updateProfile = useUpdatePractitionerProfile();
@@ -75,6 +75,8 @@ export default function ProfileSettingsPage() {
     enabled: !!profile?.id,
   });
 
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [about, setAbout] = useState('');
   const [education, setEducation] = useState('');
   const [languages, setLanguages] = useState<string[]>([]);
@@ -94,11 +96,11 @@ export default function ProfileSettingsPage() {
   const pricingIncomplete = practitioner?.price_min_agorot == null || practitioner?.price_max_agorot == null;
 
   const currentProfileKey = useMemo(() => JSON.stringify({
-    about, education, languages, phone, email, specialtyId,
+    firstName, lastName, about, education, languages, phone, email, specialtyId,
     addressLine, zipCode, city, acceptingPatients,
     priceMinShekels, priceMaxShekels, consultationDurationMinutes,
     teudatZehut: teudatZehut.trim(),
-  }), [about, education, languages, phone, email, specialtyId, teudatZehut,
+  }), [firstName, lastName, about, education, languages, phone, email, specialtyId, teudatZehut,
     addressLine, zipCode, city, acceptingPatients, priceMinShekels,
     priceMaxShekels, consultationDurationMinutes]);
 
@@ -111,6 +113,13 @@ export default function ProfileSettingsPage() {
       .filter(item => item.section === section)
       .every(item => item.completed);
   };
+
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.first_name || '');
+      setLastName(profile.last_name || '');
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (practitioner) {
@@ -135,6 +144,8 @@ export default function ProfileSettingsPage() {
       setConsultationDurationMinutes(practitioner.consultation_duration_minutes ?? 30);
 
       setSavedProfileKey(JSON.stringify({
+        firstName: profile?.first_name || '',
+        lastName: profile?.last_name || '',
         about: practitioner.about || '',
         education: practitioner.education || '',
         languages: practitioner.languages ?? [],
@@ -151,7 +162,7 @@ export default function ProfileSettingsPage() {
         teudatZehut: '',
       }));
     }
-  }, [practitioner]);
+  }, [practitioner, profile]);
 
   const handleSaveProfile = async () => {
     const tz = teudatZehut.trim();
@@ -172,6 +183,8 @@ export default function ProfileSettingsPage() {
     }
     try {
       const payload: Parameters<typeof updateProfile.mutateAsync>[0] = {
+        first_name: firstName.trim() || null,
+        last_name: lastName.trim() || null,
         about: about || null,
         education: education || null,
         languages: languages.length > 0 ? languages : null,
@@ -191,8 +204,9 @@ export default function ProfileSettingsPage() {
       if (tz) payload.teudat_zehut = tz;
 
       await updateProfile.mutateAsync(payload);
+      await refreshUserData();
       setSavedProfileKey(JSON.stringify({
-        about, education, languages, phone, email, specialtyId,
+        firstName, lastName, about, education, languages, phone, email, specialtyId,
         addressLine, zipCode, city, acceptingPatients,
         priceMinShekels, priceMaxShekels, consultationDurationMinutes,
         teudatZehut: '',
@@ -269,6 +283,20 @@ export default function ProfileSettingsPage() {
           title={t('avatarTitle')}
           badge={!isSectionComplete('avatar') ? t('toCompleteBadge') : undefined}
         />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+          <Input
+            label={tc('firstName')}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder={tc('firstName')}
+          />
+          <Input
+            label={tc('lastName')}
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder={tc('lastName')}
+          />
+        </div>
         <AvatarUploadSection
           avatarUrl={profile?.avatar_url}
           firstName={profile?.first_name}
