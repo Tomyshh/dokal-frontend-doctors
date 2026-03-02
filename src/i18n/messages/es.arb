@@ -1128,7 +1128,21 @@
     "externalEventTimeRequired": "La hora de inicio y fin es obligatoria.",
     "externalEventEndAfterStart": "La hora de fin debe ser posterior a la de inicio.",
     "deleteExternalEvent": "Eliminar evento",
-    "deleteExternalEventConfirm": "¿Seguro que quieres eliminar este evento?"
+    "deleteExternalEventConfirm": "¿Seguro que quieres eliminar este evento?",
+    "recurringBreakLabel": "Pausa recurrente",
+    "deleteRecurringTitle": "Eliminar pausa recurrente",
+    "deleteRecurringDescription": "Esta pausa se repite cada semana. ¿Cómo desea eliminarla?",
+    "deleteThisDayOnly": "Eliminar solo este día",
+    "deleteThisDayDesc": "Eliminar el {day} de los días recurrentes. Los demás días se conservarán.",
+    "deleteAllOccurrences": "Eliminar todas las ocurrencias",
+    "deleteAllOccurrencesDesc": "Eliminar permanentemente esta pausa para todos los días de la semana.",
+    "daySun": "Domingo",
+    "dayMon": "Lunes",
+    "dayTue": "Martes",
+    "dayWed": "Miércoles",
+    "dayThu": "Jueves",
+    "dayFri": "Viernes",
+    "daySat": "Sábado"
   },
   "questionnaire": {
     "backToSettings": "Volver a ajustes",

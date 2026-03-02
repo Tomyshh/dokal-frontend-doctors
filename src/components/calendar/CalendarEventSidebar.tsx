@@ -11,12 +11,12 @@ import { getItemColors } from './CalendarEventCard';
 import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { getItemStartTime, getItemEndTime } from '@/hooks/useCalendarAppointments';
-import { X, User, Clock, FileText, Stethoscope, ExternalLink, Globe, Trash2 } from 'lucide-react';
+import { X, User, Clock, FileText, Stethoscope, ExternalLink, Globe, Trash2, Repeat, CalendarMinus } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import type { CalendarItem } from '@/types';
 import { useDeleteExternalEvent } from '@/hooks/useExternalEvents';
-import { useDeleteBreak } from '@/hooks/useBreaks';
+import { useDeleteBreak, useUpdateBreak } from '@/hooks/useBreaks';
 import { Dialog } from '@/components/ui/Dialog';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -57,6 +57,16 @@ function cleanEventDescription(description: string | null | undefined): string |
   return cleaned || null;
 }
 
+function isRecurringBreak(description: string | null | undefined): boolean {
+  if (!description) return false;
+  return /Recurring\s+break/i.test(description);
+}
+
+function getDayOfWeekFromDate(dateStr: string): number {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.getDay();
+}
+
 interface CalendarEventSidebarProps {
   item: CalendarItem | null;
   onClose: () => void;
@@ -77,6 +87,7 @@ export default function CalendarEventSidebar({
   // Tous les hooks doivent être appelés inconditionnellement (règles des hooks React)
   const deleteExternalMutation = useDeleteExternalEvent();
   const deleteBreakMutation = useDeleteBreak();
+  const updateBreakMutation = useUpdateBreak();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const updateMutation = useUpdateCrmAppointment();
   const updateOrgMutation = useUpdateCrmOrganizationAppointment();
@@ -116,11 +127,15 @@ export default function CalendarEventSidebar({
   if (item.kind === 'external_event') {
     const evt = item.data;
     const linkedBreakId = extractBreakId(evt.description);
+    const isRecurring = isRecurringBreak(evt.description);
     const canDelete = evt.source === 'manual' || !!linkedBreakId;
     const displayTitle = cleanEventTitle(evt.title);
     const displayDescription = cleanEventDescription(evt.description);
+    const eventDayOfWeek = getDayOfWeekFromDate(evt.date);
 
-    const handleDelete = async () => {
+    const isDeleting = deleteBreakMutation.isPending || deleteExternalMutation.isPending || updateBreakMutation.isPending;
+
+    const handleDeleteAll = async () => {
       try {
         if (linkedBreakId) {
           await deleteBreakMutation.mutateAsync(linkedBreakId);
@@ -135,6 +150,27 @@ export default function CalendarEventSidebar({
         toast.error(tc('saveErrorTitle'), msg);
       }
     };
+
+    const handleDeleteThisDay = async () => {
+      if (!linkedBreakId) return;
+      try {
+        await updateBreakMutation.mutateAsync({
+          id: linkedBreakId,
+          data: { remove_day: eventDayOfWeek },
+        });
+        setDeleteDialogOpen(false);
+        onClose();
+        toast.success(tc('saveSuccess'));
+      } catch (err: unknown) {
+        const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+        toast.error(tc('saveErrorTitle'), msg);
+      }
+    };
+
+    const dayNames = [
+      t('daySun'), t('dayMon'), t('dayTue'), t('dayWed'),
+      t('dayThu'), t('dayFri'), t('daySat'),
+    ];
 
     return (
       <div className="fixed inset-y-0 right-0 z-30 w-full sm:w-[380px] bg-card border-l border-border shadow-xl flex flex-col transition-transform duration-200">
@@ -161,6 +197,12 @@ export default function CalendarEventSidebar({
             <p className="text-lg font-semibold text-foreground">{displayTitle}</p>
             {displayDescription && (
               <p className="text-sm text-muted-foreground mt-1 whitespace-pre-line">{displayDescription}</p>
+            )}
+            {isRecurring && linkedBreakId && (
+              <Badge className="mt-2 bg-violet-100 text-violet-700">
+                <Repeat className="h-3 w-3" />
+                {t('recurringBreakLabel')}
+              </Badge>
             )}
           </div>
 
@@ -238,26 +280,87 @@ export default function CalendarEventSidebar({
           )}
         </div>
 
+        {/* Delete dialog */}
         <Dialog
           open={deleteDialogOpen}
           onClose={() => setDeleteDialogOpen(false)}
-          title={t('deleteExternalEvent')}
+          title={isRecurring && linkedBreakId ? t('deleteRecurringTitle') : t('deleteExternalEvent')}
         >
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">{t('deleteExternalEventConfirm')}</p>
-            <div className="flex gap-3 justify-end pt-2">
-              <Button variant="ghost" onClick={() => setDeleteDialogOpen(false)}>
-                {tc('cancel')}
-              </Button>
-              <Button
-                variant="destructive"
-                loading={deleteBreakMutation.isPending || deleteExternalMutation.isPending}
-                onClick={handleDelete}
-              >
-                {t('deleteExternalEvent')}
-              </Button>
+          {isRecurring && linkedBreakId ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {t('deleteRecurringDescription')}
+              </p>
+
+              <div className="space-y-2">
+                {/* Option 1: Delete this day only */}
+                <button
+                  type="button"
+                  onClick={handleDeleteThisDay}
+                  disabled={isDeleting}
+                  className="w-full rounded-xl border border-border p-4 text-left hover:bg-muted/50 transition-colors disabled:opacity-50 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-amber-100 text-amber-700 shrink-0">
+                      <CalendarMinus className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground group-hover:text-amber-700 transition-colors">
+                        {t('deleteThisDayOnly')}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {t('deleteThisDayDesc', { day: dayNames[eventDayOfWeek] })}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Option 2: Delete all occurrences */}
+                <button
+                  type="button"
+                  onClick={handleDeleteAll}
+                  disabled={isDeleting}
+                  className="w-full rounded-xl border border-red-200 p-4 text-left hover:bg-red-50/50 transition-colors disabled:opacity-50 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-red-100 text-red-600 shrink-0">
+                      <Trash2 className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground group-hover:text-red-600 transition-colors">
+                        {t('deleteAllOccurrences')}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {t('deleteAllOccurrencesDesc')}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <div className="flex justify-end pt-1">
+                <Button variant="ghost" size="sm" onClick={() => setDeleteDialogOpen(false)}>
+                  {tc('cancel')}
+                </Button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">{t('deleteExternalEventConfirm')}</p>
+              <div className="flex gap-3 justify-end pt-2">
+                <Button variant="ghost" onClick={() => setDeleteDialogOpen(false)}>
+                  {tc('cancel')}
+                </Button>
+                <Button
+                  variant="destructive"
+                  loading={isDeleting}
+                  onClick={handleDeleteAll}
+                >
+                  {t('deleteExternalEvent')}
+                </Button>
+              </div>
+            </div>
+          )}
         </Dialog>
       </div>
     );

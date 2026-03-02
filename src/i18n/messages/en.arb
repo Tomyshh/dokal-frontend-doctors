@@ -1145,7 +1145,21 @@
     "externalEventTimeRequired": "Start and end time are required.",
     "externalEventEndAfterStart": "End time must be after start time.",
     "deleteExternalEvent": "Delete event",
-    "deleteExternalEventConfirm": "Are you sure you want to delete this event?"
+    "deleteExternalEventConfirm": "Are you sure you want to delete this event?",
+    "recurringBreakLabel": "Recurring break",
+    "deleteRecurringTitle": "Delete recurring break",
+    "deleteRecurringDescription": "This break repeats every week. How would you like to delete it?",
+    "deleteThisDayOnly": "Remove this day only",
+    "deleteThisDayDesc": "Remove {day} from the recurring days. Other days will remain.",
+    "deleteAllOccurrences": "Delete all occurrences",
+    "deleteAllOccurrencesDesc": "Permanently delete this break for all days of the week.",
+    "daySun": "Sunday",
+    "dayMon": "Monday",
+    "dayTue": "Tuesday",
+    "dayWed": "Wednesday",
+    "dayThu": "Thursday",
+    "dayFri": "Friday",
+    "daySat": "Saturday"
   },
   "questionnaire": {
     "backToSettings": "Back to settings",

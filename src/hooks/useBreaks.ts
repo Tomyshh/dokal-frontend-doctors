@@ -30,6 +30,21 @@ export function useCreateBreak() {
   });
 }
 
+export function useUpdateBreak() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: { recurring_days?: number[]; remove_day?: number } }) => {
+      const { data: result } = await api.patch<CrmBreak | { deleted: true }>(`/crm/breaks/${id}`, data);
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crm-breaks'] });
+      queryClient.invalidateQueries({ queryKey: ['external-events'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
+    },
+  });
+}
+
 export function useDeleteBreak() {
   const queryClient = useQueryClient();
   return useMutation({

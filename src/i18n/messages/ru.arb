@@ -1128,7 +1128,21 @@
     "externalEventTimeRequired": "Время начала и конца обязательно.",
     "externalEventEndAfterStart": "Время окончания должно быть позже времени начала.",
     "deleteExternalEvent": "Удалить событие",
-    "deleteExternalEventConfirm": "Вы уверены, что хотите удалить это событие?"
+    "deleteExternalEventConfirm": "Вы уверены, что хотите удалить это событие?",
+    "recurringBreakLabel": "Повторяющийся перерыв",
+    "deleteRecurringTitle": "Удалить повторяющийся перерыв",
+    "deleteRecurringDescription": "Этот перерыв повторяется каждую неделю. Как вы хотите его удалить?",
+    "deleteThisDayOnly": "Удалить только этот день",
+    "deleteThisDayDesc": "Удалить {day} из повторяющихся дней. Остальные дни останутся.",
+    "deleteAllOccurrences": "Удалить все повторения",
+    "deleteAllOccurrencesDesc": "Полностью удалить этот перерыв для всех дней недели.",
+    "daySun": "Воскресенье",
+    "dayMon": "Понедельник",
+    "dayTue": "Вторник",
+    "dayWed": "Среда",
+    "dayThu": "Четверг",
+    "dayFri": "Пятница",
+    "daySat": "Суббота"
   },
   "questionnaire": {
     "backToSettings": "Назад к настройкам",
