@@ -133,10 +133,10 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       )}
     >
       {/* Logo */}
-      <div className="flex items-center justify-between p-4 h-16 border-b border-border/50">
-        <div className="flex-1 min-w-0 h-8 relative rounded-sm overflow-hidden">
+      <div className={cn('flex items-center justify-between p-4 border-b border-border/50', collapsed ? 'h-16' : 'h-20')}>
+        <div className={cn('flex-1 min-w-0 relative rounded-sm overflow-hidden', collapsed ? 'h-8' : 'h-12')}>
           <Image
-            src="/images/banderolle.png"
+            src="/logo/Dokal.png"
             alt="Dokal"
             fill
             className="object-contain object-left rounded-sm"
