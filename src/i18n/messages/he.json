@@ -201,12 +201,19 @@
     "notifications": "התראות",
     "patients": "מטופלים",
     "management": "ניהול",
+    "general": "כללי",
+    "profile": "פרופיל",
+    "appearance": "מראה",
+    "businessCard": "כרטיס ביקור",
+    "googleCalendar": "Google Calendar",
     "reasons": "סיבות לפגישה",
     "instructions": "הנחיות לפני פגישה",
     "questionnaire": "שאלון לפני ביקור",
     "help": "עזרה",
     "support": "תמיכה",
-    "team": "צוות"
+    "team": "צוות",
+    "calendar": "יומן",
+    "billing": "חיוב"
   },
   "dashboard": {
     "title": "לוח בקרה",
@@ -341,6 +348,12 @@
   },
   "settings": {
     "title": "הגדרות",
+    "generalSubtitle": "שפה, התראות והגדרות ארגון.",
+    "profileTitle": "פרופיל",
+    "profileSubtitle": "ניהול הפרופיל המקצועי, פרטי יצירת קשר ותעריפים.",
+    "appearancePageTitle": "מראה",
+    "appearancePageSubtitle": "ערכת נושא, צבעים והעדפות חזותיות.",
+    "businessCardSubtitle": "התאמה אישית של כרטיס הביקור, קישורים חברתיים וניווט.",
     "avatarTitle": "תמונת פרופיל",
     "avatarSubtitle": "העלו תמונה שלכם (כולל חיתוך).",
     "avatarAdd": "הוסף תמונה",

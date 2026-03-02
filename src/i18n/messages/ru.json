@@ -200,12 +200,19 @@
     "notifications": "Уведомления",
     "patients": "Пациенты",
     "management": "Управление",
+    "general": "Общие",
+    "profile": "Профиль",
+    "appearance": "Оформление",
+    "businessCard": "Визитка",
+    "googleCalendar": "Google Calendar",
     "reasons": "Причины приёма",
     "instructions": "Инструкции перед приёмом",
     "questionnaire": "Анкета перед визитом",
     "help": "Помощь",
     "support": "Поддержка",
-    "team": "Команда"
+    "team": "Команда",
+    "calendar": "Календарь",
+    "billing": "Оплата"
   },
   "dashboard": {
     "title": "Панель управления",
@@ -340,6 +347,12 @@
   },
   "settings": {
     "title": "Настройки",
+    "generalSubtitle": "Язык, уведомления и настройки организации.",
+    "profileTitle": "Профиль",
+    "profileSubtitle": "Управление профессиональным профилем, контактами и ценами.",
+    "appearancePageTitle": "Оформление",
+    "appearancePageSubtitle": "Тема, цвета и визуальные настройки.",
+    "businessCardSubtitle": "Настройка публичной визитки, соцсетей и навигации.",
     "avatarTitle": "Фото профиля",
     "avatarSubtitle": "Загрузите своё фото (с обрезкой).",
     "avatarAdd": "Добавить фото",

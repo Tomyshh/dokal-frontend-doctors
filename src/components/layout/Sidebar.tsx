@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/routing';
@@ -23,8 +23,11 @@ import {
   FileText,
   LogOut,
   ChevronLeft,
+  ChevronDown,
   Users,
   ClipboardCheck,
+  User,
+  Palette,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -52,6 +55,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathnameWithoutLocale =
     pathname.startsWith(`/${locale}`) ? pathname.slice(`/${locale}`.length) || '/' : pathname;
 
+  const isSettingsSection = pathnameWithoutLocale.startsWith('/settings');
+  const [settingsOpen, setSettingsOpen] = useState(isSettingsSection);
+
   type SidebarLink = {
     href: string;
     icon: typeof LayoutDashboard;
@@ -60,13 +66,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     badge?: boolean;
   };
 
-  // Build main links based on role
   const mainLinks = useMemo(() => {
     const links: SidebarLink[] = [
       { href: '/', icon: LayoutDashboard, label: t('overview'), exact: true },
     ];
 
-    // Secretaries don't have a personal schedule
     if (!isSecretary) {
       links.push({ href: '/schedule', icon: CalendarDays, label: t('schedule') });
     }
@@ -78,49 +82,45 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       { href: '/patients', icon: Users, label: t('patients') },
     );
 
-    // Secretaries don't have reviews
     if (!isSecretary) {
       links.push({ href: '/reviews', icon: Star, label: t('reviews') });
     }
 
-    links.push({
-      href: '/settings',
-      icon: Settings,
-      label: t('settings'),
-      badge: showSettingsBadge,
-    });
-
-    // Billing is not for secretaries (clinic pays)
     if (!isSecretary) {
       links.push({ href: '/billing', icon: CreditCard, label: t('billing') });
     }
 
     return links;
-  }, [t, isSecretary, showSettingsBadge]);
+  }, [t, isSecretary]);
 
-  // Build management links based on role & organization type
-  const managementLinks = useMemo(() => {
-    const links: { href: string; icon: typeof ClipboardList; label: string }[] = [];
+  const settingsSubLinks = useMemo(() => {
+    const links: { href: string; icon: typeof Settings; label: string }[] = [];
 
-    // Reasons, instructions & questionnaire are for practitioners
     if (!isSecretary) {
       links.push(
+        { href: '/settings/profile', icon: User, label: t('profile') },
+        { href: '/settings/appearance', icon: Palette, label: t('appearance') },
+        { href: '/settings/business-card', icon: CreditCard, label: t('businessCard') },
+        { href: '/settings/google-calendar', icon: Calendar, label: t('googleCalendar') },
         { href: '/settings/reasons', icon: ClipboardList, label: t('reasons') },
         { href: '/settings/instructions', icon: FileText, label: t('instructions') },
         { href: '/settings/questionnaire', icon: ClipboardCheck, label: t('questionnaire') },
       );
     }
 
-    // Team management — always visible (page handles individual→clinic upgrade)
-    links.push({ href: '/team', icon: Users, label: t('team') });
-
     return links;
   }, [t, isSecretary]);
 
+  const teamLink = useMemo(() => (
+    { href: '/team', icon: Users, label: t('team') }
+  ), [t]);
+
   const isActive = (href: string, exact = false) => {
     if (exact) return pathnameWithoutLocale === href;
-    return pathnameWithoutLocale.startsWith(href);
+    return pathnameWithoutLocale === href || pathnameWithoutLocale.startsWith(href + '/');
   };
+
+  const isSettingsRootActive = pathnameWithoutLocale === '/settings';
 
   return (
     <aside
@@ -190,31 +190,111 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </Link>
         ))}
 
-        {/* Management Section */}
-        {managementLinks.length > 0 && (
-          <div className="pt-4">
-            {!collapsed && (
-              <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                {t('management')}
-              </p>
-            )}
-            {managementLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'sidebar-link',
-                  isActive(link.href) && 'sidebar-link-active',
-                  collapsed && 'justify-center px-2'
+        {/* Settings Section with sub-menu */}
+        <div className="pt-4">
+          {!collapsed && (
+            <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              {t('settings')}
+            </p>
+          )}
+
+          {/* Settings main link + toggle */}
+          {collapsed ? (
+            <Link
+              href="/settings"
+              className={cn(
+                'sidebar-link justify-center px-2',
+                isSettingsSection && 'sidebar-link-active'
+              )}
+              title={t('settings')}
+            >
+              <span className="relative">
+                <Settings className="h-5 w-5 shrink-0" />
+                {showSettingsBadge && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white"
+                    aria-label={t('profileIncompleteBadge')}
+                  />
                 )}
-                title={collapsed ? link.label : undefined}
+              </span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(!settingsOpen)}
+              className={cn(
+                'sidebar-link w-full',
+                isSettingsSection && !isSettingsRootActive && 'text-primary',
+              )}
+            >
+              <span className="relative">
+                <Settings className="h-5 w-5 shrink-0" />
+                {showSettingsBadge && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white"
+                    aria-label={t('profileIncompleteBadge')}
+                  />
+                )}
+              </span>
+              <span className="truncate flex-1 text-left">{t('settings')}</span>
+              {showSettingsBadge && (
+                <span
+                  className="shrink-0 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                  aria-label={t('profileIncompleteBadge')}
+                >
+                  {practitionerProfile?.completionPercent ?? 0}%
+                </span>
+              )}
+              <ChevronDown className={cn(
+                'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+                settingsOpen && 'rotate-180'
+              )} />
+            </button>
+          )}
+
+          {/* Settings sub-links */}
+          {!collapsed && settingsOpen && (
+            <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-border/50 pl-3">
+              <Link
+                href="/settings"
+                className={cn(
+                  'sidebar-link text-sm py-2',
+                  isSettingsRootActive && 'sidebar-link-active'
+                )}
               >
-                <link.icon className="h-5 w-5 shrink-0" />
-                {!collapsed && <span className="truncate">{link.label}</span>}
+                <Settings className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t('general')}</span>
               </Link>
-            ))}
-          </div>
-        )}
+              {settingsSubLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    'sidebar-link text-sm py-2',
+                    isActive(link.href) && 'sidebar-link-active'
+                  )}
+                >
+                  <link.icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{link.label}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Team link */}
+          <Link
+            href={teamLink.href}
+            className={cn(
+              'sidebar-link mt-1',
+              isActive(teamLink.href) && 'sidebar-link-active',
+              collapsed && 'justify-center px-2'
+            )}
+            title={collapsed ? teamLink.label : undefined}
+          >
+            <teamLink.icon className="h-5 w-5 shrink-0" />
+            {!collapsed && <span className="truncate">{teamLink.label}</span>}
+          </Link>
+        </div>
       </nav>
 
       {/* User Profile */}

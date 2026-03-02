@@ -201,12 +201,19 @@
     "notifications": "Notifications",
     "patients": "Patients",
     "management": "Gestion",
+    "general": "Général",
+    "profile": "Profil",
+    "appearance": "Apparence",
+    "businessCard": "Carte de visite",
+    "googleCalendar": "Google Calendar",
     "reasons": "Motifs de consultation",
     "instructions": "Instructions pré-RDV",
     "questionnaire": "Questionnaire pré-visite",
     "help": "Aide",
     "support": "Support",
-    "team": "Équipe"
+    "team": "Équipe",
+    "calendar": "Calendrier",
+    "billing": "Facturation"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -342,6 +349,12 @@
   },
   "settings": {
     "title": "Paramètres",
+    "generalSubtitle": "Langue, notifications et paramètres d'organisation.",
+    "profileTitle": "Profil",
+    "profileSubtitle": "Gérez votre profil professionnel, vos coordonnées et vos tarifs.",
+    "appearancePageTitle": "Apparence",
+    "appearancePageSubtitle": "Thème, couleurs et préférences visuelles.",
+    "businessCardSubtitle": "Personnalisez votre carte publique, liens sociaux et navigation.",
     "avatarTitle": "Photo de profil",
     "avatarSubtitle": "Ajoutez une photo de vous (recadrage inclus).",
     "avatarAdd": "Ajouter une photo",

@@ -201,12 +201,19 @@
     "notifications": "Notifications",
     "patients": "Patients",
     "management": "Management",
+    "general": "General",
+    "profile": "Profile",
+    "appearance": "Appearance",
+    "businessCard": "Business Card",
+    "googleCalendar": "Google Calendar",
     "reasons": "Appointment reasons",
     "instructions": "Pre-appointment instructions",
     "questionnaire": "Pre-visit questionnaire",
     "help": "Help",
     "support": "Support",
-    "team": "Team"
+    "team": "Team",
+    "calendar": "Calendar",
+    "billing": "Billing"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -342,6 +349,12 @@
   },
   "settings": {
     "title": "Settings",
+    "generalSubtitle": "Language, notifications and organization settings.",
+    "profileTitle": "Profile",
+    "profileSubtitle": "Manage your professional profile, contact information and pricing.",
+    "appearancePageTitle": "Appearance",
+    "appearancePageSubtitle": "Theme, colors and visual preferences.",
+    "businessCardSubtitle": "Customize your public card, social links and navigation.",
     "avatarTitle": "Profile photo",
     "avatarSubtitle": "Upload a photo of yourself (cropping included).",
     "avatarAdd": "Add a photo",
