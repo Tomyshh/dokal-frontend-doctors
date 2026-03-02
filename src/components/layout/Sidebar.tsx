@@ -251,28 +251,28 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
           {/* Settings sub-links */}
           {!collapsed && settingsOpen && (
-            <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-border/50 pl-3 min-w-0">
+            <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-border/50 pl-3 min-w-0 overflow-hidden">
               <Link
                 href="/settings"
                 className={cn(
-                  'sidebar-link text-sm py-2',
+                  'sidebar-link text-sm py-2 min-w-0',
                   isSettingsRootActive && 'sidebar-link-active'
                 )}
               >
                 <Settings className="h-4 w-4 shrink-0" />
-                <span className="min-w-0 flex-1 truncate">{t('general')}</span>
+                <span className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{t('general')}</span>
               </Link>
               {settingsSubLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'sidebar-link text-sm py-2',
+                    'sidebar-link text-sm py-2 min-w-0',
                     isActive(link.href) && 'sidebar-link-active'
                   )}
                 >
                   <link.icon className="h-4 w-4 shrink-0" />
-                  <span className="min-w-0 flex-1 truncate">{link.label}</span>
+                  <span className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{link.label}</span>
                 </Link>
               ))}
             </div>
