@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import { getDayName, formatTime } from '@/lib/utils';
 import { useToast } from '@/providers/ToastProvider';
-import { Plus, Pencil, Trash2, CalendarOff, Coffee, Clock } from 'lucide-react';
+import { Plus, Pencil, Trash2, CalendarOff, Coffee, Clock, Info, CalendarDays, Timer, Utensils, User, Users, GraduationCap, ArrowRight } from 'lucide-react';
 import type { WeeklySchedule } from '@/types';
 
 function padTime(t: string) {
@@ -444,38 +444,61 @@ export default function SchedulePage() {
         onClose={() => setShowBlockDialog(false)}
         title={editingBlock ? t('editBlock') : t('addBlock')}
       >
-        <div className="space-y-4">
-          {!editingBlock && (
-            <Select
-              label={t('dayOfWeek')}
-              value={String(blockDay)}
-              onChange={(e) => setBlockDay(Number(e.target.value))}
-              options={dayOptions}
-            />
-          )}
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              type="time"
-              label={t('startTime')}
-              value={blockStart}
-              onChange={(e) => setBlockStart(e.target.value)}
-            />
-            <Input
-              type="time"
-              label={t('endTime')}
-              value={blockEnd}
-              onChange={(e) => setBlockEnd(e.target.value)}
-            />
+        <div className="space-y-5">
+          <p className="text-sm text-muted-foreground -mt-2">
+            {editingBlock ? t('editBlockSubtitle') : t('addBlockSubtitle')}
+          </p>
+
+          <div className="rounded-xl bg-blue-50/60 border border-blue-200/60 px-4 py-3 flex items-start gap-3">
+            <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+            <p className="text-xs text-blue-700 leading-relaxed">
+              {t('blockInfoBanner')}
+            </p>
           </div>
-          <Input
-            type="number"
-            label={t('slotDuration')}
-            value={blockDuration}
-            onChange={(e) => setBlockDuration(Number(e.target.value))}
-            min={5}
-            max={240}
-          />
-          <div className="flex justify-end gap-3">
+
+          {!editingBlock && (
+            <div>
+              <Select
+                label={t('dayOfWeek')}
+                value={String(blockDay)}
+                onChange={(e) => setBlockDay(Number(e.target.value))}
+                options={dayOptions}
+              />
+              <p className="mt-1 text-[11px] text-muted-foreground">{t('dayOfWeekHint')}</p>
+            </div>
+          )}
+
+          <div>
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                type="time"
+                label={t('startTime')}
+                value={blockStart}
+                onChange={(e) => setBlockStart(e.target.value)}
+              />
+              <Input
+                type="time"
+                label={t('endTime')}
+                value={blockEnd}
+                onChange={(e) => setBlockEnd(e.target.value)}
+              />
+            </div>
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('timeRangeHint')}</p>
+          </div>
+
+          <div>
+            <Input
+              type="number"
+              label={t('slotDuration')}
+              value={blockDuration}
+              onChange={(e) => setBlockDuration(Number(e.target.value))}
+              min={5}
+              max={240}
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('slotDurationHint')}</p>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-1">
             <Button variant="outline" onClick={() => setShowBlockDialog(false)}>
               {tc('cancel')}
             </Button>
@@ -492,44 +515,71 @@ export default function SchedulePage() {
         onClose={() => setShowOverrideDialog(false)}
         title={t('addOverride')}
       >
-        <div className="space-y-4">
-          <Input
-            type="date"
-            label={t('dayOfWeek')}
-            value={overrideDate}
-            onChange={(e) => setOverrideDate(e.target.value)}
-          />
-          <Select
-            label={t('available')}
-            value={overrideAvailable ? 'true' : 'false'}
-            onChange={(e) => setOverrideAvailable(e.target.value === 'true')}
-            options={[
-              { value: 'false', label: t('unavailable') },
-              { value: 'true', label: t('specialHours') },
-            ]}
-          />
+        <div className="space-y-5">
+          <p className="text-sm text-muted-foreground -mt-2">
+            {t('addOverrideSubtitle')}
+          </p>
+
+          <div className="rounded-xl bg-violet-50/60 border border-violet-200/60 px-4 py-3 flex items-start gap-3">
+            <Info className="h-4 w-4 text-violet-600 mt-0.5 shrink-0" />
+            <p className="text-xs text-violet-700 leading-relaxed">
+              {t('overrideInfoBanner')}
+            </p>
+          </div>
+
+          <div>
+            <Input
+              type="date"
+              label={t('breakDate')}
+              value={overrideDate}
+              onChange={(e) => setOverrideDate(e.target.value)}
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('overrideDateHint')}</p>
+          </div>
+
+          <div>
+            <Select
+              label={t('available')}
+              value={overrideAvailable ? 'true' : 'false'}
+              onChange={(e) => setOverrideAvailable(e.target.value === 'true')}
+              options={[
+                { value: 'false', label: t('unavailable') },
+                { value: 'true', label: t('specialHours') },
+              ]}
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('overrideAvailableHint')}</p>
+          </div>
+
           {overrideAvailable && (
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                type="time"
-                label={t('startTime')}
-                value={overrideStart}
-                onChange={(e) => setOverrideStart(e.target.value)}
-              />
-              <Input
-                type="time"
-                label={t('endTime')}
-                value={overrideEnd}
-                onChange={(e) => setOverrideEnd(e.target.value)}
-              />
+            <div>
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  type="time"
+                  label={t('startTime')}
+                  value={overrideStart}
+                  onChange={(e) => setOverrideStart(e.target.value)}
+                />
+                <Input
+                  type="time"
+                  label={t('endTime')}
+                  value={overrideEnd}
+                  onChange={(e) => setOverrideEnd(e.target.value)}
+                />
+              </div>
+              <p className="mt-1 text-[11px] text-muted-foreground">{t('timeRangeHint')}</p>
             </div>
           )}
-          <Textarea
-            label={t('reason')}
-            value={overrideReason}
-            onChange={(e) => setOverrideReason(e.target.value)}
-          />
-          <div className="flex justify-end gap-3">
+
+          <div>
+            <Textarea
+              label={t('reason')}
+              value={overrideReason}
+              onChange={(e) => setOverrideReason(e.target.value)}
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('overrideReasonHint')}</p>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-1">
             <Button variant="outline" onClick={() => setShowOverrideDialog(false)}>
               {tc('cancel')}
             </Button>
@@ -546,63 +596,105 @@ export default function SchedulePage() {
         onClose={() => setShowBreakDialog(false)}
         title={t('addBreak')}
       >
-        <div className="space-y-4">
+        <div className="space-y-5">
+          <p className="text-sm text-muted-foreground -mt-2">
+            {t('breakDialogSubtitle')}
+          </p>
+
+          <div className="rounded-xl bg-amber-50/60 border border-amber-200/60 px-4 py-3 flex items-start gap-3">
+            <Info className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+            <p className="text-xs text-amber-700 leading-relaxed">
+              {t('breakInfoBanner')}
+            </p>
+          </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('breakPresets')}
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {breakPresets.map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => applyBreakPreset(preset)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:border-primary/30 hover:text-primary transition-colors"
-                >
-                  <Coffee className="h-3 w-3" />
-                  {preset.label}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-medium text-foreground">{t('breakPresets')}</span>
+              <span className="text-xs text-muted-foreground">{t('breakPresetsHint')}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {breakPresets.map((preset, idx) => {
+                const icons = [Utensils, User, Users, GraduationCap];
+                const PresetIcon = icons[idx] || Coffee;
+                const isActive = breakTitle === preset.label;
+                return (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => applyBreakPreset(preset)}
+                    className={`flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-all ${
+                      isActive
+                        ? 'border-primary bg-primary/5 text-primary ring-1 ring-primary/20'
+                        : 'border-border bg-card hover:border-primary/30 hover:bg-muted/50 text-foreground'
+                    }`}
+                  >
+                    <div className={`rounded-lg p-1.5 ${isActive ? 'bg-primary/10' : 'bg-muted'}`}>
+                      <PresetIcon className={`h-3.5 w-3.5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium">{preset.label}</span>
+                      <span className="block text-[11px] text-muted-foreground">
+                        {preset.start} <ArrowRight className="inline h-2.5 w-2.5" /> {preset.end}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <Input
-            label={t('breakTitle')}
-            value={breakTitle}
-            onChange={(e) => setBreakTitle(e.target.value)}
-            placeholder={t('breakTitlePlaceholder')}
-          />
+          <div className="h-px bg-border" />
 
-          <Input
-            type="date"
-            label={t('breakDate')}
-            value={breakDate}
-            onChange={(e) => setBreakDate(e.target.value)}
-            min={todayStr}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
+          <div>
             <Input
-              type="time"
-              label={t('breakStart')}
-              value={breakStartTime}
-              onChange={(e) => setBreakStartTime(e.target.value)}
+              label={t('breakTitle')}
+              value={breakTitle}
+              onChange={(e) => setBreakTitle(e.target.value)}
+              placeholder={t('breakTitlePlaceholder')}
             />
-            <Input
-              type="time"
-              label={t('breakEnd')}
-              value={breakEndTime}
-              onChange={(e) => setBreakEndTime(e.target.value)}
-            />
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('breakTitleHint')}</p>
           </div>
 
-          <Textarea
-            label={t('breakDescription')}
-            value={breakDescription}
-            onChange={(e) => setBreakDescription(e.target.value)}
-            placeholder={t('breakDescriptionPlaceholder')}
-            rows={2}
-          />
+          <div>
+            <Input
+              type="date"
+              label={t('breakDate')}
+              value={breakDate}
+              onChange={(e) => setBreakDate(e.target.value)}
+              min={todayStr}
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('breakDateHint')}</p>
+          </div>
+
+          <div>
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                type="time"
+                label={t('breakStart')}
+                value={breakStartTime}
+                onChange={(e) => setBreakStartTime(e.target.value)}
+              />
+              <Input
+                type="time"
+                label={t('breakEnd')}
+                value={breakEndTime}
+                onChange={(e) => setBreakEndTime(e.target.value)}
+              />
+            </div>
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('breakTimeHint')}</p>
+          </div>
+
+          <div>
+            <Textarea
+              label={t('breakDescription')}
+              value={breakDescription}
+              onChange={(e) => setBreakDescription(e.target.value)}
+              placeholder={t('breakDescriptionPlaceholder')}
+              rows={2}
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('breakDescriptionHint')}</p>
+          </div>
 
           {breakError && (
             <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
@@ -610,7 +702,7 @@ export default function SchedulePage() {
             </div>
           )}
 
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 pt-1">
             <Button variant="outline" onClick={() => setShowBreakDialog(false)}>
               {tc('cancel')}
             </Button>

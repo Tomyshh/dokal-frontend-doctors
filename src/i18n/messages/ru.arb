@@ -316,6 +316,12 @@
     "selectPractitionerRequired": "Пожалуйста, выберите врача.",
     "practitioner": "Врач",
     "visitedBeforeDesc": "Показывает, был ли пациент ранее.",
+    "timelineTitle": "Ваш день в одном взгляде",
+    "timelineHint": "Нажмите на свободный слот, чтобы назначить время приёма",
+    "timelineLoading": "Загрузка расписания...",
+    "timelineNoSchedule": "Рабочие часы для этого дня не заданы",
+    "timelineFree": "Свободно",
+    "timelineBusy": "Занято",
     "noAppointments": "Приёмов нет",
     "statusLabel": {
       "pending": "В ожидании",

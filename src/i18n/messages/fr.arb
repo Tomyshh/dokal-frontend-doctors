@@ -316,6 +316,12 @@
     "selectPractitionerRequired": "Veuillez sélectionner un praticien.",
     "practitioner": "Praticien",
     "visitedBeforeDesc": "Indique si le patient est déjà venu consulter auparavant.",
+    "timelineTitle": "Votre journée en un coup d'œil",
+    "timelineHint": "Cliquez sur un créneau libre pour fixer l'heure du rendez-vous",
+    "timelineLoading": "Chargement du planning...",
+    "timelineNoSchedule": "Pas d'horaires de travail définis pour ce jour",
+    "timelineFree": "Libre",
+    "timelineBusy": "Occupé",
     "noAppointments": "Aucun rendez-vous",
     "statusLabel": {
       "pending": "En attente",

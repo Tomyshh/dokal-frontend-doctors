@@ -316,6 +316,12 @@
     "selectPractitionerRequired": "Please select a practitioner.",
     "practitioner": "Practitioner",
     "visitedBeforeDesc": "Indicates whether the patient has visited before.",
+    "timelineTitle": "Your day at a glance",
+    "timelineHint": "Click on a free slot to set the appointment time",
+    "timelineLoading": "Loading schedule...",
+    "timelineNoSchedule": "No working hours set for this day",
+    "timelineFree": "Free",
+    "timelineBusy": "Booked",
     "noAppointments": "No appointments",
     "statusLabel": {
       "pending": "Pending",

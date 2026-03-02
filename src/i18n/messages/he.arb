@@ -316,6 +316,12 @@
     "selectPractitionerRequired": "אנא בחרו רופא.",
     "practitioner": "רופא",
     "visitedBeforeDesc": "מציין האם המטופל ביקר בעבר.",
+    "timelineTitle": "היום שלך במבט אחד",
+    "timelineHint": "לחצו על משבצת פנויה כדי לקבוע את שעת הפגישה",
+    "timelineLoading": "טוען לוח זמנים...",
+    "timelineNoSchedule": "לא הוגדרו שעות עבודה ליום זה",
+    "timelineFree": "פנוי",
+    "timelineBusy": "תפוס",
     "noAppointments": "אין פגישות",
     "statusLabel": {
       "pending": "ממתין",

@@ -18,6 +18,7 @@ import { useCreateCrmAppointment } from '@/hooks/useAppointments';
 import { useCrmPatientSearch, useCreateCrmPatient } from '@/hooks/useCrmPatients';
 import type { CrmPatientListItem } from '@/types';
 import type { CreateCrmAppointmentRequest, CreateCrmPatientRequest } from '@/types/api';
+import { DayTimeline } from './DayTimeline';
 
 type Step = 'patient' | 'details';
 
@@ -541,6 +542,18 @@ export function CreateCrmAppointmentDialog({
                 disabled={submitting}
               />
             </div>
+
+            {date && (
+              <DayTimeline
+                date={date}
+                selectedStart={startTime}
+                selectedEnd={endTime}
+                onSlotSelect={(start, end) => {
+                  setStartTime(start);
+                  setEndTime(end);
+                }}
+              />
+            )}
 
             <Select
               id="reason"

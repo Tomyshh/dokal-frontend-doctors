@@ -316,6 +316,12 @@
     "selectPractitioner": "Seleccionar un profesional",
     "selectPractitionerRequired": "Seleccione un profesional.",
     "visitedBeforeDesc": "Indica si el paciente ya ha venido antes.",
+    "timelineTitle": "Su día de un vistazo",
+    "timelineHint": "Haga clic en un espacio libre para fijar la hora de la cita",
+    "timelineLoading": "Cargando horario...",
+    "timelineNoSchedule": "No hay horario de trabajo definido para este día",
+    "timelineFree": "Libre",
+    "timelineBusy": "Ocupado",
     "noAppointments": "No appointments",
     "statusLabel": {
       "pending": "Pending",
