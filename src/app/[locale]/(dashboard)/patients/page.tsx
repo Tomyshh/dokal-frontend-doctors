@@ -11,9 +11,10 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { useCrmPatients } from '@/hooks/useCrmPatients';
 import { Link } from '@/i18n/routing';
-import { Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, ChevronLeft, ChevronRight, CalendarPlus } from 'lucide-react';
 import type { CrmPatientListItem } from '@/types';
 import { formatMissingFieldLabel } from '@/lib/crm';
+import { CreateCrmAppointmentDialog } from '@/components/appointments/CreateCrmAppointmentDialog';
 
 const PAGE_SIZE = 30;
 
@@ -26,6 +27,7 @@ export default function PatientsPage() {
   const [status, setStatus] = useState<string>('');
   const [incomplete, setIncomplete] = useState<string>('');
   const [offset, setOffset] = useState(0);
+  const [appointmentPatient, setAppointmentPatient] = useState<CrmPatientListItem | null>(null);
 
   const { data, isLoading, isError } = useCrmPatients({
     q: q.trim() || undefined,
@@ -186,11 +188,22 @@ export default function PatientsPage() {
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
-                          <Link href={`/patients/${p.id}`}>
-                            <Button size="sm" variant="outline" className="h-8">
-                              {t('open')}
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
+                              title={t('newAppointment')}
+                              onClick={() => setAppointmentPatient(p)}
+                            >
+                              <CalendarPlus className="h-4 w-4" />
                             </Button>
-                          </Link>
+                            <Link href={`/patients/${p.id}`}>
+                              <Button size="sm" variant="outline" className="h-8">
+                                {t('open')}
+                              </Button>
+                            </Link>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -231,6 +244,12 @@ export default function PatientsPage() {
           </>
         )}
       </Card>
+
+      <CreateCrmAppointmentDialog
+        open={!!appointmentPatient}
+        onClose={() => setAppointmentPatient(null)}
+        defaultPatient={appointmentPatient}
+      />
     </div>
   );
 }

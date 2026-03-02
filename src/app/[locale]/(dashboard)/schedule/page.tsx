@@ -132,10 +132,10 @@ export default function SchedulePage() {
   };
 
   const breakPresets = [
-    { label: t('breakLunch'), start: '12:00', end: '13:00' },
-    { label: t('breakPersonal'), start: '14:00', end: '14:30' },
-    { label: t('breakMeeting'), start: '10:00', end: '11:00' },
-    { label: t('breakTraining'), start: '15:00', end: '17:00' },
+    { label: t('breakLunch'), desc: t('breakLunchDesc'), start: '12:00', end: '13:00', icon: Utensils },
+    { label: t('breakPersonal'), desc: t('breakPersonalDesc'), start: '14:00', end: '14:30', icon: User },
+    { label: t('breakMeeting'), desc: t('breakMeetingDesc'), start: '10:00', end: '11:00', icon: Users },
+    { label: t('breakTraining'), desc: t('breakTrainingDesc'), start: '15:00', end: '17:00', icon: GraduationCap },
   ];
 
   const openBreakDialog = () => {
@@ -597,45 +597,53 @@ export default function SchedulePage() {
         title={t('addBreak')}
       >
         <div className="space-y-5">
-          <p className="text-sm text-muted-foreground -mt-2">
+          {/* Subtitle */}
+          <p className="text-sm text-muted-foreground -mt-1">
             {t('breakDialogSubtitle')}
           </p>
 
-          <div className="rounded-xl bg-amber-50/60 border border-amber-200/60 px-4 py-3 flex items-start gap-3">
+          {/* Info banner */}
+          <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-start gap-3">
             <Info className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-            <p className="text-xs text-amber-700 leading-relaxed">
+            <p className="text-xs text-amber-800 leading-relaxed">
               {t('breakInfoBanner')}
             </p>
           </div>
 
+          {/* Section 1: Presets */}
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium text-foreground">{t('breakPresets')}</span>
-              <span className="text-xs text-muted-foreground">{t('breakPresetsHint')}</span>
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <span className="flex items-center justify-center h-5 w-5 rounded-full bg-primary text-[10px] font-bold text-white">1</span>
+              <h3 className="text-sm font-semibold text-foreground">{t('breakStepType')}</h3>
             </div>
+            <p className="text-xs text-muted-foreground mb-3 ml-7">
+              {t('breakPresetsHint')}
+            </p>
             <div className="grid grid-cols-2 gap-2">
-              {breakPresets.map((preset, idx) => {
-                const icons = [Utensils, User, Users, GraduationCap];
-                const PresetIcon = icons[idx] || Coffee;
+              {breakPresets.map((preset) => {
+                const PresetIcon = preset.icon;
                 const isActive = breakTitle === preset.label;
+                const durationMin = toMinutes(preset.end) - toMinutes(preset.start);
                 return (
                   <button
                     key={preset.label}
                     type="button"
                     onClick={() => applyBreakPreset(preset)}
-                    className={`flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-all ${
+                    className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-all ${
                       isActive
-                        ? 'border-primary bg-primary/5 text-primary ring-1 ring-primary/20'
-                        : 'border-border bg-card hover:border-primary/30 hover:bg-muted/50 text-foreground'
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20 shadow-sm'
+                        : 'border-border bg-card hover:border-primary/30 hover:bg-muted/40'
                     }`}
                   >
-                    <div className={`rounded-lg p-1.5 ${isActive ? 'bg-primary/10' : 'bg-muted'}`}>
-                      <PresetIcon className={`h-3.5 w-3.5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <div className={`rounded-lg p-2 shrink-0 ${isActive ? 'bg-primary/10' : 'bg-muted'}`}>
+                      <PresetIcon className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                     </div>
-                    <div>
-                      <span className="text-sm font-medium">{preset.label}</span>
-                      <span className="block text-[11px] text-muted-foreground">
-                        {preset.start} <ArrowRight className="inline h-2.5 w-2.5" /> {preset.end}
+                    <div className="min-w-0">
+                      <span className={`block text-sm font-medium leading-tight ${isActive ? 'text-primary' : 'text-foreground'}`}>
+                        {preset.label}
+                      </span>
+                      <span className="block text-[11px] text-muted-foreground leading-tight mt-0.5">
+                        {preset.start} → {preset.end} · {durationMin} min
                       </span>
                     </div>
                   </button>
@@ -644,70 +652,106 @@ export default function SchedulePage() {
             </div>
           </div>
 
-          <div className="h-px bg-border" />
-
-          <div>
-            <Input
-              label={t('breakTitle')}
-              value={breakTitle}
-              onChange={(e) => setBreakTitle(e.target.value)}
-              placeholder={t('breakTitlePlaceholder')}
-            />
-            <p className="mt-1 text-[11px] text-muted-foreground">{t('breakTitleHint')}</p>
-          </div>
-
-          <div>
-            <Input
-              type="date"
-              label={t('breakDate')}
-              value={breakDate}
-              onChange={(e) => setBreakDate(e.target.value)}
-              min={todayStr}
-            />
-            <p className="mt-1 text-[11px] text-muted-foreground">{t('breakDateHint')}</p>
-          </div>
-
-          <div>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                type="time"
-                label={t('breakStart')}
-                value={breakStartTime}
-                onChange={(e) => setBreakStartTime(e.target.value)}
-              />
-              <Input
-                type="time"
-                label={t('breakEnd')}
-                value={breakEndTime}
-                onChange={(e) => setBreakEndTime(e.target.value)}
-              />
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+            <div className="relative flex justify-center">
+              <span className="bg-card px-3 text-xs text-muted-foreground">{t('breakCustomHint')}</span>
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">{t('breakTimeHint')}</p>
           </div>
 
+          {/* Section 2: Details */}
           <div>
-            <Textarea
-              label={t('breakDescription')}
-              value={breakDescription}
-              onChange={(e) => setBreakDescription(e.target.value)}
-              placeholder={t('breakDescriptionPlaceholder')}
-              rows={2}
-            />
-            <p className="mt-1 text-[11px] text-muted-foreground">{t('breakDescriptionHint')}</p>
+            <div className="flex items-center gap-2.5 mb-3">
+              <span className="flex items-center justify-center h-5 w-5 rounded-full bg-primary text-[10px] font-bold text-white">2</span>
+              <h3 className="text-sm font-semibold text-foreground">{t('breakStepDetails')}</h3>
+            </div>
+
+            <div className="space-y-4">
+              {/* Title */}
+              <div>
+                <Input
+                  label={t('breakTitle')}
+                  value={breakTitle}
+                  onChange={(e) => setBreakTitle(e.target.value)}
+                  placeholder={t('breakTitlePlaceholder')}
+                  required
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground ml-0.5">{t('breakTitleHint')}</p>
+              </div>
+
+              {/* Date */}
+              <div>
+                <Input
+                  type="date"
+                  label={t('breakDate')}
+                  value={breakDate}
+                  onChange={(e) => setBreakDate(e.target.value)}
+                  min={todayStr}
+                  required
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground ml-0.5">{t('breakDateHint')}</p>
+              </div>
+
+              {/* Time range */}
+              <div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    type="time"
+                    label={t('breakStart')}
+                    value={breakStartTime}
+                    onChange={(e) => setBreakStartTime(e.target.value)}
+                    required
+                  />
+                  <Input
+                    type="time"
+                    label={t('breakEnd')}
+                    value={breakEndTime}
+                    onChange={(e) => setBreakEndTime(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-1.5">
+                  <p className="text-[11px] text-muted-foreground ml-0.5">{t('breakTimeHint')}</p>
+                  {breakStartTime && breakEndTime && toMinutes(breakEndTime) > toMinutes(breakStartTime) && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary">
+                      <Timer className="h-3 w-3" />
+                      {t('breakDuration', { duration: toMinutes(breakEndTime) - toMinutes(breakStartTime) })}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <Textarea
+                  label={t('breakDescription')}
+                  value={breakDescription}
+                  onChange={(e) => setBreakDescription(e.target.value)}
+                  placeholder={t('breakDescriptionPlaceholder')}
+                  rows={2}
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground ml-0.5">{t('breakDescriptionHint')}</p>
+              </div>
+            </div>
           </div>
 
+          {/* Error */}
           {breakError && (
-            <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 flex items-start gap-2.5">
+              <Info className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
               {breakError}
             </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-1">
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-1 border-t border-border">
             <Button variant="outline" onClick={() => setShowBreakDialog(false)}>
               {tc('cancel')}
             </Button>
             <Button onClick={handleSaveBreak} loading={createExternalEvent.isPending}>
-              {tc('save')}
+              <Coffee className="h-4 w-4" />
+              {t('breakSave')}
             </Button>
           </div>
         </div>

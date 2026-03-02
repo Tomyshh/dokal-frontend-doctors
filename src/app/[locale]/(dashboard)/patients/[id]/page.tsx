@@ -14,12 +14,13 @@ import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { ArrowLeft, Phone, Mail, MapPin, Calendar, AlertTriangle, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MapPin, Calendar, AlertTriangle, MessageSquare, CalendarPlus } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
 import type { CrmPatientListItem, Appointment } from '@/types';
 import { formatMissingFieldLabel } from '@/lib/crm';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
 import { useToast } from '@/providers/ToastProvider';
+import { CreateCrmAppointmentDialog } from '@/components/appointments/CreateCrmAppointmentDialog';
 
 const INSURANCE_PROVIDER_OPTIONS = [
   'AIG',
@@ -52,6 +53,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   const createConversation = useCreateConversation();
   const toast = useToast();
   const [editMode, setEditMode] = useState(false);
+  const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
 
   const { crmRecord, teudatDisplay, insuranceProviderDisplay, history } = useMemo(() => {
     const d = data as any;
@@ -287,6 +289,13 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               </Button>
             )}
             <Button
+              variant="outline"
+              onClick={() => setAppointmentDialogOpen(true)}
+            >
+              <CalendarPlus className="h-4 w-4 rtl:ml-2 rtl:mr-0 ml-0 mr-2" />
+              {t('newAppointment')}
+            </Button>
+            <Button
               variant={editMode ? 'outline' : 'default'}
               onClick={() => setEditMode((v) => !v)}
             >
@@ -413,7 +422,17 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
       {/* Appointment History */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('appointmentHistory')}</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>{t('appointmentHistory')}</CardTitle>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setAppointmentDialogOpen(true)}
+            >
+              <CalendarPlus className="h-4 w-4 rtl:ml-1 rtl:mr-0 ml-0 mr-1" />
+              {t('newAppointment')}
+            </Button>
+          </div>
         </CardHeader>
         {history.length ? (
           <div className="overflow-x-auto">
@@ -450,6 +469,12 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
           <p className="text-sm text-muted-foreground">{tcal('noEvents')}</p>
         )}
       </Card>
+
+      <CreateCrmAppointmentDialog
+        open={appointmentDialogOpen}
+        onClose={() => setAppointmentDialogOpen(false)}
+        defaultPatient={crmRecord}
+      />
     </div>
   );
 }

@@ -354,7 +354,8 @@
     "insurance": "Health insurance",
     "emergencyContact": "Emergency contact",
     "familyDoctor": "Family doctor",
-    "noHealthProfile": "No health profile available"
+    "noHealthProfile": "No health profile available",
+    "newAppointment": "New appointment"
   },
   "reviews": {
     "title": "Reviews",

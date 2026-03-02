@@ -352,7 +352,8 @@
     "insurance": "Медицинская страховка",
     "emergencyContact": "Контакт для экстренных случаев",
     "familyDoctor": "Лечащий врач",
-    "noHealthProfile": "Медицинский профиль отсутствует"
+    "noHealthProfile": "Медицинский профиль отсутствует",
+    "newAppointment": "Новая запись"
   },
   "reviews": {
     "title": "Отзывы",

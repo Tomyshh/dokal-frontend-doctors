@@ -47,6 +47,7 @@ export interface CreateCrmAppointmentDialogProps {
   onClose: () => void;
   defaultDate?: string; // yyyy-MM-dd
   defaultStartTime?: string; // HH:mm
+  defaultPatient?: CrmPatientListItem | null;
 }
 
 export function CreateCrmAppointmentDialog({
@@ -54,6 +55,7 @@ export function CreateCrmAppointmentDialog({
   onClose,
   defaultDate,
   defaultStartTime,
+  defaultPatient,
 }: CreateCrmAppointmentDialogProps) {
   const t = useTranslations('appointments');
   const tc = useTranslations('common');
@@ -112,11 +114,7 @@ export function CreateCrmAppointmentDialog({
       if (initializedRef.current) return;
       initializedRef.current = true;
 
-      setStep('patient');
       setError('');
-      setPatientQuery('');
-      setPatientOpen(false);
-      setSelectedPatient(null);
       setCreateNewPatient(false);
       setPFirstName('');
       setPLastName('');
@@ -131,12 +129,24 @@ export function CreateCrmAppointmentDialog({
       setReasonId('');
       setVisitedBefore(false);
       setNotes('');
-      // Don't derive practitioner here (members may still be loading)
       setPractitionerId('');
+
+      if (defaultPatient) {
+        setSelectedPatient(defaultPatient);
+        const name = `${defaultPatient.first_name || ''} ${defaultPatient.last_name || ''}`.trim();
+        setPatientQuery(name);
+        setPatientOpen(false);
+        setStep('details');
+      } else {
+        setSelectedPatient(null);
+        setPatientQuery('');
+        setPatientOpen(false);
+        setStep('patient');
+      }
     } else {
       initializedRef.current = false;
     }
-  }, [open, defaultDate, defaultStartTime]);
+  }, [open, defaultDate, defaultStartTime, defaultPatient]);
 
   // When members arrive, set a default practitioner for secretaries without resetting the form
   useEffect(() => {

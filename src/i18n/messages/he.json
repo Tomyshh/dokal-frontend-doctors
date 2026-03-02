@@ -353,7 +353,8 @@
     "insurance": "קופת חולים",
     "emergencyContact": "איש קשר לחירום",
     "familyDoctor": "רופא משפחה",
-    "noHealthProfile": "אין פרופיל בריאות"
+    "noHealthProfile": "אין פרופיל בריאות",
+    "newAppointment": "תור חדש"
   },
   "reviews": {
     "title": "ביקורות",

@@ -354,7 +354,8 @@
     "insurance": "Caisse maladie",
     "emergencyContact": "Contact urgence",
     "familyDoctor": "Médecin traitant",
-    "noHealthProfile": "Aucun profil santé renseigné"
+    "noHealthProfile": "Aucun profil santé renseigné",
+    "newAppointment": "Nouveau rendez-vous"
   },
   "reviews": {
     "title": "Avis",
