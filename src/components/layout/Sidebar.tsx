@@ -19,7 +19,6 @@ import {
   Star,
   Settings,
   CreditCard,
-  ClipboardList,
   FileText,
   LogOut,
   ChevronLeft,
@@ -93,23 +92,27 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     return links;
   }, [t, isSecretary]);
 
+  const profileIncompleteCount = practitionerProfile?.completionItems
+    ? practitionerProfile.completionItems.filter((i) => !i.completed).length
+    : 0;
+  const showProfileBadge = !practitionerProfile?.isLoading && profileIncompleteCount > 0;
+
   const settingsSubLinks = useMemo(() => {
-    const links: { href: string; icon: typeof Settings; label: string }[] = [];
+    const links: { href: string; icon: typeof Settings; label: string; badge?: number }[] = [];
 
     if (!isSecretary) {
       links.push(
-        { href: '/settings/profile', icon: User, label: t('profile') },
+        { href: '/settings/profile', icon: User, label: t('profile'), badge: showProfileBadge ? profileIncompleteCount : undefined },
         { href: '/settings/appearance', icon: Palette, label: t('appearance') },
         { href: '/settings/business-card', icon: CreditCard, label: t('businessCard') },
         { href: '/settings/google-calendar', icon: Calendar, label: t('googleCalendar') },
-        { href: '/settings/reasons', icon: ClipboardList, label: t('reasons') },
         { href: '/settings/instructions', icon: FileText, label: t('instructions') },
         { href: '/settings/questionnaire', icon: ClipboardCheck, label: t('questionnaire') },
       );
     }
 
     return links;
-  }, [t, isSecretary]);
+  }, [t, isSecretary, showProfileBadge, profileIncompleteCount]);
 
   const teamLink = useMemo(() => (
     { href: '/team', icon: Users, label: t('team') }
@@ -273,6 +276,14 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 >
                   <link.icon className="h-4 w-4 shrink-0" />
                   <span className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{link.label}</span>
+                  {link.badge != null && link.badge > 0 && (
+                    <span
+                      className="shrink-0 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                      aria-label={t('profileIncompleteBadge')}
+                    >
+                      {link.badge}
+                    </span>
+                  )}
                 </Link>
               ))}
             </div>
