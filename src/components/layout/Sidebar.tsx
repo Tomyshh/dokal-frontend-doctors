@@ -222,10 +222,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <button
               type="button"
               onClick={() => setSettingsOpen(!settingsOpen)}
-              className={cn(
-                'sidebar-link w-full',
-                isSettingsSection && !isSettingsRootActive && 'text-primary',
-              )}
+              className="sidebar-link w-full"
             >
               <span className="relative">
                 <Settings className="h-5 w-5 shrink-0" />
@@ -254,7 +251,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
           {/* Settings sub-links */}
           {!collapsed && settingsOpen && (
-            <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-border/50 pl-3">
+            <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-border/50 pl-3 min-w-0">
               <Link
                 href="/settings"
                 className={cn(
@@ -263,7 +260,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 )}
               >
                 <Settings className="h-4 w-4 shrink-0" />
-                <span className="truncate">{t('general')}</span>
+                <span className="min-w-0 flex-1 truncate">{t('general')}</span>
               </Link>
               {settingsSubLinks.map((link) => (
                 <Link
@@ -275,7 +272,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   )}
                 >
                   <link.icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{link.label}</span>
+                  <span className="min-w-0 flex-1 truncate">{link.label}</span>
                 </Link>
               ))}
             </div>
