@@ -142,5 +142,10 @@ export function getItemTitle(item: CalendarItem): string {
   if (item.kind === 'crm_appointment') {
     return getCrmAppointmentPatientDisplayName(item.data);
   }
-  return item.data.title || '';
+  const raw = item.data.title || '';
+  return raw
+    .replace(/\s*\(Dokal\)\s*/gi, ' ')
+    .replace(/\s*\(Google Calendar Sync\)\s*/gi, '')
+    .replace(/^🔒\s*/, '')
+    .trim();
 }

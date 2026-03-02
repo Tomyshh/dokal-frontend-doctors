@@ -11,11 +11,12 @@ import { getItemColors } from './CalendarEventCard';
 import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { getItemStartTime, getItemEndTime } from '@/hooks/useCalendarAppointments';
-import { X, User, Clock, FileText, Stethoscope, ExternalLink, Globe } from 'lucide-react';
+import { X, User, Clock, FileText, Stethoscope, ExternalLink, Globe, Trash2 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import type { CalendarItem } from '@/types';
 import { useDeleteExternalEvent } from '@/hooks/useExternalEvents';
+import { useDeleteBreak } from '@/hooks/useBreaks';
 import { Dialog } from '@/components/ui/Dialog';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -30,6 +31,31 @@ import {
 } from '@/lib/crm';
 import { CompletePatientInfoDialog } from '@/components/appointments/CompletePatientInfoDialog';
 import { useUpdateCrmAppointment, useUpdateCrmOrganizationAppointment } from '@/hooks/useAppointments';
+
+function extractBreakId(description: string | null | undefined): string | null {
+  if (!description) return null;
+  const match = description.match(/break_id=([0-9a-f-]{36})/i);
+  return match ? match[1] : null;
+}
+
+function cleanEventTitle(title: string | null | undefined): string {
+  if (!title) return '-';
+  return title
+    .replace(/\s*\(Dokal\)\s*/gi, ' ')
+    .replace(/\s*\(Google Calendar Sync\)\s*/gi, '')
+    .replace(/^🔒\s*/, '')
+    .trim() || '-';
+}
+
+function cleanEventDescription(description: string | null | undefined): string | null {
+  if (!description) return null;
+  const cleaned = description
+    .split('\n')
+    .filter(line => !line.match(/^Dokal\s+break_id=/i) && !line.match(/^(Recurring|One-time)\s+break$/i))
+    .join('\n')
+    .trim();
+  return cleaned || null;
+}
 
 interface CalendarEventSidebarProps {
   item: CalendarItem | null;
@@ -50,6 +76,7 @@ export default function CalendarEventSidebar({
 
   // Tous les hooks doivent être appelés inconditionnellement (règles des hooks React)
   const deleteExternalMutation = useDeleteExternalEvent();
+  const deleteBreakMutation = useDeleteBreak();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const updateMutation = useUpdateCrmAppointment();
   const updateOrgMutation = useUpdateCrmOrganizationAppointment();
@@ -88,6 +115,27 @@ export default function CalendarEventSidebar({
   // ─── External event sidebar ──────────────────────────────────────────
   if (item.kind === 'external_event') {
     const evt = item.data;
+    const linkedBreakId = extractBreakId(evt.description);
+    const canDelete = evt.source === 'manual' || !!linkedBreakId;
+    const displayTitle = cleanEventTitle(evt.title);
+    const displayDescription = cleanEventDescription(evt.description);
+
+    const handleDelete = async () => {
+      try {
+        if (linkedBreakId) {
+          await deleteBreakMutation.mutateAsync(linkedBreakId);
+        } else {
+          await deleteExternalMutation.mutateAsync(evt.id);
+        }
+        setDeleteDialogOpen(false);
+        onClose();
+        toast.success(tc('saveSuccess'));
+      } catch (err: unknown) {
+        const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+        toast.error(tc('saveErrorTitle'), msg);
+      }
+    };
+
     return (
       <div className="fixed inset-y-0 right-0 z-30 w-full sm:w-[380px] bg-card border-l border-border shadow-xl flex flex-col transition-transform duration-200">
         {/* Header */}
@@ -110,9 +158,9 @@ export default function CalendarEventSidebar({
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {/* Title */}
           <div>
-            <p className="text-lg font-semibold text-foreground">{evt.title || '-'}</p>
-            {evt.description && (
-              <p className="text-sm text-muted-foreground mt-1 whitespace-pre-line">{evt.description}</p>
+            <p className="text-lg font-semibold text-foreground">{displayTitle}</p>
+            {displayDescription && (
+              <p className="text-sm text-muted-foreground mt-1 whitespace-pre-line">{displayDescription}</p>
             )}
           </div>
 
@@ -133,7 +181,11 @@ export default function CalendarEventSidebar({
               <Globe className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">{t('source')}</p>
-                <Badge className="bg-blue-100 text-blue-700">{t('googleEvent')}</Badge>
+                {linkedBreakId ? (
+                  <Badge className="bg-amber-100 text-amber-700">Dokal</Badge>
+                ) : (
+                  <Badge className="bg-blue-100 text-blue-700">{t('googleEvent')}</Badge>
+                )}
               </div>
             </div>
 
@@ -174,12 +226,13 @@ export default function CalendarEventSidebar({
           <Button variant="outline" size="sm" onClick={onClose}>
             {tc('close')}
           </Button>
-          {evt.source === 'manual' && (
+          {canDelete && (
             <Button
               variant="destructive"
               size="sm"
               onClick={() => setDeleteDialogOpen(true)}
             >
+              <Trash2 className="h-3.5 w-3.5" />
               {t('deleteExternalEvent')}
             </Button>
           )}
@@ -198,18 +251,8 @@ export default function CalendarEventSidebar({
               </Button>
               <Button
                 variant="destructive"
-                loading={deleteExternalMutation.isPending}
-                onClick={async () => {
-                  try {
-                    await deleteExternalMutation.mutateAsync(evt.id);
-                    setDeleteDialogOpen(false);
-                    onClose();
-                    toast.success(tc('saveSuccess'));
-                  } catch (err: unknown) {
-                    const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
-                    toast.error(tc('saveErrorTitle'), msg);
-                  }
-                }}
+                loading={deleteBreakMutation.isPending || deleteExternalMutation.isPending}
+                onClick={handleDelete}
               >
                 {t('deleteExternalEvent')}
               </Button>
