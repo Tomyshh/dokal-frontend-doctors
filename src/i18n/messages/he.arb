@@ -237,7 +237,12 @@
     "team": "צוות",
     "calendar": "יומן",
     "settingsAvatarRequired": "תמונת פרופיל נדרשת",
-    "profileIncompleteBadge": "פרופיל לא מלא"
+    "profileIncompleteBadge": "פרופיל לא מלא",
+    "general": "כללי",
+    "profile": "פרופיל",
+    "appearance": "מראה",
+    "businessCard": "כרטיס ביקור",
+    "googleCalendar": "Google Calendar"
   },
   "dashboard": {
     "title": "לוח בקרה",

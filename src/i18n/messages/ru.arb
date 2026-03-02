@@ -237,7 +237,12 @@
     "team": "Команда",
     "calendar": "Календарь",
     "settingsAvatarRequired": "Требуется фото профиля",
-    "profileIncompleteBadge": "Профиль не заполнен"
+    "profileIncompleteBadge": "Профиль не заполнен",
+    "general": "Общие",
+    "profile": "Профиль",
+    "appearance": "Оформление",
+    "businessCard": "Визитка",
+    "googleCalendar": "Google Calendar"
   },
   "dashboard": {
     "title": "Панель управления",

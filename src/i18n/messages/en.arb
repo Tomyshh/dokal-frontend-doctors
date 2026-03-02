@@ -213,8 +213,7 @@
     "downgradeDeactivatedLabel": "Members to be deactivated:",
     "planChanged": "Plan changed",
     "planUpgraded": "Plan upgraded successfully",
-    "planDowngraded": "Plan downgraded successfully"
-    ,
+    "planDowngraded": "Plan downgraded successfully",
     "retry": "Retry",
     "backToProfile": "Back to profile"
   },
@@ -238,7 +237,12 @@
     "team": "Team",
     "calendar": "Calendar",
     "settingsAvatarRequired": "Profile photo required",
-    "profileIncompleteBadge": "Profile incomplete"
+    "profileIncompleteBadge": "Profile incomplete",
+    "general": "General",
+    "profile": "Profile",
+    "appearance": "Appearance",
+    "businessCard": "Business Card",
+    "googleCalendar": "Google Calendar"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1106,4 +1110,3 @@
     "saveErrorBackendNotReady": "This feature requires a backend update. Please ask the backend team to implement the questionnaire-config endpoints."
   }
 }
-

@@ -237,7 +237,12 @@
     "team": "Équipe",
     "calendar": "Calendrier",
     "settingsAvatarRequired": "Photo de profil requise",
-    "profileIncompleteBadge": "Profil incomplet"
+    "profileIncompleteBadge": "Profil incomplet",
+    "general": "Général",
+    "profile": "Profil",
+    "appearance": "Apparence",
+    "businessCard": "Carte de visite",
+    "googleCalendar": "Google Calendar"
   },
   "dashboard": {
     "title": "Tableau de bord",
