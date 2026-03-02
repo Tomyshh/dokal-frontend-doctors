@@ -199,7 +199,9 @@
     "noSubscriptionSubtitle": "ሁሉንም የDokal ባህሪያት ለመድረስ ይመዝገቡ።",
     "payNow": "ይክፈሉ እና ያንቁ",
     "cancelledAccessUntil": "ምዝገባዎ ተሰርዟል። መዳረሻ እስከ {date}።",
-    "trialDays": "{days} ቀናት"
+    "trialDays": "{days} ቀናት",
+    "notVisibleTitle": "መገለጫዎ ከአሁን በኋላ አይታይም",
+    "notVisibleDescription": "ታካሚዎች ሊያገኙዎት ወይም ቀጠሮ ሊያስይዙ አይችሉም። እንደገና ለመታየት ምዝገባዎን ያንቁ።"
   },
   "nav": {
     "menu": "Menu",

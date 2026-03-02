@@ -199,7 +199,9 @@
     "noSubscriptionSubtitle": "Abonnez-vous pour accéder à toutes les fonctionnalités de Dokal.",
     "payNow": "Payer et activer",
     "cancelledAccessUntil": "Votre abonnement a été annulé. Accès jusqu'au {date}.",
-    "trialDays": "{days} jours"
+    "trialDays": "{days} jours",
+    "notVisibleTitle": "Votre profil n'est plus visible",
+    "notVisibleDescription": "Les patients ne peuvent plus vous trouver ni prendre rendez-vous. Activez votre abonnement pour réapparaître."
   },
   "nav": {
     "menu": "Menu",

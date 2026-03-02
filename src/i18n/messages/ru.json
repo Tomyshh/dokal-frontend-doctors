@@ -198,7 +198,9 @@
     "noSubscriptionSubtitle": "Оформите подписку для доступа ко всем функциям Dokal.",
     "payNow": "Оплатить и активировать",
     "cancelledAccessUntil": "Ваша подписка отменена. Доступ до {date}.",
-    "trialDays": "{days} дней"
+    "trialDays": "{days} дней",
+    "notVisibleTitle": "Ваш профиль больше не виден",
+    "notVisibleDescription": "Пациенты не могут найти вас или записаться на приём. Активируйте подписку, чтобы снова появиться."
   },
   "nav": {
     "menu": "Меню",

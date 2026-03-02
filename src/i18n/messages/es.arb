@@ -226,7 +226,9 @@
     "noSubscriptionSubtitle": "Suscríbete para acceder a todas las funciones de Dokal.",
     "payNow": "Pagar y activar",
     "cancelledAccessUntil": "Tu suscripción ha sido cancelada. Acceso hasta {date}.",
-    "trialDays": "{days} días"
+    "trialDays": "{days} días",
+    "notVisibleTitle": "Tu perfil ya no es visible",
+    "notVisibleDescription": "Los pacientes ya no pueden encontrarte ni reservar citas. Activa tu suscripción para volver a aparecer."
   },
   "nav": {
     "menu": "Menu",

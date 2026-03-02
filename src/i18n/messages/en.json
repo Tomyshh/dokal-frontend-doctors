@@ -199,7 +199,9 @@
     "noSubscriptionSubtitle": "Subscribe to access all Dokal features.",
     "payNow": "Pay & activate",
     "cancelledAccessUntil": "Your subscription has been cancelled. Access until {date}.",
-    "trialDays": "{days} days"
+    "trialDays": "{days} days",
+    "notVisibleTitle": "Your profile is no longer visible",
+    "notVisibleDescription": "Patients can no longer find you or book appointments. Activate your subscription to reappear."
   },
   "nav": {
     "menu": "Menu",

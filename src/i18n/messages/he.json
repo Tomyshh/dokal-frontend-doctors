@@ -199,7 +199,9 @@
     "noSubscriptionSubtitle": "הירשמו למנוי כדי לגשת לכל התכונות של Dokal.",
     "payNow": "שלמו והפעילו",
     "cancelledAccessUntil": "המנוי שלכם בוטל. גישה עד {date}.",
-    "trialDays": "{days} ימים"
+    "trialDays": "{days} ימים",
+    "notVisibleTitle": "הפרופיל שלך כבר לא מוצג",
+    "notVisibleDescription": "מטופלים לא יכולים למצוא אותך או לקבוע תורים. הפעילו את המנוי כדי להופיע מחדש."
   },
   "nav": {
     "menu": "תפריט",

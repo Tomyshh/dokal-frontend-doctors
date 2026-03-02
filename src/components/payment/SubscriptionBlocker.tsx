@@ -6,7 +6,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import PaymeHostedFields from './PaymeHostedFields';
 import { subscribe, BASE_PRICES_ILS, type PlanType } from '@/lib/subscription';
 import { Button } from '@/components/ui/Button';
-import { Lock, AlertTriangle, CreditCard, CheckCircle2, Crown, Users, Building2, Globe, Clock, Sparkles, LogOut } from 'lucide-react';
+import { Lock, AlertTriangle, CreditCard, CheckCircle2, Crown, Users, Building2, Globe, Clock, Sparkles, LogOut, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SubscriptionStatus } from '@/lib/subscription';
 import Image from 'next/image';
@@ -189,9 +189,13 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
 
         {/* Content */}
         <div className="px-6 py-6 space-y-5">
-          {/* Logo */}
-          <div className="flex items-center justify-center">
-            <Image src="/logo/Dokal.png" alt="Dokal" width={100} height={32} />
+          {/* Visibility warning */}
+          <div className="rounded-xl bg-red-50 border border-red-200 p-4 flex items-start gap-3">
+            <EyeOff className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-red-800">{t('notVisibleTitle')}</p>
+              <p className="text-xs text-red-600 mt-0.5">{t('notVisibleDescription')}</p>
+            </div>
           </div>
 
           {/* Plan selector */}
