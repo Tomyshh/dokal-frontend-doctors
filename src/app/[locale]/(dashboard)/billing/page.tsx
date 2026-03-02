@@ -10,15 +10,14 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
-import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Avatar } from '@/components/ui/Avatar';
 import {
-  addCard,
   changePlan,
   downgradePlan,
   listCards,
   deleteCard,
+  subscribe,
   BASE_PRICES_ILS,
   SEAT_PRICES_ILS,
   calculateMonthlyPriceILS,
@@ -41,30 +40,12 @@ import {
   Receipt,
   Users,
 } from 'lucide-react';
+import PaymeHostedFields from '@/components/payment/PaymeHostedFields';
 
 function maskCardLabel(card: SubscriptionCard) {
   const brand = card.brand ? card.brand.toUpperCase() : 'CARD';
   const last4 = card.last4 ? `•••• ${card.last4}` : card.buyer_card_mask || '';
   return `${brand} ${last4}`.trim();
-}
-
-function normalizeCardNumber(value: string) {
-  return value.replace(/\s+/g, '').replace(/-/g, '');
-}
-
-function isValidExpiry(value: string) {
-  // MM/YY
-  const v = value.trim();
-  if (!/^\d{2}\/\d{2}$/.test(v)) return false;
-  const [mm, yy] = v.split('/').map(Number);
-  if (mm < 1 || mm > 12) return false;
-  // Rough "not in the past" check
-  const now = new Date();
-  const currentYY = Number(String(now.getFullYear()).slice(-2));
-  const currentMM = now.getMonth() + 1;
-  if (yy < currentYY) return false;
-  if (yy === currentYY && mm < currentMM) return false;
-  return true;
 }
 
 export default function BillingPage() {
@@ -195,14 +176,6 @@ export default function BillingPage() {
     retry: 1,
   });
 
-  const addCardMutation = useMutation({
-    mutationFn: addCard,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription', 'cards'] });
-      refreshSubscription();
-    },
-  });
-
   const deleteCardMutation = useMutation({
     mutationFn: deleteCard,
     onSuccess: () => {
@@ -212,68 +185,29 @@ export default function BillingPage() {
   });
 
   const [addCardOpen, setAddCardOpen] = useState(false);
+  const [addCardLoading, setAddCardLoading] = useState(false);
+  const [cardFormError, setCardFormError] = useState('');
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; card: SubscriptionCard | null }>({
     open: false,
     card: null,
   });
 
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvv, setCvv] = useState('');
-  const [cardHolder, setCardHolder] = useState('');
-  const [zipCode, setZipCode] = useState('');
-  const [cardFormError, setCardFormError] = useState('');
-
-  const resetCardForm = () => {
-    setCardNumber('');
-    setExpiry('');
-    setCvv('');
-    setCardHolder('');
-    setZipCode('');
+  const handleCardTokenized = async (buyerKey: string) => {
     setCardFormError('');
-  };
-
-  const canSubmitCard = useMemo(() => {
-    const number = normalizeCardNumber(cardNumber);
-    if (number.length < 12) return false;
-    if (!isValidExpiry(expiry)) return false;
-    if (cvv.trim().length < 3) return false;
-    return true;
-  }, [cardNumber, expiry, cvv]);
-
-  const handleAddCard = async () => {
-    setCardFormError('');
-    const number = normalizeCardNumber(cardNumber);
-
-    if (number.length < 12) {
-      setCardFormError(t('cardFormInvalid'));
-      return;
-    }
-    if (!isValidExpiry(expiry)) {
-      setCardFormError(t('cardFormInvalid'));
-      return;
-    }
-    if (cvv.trim().length < 3) {
-      setCardFormError(t('cardFormInvalid'));
-      return;
-    }
-
+    setAddCardLoading(true);
     try {
-      await addCardMutation.mutateAsync({
-        cardNumber: number,
-        expirationDate: expiry.trim(),
-        cvv: cvv.trim(),
-        cardHolder: cardHolder.trim() || undefined,
-        buyerZipCode: zipCode.trim() || undefined,
-      });
+      await subscribe({ buyer_key: buyerKey, plan: currentPlan } as any);
+      queryClient.invalidateQueries({ queryKey: ['subscription', 'cards'] });
+      await refreshSubscription();
       setAddCardOpen(false);
-      resetCardForm();
       toast.success(t('cardAddedSuccess'));
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
       const msg = axiosError?.response?.data?.error?.message || tsub('genericError');
       setCardFormError(msg);
       toast.error(tc('saveErrorTitle'), msg);
+    } finally {
+      setAddCardLoading(false);
     }
   };
 
@@ -565,67 +499,33 @@ export default function BillingPage() {
         </div>
       </div>
 
-      {/* ─── Add card dialog ─────────────────────────────────────────── */}
+      {/* ─── Add card dialog (Hosted Fields) ─────────────────────────── */}
       <Dialog
         open={addCardOpen}
-        onClose={() => { setAddCardOpen(false); resetCardForm(); }}
+        onClose={() => { setAddCardOpen(false); setCardFormError(''); }}
         title={t('addPaymentMethod')}
         className="max-w-xl"
       >
         <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="sm:col-span-2">
-              <Input
-                label={tsub('cardNumber')}
-                value={cardNumber}
-                onChange={(e) => setCardNumber(e.target.value)}
-                placeholder="0000 0000 0000 0000"
-              />
-            </div>
-            <Input
-              label={tsub('expiry')}
-              value={expiry}
-              onChange={(e) => setExpiry(e.target.value)}
-              placeholder="MM/YY"
-            />
-            <Input
-              label={tsub('cvv')}
-              value={cvv}
-              onChange={(e) => setCvv(e.target.value)}
-              placeholder="123"
-            />
-            <div className="sm:col-span-2">
-              <Input
-                label={tsub('cardHolderLabel')}
-                value={cardHolder}
-                onChange={(e) => setCardHolder(e.target.value)}
-                placeholder={tsub('cardHolderPlaceholder')}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Input
-                label={tsub('zipCode')}
-                value={zipCode}
-                onChange={(e) => setZipCode(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <p className="text-xs text-muted-foreground">{tsub('securityNotice')}</p>
-
           {cardFormError && (
             <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               {cardFormError}
             </div>
           )}
 
-          <div className="flex gap-3 justify-end pt-2">
-            <Button variant="ghost" onClick={() => { setAddCardOpen(false); resetCardForm(); }}>
+          <PaymeHostedFields
+            onTokenized={handleCardTokenized}
+            onError={setCardFormError}
+            loading={addCardLoading}
+            submitLabel={tc('confirm')}
+            buyerFirstName={profile?.first_name ?? ''}
+            buyerLastName={profile?.last_name ?? ''}
+            buyerEmail={profile?.email ?? ''}
+          />
+
+          <div className="flex justify-end pt-2">
+            <Button variant="ghost" onClick={() => { setAddCardOpen(false); setCardFormError(''); }}>
               {tc('cancel')}
-            </Button>
-            <Button onClick={handleAddCard} loading={addCardMutation.isPending} disabled={!canSubmitCard}>
-              <CheckCircle2 className="h-4 w-4" />
-              {tc('confirm')}
             </Button>
           </div>
         </div>

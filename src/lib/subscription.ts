@@ -134,6 +134,11 @@ export interface AddCardResponse {
   card: SubscriptionCard;
 }
 
+export interface SubscribeWithBuyerKeyPayload {
+  buyer_key: string;
+  plan?: PlanType;
+}
+
 export interface SubscribeWithCardIdPayload {
   cardId: string;
   plan?: PlanType;
@@ -148,7 +153,7 @@ export interface SubscribeWithNewCardPayload {
   plan?: PlanType;
 }
 
-export type SubscribePayload = SubscribeWithCardIdPayload | SubscribeWithNewCardPayload;
+export type SubscribePayload = SubscribeWithBuyerKeyPayload | SubscribeWithCardIdPayload | SubscribeWithNewCardPayload;
 
 export interface SubscribeResponse {
   salePaymeId: string;

@@ -188,7 +188,18 @@
     "planDowngraded": "המסלול שונמך בהצלחה"
     ,
     "retry": "נסה שוב",
-    "backToProfile": "חזרה לפרופיל"
+    "backToProfile": "חזרה לפרופיל",
+    "trialExpiredTitle": "תקופת הניסיון החינמית הסתיימה",
+    "trialExpiredSubtitle": "הזינו את פרטי התשלום שלכם כדי להמשיך להשתמש ב-Dokal.",
+    "expiredTitle": "המנוי שלכם פג תוקף",
+    "expiredSubtitle": "חדשו את המנוי כדי לגשת ללוח הבקרה שלכם.",
+    "pastDueTitle": "תשלום באיחור",
+    "pastDueSubtitle": "התשלום האחרון שלכם נכשל. עדכנו את פרטי התשלום כדי לשחזר את הגישה.",
+    "noSubscriptionTitle": "נדרש מנוי",
+    "noSubscriptionSubtitle": "הירשמו למנוי כדי לגשת לכל התכונות של Dokal.",
+    "payNow": "שלמו והפעילו",
+    "cancelledAccessUntil": "המנוי שלכם בוטל. גישה עד {date}.",
+    "trialDays": "{days} ימים"
   },
   "nav": {
     "menu": "תפריט",

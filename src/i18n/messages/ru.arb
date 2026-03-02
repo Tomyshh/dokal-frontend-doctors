@@ -215,7 +215,18 @@
     "planUpgraded": "Тариф успешно повышен",
     "planDowngraded": "Тариф успешно понижен",
     "retry": "Повторить",
-    "backToProfile": "Вернуться к профилю"
+    "backToProfile": "Вернуться к профилю",
+    "trialExpiredTitle": "Ваш бесплатный пробный период закончился",
+    "trialExpiredSubtitle": "Введите данные оплаты, чтобы продолжить использование Dokal.",
+    "expiredTitle": "Ваша подписка истекла",
+    "expiredSubtitle": "Обновите подписку для доступа к панели управления.",
+    "pastDueTitle": "Просроченный платёж",
+    "pastDueSubtitle": "Последний платёж не прошёл. Обновите данные оплаты для восстановления доступа.",
+    "noSubscriptionTitle": "Требуется подписка",
+    "noSubscriptionSubtitle": "Оформите подписку для доступа ко всем функциям Dokal.",
+    "payNow": "Оплатить и активировать",
+    "cancelledAccessUntil": "Ваша подписка отменена. Доступ до {date}.",
+    "trialDays": "{days} дней"
   },
   "nav": {
     "menu": "Меню",

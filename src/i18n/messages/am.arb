@@ -215,7 +215,18 @@
     "planUpgraded": "Plan upgraded successfully",
     "planDowngraded": "Plan downgraded successfully",
     "retry": "Retry",
-    "backToProfile": "Back to profile"
+    "backToProfile": "Back to profile",
+    "trialExpiredTitle": "ነፃ ሙከራ ጊዜዎ አልቋል",
+    "trialExpiredSubtitle": "Dokalን መጠቀም ለመቀጠል የክፍያ መረጃዎን ያስገቡ።",
+    "expiredTitle": "ምዝገባዎ አልቋል",
+    "expiredSubtitle": "ዳሽቦርድዎን ለመድረስ ምዝገባዎን ያድሱ።",
+    "pastDueTitle": "ክፍያ ያለፈበት",
+    "pastDueSubtitle": "የመጨረሻ ክፍያዎ አልተሳካም። ተደራሽነትን ለማስመለስ የክፍያ መረጃዎን ያድሱ።",
+    "noSubscriptionTitle": "ምዝገባ ያስፈልጋል",
+    "noSubscriptionSubtitle": "ሁሉንም የDokal ባህሪያት ለመድረስ ይመዝገቡ።",
+    "payNow": "ይክፈሉ እና ያንቁ",
+    "cancelledAccessUntil": "ምዝገባዎ ተሰርዟል። መዳረሻ እስከ {date}።",
+    "trialDays": "{days} ቀናት"
   },
   "nav": {
     "menu": "Menu",

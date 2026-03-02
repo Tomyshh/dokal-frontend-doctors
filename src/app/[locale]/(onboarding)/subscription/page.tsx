@@ -3,11 +3,9 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
-import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import Image from 'next/image';
 import {
-  addCard,
   subscribe,
   startTrial,
   BASE_PRICES_ILS,
@@ -30,66 +28,13 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
-import type { Practitioner } from '@/types';
 import { useRouter } from 'next/navigation';
 import { Spinner } from '@/components/ui/Spinner';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
 import { getMyPractitionerOrNull, isPractitionerOnboardingReady } from '@/lib/practitioner';
-
-type CardForm = {
-  cardNumber: string;
-  expirationDate: string;
-  cvv: string;
-  cardHolder: string;
-  buyerZipCode: string;
-};
+import PaymeHostedFields from '@/components/payment/PaymeHostedFields';
 
 type View = 'plan-picker' | 'card-form';
-
-function formatCardNumber(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 16);
-  return digits.replace(/(.{4})/g, '$1 ').trim();
-}
-
-function formatExpiry(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 4);
-  if (digits.length >= 3) {
-    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-  }
-  return digits;
-}
-
-function getCardBrand(number: string): string | null {
-  const digits = number.replace(/\D/g, '');
-  if (digits.startsWith('4')) return 'visa';
-  if (/^5[1-5]/.test(digits) || /^2[2-7]/.test(digits)) return 'mastercard';
-  if (digits.startsWith('37') || digits.startsWith('34')) return 'amex';
-  if (digits.startsWith('6')) return 'discover';
-  return null;
-}
-
-function CardBrandIcon({ brand }: { brand: string | null }) {
-  if (brand === 'visa') {
-    return (
-      <span className="text-xs font-bold text-blue-600 tracking-wide">VISA</span>
-    );
-  }
-  if (brand === 'mastercard') {
-    return (
-      <div className="flex -space-x-1.5">
-        <div className="w-4 h-4 rounded-full bg-red-500 opacity-80" />
-        <div className="w-4 h-4 rounded-full bg-yellow-500 opacity-80" />
-      </div>
-    );
-  }
-  if (brand === 'amex') {
-    return (
-      <span className="text-xs font-bold text-blue-800 tracking-wide">AMEX</span>
-    );
-  }
-  return <CreditCard className="h-4 w-4 text-gray-400" />;
-}
 
 // ─── Plan Card ────────────────────────────────────────────────────────
 
@@ -261,25 +206,12 @@ export default function OnboardingSubscriptionPage() {
 
   const [view, setView] = useState<View>('plan-picker');
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('individual');
-  const [form, setForm] = useState<CardForm>({
-    cardNumber: '',
-    expirationDate: '',
-    cvv: '',
-    cardHolder: '',
-    buyerZipCode: '',
-  });
   const [loading, setLoading] = useState(false);
   const [trialLoading, setTrialLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState<'subscribed' | 'trial' | null>(null);
 
-  const cardBrand = getCardBrand(form.cardNumber);
-  const rawCardNumber = form.cardNumber.replace(/\s/g, '');
   const selectedPrice = BASE_PRICES_ILS[selectedPlan];
-
-  const userName = profile
-    ? `Dr ${profile.last_name || ''}`
-    : '';
 
   // Enforce profile completion before plan selection
   const {
@@ -314,37 +246,6 @@ export default function OnboardingSubscriptionPage() {
     // In that case, we should NOT redirect back to the form (loop); we should wait + retry.
     return !!profile && !loadingPractitioner && !practitionerError && needsProfileCompletion;
   }, [profile, loadingPractitioner, practitionerError, needsProfileCompletion]);
-
-  // All hooks must run before any conditional return (React rules of hooks)
-  const handleChange = useCallback(
-    <K extends keyof CardForm>(key: K, value: CardForm[K]) => {
-      setForm((prev) => ({ ...prev, [key]: value }));
-      setError('');
-    },
-    []
-  );
-
-  const handleCardNumberChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      handleChange('cardNumber', formatCardNumber(e.target.value));
-    },
-    [handleChange]
-  );
-
-  const handleExpiryChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      handleChange('expirationDate', formatExpiry(e.target.value));
-    },
-    [handleChange]
-  );
-
-  const handleCvvChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
-      handleChange('cvv', digits);
-    },
-    [handleChange]
-  );
 
   useEffect(() => {
     if (!profileMissingButMayPropagate) {
@@ -444,11 +345,6 @@ export default function OnboardingSubscriptionPage() {
     );
   }
 
-  const isFormValid =
-    rawCardNumber.length >= 13 &&
-    form.expirationDate.length === 5 &&
-    form.cvv.length >= 3;
-
   const hardRedirectToDashboard = () => {
     window.location.assign(`/${locale}`);
   };
@@ -475,25 +371,15 @@ export default function OnboardingSubscriptionPage() {
     }
   };
 
-  // ─── Subscribe with card ───────────────────────────────────────────
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isFormValid) return;
+  // ─── Subscribe with buyer_key from PayMe Hosted Fields ──────────────
+  const handleTokenized = async (buyerKey: string) => {
     if (actionInFlightRef.current) return;
     actionInFlightRef.current = true;
 
     setError('');
     setLoading(true);
     try {
-      const cardResponse = await addCard({
-        cardNumber: rawCardNumber,
-        expirationDate: form.expirationDate,
-        cvv: form.cvv,
-        cardHolder: form.cardHolder || undefined,
-        buyerZipCode: form.buyerZipCode || undefined,
-      });
-
-      await subscribe({ cardId: cardResponse.card.id, plan: selectedPlan });
+      await subscribe({ buyer_key: buyerKey, plan: selectedPlan } as any);
       await refreshSubscription();
       setSuccess('subscribed');
       setTimeout(hardRedirectToDashboard, 2000);
@@ -674,7 +560,7 @@ export default function OnboardingSubscriptionPage() {
     );
   }
 
-  // ─── Card Form View ────────────────────────────────────────────────
+  // ─── Card Form View (Hosted Fields) ────────────────────────────────
   return (
     <div className="max-w-2xl mx-auto">
       {/* Back to plan picker */}
@@ -703,132 +589,18 @@ export default function OnboardingSubscriptionPage() {
         </div>
       )}
 
-      {/* Card form */}
-      <form onSubmit={handleSubscribe} className="space-y-5">
-        {/* Visual card preview */}
-        <div
-          className={cn(
-            'rounded-2xl p-5 h-44 flex flex-col justify-between transition-all duration-500',
-            'bg-gradient-to-br shadow-lg',
-            cardBrand === 'visa'
-              ? 'from-blue-600 to-blue-800'
-              : cardBrand === 'mastercard'
-                ? 'from-gray-800 to-gray-950'
-                : cardBrand === 'amex'
-                  ? 'from-indigo-600 to-indigo-900'
-                  : 'from-gray-700 to-gray-900'
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <div className="bg-white/20 rounded-lg px-2 py-1">
-              <CardBrandIcon brand={cardBrand} />
-            </div>
-            <Lock className="h-4 w-4 text-white/40" />
-          </div>
-          <div>
-            <div className="text-white/90 font-mono text-lg tracking-[0.2em]">
-              {rawCardNumber
-                ? rawCardNumber.replace(/(.{4})/g, '$1  ').trim()
-                : '••••  ••••  ••••  ••••'}
-            </div>
-          </div>
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="text-[10px] text-white/40 uppercase tracking-wider">
-                {t('cardHolderLabel')}
-              </div>
-              <div className="text-white/80 text-sm font-medium truncate max-w-[180px]">
-                {form.cardHolder || userName || t('cardHolderPlaceholder')}
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-[10px] text-white/40 uppercase tracking-wider">
-                {t('expiryLabel')}
-              </div>
-              <div className="text-white/80 text-sm font-mono">
-                {form.expirationDate || 'MM/YY'}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Card number */}
-        <Input
-          id="cardNumber"
-          label={t('cardNumber')}
-          placeholder="4580 0000 0000 1234"
-          value={form.cardNumber}
-          onChange={handleCardNumberChange}
-          required
-          autoComplete="cc-number"
-          inputMode="numeric"
-        />
-
-        {/* Expiry + CVV */}
-        <div className="grid grid-cols-2 gap-4">
-          <Input
-            id="expirationDate"
-            label={t('expiry')}
-            placeholder="MM/YY"
-            value={form.expirationDate}
-            onChange={handleExpiryChange}
-            required
-            autoComplete="cc-exp"
-            inputMode="numeric"
-            maxLength={5}
-          />
-          <Input
-            id="cvv"
-            type="password"
-            label={t('cvv')}
-            placeholder="•••"
-            value={form.cvv}
-            onChange={handleCvvChange}
-            required
-            autoComplete="cc-csc"
-            inputMode="numeric"
-            maxLength={4}
-          />
-        </div>
-
-        {/* Card holder */}
-        <Input
-          id="cardHolder"
-          label={t('cardHolder')}
-          placeholder={t('cardHolderPlaceholder')}
-          value={form.cardHolder}
-          onChange={(e) => handleChange('cardHolder', e.target.value)}
-          autoComplete="cc-name"
-        />
-
-        {/* Zip code (optional) */}
-        <Input
-          id="buyerZipCode"
-          label={t('zipCode')}
-          placeholder="6100000"
-          value={form.buyerZipCode}
-          onChange={(e) => handleChange('buyerZipCode', e.target.value)}
-          autoComplete="postal-code"
-          inputMode="numeric"
-        />
-
-        {/* Security notice */}
-        <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 rounded-xl px-4 py-3">
-          <Shield className="h-4 w-4 shrink-0 text-gray-400" />
-          <span>{t('securityNotice')}</span>
-        </div>
-
-        {/* Submit */}
-        <Button
-          type="submit"
-          className="w-full rounded-full h-12 text-base"
-          loading={loading}
-          disabled={!isFormValid}
-        >
-          <Lock className="h-4 w-4" />
-          {t('subscribe')} — {selectedPrice} ₪/{t('perMonth')}
-        </Button>
-      </form>
+      {/* PayMe Hosted Fields */}
+      <PaymeHostedFields
+        onTokenized={handleTokenized}
+        onError={setError}
+        loading={loading}
+        submitLabel={t('subscribe')}
+        priceLabel={`${selectedPrice} ₪/${t('perMonth')}`}
+        buyerFirstName={profile?.first_name ?? ''}
+        buyerLastName={profile?.last_name ?? ''}
+        buyerEmail={profile?.email ?? ''}
+        amountILS={selectedPrice}
+      />
     </div>
   );
 }

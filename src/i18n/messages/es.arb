@@ -215,7 +215,18 @@
     "planUpgraded": "Plan upgraded successfully",
     "planDowngraded": "Plan downgraded successfully",
     "retry": "Reintentar",
-    "backToProfile": "Volver al perfil"
+    "backToProfile": "Volver al perfil",
+    "trialExpiredTitle": "Tu período de prueba ha terminado",
+    "trialExpiredSubtitle": "Ingresa tus datos de pago para seguir usando Dokal.",
+    "expiredTitle": "Tu suscripción ha expirado",
+    "expiredSubtitle": "Renueva tu suscripción para acceder a tu panel.",
+    "pastDueTitle": "Pago atrasado",
+    "pastDueSubtitle": "Tu último pago falló. Actualiza tus datos de pago para restaurar el acceso.",
+    "noSubscriptionTitle": "Suscripción requerida",
+    "noSubscriptionSubtitle": "Suscríbete para acceder a todas las funciones de Dokal.",
+    "payNow": "Pagar y activar",
+    "cancelledAccessUntil": "Tu suscripción ha sido cancelada. Acceso hasta {date}.",
+    "trialDays": "{days} días"
   },
   "nav": {
     "menu": "Menu",

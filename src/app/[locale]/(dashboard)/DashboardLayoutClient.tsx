@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, type ReactNode } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import SocketProvider from '@/providers/SocketProvider';
 import Sidebar from '@/components/layout/Sidebar';
@@ -17,6 +17,7 @@ import { Link } from '@/i18n/routing';
 import { useQuery } from '@tanstack/react-query';
 import { getMyPractitionerOrNull } from '@/lib/practitioner';
 import { PractitionerProfileProvider } from '@/providers/PractitionerProfileProvider';
+import SubscriptionBlocker from '@/components/payment/SubscriptionBlocker';
 
 export default function DashboardLayoutClient({ children }: { children: ReactNode }) {
   const { loading, user, profile, subscriptionStatus, signOut } = useAuth();
@@ -28,10 +29,29 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
-  const hasAccess =
-    subscriptionStatus?.hasSubscription ||
-    subscriptionStatus?.subscription?.status === 'trialing' ||
-    (subscriptionStatus?.trial?.isActive && (subscriptionStatus.trial.daysRemaining ?? 0) > 0);
+  const hasAccess = useMemo(() => {
+    if (!subscriptionStatus) return false;
+
+    // Active subscription
+    if (subscriptionStatus.hasSubscription) return true;
+
+    // Active trial
+    if (
+      subscriptionStatus.subscription?.status === 'trialing' &&
+      subscriptionStatus.trial?.isActive &&
+      (subscriptionStatus.trial.daysRemaining ?? 0) > 0
+    ) return true;
+
+    // Cancelled but still within paid period
+    if (
+      subscriptionStatus.subscription?.status === 'cancelled' &&
+      subscriptionStatus.subscription.current_period_end
+    ) {
+      return new Date(subscriptionStatus.subscription.current_period_end) > new Date();
+    }
+
+    return false;
+  }, [subscriptionStatus]);
 
   const {
     data: practitioner,
@@ -60,15 +80,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
       return;
     }
 
-    if (subscriptionStatus === null) return;
-
-    if (
-      (profile.role === 'practitioner' || profile.role === 'admin') &&
-      !hasAccess
-    ) {
-      router.replace(`/${locale}/subscription`);
-    }
-  }, [loading, user, profile, subscriptionStatus, hasAccess, router, locale]);
+  }, [loading, user, profile, router, locale]);
 
   // ─── Loading state ─────────────────────────────────────────────────
   if (loading) {
@@ -108,10 +120,19 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
     );
   }
 
+  // ─── Subscription blocker (full-screen paywall) ─────────────────────
+  const showBlocker =
+    !loading &&
+    profile &&
+    (profile.role === 'practitioner' || profile.role === 'admin') &&
+    subscriptionStatus !== null &&
+    !hasAccess;
+
+  if (showBlocker) {
+    return <SubscriptionBlocker subscriptionStatus={subscriptionStatus} />;
+  }
+
   // ─── Role check ────────────────────────────────────────────────────
-  // Only block if we have a profile AND the role is wrong.
-  // If profile is null (backend unreachable / still propagating), let them through
-  // so they don't get stuck. The middleware already verified the session.
   if (profile && profile.role !== 'practitioner' && profile.role !== 'secretary' && profile.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-6">
@@ -128,12 +149,18 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
     );
   }
 
-  // ─── Trial banner ──────────────────────────────────────────────────
+  // ─── Trial / Cancelled banner ──────────────────────────────────────
   const showTrialBanner =
     !bannerDismissed &&
     subscriptionStatus?.trial?.isActive &&
     !subscriptionStatus.hasSubscription &&
     (subscriptionStatus.trial.daysRemaining ?? 0) <= 14;
+
+  const showCancelledBanner =
+    !bannerDismissed &&
+    subscriptionStatus?.subscription?.status === 'cancelled' &&
+    subscriptionStatus.subscription.current_period_end &&
+    new Date(subscriptionStatus.subscription.current_period_end) > new Date();
 
   return (
     <PractitionerProfileProvider
@@ -151,6 +178,37 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
                 <Clock className="h-4 w-4 shrink-0" />
                 <span className="font-medium">
                   {ts('trialBannerText', { days: subscriptionStatus.trial.daysRemaining })}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/subscription"
+                  className="text-xs font-semibold bg-white/20 hover:bg-white/30 rounded-full px-4 py-1.5 transition-colors"
+                >
+                  {ts('subscribeNowTitle')}
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setBannerDismissed(true)}
+                  className="text-white/60 hover:text-white transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Cancelled subscription banner */}
+        {showCancelledBanner && subscriptionStatus?.subscription?.current_period_end && (
+          <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2.5 text-sm">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 shrink-0" />
+                <span className="font-medium">
+                  {ts('cancelledAccessUntil', {
+                    date: new Date(subscriptionStatus.subscription.current_period_end).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' }),
+                  })}
                 </span>
               </div>
               <div className="flex items-center gap-3">
