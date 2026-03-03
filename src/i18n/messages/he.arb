@@ -279,6 +279,13 @@
     "patientOverview": "סקירת מטופלים",
     "upcomingAppointments": "פגישות קרובות",
     "doctorSchedule": "לוח הזמנים של היום",
+    "calendar": "יומן",
+    "viewAppointment": "צפה בפגישה",
+    "noAppointmentsDay": "אין פגישות ביום זה",
+    "appointmentsCount": "{count} פגישות",
+    "goodMorning": "בוקר טוב",
+    "goodAfternoon": "צהריים טובים",
+    "goodEvening": "ערב טוב",
     "patients": "מטופלים",
     "appointments": "פגישות"
   },

@@ -266,6 +266,13 @@
     "patientOverview": "Patient overview",
     "upcomingAppointments": "Upcoming appointments",
     "doctorSchedule": "Today's schedule",
+    "calendar": "Calendar",
+    "viewAppointment": "View appointment",
+    "noAppointmentsDay": "No appointments this day",
+    "appointmentsCount": "{count} appointment(s)",
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
     "patients": "patients",
     "appointments": "appointments"
   },

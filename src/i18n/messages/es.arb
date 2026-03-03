@@ -279,6 +279,13 @@
     "patientOverview": "Patient overview",
     "upcomingAppointments": "Upcoming appointments",
     "doctorSchedule": "Today's schedule",
+    "calendar": "Calendario",
+    "viewAppointment": "Ver la cita",
+    "noAppointmentsDay": "Sin citas este día",
+    "appointmentsCount": "{count} cita(s)",
+    "goodMorning": "Buenos días",
+    "goodAfternoon": "Buenas tardes",
+    "goodEvening": "Buenas noches",
     "patients": "patients",
     "appointments": "appointments"
   },

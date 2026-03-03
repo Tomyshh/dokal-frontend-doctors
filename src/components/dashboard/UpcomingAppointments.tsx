@@ -11,12 +11,13 @@ import { formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { CalendarX } from 'lucide-react';
 import { format } from 'date-fns';
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
 
 export default function UpcomingAppointments() {
   const t = useTranslations('dashboard');
   const ta = useTranslations('appointments');
   const locale = useLocale();
+  const router = useRouter();
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const { data, isLoading } = useCrmAppointments({ date: today, limit: 6 });
@@ -25,7 +26,7 @@ export default function UpcomingAppointments() {
     <Card>
       <CardHeader>
         <CardTitle>{t('upcomingAppointments')}</CardTitle>
-        <Link href="/appointments" className="text-sm text-primary hover:underline">
+        <Link href="/appointments" className="text-sm text-primary hover:underline font-medium">
           {ta('title')}
         </Link>
       </CardHeader>
@@ -57,7 +58,11 @@ export default function UpcomingAppointments() {
             </thead>
             <tbody className="divide-y divide-border/50">
               {data.appointments.map((appt) => (
-                <tr key={appt.id} className="hover:bg-muted/30 transition-colors">
+                <tr
+                  key={appt.id}
+                  onClick={() => router.push(`/appointments/${appt.id}`)}
+                  className="hover:bg-primary-50/50 cursor-pointer transition-colors duration-150 group"
+                >
                   <td className="py-3 px-2">
                     <div className="flex items-center gap-3">
                       <Avatar
@@ -67,16 +72,16 @@ export default function UpcomingAppointments() {
                         size="sm"
                       />
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                           {appt.profiles?.first_name} {appt.profiles?.last_name}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-2 text-sm text-gray-600">
+                  <td className="py-3 px-2 text-sm text-muted-foreground">
                     {formatTime(appt.start_time)} - {formatTime(appt.end_time)}
                   </td>
-                  <td className="py-3 px-2 text-sm text-gray-600">
+                  <td className="py-3 px-2 text-sm text-muted-foreground">
                     {locale === 'he'
                       ? appt.appointment_reasons?.label_he || appt.appointment_reasons?.label || '-'
                       : locale === 'fr'

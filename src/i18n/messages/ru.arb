@@ -279,6 +279,13 @@
     "patientOverview": "Сводка по пациентам",
     "upcomingAppointments": "Ближайшие приёмы",
     "doctorSchedule": "Расписание на сегодня",
+    "calendar": "Календарь",
+    "viewAppointment": "Посмотреть приём",
+    "noAppointmentsDay": "Нет приёмов в этот день",
+    "appointmentsCount": "{count} приём(ов)",
+    "goodMorning": "Доброе утро",
+    "goodAfternoon": "Добрый день",
+    "goodEvening": "Добрый вечер",
     "patients": "пациентов",
     "appointments": "приём(ов)"
   },

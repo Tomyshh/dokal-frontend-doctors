@@ -266,6 +266,13 @@
     "patientOverview": "Aperçu patients",
     "upcomingAppointments": "Prochains rendez-vous",
     "doctorSchedule": "Planning du jour",
+    "calendar": "Calendrier",
+    "viewAppointment": "Voir le rendez-vous",
+    "noAppointmentsDay": "Aucun rendez-vous ce jour",
+    "appointmentsCount": "{count} rendez-vous",
+    "goodMorning": "Bonjour",
+    "goodAfternoon": "Bon après-midi",
+    "goodEvening": "Bonsoir",
     "patients": "patients",
     "appointments": "rendez-vous"
   },
