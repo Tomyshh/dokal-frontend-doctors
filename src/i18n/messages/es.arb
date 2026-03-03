@@ -116,7 +116,17 @@
     "completeProfileTitle": "Complete your profile",
     "completeProfileSubtitle": "These details are required to activate your account.",
     "completeProfileMissingFields": "Por favor, complete los siguientes campos:",
-    "saveAndContinue": "Save and continue"
+    "saveAndContinue": "Save and continue",
+    "wizardStepPersonal": "Personal",
+    "wizardStepProfessional": "Profesional",
+    "wizardStepLocation": "Ubicación",
+    "wizardStepPersonalDesc": "Cuéntanos quién eres",
+    "wizardStepProfessionalDesc": "Tus credenciales médicas",
+    "wizardStepLocationDesc": "¿Dónde está tu consultorio?",
+    "wizardNext": "Siguiente",
+    "wizardBack": "Atrás",
+    "wizardStepOf": "Paso {current} de {total}",
+    "cityInvalid": "Por favor, selecciona una ciudad."
   },
   "subscription": {
     "onboardingTitle": "Welcome to Dokal!",

@@ -15,32 +15,95 @@ import { PhoneInputIL, normalizeIsraelPhoneToE164 } from '@/components/auth/Phon
 import { Spinner } from '@/components/ui/Spinner';
 import { filterOnboardingOptionalMissingFields, getMyPractitionerOrNull, isPractitionerCompleteFromBackend, unwrapPractitioner } from '@/lib/practitioner';
 import { isRtl } from '@/i18n/config';
-import { LogOut } from 'lucide-react';
+import { LogOut, ArrowLeft, ArrowRight, User, Stethoscope, MapPin, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type FormState = {
   firstName: string;
   lastName: string;
   phone: string;
   city: string;
-  /** Specialty UUID from the backend */
   specialtyId: string;
   licenseNumber: string;
   specializationLicense: string;
   addressLine: string;
   zipCode: string;
-  /** Coordonnées géographiques (requises pour la recherche par distance) */
   latitude: number | null;
   longitude: number | null;
 };
 
+const TOTAL_STEPS = 3;
+
 function hasStreetNumber(address: string) {
   const s = (address || '').trim();
   if (!s) return false;
-  // Accept both "12 Rothschild" and "Rothschild 12"
   if (/^\d+\s+\S+/.test(s)) return true;
   if (/\S+\s+\d+[a-zA-Z]?$/.test(s)) return true;
-  // Fallback: any digit somewhere (covers some formatted addresses)
   return /\d/.test(s);
+}
+
+function StepIndicator({
+  currentStep,
+  steps,
+  rtl,
+}: {
+  currentStep: number;
+  steps: { label: string; icon: React.ReactNode }[];
+  rtl: boolean;
+}) {
+  const orderedSteps = rtl ? [...steps].reverse() : steps;
+  const getOriginalIndex = (displayIdx: number) =>
+    rtl ? steps.length - 1 - displayIdx : displayIdx;
+
+  return (
+    <div className="flex items-center justify-center w-full mb-8">
+      {orderedSteps.map((step, displayIdx) => {
+        const stepIdx = getOriginalIndex(displayIdx);
+        const isActive = stepIdx === currentStep;
+        const isCompleted = stepIdx < currentStep;
+        const isLast = displayIdx === orderedSteps.length - 1;
+
+        return (
+          <div key={stepIdx} className="flex items-center">
+            <div className="flex flex-col items-center">
+              <div
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300',
+                  isCompleted && 'bg-primary text-white shadow-md shadow-primary/30',
+                  isActive && 'bg-primary text-white shadow-lg shadow-primary/40 ring-4 ring-primary/20 scale-110',
+                  !isActive && !isCompleted && 'bg-muted text-muted-foreground',
+                )}
+              >
+                {isCompleted ? <Check className="h-4 w-4" /> : step.icon}
+              </div>
+              <span
+                className={cn(
+                  'text-xs mt-2 font-medium transition-colors duration-300 whitespace-nowrap',
+                  isActive && 'text-primary',
+                  isCompleted && 'text-primary/70',
+                  !isActive && !isCompleted && 'text-muted-foreground',
+                )}
+              >
+                {step.label}
+              </span>
+            </div>
+            {!isLast && (
+              <div className="flex items-center mx-3 mb-6">
+                <div
+                  className={cn(
+                    'h-0.5 w-12 sm:w-20 transition-all duration-500',
+                    (rtl ? getOriginalIndex(displayIdx + 1) < currentStep : stepIdx < currentStep)
+                      ? 'bg-primary'
+                      : 'bg-border',
+                  )}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function CompleteProfilePage() {
@@ -49,9 +112,9 @@ export default function CompleteProfilePage() {
   const rtl = isRtl(locale);
   const { user, profile, loading: authLoading, refreshUserData, signOut, loggingOut } = useAuth();
 
-  // Google user_metadata may contain given_name, family_name, full_name, avatar_url
   const googleMeta = user?.user_metadata;
 
+  const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>({
     firstName: profile?.first_name || googleMeta?.given_name || '',
     lastName: profile?.last_name || googleMeta?.family_name || '',
@@ -70,12 +133,10 @@ export default function CompleteProfilePage() {
   const [loading, setLoading] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [addressFieldError, setAddressFieldError] = useState<string | undefined>(undefined);
+  const [stepErrors, setStepErrors] = useState<Record<number, string>>({});
 
-  // Resolve email and user ID: prefer backend profile, fall back to Supabase user (Google OAuth)
   const resolvedEmail = profile?.email || user?.email || null;
 
-  // If profile or user arrives after initial render, prefill basic fields once.
-  // For Google OAuth users, user_metadata may have given_name/family_name before the backend profile exists.
   useEffect(() => {
     if (!profile && !user) return;
     setForm((prev) => ({
@@ -87,7 +148,6 @@ export default function CompleteProfilePage() {
     }));
   }, [profile, user, googleMeta]);
 
-  // If a practitioner already exists (e.g. after a redirect back), prefill missing fields from it.
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -118,7 +178,7 @@ export default function CompleteProfilePage() {
           specializationLicense: prev.specializationLicense || data.specialization_license || '',
         }));
       } catch {
-        // ignore (practitioner may not exist yet)
+        // practitioner may not exist yet
       }
     })();
     return () => {
@@ -156,68 +216,109 @@ export default function CompleteProfilePage() {
   const handleChange = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     setError('');
+    setStepErrors((prev) => ({ ...prev, [step]: '' }));
   };
 
-  const waitForPractitionerReady = useCallback(
-    async () => {
-      const started = Date.now();
-      let delay = 400;
-      // Some backends use async jobs / eventual consistency — allow a bit more time.
-      while (Date.now() - started < 25_000) {
-        try {
-          const data = await getMyPractitionerOrNull();
-          if (isPractitionerCompleteFromBackend(data)) return true;
-        } catch {
-          // not ready yet
-        }
-        await new Promise((r) => setTimeout(r, delay));
-        delay = Math.min(Math.round(delay * 1.7), 2000);
-      }
-      return false;
-    },
-    [],
+  const wizardSteps = useMemo(
+    () => [
+      { label: t('wizardStepPersonal'), icon: <User className="h-4 w-4" /> },
+      { label: t('wizardStepProfessional'), icon: <Stethoscope className="h-4 w-4" /> },
+      { label: t('wizardStepLocation'), icon: <MapPin className="h-4 w-4" /> },
+    ],
+    [t],
   );
+
+  const validateStep = (s: number): boolean => {
+    switch (s) {
+      case 0: {
+        if (!form.firstName.trim() || !form.lastName.trim()) {
+          setStepErrors((prev) => ({ ...prev, [s]: t('completeProfileMissingFields') }));
+          return false;
+        }
+        if (!form.phone.trim()) {
+          setStepErrors((prev) => ({ ...prev, [s]: t('phoneInvalid') }));
+          return false;
+        }
+        if (phoneInvalid) {
+          setStepErrors((prev) => ({ ...prev, [s]: t('phoneInvalid') }));
+          return false;
+        }
+        return true;
+      }
+      case 1: {
+        if (!form.specialtyId) {
+          setStepErrors((prev) => ({ ...prev, [s]: t('specialtyInvalid') }));
+          return false;
+        }
+        if (!form.licenseNumber.trim()) {
+          setStepErrors((prev) => ({ ...prev, [s]: t('licenseNumberInvalid') }));
+          return false;
+        }
+        if (licenseNumberInvalid) {
+          setStepErrors((prev) => ({ ...prev, [s]: t('licenseNumberInvalid') }));
+          return false;
+        }
+        if (specializationLicenseInvalid) {
+          setStepErrors((prev) => ({ ...prev, [s]: t('specializationLicenseInvalid') }));
+          return false;
+        }
+        return true;
+      }
+      case 2: {
+        if (!form.addressLine.trim() || form.latitude == null || form.longitude == null) {
+          setStepErrors((prev) => ({ ...prev, [s]: t('addressSelectHint') }));
+          return false;
+        }
+        if (!hasStreetNumber(form.addressLine)) {
+          setStepErrors((prev) => ({ ...prev, [s]: t('addressMustIncludeStreetNumber') }));
+          return false;
+        }
+        if (!form.city.trim()) {
+          setStepErrors((prev) => ({ ...prev, [s]: t('cityInvalid') }));
+          return false;
+        }
+        return true;
+      }
+      default:
+        return true;
+    }
+  };
+
+  const goNext = () => {
+    if (!validateStep(step)) return;
+    setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
+  };
+
+  const goBack = () => {
+    setStepErrors({});
+    setStep((s) => Math.max(s - 1, 0));
+  };
+
+  const waitForPractitionerReady = useCallback(async () => {
+    const started = Date.now();
+    let delay = 400;
+    while (Date.now() - started < 25_000) {
+      try {
+        const data = await getMyPractitionerOrNull();
+        if (isPractitionerCompleteFromBackend(data)) return true;
+      } catch {
+        // not ready yet
+      }
+      await new Promise((r) => setTimeout(r, delay));
+      delay = Math.min(Math.round(delay * 1.7), 2000);
+    }
+    return false;
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setAddressFieldError(undefined);
 
+    if (!validateStep(step)) return;
+
     if (!resolvedEmail) {
       setError(t('registrationBackendError'));
-      return;
-    }
-
-    if (phoneInvalid) {
-      setError(t('phoneInvalid'));
-      return;
-    }
-    if (licenseNumberInvalid) {
-      setError(t('licenseNumberInvalid'));
-      return;
-    }
-    if (specializationLicenseInvalid) {
-      setError(t('specializationLicenseInvalid'));
-      return;
-    }
-
-    if (!form.specialtyId) {
-      setError(t('specialtyInvalid'));
-      return;
-    }
-
-    if (!form.city.trim()) {
-      setError(t('cityInvalid'));
-      return;
-    }
-
-    if (!form.addressLine.trim() || form.latitude == null || form.longitude == null) {
-      setError(t('addressSelectHint'));
-      return;
-    }
-
-    if (!hasStreetNumber(form.addressLine)) {
-      setError(t('addressMustIncludeStreetNumber'));
       return;
     }
 
@@ -244,24 +345,19 @@ export default function CompleteProfilePage() {
       const { data: raw } = await api.post<unknown>('/practitioners/register', payload);
       const registered = unwrapPractitioner(raw) as Practitioner;
 
-      // Refresh in-memory auth profile/subscription (role changes, etc.)
       await refreshUserData();
 
-      // If the 201 response already has complete data, navigate immediately.
       if (registered?.is_complete === true) {
         window.location.assign(`/${locale}/subscription`);
         return;
       }
 
-      // Otherwise poll /practitioners/me (with cache-busting) for up to 15s.
       const ready = await waitForPractitionerReady();
       if (ready) {
         window.location.assign(`/${locale}/subscription`);
         return;
       }
 
-      // Timeout: go to subscription anyway — it will show "Finalisation..." and retry.
-      // Never block the user with "registration failed" after a successful 201.
       window.location.assign(`/${locale}/subscription`);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: { message?: string } } } };
@@ -271,6 +367,11 @@ export default function CompleteProfilePage() {
     }
   };
 
+  const currentStepError = stepErrors[step] || '';
+
+  const ArrowNext = rtl ? ArrowLeft : ArrowRight;
+  const ArrowPrev = rtl ? ArrowRight : ArrowLeft;
+
   return (
     <div className="h-full flex flex-col">
       {authLoading && !user ? (
@@ -279,7 +380,7 @@ export default function CompleteProfilePage() {
         </div>
       ) : null}
 
-      <div className={rtl ? 'flex items-center justify-end mb-4' : 'flex items-center justify-start mb-4'}>
+      <div className={rtl ? 'flex items-center justify-end mb-2' : 'flex items-center justify-start mb-2'}>
         <Button
           type="button"
           variant="ghost"
@@ -303,12 +404,14 @@ export default function CompleteProfilePage() {
         </Button>
       </div>
 
-      <div className="text-center mb-6">
+      <div className="text-center mb-2">
         <h1 className="text-2xl font-bold text-gray-900">{t('completeProfileTitle')}</h1>
-        <p className="text-sm text-muted-foreground mt-2">{t('completeProfileSubtitle')}</p>
+        <p className="text-sm text-muted-foreground mt-1">{t('completeProfileSubtitle')}</p>
       </div>
 
-      {missingFields.length > 0 && (
+      <StepIndicator currentStep={step} steps={wizardSteps} rtl={rtl} />
+
+      {missingFields.length > 0 && step === 0 && (
         <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800 mb-4">
           <p className="font-medium mb-1">{t('completeProfileMissingFields')}</p>
           <p className="text-amber-700">
@@ -317,35 +420,51 @@ export default function CompleteProfilePage() {
         </div>
       )}
 
-      {error && (
-        <div className="rounded-2xl bg-red-50 border border-red-200 p-3 text-sm text-red-700 mb-4">
-          {error}
+      {(error || currentStepError) && (
+        <div className="rounded-2xl bg-red-50 border border-red-200 p-3 text-sm text-red-700 mb-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          {error || currentStepError}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
-        <div className="flex-1 min-h-0 overflow-y-auto pr-1">
-          <div className="space-y-3 pb-4">
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                id="firstName"
-                label={t('firstName')}
-                value={form.firstName}
-                onChange={(e) => handleChange('firstName', e.target.value)}
-                required
-                autoComplete="given-name"
-              />
-              <Input
-                id="lastName"
-                label={t('lastName')}
-                value={form.lastName}
-                onChange={(e) => handleChange('lastName', e.target.value)}
-                required
-                autoComplete="family-name"
-              />
-            </div>
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {/* Step 0: Personal Information */}
+          <div
+            className={cn(
+              'transition-all duration-300',
+              step === 0 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
+            )}
+          >
+            <div className="space-y-5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-foreground">{t('wizardStepPersonal')}</h2>
+                  <p className="text-xs text-muted-foreground">{t('wizardStepPersonalDesc')}</p>
+                </div>
+              </div>
 
-            <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  id="firstName"
+                  label={t('firstName')}
+                  value={form.firstName}
+                  onChange={(e) => handleChange('firstName', e.target.value)}
+                  required
+                  autoComplete="given-name"
+                />
+                <Input
+                  id="lastName"
+                  label={t('lastName')}
+                  value={form.lastName}
+                  onChange={(e) => handleChange('lastName', e.target.value)}
+                  required
+                  autoComplete="family-name"
+                />
+              </div>
+
               <PhoneInputIL
                 id="phone"
                 label={t('phone')}
@@ -354,14 +473,27 @@ export default function CompleteProfilePage() {
                 required
                 error={phoneInvalid ? t('phoneInvalid') : undefined}
               />
-              <CityCombobox
-                id="city"
-                label={t('city')}
-                value={form.city}
-                onChange={(v) => handleChange('city', v)}
-                required
-                placeholder={t('city')}
-              />
+            </div>
+          </div>
+
+          {/* Step 1: Professional Information */}
+          <div
+            className={cn(
+              'transition-all duration-300',
+              step === 1 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
+            )}
+          >
+            <div className="space-y-5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Stethoscope className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-foreground">{t('wizardStepProfessional')}</h2>
+                  <p className="text-xs text-muted-foreground">{t('wizardStepProfessionalDesc')}</p>
+                </div>
+              </div>
+
               <SpecialtyCombobox
                 id="specialty"
                 label={t('specialty')}
@@ -370,85 +502,150 @@ export default function CompleteProfilePage() {
                 required
                 placeholder={t('specialty')}
               />
-            </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                id="licenseNumber"
-                label={t('licenseNumber')}
-                value={form.licenseNumber}
-                onChange={(e) => handleChange('licenseNumber', e.target.value.replace(/\D/g, '').slice(0, 6))}
-                required
-                inputMode="numeric"
-                maxLength={6}
-                error={licenseNumberInvalid ? t('licenseNumberInvalid') : undefined}
-              />
-              <Input
-                id="specializationLicense"
-                label={t('specializationLicense')}
-                value={form.specializationLicense}
-                onChange={(e) => handleChange('specializationLicense', e.target.value.replace(/\D/g, '').slice(0, 6))}
-                inputMode="numeric"
-                maxLength={6}
-                error={specializationLicenseInvalid ? t('specializationLicenseInvalid') : undefined}
-              />
-            </div>
-
-            <div className="grid grid-cols-4 gap-3">
-              <div className="col-span-3">
-                <AddressAutocomplete
-                  id="addressLine"
-                  label={t('addressLine')}
-                  value={form.addressLine}
-                  placeholder={t('addressSelectHint')}
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  id="licenseNumber"
+                  label={t('licenseNumber')}
+                  value={form.licenseNumber}
+                  onChange={(e) => handleChange('licenseNumber', e.target.value.replace(/\D/g, '').slice(0, 6))}
                   required
-                  error={addressFieldError}
-                  onChange={(data: AddressResult) => {
-                    const nextAddress = (data.address_line || '').trim();
-                    if (!hasStreetNumber(nextAddress)) {
-                      setAddressFieldError(t('addressMustIncludeStreetNumber'));
-                      return;
-                    }
-                    if (!data.city?.trim()) {
-                      setAddressFieldError(t('addressMustIncludeCity'));
-                      return;
-                    }
-
-                    setAddressFieldError(undefined);
-                    handleChange('addressLine', nextAddress);
-                    handleChange('zipCode', data.zip_code);
-                    handleChange('city', data.city);
-                    setForm((prev) => ({
-                      ...prev,
-                      latitude: data.latitude,
-                      longitude: data.longitude,
-                    }));
-                  }}
-                  onClear={() => {
-                    setAddressFieldError(undefined);
-                    handleChange('addressLine', '');
-                    handleChange('zipCode', '');
-                    handleChange('city', '');
-                    setForm((prev) => ({ ...prev, latitude: null, longitude: null }));
-                  }}
+                  inputMode="numeric"
+                  maxLength={6}
+                  error={licenseNumberInvalid ? t('licenseNumberInvalid') : undefined}
+                />
+                <Input
+                  id="specializationLicense"
+                  label={t('specializationLicense')}
+                  value={form.specializationLicense}
+                  onChange={(e) => handleChange('specializationLicense', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  inputMode="numeric"
+                  maxLength={6}
+                  error={specializationLicenseInvalid ? t('specializationLicenseInvalid') : undefined}
                 />
               </div>
-              <Input
-                id="zipCode"
-                label={t('zipCode')}
-                value={form.zipCode}
-                onChange={(e) => handleChange('zipCode', e.target.value)}
-                autoComplete="postal-code"
-                placeholder={t('zipCode')}
+            </div>
+          </div>
+
+          {/* Step 2: Office Location */}
+          <div
+            className={cn(
+              'transition-all duration-300',
+              step === 2 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
+            )}
+          >
+            <div className="space-y-5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <MapPin className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-foreground">{t('wizardStepLocation')}</h2>
+                  <p className="text-xs text-muted-foreground">{t('wizardStepLocationDesc')}</p>
+                </div>
+              </div>
+
+              <AddressAutocomplete
+                id="addressLine"
+                label={t('addressLine')}
+                value={form.addressLine}
+                placeholder={t('addressSelectHint')}
+                required
+                error={addressFieldError}
+                onChange={(data: AddressResult) => {
+                  const nextAddress = (data.address_line || '').trim();
+                  if (!hasStreetNumber(nextAddress)) {
+                    setAddressFieldError(t('addressMustIncludeStreetNumber'));
+                    return;
+                  }
+                  if (!data.city?.trim()) {
+                    setAddressFieldError(t('addressMustIncludeCity'));
+                    return;
+                  }
+
+                  setAddressFieldError(undefined);
+                  handleChange('addressLine', nextAddress);
+                  handleChange('zipCode', data.zip_code);
+                  handleChange('city', data.city);
+                  setForm((prev) => ({
+                    ...prev,
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                  }));
+                }}
+                onClear={() => {
+                  setAddressFieldError(undefined);
+                  handleChange('addressLine', '');
+                  handleChange('zipCode', '');
+                  handleChange('city', '');
+                  setForm((prev) => ({ ...prev, latitude: null, longitude: null }));
+                }}
               />
+
+              <div className="grid grid-cols-2 gap-4">
+                <CityCombobox
+                  id="city"
+                  label={t('city')}
+                  value={form.city}
+                  onChange={(v) => handleChange('city', v)}
+                  required
+                  placeholder={t('city')}
+                />
+                <Input
+                  id="zipCode"
+                  label={t('zipCode')}
+                  value={form.zipCode}
+                  onChange={(e) => handleChange('zipCode', e.target.value)}
+                  autoComplete="postal-code"
+                  placeholder={t('zipCode')}
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="pt-4 border-t border-border/60 bg-white/95 backdrop-blur-sm">
-          <Button type="submit" className="w-full rounded-full h-11" loading={loading}>
-            {t('saveAndContinue')}
-          </Button>
+        {/* Navigation buttons */}
+        <div className="pt-5 mt-auto">
+          <div className="flex items-center gap-3">
+            {step > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full h-11 px-6"
+                onClick={goBack}
+              >
+                <ArrowPrev className="h-4 w-4" />
+                <span>{t('wizardBack')}</span>
+              </Button>
+            )}
+
+            <div className="flex-1" />
+
+            {step < TOTAL_STEPS - 1 ? (
+              <Button
+                type="button"
+                className="rounded-full h-11 px-8"
+                onClick={goNext}
+              >
+                <span>{t('wizardNext')}</span>
+                <ArrowNext className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                className="rounded-full h-11 px-8"
+                loading={loading}
+              >
+                <span>{t('saveAndContinue')}</span>
+                <ArrowNext className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Step counter */}
+          <p className="text-center text-xs text-muted-foreground mt-3">
+            {t('wizardStepOf', { current: step + 1, total: TOTAL_STEPS })}
+          </p>
         </div>
       </form>
     </div>

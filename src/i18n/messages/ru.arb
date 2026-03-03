@@ -116,7 +116,17 @@
     "completeProfileTitle": "Заполните профиль",
     "completeProfileSubtitle": "Эти данные необходимы для активации аккаунта.",
     "completeProfileMissingFields": "Пожалуйста, заполните следующие поля:",
-    "saveAndContinue": "Сохранить и продолжить"
+    "saveAndContinue": "Сохранить и продолжить",
+    "wizardStepPersonal": "Личные данные",
+    "wizardStepProfessional": "Профессиональные",
+    "wizardStepLocation": "Местоположение",
+    "wizardStepPersonalDesc": "Расскажите нам о себе",
+    "wizardStepProfessionalDesc": "Ваши медицинские квалификации",
+    "wizardStepLocationDesc": "Где находится ваш кабинет?",
+    "wizardNext": "Далее",
+    "wizardBack": "Назад",
+    "wizardStepOf": "Шаг {current} из {total}",
+    "cityInvalid": "Пожалуйста, выберите город."
   },
   "subscription": {
     "onboardingTitle": "Добро пожаловать в Dokal!",

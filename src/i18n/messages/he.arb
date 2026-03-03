@@ -116,7 +116,17 @@
     "completeProfileTitle": "השלמת פרופיל",
     "completeProfileSubtitle": "הפרטים האלה נדרשים כדי להפעיל את החשבון.",
     "completeProfileMissingFields": "נא למלא את השדות הבאים:",
-    "saveAndContinue": "שמירה והמשך"
+    "saveAndContinue": "שמירה והמשך",
+    "wizardStepPersonal": "אישי",
+    "wizardStepProfessional": "מקצועי",
+    "wizardStepLocation": "מיקום",
+    "wizardStepPersonalDesc": "ספרו לנו מי אתם",
+    "wizardStepProfessionalDesc": "ההסמכות הרפואיות שלכם",
+    "wizardStepLocationDesc": "היכן נמצאת המרפאה שלכם?",
+    "wizardNext": "הבא",
+    "wizardBack": "חזרה",
+    "wizardStepOf": "שלב {current} מתוך {total}",
+    "cityInvalid": "נא לבחור עיר."
   },
   "subscription": {
     "onboardingTitle": "!ברוכים הבאים ל-Dokal",
