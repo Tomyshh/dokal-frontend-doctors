@@ -20,22 +20,16 @@ export default function OnboardingLayoutClient({ children }: { children: ReactNo
   }
 
   return (
-    <div
-      className={
-        isCompleteProfile
-          ? 'h-[100dvh] overflow-hidden bg-gradient-to-br from-primary-900 via-primary to-primary-700'
-          : 'min-h-screen bg-gradient-to-br from-primary-900 via-primary to-primary-700'
-      }
-    >
+    <div className="min-h-screen bg-gradient-to-br from-primary-900 via-primary to-primary-700">
       <div
         className={
           isCompleteProfile
-            ? 'max-w-5xl mx-auto px-6 py-6 lg:py-8 h-full flex flex-col'
+            ? 'max-w-2xl mx-auto px-6 py-8 lg:py-12'
             : 'max-w-5xl mx-auto px-6 py-10 lg:py-16'
         }
       >
         {/* Logo */}
-        <div className={isCompleteProfile ? 'flex justify-center mb-6' : 'flex justify-center mb-10'}>
+        <div className={isCompleteProfile ? 'flex justify-center mb-8' : 'flex justify-center mb-10'}>
           <Image
             src="/branding/fulllogo_transparent_nobuffer.png"
             alt="Dokal"
@@ -50,7 +44,7 @@ export default function OnboardingLayoutClient({ children }: { children: ReactNo
         <div
           className={
             isCompleteProfile
-              ? 'bg-white rounded-3xl shadow-2xl shadow-black/20 border border-white/20 p-6 sm:p-8 flex-1 overflow-hidden'
+              ? 'bg-white rounded-3xl shadow-2xl shadow-black/20 border border-white/20 p-6 sm:p-8'
               : 'bg-white rounded-3xl shadow-2xl shadow-black/20 border border-white/20 p-8 sm:p-10'
           }
         >

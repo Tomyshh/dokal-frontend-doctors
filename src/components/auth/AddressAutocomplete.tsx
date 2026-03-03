@@ -39,10 +39,17 @@ export function AddressAutocomplete({
   const t = useTranslations('common');
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(value || '');
   const [predictions, setPredictions] = useState<Array<{ place_id: string; description: string }>>([]);
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectingRef = useRef(false);
+
+  useEffect(() => {
+    if (!selectingRef.current) {
+      setInputValue(value || '');
+    }
+  }, [value]);
 
   const fetchPredictions = useCallback(async (input: string) => {
     if (input.trim().length < 3) {
@@ -77,15 +84,19 @@ export function AddressAutocomplete({
 
   const handleFocus = useCallback(() => {
     setOpen(true);
-    setInputValue(value || '');
-  }, [value]);
+  }, []);
 
   const handleBlur = useCallback(() => {
-    setTimeout(() => setOpen(false), 150);
+    setTimeout(() => {
+      if (!selectingRef.current) {
+        setOpen(false);
+      }
+    }, 200);
   }, []);
 
   const handleSelect = useCallback(
     async (placeId: string) => {
+      selectingRef.current = true;
       setLoading(true);
       try {
         const res = await fetch(
@@ -110,6 +121,9 @@ export function AddressAutocomplete({
         setPredictions([]);
       } finally {
         setLoading(false);
+        setTimeout(() => {
+          selectingRef.current = false;
+        }, 100);
       }
     },
     [onChange]
@@ -120,8 +134,6 @@ export function AddressAutocomplete({
     setPredictions([]);
     onClear?.();
   }, [onClear]);
-
-  const displayValue = open ? inputValue : value;
 
   return (
     <div className="space-y-1.5 relative">
@@ -137,7 +149,7 @@ export function AddressAutocomplete({
           ref={inputRef}
           type="text"
           id={id}
-          value={displayValue}
+          value={inputValue}
           onChange={(e) => {
             const v = e.target.value;
             setInputValue(v);

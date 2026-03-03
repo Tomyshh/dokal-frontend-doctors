@@ -373,7 +373,7 @@ export default function CompleteProfilePage() {
   const ArrowPrev = rtl ? ArrowRight : ArrowLeft;
 
   return (
-    <div className="h-full flex flex-col">
+    <div>
       {authLoading && !user ? (
         <div className="flex items-center justify-center py-10">
           <Spinner size="lg" />
@@ -426,186 +426,184 @@ export default function CompleteProfilePage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
-        <div className="flex-1 min-h-0 overflow-y-auto">
-          {/* Step 0: Personal Information */}
-          <div
-            className={cn(
-              'transition-all duration-300',
-              step === 0 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
-            )}
-          >
-            <div className="space-y-5">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <User className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-base font-semibold text-foreground">{t('wizardStepPersonal')}</h2>
-                  <p className="text-xs text-muted-foreground">{t('wizardStepPersonalDesc')}</p>
-                </div>
+      <form onSubmit={handleSubmit}>
+        {/* Step 0: Personal Information */}
+        <div
+          className={cn(
+            'transition-all duration-300',
+            step === 0 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
+          )}
+        >
+          <div className="space-y-5">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <User className="h-4 w-4 text-primary" />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  id="firstName"
-                  label={t('firstName')}
-                  value={form.firstName}
-                  onChange={(e) => handleChange('firstName', e.target.value)}
-                  required
-                  autoComplete="given-name"
-                />
-                <Input
-                  id="lastName"
-                  label={t('lastName')}
-                  value={form.lastName}
-                  onChange={(e) => handleChange('lastName', e.target.value)}
-                  required
-                  autoComplete="family-name"
-                />
+              <div>
+                <h2 className="text-base font-semibold text-foreground">{t('wizardStepPersonal')}</h2>
+                <p className="text-xs text-muted-foreground">{t('wizardStepPersonalDesc')}</p>
               </div>
+            </div>
 
-              <PhoneInputIL
-                id="phone"
-                label={t('phone')}
-                value={form.phone}
-                onChange={(v) => handleChange('phone', v)}
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                id="firstName"
+                label={t('firstName')}
+                value={form.firstName}
+                onChange={(e) => handleChange('firstName', e.target.value)}
                 required
-                error={phoneInvalid ? t('phoneInvalid') : undefined}
+                autoComplete="given-name"
+              />
+              <Input
+                id="lastName"
+                label={t('lastName')}
+                value={form.lastName}
+                onChange={(e) => handleChange('lastName', e.target.value)}
+                required
+                autoComplete="family-name"
+              />
+            </div>
+
+            <PhoneInputIL
+              id="phone"
+              label={t('phone')}
+              value={form.phone}
+              onChange={(v) => handleChange('phone', v)}
+              required
+              error={phoneInvalid ? t('phoneInvalid') : undefined}
+            />
+          </div>
+        </div>
+
+        {/* Step 1: Professional Information */}
+        <div
+          className={cn(
+            'transition-all duration-300',
+            step === 1 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
+          )}
+        >
+          <div className="space-y-5">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Stethoscope className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-foreground">{t('wizardStepProfessional')}</h2>
+                <p className="text-xs text-muted-foreground">{t('wizardStepProfessionalDesc')}</p>
+              </div>
+            </div>
+
+            <SpecialtyCombobox
+              id="specialty"
+              label={t('specialty')}
+              value={form.specialtyId}
+              onChange={(v) => handleChange('specialtyId', v)}
+              required
+              placeholder={t('specialty')}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                id="licenseNumber"
+                label={t('licenseNumber')}
+                value={form.licenseNumber}
+                onChange={(e) => handleChange('licenseNumber', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                required
+                inputMode="numeric"
+                maxLength={6}
+                error={licenseNumberInvalid ? t('licenseNumberInvalid') : undefined}
+              />
+              <Input
+                id="specializationLicense"
+                label={t('specializationLicense')}
+                value={form.specializationLicense}
+                onChange={(e) => handleChange('specializationLicense', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                inputMode="numeric"
+                maxLength={6}
+                error={specializationLicenseInvalid ? t('specializationLicenseInvalid') : undefined}
               />
             </div>
           </div>
+        </div>
 
-          {/* Step 1: Professional Information */}
-          <div
-            className={cn(
-              'transition-all duration-300',
-              step === 1 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
-            )}
-          >
-            <div className="space-y-5">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Stethoscope className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-base font-semibold text-foreground">{t('wizardStepProfessional')}</h2>
-                  <p className="text-xs text-muted-foreground">{t('wizardStepProfessionalDesc')}</p>
-                </div>
+        {/* Step 2: Office Location */}
+        <div
+          className={cn(
+            'transition-all duration-300',
+            step === 2 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
+          )}
+        >
+          <div className="space-y-5">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <MapPin className="h-4 w-4 text-primary" />
               </div>
-
-              <SpecialtyCombobox
-                id="specialty"
-                label={t('specialty')}
-                value={form.specialtyId}
-                onChange={(v) => handleChange('specialtyId', v)}
-                required
-                placeholder={t('specialty')}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  id="licenseNumber"
-                  label={t('licenseNumber')}
-                  value={form.licenseNumber}
-                  onChange={(e) => handleChange('licenseNumber', e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  required
-                  inputMode="numeric"
-                  maxLength={6}
-                  error={licenseNumberInvalid ? t('licenseNumberInvalid') : undefined}
-                />
-                <Input
-                  id="specializationLicense"
-                  label={t('specializationLicense')}
-                  value={form.specializationLicense}
-                  onChange={(e) => handleChange('specializationLicense', e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  inputMode="numeric"
-                  maxLength={6}
-                  error={specializationLicenseInvalid ? t('specializationLicenseInvalid') : undefined}
-                />
+              <div>
+                <h2 className="text-base font-semibold text-foreground">{t('wizardStepLocation')}</h2>
+                <p className="text-xs text-muted-foreground">{t('wizardStepLocationDesc')}</p>
               </div>
             </div>
-          </div>
 
-          {/* Step 2: Office Location */}
-          <div
-            className={cn(
-              'transition-all duration-300',
-              step === 2 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
-            )}
-          >
-            <div className="space-y-5">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <MapPin className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-base font-semibold text-foreground">{t('wizardStepLocation')}</h2>
-                  <p className="text-xs text-muted-foreground">{t('wizardStepLocationDesc')}</p>
-                </div>
-              </div>
+            <AddressAutocomplete
+              id="addressLine"
+              label={t('addressLine')}
+              value={form.addressLine}
+              placeholder={t('addressSelectHint')}
+              required
+              error={addressFieldError}
+              onChange={(data: AddressResult) => {
+                const nextAddress = (data.address_line || '').trim();
+                if (!hasStreetNumber(nextAddress)) {
+                  setAddressFieldError(t('addressMustIncludeStreetNumber'));
+                  return;
+                }
+                if (!data.city?.trim()) {
+                  setAddressFieldError(t('addressMustIncludeCity'));
+                  return;
+                }
 
-              <AddressAutocomplete
-                id="addressLine"
-                label={t('addressLine')}
-                value={form.addressLine}
-                placeholder={t('addressSelectHint')}
+                setAddressFieldError(undefined);
+                handleChange('addressLine', nextAddress);
+                handleChange('zipCode', data.zip_code);
+                handleChange('city', data.city);
+                setForm((prev) => ({
+                  ...prev,
+                  latitude: data.latitude,
+                  longitude: data.longitude,
+                }));
+              }}
+              onClear={() => {
+                setAddressFieldError(undefined);
+                handleChange('addressLine', '');
+                handleChange('zipCode', '');
+                handleChange('city', '');
+                setForm((prev) => ({ ...prev, latitude: null, longitude: null }));
+              }}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <CityCombobox
+                id="city"
+                label={t('city')}
+                value={form.city}
+                onChange={(v) => handleChange('city', v)}
                 required
-                error={addressFieldError}
-                onChange={(data: AddressResult) => {
-                  const nextAddress = (data.address_line || '').trim();
-                  if (!hasStreetNumber(nextAddress)) {
-                    setAddressFieldError(t('addressMustIncludeStreetNumber'));
-                    return;
-                  }
-                  if (!data.city?.trim()) {
-                    setAddressFieldError(t('addressMustIncludeCity'));
-                    return;
-                  }
-
-                  setAddressFieldError(undefined);
-                  handleChange('addressLine', nextAddress);
-                  handleChange('zipCode', data.zip_code);
-                  handleChange('city', data.city);
-                  setForm((prev) => ({
-                    ...prev,
-                    latitude: data.latitude,
-                    longitude: data.longitude,
-                  }));
-                }}
-                onClear={() => {
-                  setAddressFieldError(undefined);
-                  handleChange('addressLine', '');
-                  handleChange('zipCode', '');
-                  handleChange('city', '');
-                  setForm((prev) => ({ ...prev, latitude: null, longitude: null }));
-                }}
+                placeholder={t('city')}
               />
-
-              <div className="grid grid-cols-2 gap-4">
-                <CityCombobox
-                  id="city"
-                  label={t('city')}
-                  value={form.city}
-                  onChange={(v) => handleChange('city', v)}
-                  required
-                  placeholder={t('city')}
-                />
-                <Input
-                  id="zipCode"
-                  label={t('zipCode')}
-                  value={form.zipCode}
-                  onChange={(e) => handleChange('zipCode', e.target.value)}
-                  autoComplete="postal-code"
-                  placeholder={t('zipCode')}
-                />
-              </div>
+              <Input
+                id="zipCode"
+                label={t('zipCode')}
+                value={form.zipCode}
+                onChange={(e) => handleChange('zipCode', e.target.value)}
+                autoComplete="postal-code"
+                placeholder={t('zipCode')}
+              />
             </div>
           </div>
         </div>
 
         {/* Navigation buttons */}
-        <div className="pt-5 mt-auto">
+        <div className="pt-6">
           <div className="flex items-center gap-3">
             {step > 0 && (
               <Button
