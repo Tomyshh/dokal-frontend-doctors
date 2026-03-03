@@ -94,6 +94,9 @@ export function AddressAutocomplete({
         );
         const data = (await res.json()) as AddressResult & { formatted_address?: string };
         if (data.address_line && data.latitude != null && data.longitude != null) {
+          setInputValue(data.address_line);
+          setPredictions([]);
+          setOpen(false);
           onChange({
             address_line: data.address_line,
             zip_code: data.zip_code || '',
@@ -101,9 +104,6 @@ export function AddressAutocomplete({
             latitude: data.latitude,
             longitude: data.longitude,
           });
-          setInputValue('');
-          setPredictions([]);
-          setOpen(false);
           inputRef.current?.blur();
         }
       } catch {
