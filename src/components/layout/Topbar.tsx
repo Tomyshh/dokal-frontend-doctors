@@ -39,7 +39,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
   const gcalConnectMutation = useStartGoogleCalendarConnect();
   const showEnergyRing = !(gcalStatusLoading || gcalConnectMutation.isPending);
   const isGcalSynced = Boolean(
-    gcalStatus?.connected && gcalStatus?.last_sync_at && !gcalStatus?.last_error
+    gcalStatus?.connected && !gcalStatus?.last_error
   );
   const energyRingClass = showEnergyRing
     ? isGcalSynced
