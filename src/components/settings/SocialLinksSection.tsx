@@ -237,6 +237,7 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
         avatarUrl={avatarUrl}
         cardHeadline={cardHeadline}
         onAvatarClick={() => avatarInputRef.current?.click()}
+        onShare={handleShare}
       />
       <input
         ref={avatarInputRef}

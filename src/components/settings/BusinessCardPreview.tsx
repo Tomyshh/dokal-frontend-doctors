@@ -19,6 +19,7 @@ interface BusinessCardPreviewProps {
   avatarUrl?: string | null;
   cardHeadline: string;
   onAvatarClick?: () => void;
+  onShare?: () => void;
 }
 
 export default function BusinessCardPreview({
@@ -26,6 +27,7 @@ export default function BusinessCardPreview({
   avatarUrl,
   cardHeadline,
   onAvatarClick,
+  onShare,
 }: BusinessCardPreviewProps) {
   const t = useTranslations('settings');
 
@@ -161,6 +163,16 @@ export default function BusinessCardPreview({
           </div>
         </div>
       </div>
+
+      {/* Share button */}
+      <button
+        type="button"
+        onClick={onShare}
+        className="mt-4 flex h-12 w-full items-center justify-center gap-2.5 rounded-2xl bg-primary text-sm font-semibold text-white shadow-md transition-colors hover:bg-primary/90 active:bg-primary/80"
+      >
+        <Share2 className="h-5 w-5" />
+        <span>{t('shareCard')}</span>
+      </button>
     </div>
   );
 }
