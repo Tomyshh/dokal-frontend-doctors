@@ -108,7 +108,15 @@
     "otpResendIn": "שליחה מחדש בעוד {seconds} שניות",
     "otpResendError": "לא ניתן לשלוח שוב. נסו מאוחר יותר.",
     "otpResendSuccess": "קוד חדש נשלח לכתובת האימייל שלך.",
-    "otpBackToForm": "עריכת הפרטים"
+    "otpBackToForm": "עריכת הפרטים",
+    "inviteWelcome": "ברוכים הבאים ל-Dokal!",
+    "inviteWelcomeWithName": "שלום {name}, ברוכים הבאים ל-Dokal!",
+    "inviteSetPasswordSubtitle": "צרו סיסמה כדי להשלים את ההרשמה ולגשת לחשבון.",
+    "invitePasswordTooShort": "הסיסמה חייבת להכיל לפחות 6 תווים.",
+    "inviteSetPasswordButton": "הגדרת סיסמה וכניסה",
+    "inviteSuccessTitle": "החשבון מוכן!",
+    "inviteSuccessRedirect": "מעבר ללוח הבקרה...",
+    "inviteGenericError": "אירעה שגיאה. נא לנסות שוב."
   },
   "subscription": {
     "onboardingTitle": "!ברוכים הבאים ל-Dokal",

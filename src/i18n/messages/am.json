@@ -108,7 +108,15 @@
     "otpResendIn": "Resend in {seconds}s",
     "otpResendError": "Unable to resend code. Try again later.",
     "otpResendSuccess": "A new code has been sent to your email.",
-    "otpBackToForm": "Edit my information"
+    "otpBackToForm": "Edit my information",
+    "inviteWelcome": "Welcome to Dokal!",
+    "inviteWelcomeWithName": "Hello {name}, welcome to Dokal!",
+    "inviteSetPasswordSubtitle": "Create a password to complete your registration and access your account.",
+    "invitePasswordTooShort": "Password must be at least 6 characters.",
+    "inviteSetPasswordButton": "Set password & sign in",
+    "inviteSuccessTitle": "Your account is ready!",
+    "inviteSuccessRedirect": "Redirecting to your dashboard...",
+    "inviteGenericError": "An error occurred. Please try again."
   },
   "subscription": {
     "onboardingTitle": "Welcome to Dokal!",

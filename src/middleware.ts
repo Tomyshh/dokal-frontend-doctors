@@ -36,9 +36,9 @@ export async function middleware(request: NextRequest) {
   // Route classification
   const isAuthRoute = new RegExp(`^/${LOCALE_GROUP}/(login|forgot-password|signup|verify-email)`).test(pathname);
   const isPublicRoute = new RegExp(`^/${LOCALE_GROUP}/(welcome|privacy|terms)`).test(pathname);
-  const isOnboardingRoute = new RegExp(`^/${LOCALE_GROUP}/(subscription|complete-profile)`).test(pathname);
+  const isOnboardingRoute = new RegExp(`^/${LOCALE_GROUP}/(subscription|complete-profile|accept-invite)`).test(pathname);
   const isDashboardRoute = new RegExp(
-    `^/${LOCALE_GROUP}(/(?!login|forgot-password|signup|verify-email|welcome|privacy|terms|subscription|complete-profile).*)?$`
+    `^/${LOCALE_GROUP}(/(?!login|forgot-password|signup|verify-email|welcome|privacy|terms|subscription|complete-profile|accept-invite).*)?$`
   ).test(pathname);
 
   // Protected routes: redirect unauthenticated users to welcome

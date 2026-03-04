@@ -108,7 +108,15 @@
     "otpResendIn": "Renvoyer dans {seconds}s",
     "otpResendError": "Impossible de renvoyer le code. Réessayez plus tard.",
     "otpResendSuccess": "Un nouveau code a été envoyé à votre adresse e-mail.",
-    "otpBackToForm": "Modifier mes informations"
+    "otpBackToForm": "Modifier mes informations",
+    "inviteWelcome": "Bienvenue sur Dokal !",
+    "inviteWelcomeWithName": "Bonjour {name}, bienvenue sur Dokal !",
+    "inviteSetPasswordSubtitle": "Créez un mot de passe pour finaliser votre inscription et accéder à votre compte.",
+    "invitePasswordTooShort": "Le mot de passe doit contenir au moins 6 caractères.",
+    "inviteSetPasswordButton": "Définir le mot de passe et se connecter",
+    "inviteSuccessTitle": "Votre compte est prêt !",
+    "inviteSuccessRedirect": "Redirection vers votre tableau de bord...",
+    "inviteGenericError": "Une erreur est survenue. Veuillez réessayer."
   },
   "subscription": {
     "onboardingTitle": "Bienvenue sur Dokal !",

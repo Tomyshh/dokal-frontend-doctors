@@ -126,7 +126,15 @@
     "wizardNext": "Далее",
     "wizardBack": "Назад",
     "wizardStepOf": "Шаг {current} из {total}",
-    "cityInvalid": "Пожалуйста, выберите город."
+    "cityInvalid": "Пожалуйста, выберите город.",
+    "inviteWelcome": "Добро пожаловать в Dokal!",
+    "inviteWelcomeWithName": "Здравствуйте, {name}, добро пожаловать в Dokal!",
+    "inviteSetPasswordSubtitle": "Создайте пароль для завершения регистрации и доступа к вашему аккаунту.",
+    "invitePasswordTooShort": "Пароль должен содержать не менее 6 символов.",
+    "inviteSetPasswordButton": "Установить пароль и войти",
+    "inviteSuccessTitle": "Ваш аккаунт готов!",
+    "inviteSuccessRedirect": "Перенаправление на панель управления...",
+    "inviteGenericError": "Произошла ошибка. Пожалуйста, попробуйте снова."
   },
   "subscription": {
     "onboardingTitle": "Добро пожаловать в Dokal!",

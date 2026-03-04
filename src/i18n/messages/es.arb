@@ -126,7 +126,15 @@
     "wizardNext": "Siguiente",
     "wizardBack": "Atrás",
     "wizardStepOf": "Paso {current} de {total}",
-    "cityInvalid": "Por favor, selecciona una ciudad."
+    "cityInvalid": "Por favor, selecciona una ciudad.",
+    "inviteWelcome": "¡Bienvenido a Dokal!",
+    "inviteWelcomeWithName": "Hola {name}, ¡bienvenido a Dokal!",
+    "inviteSetPasswordSubtitle": "Crea una contraseña para completar tu registro y acceder a tu cuenta.",
+    "invitePasswordTooShort": "La contraseña debe tener al menos 6 caracteres.",
+    "inviteSetPasswordButton": "Establecer contraseña e iniciar sesión",
+    "inviteSuccessTitle": "¡Tu cuenta está lista!",
+    "inviteSuccessRedirect": "Redirigiendo a tu panel de control...",
+    "inviteGenericError": "Ocurrió un error. Por favor, inténtalo de nuevo."
   },
   "subscription": {
     "onboardingTitle": "Welcome to Dokal!",
