@@ -116,6 +116,31 @@ export type ProfileCompletionItem = {
   section: 'avatar' | 'about' | 'contact' | 'address' | 'pricing';
 };
 
+export type BusinessCardCompletionItem = {
+  key: string;
+  completed: boolean;
+};
+
+export function getBusinessCardCompletionItems(
+  practitioner: Practitioner | null | undefined,
+): BusinessCardCompletionItem[] {
+  const p = practitioner ?? null;
+  const hasAnySocial = !!(
+    p?.facebook_url?.trim() ||
+    p?.instagram_url?.trim() ||
+    p?.linkedin_url?.trim() ||
+    p?.website_url?.trim() ||
+    p?.tiktok_url?.trim() ||
+    p?.youtube_url?.trim()
+  );
+  return [
+    { key: 'card_slug', completed: !!(p?.card_slug?.trim()) },
+    { key: 'card_headline', completed: !!(p?.card_headline?.trim()) },
+    { key: 'whatsapp_number', completed: !!(p?.whatsapp_number?.trim()) },
+    { key: 'social_link', completed: hasAnySocial },
+  ];
+}
+
 /**
  * Get list of profile completion items with their status for display.
  */

@@ -458,6 +458,12 @@
     "cardSlug": "Custom URL slug",
     "socialLinksTitle": "Social networks",
     "navigationLinksTitle": "Navigation links",
+    "cardPreviewLabel": "Vista previa de la tarjeta",
+    "cardEditAvatar": "Editar foto de perfil",
+    "cardEmailLabel": "Email",
+    "cardPhoneLabel": "Teléfono",
+    "cardSaveContact": "Guardar en contactos",
+    "cardBookAppointment": "Reservar cita",
     "whatsapp": "WhatsApp number",
     "website": "Website",
     "linkCopied": "Link copied to clipboard"

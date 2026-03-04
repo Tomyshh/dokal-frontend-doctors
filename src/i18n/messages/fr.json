@@ -458,6 +458,12 @@
     "cardSlug": "Slug URL personnalisé",
     "socialLinksTitle": "Réseaux sociaux",
     "navigationLinksTitle": "Liens de navigation",
+    "cardPreviewLabel": "Aperçu de votre carte",
+    "cardEditAvatar": "Modifier la photo de profil",
+    "cardEmailLabel": "E-mail",
+    "cardPhoneLabel": "Téléphone",
+    "cardSaveContact": "Enregistrer dans les contacts",
+    "cardBookAppointment": "Prendre rendez-vous",
     "whatsapp": "Numéro WhatsApp",
     "website": "Site web",
     "linkCopied": "Lien copié dans le presse-papiers"

@@ -41,7 +41,7 @@ export default function BusinessCardPage() {
       </div>
 
       {practitioner && (
-        <SocialLinksSection practitioner={practitioner} t={t} tc={tc} />
+        <SocialLinksSection practitioner={practitioner} avatarUrl={profile?.avatar_url} t={t} tc={tc} />
       )}
     </div>
   );

@@ -456,6 +456,12 @@
     "cardSlug": "URL-адрес",
     "socialLinksTitle": "Социальные сети",
     "navigationLinksTitle": "Навигационные ссылки",
+    "cardPreviewLabel": "Предпросмотр визитки",
+    "cardEditAvatar": "Изменить фото профиля",
+    "cardEmailLabel": "Эл. почта",
+    "cardPhoneLabel": "Телефон",
+    "cardSaveContact": "Сохранить в контакты",
+    "cardBookAppointment": "Записаться на приём",
     "whatsapp": "Номер WhatsApp",
     "website": "Веб-сайт",
     "linkCopied": "Ссылка скопирована"

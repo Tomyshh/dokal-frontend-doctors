@@ -457,6 +457,12 @@
     "cardSlug": "כתובת URL מותאמת",
     "socialLinksTitle": "רשתות חברתיות",
     "navigationLinksTitle": "קישורי ניווט",
+    "cardPreviewLabel": "תצוגה מקדימה של הכרטיס",
+    "cardEditAvatar": "עריכת תמונת פרופיל",
+    "cardEmailLabel": "אימייל",
+    "cardPhoneLabel": "טלפון",
+    "cardSaveContact": "שמרו אותי באנשי הקשר",
+    "cardBookAppointment": "קבעו תור",
     "whatsapp": "מספר וואטסאפ",
     "website": "אתר אינטרנט",
     "linkCopied": "הקישור הועתק"

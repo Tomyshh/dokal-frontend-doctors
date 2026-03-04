@@ -10,6 +10,7 @@ import type { Practitioner, Profile } from '@/types';
 import {
   computeProfileCompletionPercent,
   getProfileCompletionItems,
+  getBusinessCardCompletionItems,
   isPractitionerCompleteFromBackend,
 } from '@/lib/practitioner';
 
@@ -19,6 +20,7 @@ interface PractitionerProfileContextValue {
   completionPercent: number;
   isComplete: boolean;
   completionItems: ReturnType<typeof getProfileCompletionItems>;
+  businessCardCompletionItems: ReturnType<typeof getBusinessCardCompletionItems>;
   isLoading: boolean;
 }
 
@@ -40,6 +42,7 @@ export function PractitionerProfileProvider({
   const value = useMemo(() => {
     const completionPercent = computeProfileCompletionPercent(practitioner, profile);
     const completionItems = getProfileCompletionItems(practitioner, profile);
+    const businessCardCompletionItems = getBusinessCardCompletionItems(practitioner);
     const isComplete = isPractitionerCompleteFromBackend(practitioner);
     return {
       practitioner,
@@ -47,6 +50,7 @@ export function PractitionerProfileProvider({
       completionPercent,
       isComplete,
       completionItems,
+      businessCardCompletionItems,
       isLoading,
     };
   }, [practitioner, profile, isLoading]);

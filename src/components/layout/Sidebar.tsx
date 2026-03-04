@@ -97,6 +97,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     : 0;
   const showProfileBadge = !practitionerProfile?.isLoading && profileIncompleteCount > 0;
 
+  const cardIncompleteCount = practitionerProfile?.businessCardCompletionItems
+    ? practitionerProfile.businessCardCompletionItems.filter((i) => !i.completed).length
+    : 0;
+  const showCardBadge = !practitionerProfile?.isLoading && cardIncompleteCount > 0;
+
   const settingsSubLinks = useMemo(() => {
     const links: { href: string; icon: typeof Settings; label: string; badge?: number }[] = [];
 
@@ -104,7 +109,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       links.push(
         { href: '/settings/profile', icon: User, label: t('profile'), badge: showProfileBadge ? profileIncompleteCount : undefined },
         { href: '/settings/appearance', icon: Palette, label: t('appearance') },
-        { href: '/settings/business-card', icon: CreditCard, label: t('businessCard') },
+        { href: '/settings/business-card', icon: CreditCard, label: t('businessCard'), badge: showCardBadge ? cardIncompleteCount : undefined },
         { href: '/settings/google-calendar', icon: Calendar, label: t('googleCalendar') },
         { href: '/settings/instructions', icon: FileText, label: t('instructions') },
         { href: '/settings/questionnaire', icon: ClipboardCheck, label: t('questionnaire') },
@@ -112,7 +117,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     }
 
     return links;
-  }, [t, isSecretary, showProfileBadge, profileIncompleteCount]);
+  }, [t, isSecretary, showProfileBadge, profileIncompleteCount, showCardBadge, cardIncompleteCount]);
 
   const teamLink = useMemo(() => (
     { href: '/team', icon: Users, label: t('team') }

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import Cropper, { type Area } from 'react-easy-crop';
 import {
-  Globe,
   Share2,
   Copy,
   Check,
@@ -12,20 +12,116 @@ import {
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Dialog } from '@/components/ui/Dialog';
 import { useUpdateSocialLinks, getCardUrl } from '@/hooks/useBusinessCard';
+import { useUploadProfileAvatar } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
+import { useAuth } from '@/providers/AuthProvider';
+import BusinessCardPreview from './BusinessCardPreview';
 import type { Practitioner } from '@/types';
+
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+const OUTPUT_SIZE = 1024;
+
+async function loadImage(src: string): Promise<HTMLImageElement> {
+  return await new Promise((resolve, reject) => {
+    const img = document.createElement('img');
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('image_load_failed'));
+    img.src = src;
+  });
+}
+
+async function cropToBlob(imageSrc: string, crop: Area, outputSize = OUTPUT_SIZE): Promise<Blob> {
+  const image = await loadImage(imageSrc);
+  const canvas = document.createElement('canvas');
+  canvas.width = outputSize;
+  canvas.height = outputSize;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('canvas_not_supported');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(image, crop.x, crop.y, crop.width, crop.height, 0, 0, outputSize, outputSize);
+  return await new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => { if (!blob) reject(new Error('blob_failed')); else resolve(blob); },
+      'image/jpeg',
+      0.92,
+    );
+  });
+}
 
 interface SocialLinksSectionProps {
   practitioner: Practitioner;
+  avatarUrl?: string | null;
   t: (key: string) => string;
   tc: (key: string) => string;
 }
 
-export default function SocialLinksSection({ practitioner, t, tc }: SocialLinksSectionProps) {
+export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: SocialLinksSectionProps) {
   const toast = useToast();
+  const { refreshUserData } = useAuth();
   const updateSocialLinks = useUpdateSocialLinks();
+  const uploadAvatar = useUploadProfileAvatar();
   const [copied, setCopied] = useState(false);
+
+  // Avatar crop state
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1.2);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [avatarPreparing, setAvatarPreparing] = useState(false);
+
+  const cleanupObjectUrl = useCallback(() => {
+    setObjectUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+  }, []);
+
+  useEffect(() => () => cleanupObjectUrl(), [cleanupObjectUrl]);
+
+  const closeCropDialog = () => {
+    setCropDialogOpen(false);
+    cleanupObjectUrl();
+    setCrop({ x: 0, y: 0 });
+    setZoom(1.2);
+    setCroppedAreaPixels(null);
+    setAvatarPreparing(false);
+  };
+
+  const onAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    e.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error(t('avatarUploadErrorTitle'), t('avatarInvalidType')); return; }
+    if (file.size > MAX_FILE_SIZE_BYTES) { toast.error(t('avatarUploadErrorTitle'), t('avatarTooLarge')); return; }
+    cleanupObjectUrl();
+    setObjectUrl(URL.createObjectURL(file));
+    setCropDialogOpen(true);
+  };
+
+  const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
+    setCroppedAreaPixels(croppedPixels);
+  }, []);
+
+  const handleAvatarUpload = async () => {
+    if (!objectUrl || !croppedAreaPixels) return;
+    setAvatarPreparing(true);
+    try {
+      const blob = await cropToBlob(objectUrl, croppedAreaPixels);
+      const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+      await uploadAvatar.mutateAsync(file);
+      await refreshUserData();
+      toast.success(t('avatarUploadSuccess'));
+      closeCropDialog();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      toast.error(t('avatarUploadErrorTitle'), msg || t('avatarUploadError'));
+    } finally {
+      setAvatarPreparing(false);
+    }
+  };
 
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [facebookUrl, setFacebookUrl] = useState('');
@@ -107,7 +203,69 @@ export default function SocialLinksSection({ practitioner, t, tc }: SocialLinksS
     }
   };
 
+  const isAvatarBusy = uploadAvatar.isPending || avatarPreparing;
+
   return (
+    <div className="space-y-6">
+      {/* Live card preview */}
+      <BusinessCardPreview
+        practitioner={practitioner}
+        avatarUrl={avatarUrl}
+        cardHeadline={cardHeadline}
+        onAvatarClick={() => avatarInputRef.current?.click()}
+      />
+      <input
+        ref={avatarInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={onAvatarFileChange}
+      />
+
+      {/* Avatar crop dialog */}
+      <Dialog
+        open={cropDialogOpen}
+        onClose={() => { if (!isAvatarBusy) closeCropDialog(); }}
+        title={t('avatarCropTitle')}
+        className="max-w-2xl"
+      >
+        <div className="space-y-4">
+          <div className="text-sm text-muted-foreground">{t('avatarCropHint')}</div>
+          <div className="relative w-full h-[360px] bg-gray-100 rounded-2xl overflow-hidden">
+            {objectUrl && (
+              <Cropper
+                image={objectUrl}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            )}
+          </div>
+          <div className="space-y-1">
+            <div className="text-xs font-medium text-gray-700">{t('avatarZoom')}</div>
+            <input
+              type="range" min={1} max={3} step={0.01} value={zoom}
+              onChange={(e) => setZoom(Number(e.target.value))}
+              className="w-full accent-primary"
+              disabled={isAvatarBusy}
+            />
+          </div>
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={closeCropDialog} disabled={isAvatarBusy}>
+              {tc('cancel')}
+            </Button>
+            <Button type="button" onClick={handleAvatarUpload} loading={uploadAvatar.isPending} disabled={!croppedAreaPixels || avatarPreparing}>
+              {t('avatarCropSave')}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
     <Card className="settings-section">
       <CardHeader>
         <CardTitle className="flex items-center gap-2.5">
@@ -240,5 +398,6 @@ export default function SocialLinksSection({ practitioner, t, tc }: SocialLinksS
         </div>
       </div>
     </Card>
+    </div>
   );
 }

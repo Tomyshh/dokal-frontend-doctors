@@ -458,6 +458,12 @@
     "cardSlug": "Custom URL slug",
     "socialLinksTitle": "Social networks",
     "navigationLinksTitle": "Navigation links",
+    "cardPreviewLabel": "Card preview",
+    "cardEditAvatar": "Edit profile photo",
+    "cardEmailLabel": "Email",
+    "cardPhoneLabel": "Phone",
+    "cardSaveContact": "Save to contacts",
+    "cardBookAppointment": "Book appointment",
     "whatsapp": "WhatsApp number",
     "website": "Website",
     "linkCopied": "Link copied to clipboard"
