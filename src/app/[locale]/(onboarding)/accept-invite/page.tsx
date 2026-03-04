@@ -1,43 +1,107 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
-import { Lock, Check } from 'lucide-react';
+import { Lock, Check, AlertTriangle } from 'lucide-react';
 
-export default function AcceptInvitePage() {
+function AcceptInviteContent() {
   const t = useTranslations('auth');
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
 
+  const tokenHash = searchParams.get('token_hash');
+  const type = searchParams.get('type');
+
+  const [verifying, setVerifying] = useState(!!tokenHash);
+  const [verifyError, setVerifyError] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [sessionUser, setSessionUser] = useState(user);
 
-  if (authLoading) {
+  useEffect(() => {
+    if (user) setSessionUser(user);
+  }, [user]);
+
+  const verifyToken = useCallback(async () => {
+    if (!tokenHash) return;
+    setVerifying(true);
+    try {
+      const supabase = createClient();
+      const { data, error: verifyErr } = await supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: (type as 'invite') || 'invite',
+      });
+
+      if (verifyErr) {
+        setVerifyError(verifyErr.message);
+        setVerifying(false);
+        return;
+      }
+
+      if (data?.user) {
+        setSessionUser(data.user);
+      }
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete('token_hash');
+      url.searchParams.delete('type');
+      window.history.replaceState({}, '', url.toString());
+    } catch {
+      setVerifyError(t('inviteGenericError'));
+    }
+    setVerifying(false);
+  }, [tokenHash, type, t]);
+
+  useEffect(() => {
+    verifyToken();
+  }, [verifyToken]);
+
+  if (verifying || (authLoading && !sessionUser)) {
     return (
-      <div className="flex items-center justify-center py-16">
+      <div className="flex flex-col items-center justify-center py-16 space-y-4">
         <Spinner size="lg" />
+        <p className="text-sm text-muted-foreground">{t('inviteVerifying')}</p>
       </div>
     );
   }
 
-  if (!user) {
+  if (verifyError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
+        <div className="h-14 w-14 rounded-full bg-red-100 flex items-center justify-center">
+          <AlertTriangle className="h-7 w-7 text-red-600" />
+        </div>
+        <h2 className="text-xl font-semibold text-gray-900">
+          {t('inviteExpiredTitle')}
+        </h2>
+        <p className="text-sm text-muted-foreground max-w-sm">
+          {t('inviteExpiredMessage')}
+        </p>
+      </div>
+    );
+  }
+
+  const activeUser = sessionUser ?? user;
+
+  if (!activeUser) {
     router.replace(`/${locale}/login`);
     return null;
   }
 
   const firstName =
-    (user.user_metadata?.first_name as string) ??
-    (user.user_metadata?.full_name as string)?.split(' ')[0] ??
+    (activeUser.user_metadata?.first_name as string) ??
+    (activeUser.user_metadata?.full_name as string)?.split(' ')[0] ??
     '';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,5 +215,19 @@ export default function AcceptInvitePage() {
         </Button>
       </form>
     </div>
+  );
+}
+
+export default function AcceptInvitePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-16">
+          <Spinner size="lg" />
+        </div>
+      }
+    >
+      <AcceptInviteContent />
+    </Suspense>
   );
 }

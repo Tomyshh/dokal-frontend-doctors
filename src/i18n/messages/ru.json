@@ -116,7 +116,10 @@
     "inviteSetPasswordButton": "Установить пароль и войти",
     "inviteSuccessTitle": "Ваш аккаунт готов!",
     "inviteSuccessRedirect": "Перенаправление на панель управления...",
-    "inviteGenericError": "Произошла ошибка. Пожалуйста, попробуйте снова."
+    "inviteGenericError": "Произошла ошибка. Пожалуйста, попробуйте снова.",
+    "inviteVerifying": "Проверяем приглашение...",
+    "inviteExpiredTitle": "Ссылка-приглашение истекла",
+    "inviteExpiredMessage": "Ссылка больше недействительна. Попросите администратора клиники отправить новое приглашение."
   },
   "subscription": {
     "onboardingTitle": "Добро пожаловать в Dokal!",

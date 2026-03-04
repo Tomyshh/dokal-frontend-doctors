@@ -134,7 +134,10 @@
     "inviteSetPasswordButton": "Définir le mot de passe et se connecter",
     "inviteSuccessTitle": "Votre compte est prêt !",
     "inviteSuccessRedirect": "Redirection vers votre tableau de bord...",
-    "inviteGenericError": "Une erreur est survenue. Veuillez réessayer."
+    "inviteGenericError": "Une erreur est survenue. Veuillez réessayer.",
+    "inviteVerifying": "Vérification de votre invitation...",
+    "inviteExpiredTitle": "Lien d'invitation expiré",
+    "inviteExpiredMessage": "Ce lien n'est plus valide. Demandez à l'administrateur de votre clinique d'envoyer une nouvelle invitation."
   },
   "subscription": {
     "onboardingTitle": "Bienvenue sur Dokal !",

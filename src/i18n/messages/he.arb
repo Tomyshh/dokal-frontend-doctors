@@ -134,7 +134,10 @@
     "inviteSetPasswordButton": "הגדרת סיסמה וכניסה",
     "inviteSuccessTitle": "החשבון מוכן!",
     "inviteSuccessRedirect": "מעבר ללוח הבקרה...",
-    "inviteGenericError": "אירעה שגיאה. נא לנסות שוב."
+    "inviteGenericError": "אירעה שגיאה. נא לנסות שוב.",
+    "inviteVerifying": "מאמתים את ההזמנה...",
+    "inviteExpiredTitle": "קישור ההזמנה פג תוקף",
+    "inviteExpiredMessage": "הקישור כבר אינו תקף. בקשו ממנהל הקליניקה לשלוח הזמנה חדשה."
   },
   "subscription": {
     "onboardingTitle": "!ברוכים הבאים ל-Dokal",

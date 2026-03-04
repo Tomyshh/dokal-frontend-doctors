@@ -36,13 +36,15 @@ export async function middleware(request: NextRequest) {
   // Route classification
   const isAuthRoute = new RegExp(`^/${LOCALE_GROUP}/(login|forgot-password|signup|verify-email)`).test(pathname);
   const isPublicRoute = new RegExp(`^/${LOCALE_GROUP}/(welcome|privacy|terms)`).test(pathname);
-  const isOnboardingRoute = new RegExp(`^/${LOCALE_GROUP}/(subscription|complete-profile|accept-invite)`).test(pathname);
+  const isAcceptInvite = new RegExp(`^/${LOCALE_GROUP}/accept-invite`).test(pathname);
+  const isOnboardingRoute = new RegExp(`^/${LOCALE_GROUP}/(subscription|complete-profile)`).test(pathname);
   const isDashboardRoute = new RegExp(
     `^/${LOCALE_GROUP}(/(?!login|forgot-password|signup|verify-email|welcome|privacy|terms|subscription|complete-profile|accept-invite).*)?$`
   ).test(pathname);
 
   // Protected routes: redirect unauthenticated users to welcome
-  if ((isDashboardRoute || isOnboardingRoute) && !isAuthRoute && !isPublicRoute && !user) {
+  // accept-invite is excluded: the page verifies the token client-side (POST) to establish session
+  if ((isDashboardRoute || isOnboardingRoute) && !isAuthRoute && !isPublicRoute && !isAcceptInvite && !user) {
     const locale = pathname.split('/')[1] || defaultLocale;
     const welcomeUrl = new URL(`/${locale}/welcome`, request.url);
     return NextResponse.redirect(welcomeUrl);
