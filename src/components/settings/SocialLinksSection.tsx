@@ -31,6 +31,22 @@ function SocialLabel({ icon, label }: { icon: string; label: string }) {
   );
 }
 
+/** Normalise une URL en ajoutant https:// si le protocole est absent. */
+function ensureHttps(value: string | null | undefined): string | null {
+  const s = (value ?? '').trim();
+  if (!s) return null;
+  if (/^https?:\/\//i.test(s)) return s;
+  return `https://${s}`;
+}
+
+/** Normalise l'URL au blur si l'utilisateur a oublié https:// */
+function handleUrlBlur(setter: (v: string) => void, value: string) {
+  const trimmed = value.trim();
+  if (trimmed && !/^https?:\/\//i.test(trimmed)) {
+    setter(`https://${trimmed}`);
+  }
+}
+
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const OUTPUT_SIZE = 1024;
 
@@ -163,16 +179,16 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
   const handleSave = async () => {
     try {
       await updateSocialLinks.mutateAsync({
-        website_url: websiteUrl || null,
-        facebook_url: facebookUrl || null,
-        instagram_url: instagramUrl || null,
-        whatsapp_number: whatsappNumber || null,
-        linkedin_url: linkedinUrl || null,
-        tiktok_url: tiktokUrl || null,
-        youtube_url: youtubeUrl || null,
-        waze_link: wazeLink || null,
-        google_maps_link: googleMapsLink || null,
-        card_headline: cardHeadline || null,
+        website_url: ensureHttps(websiteUrl),
+        facebook_url: ensureHttps(facebookUrl),
+        instagram_url: ensureHttps(instagramUrl),
+        whatsapp_number: whatsappNumber?.trim() || null,
+        linkedin_url: ensureHttps(linkedinUrl),
+        tiktok_url: ensureHttps(tiktokUrl),
+        youtube_url: ensureHttps(youtubeUrl),
+        waze_link: ensureHttps(wazeLink),
+        google_maps_link: ensureHttps(googleMapsLink),
+        card_headline: cardHeadline?.trim() || null,
       });
       toast.success(t('saved'));
     } catch (err: unknown) {
@@ -338,18 +354,21 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
             label={<SocialLabel icon="/logo/social/facebook.svg" label="Facebook" />}
             value={facebookUrl}
             onChange={(e) => setFacebookUrl(e.target.value)}
+            onBlur={(e) => handleUrlBlur(setFacebookUrl, e.target.value)}
             placeholder="https://facebook.com/..."
           />
           <Input
             label={<SocialLabel icon="/logo/social/instagram.svg" label="Instagram" />}
             value={instagramUrl}
             onChange={(e) => setInstagramUrl(e.target.value)}
+            onBlur={(e) => handleUrlBlur(setInstagramUrl, e.target.value)}
             placeholder="https://instagram.com/..."
           />
           <Input
             label={<SocialLabel icon="/logo/social/linkedin.svg" label="LinkedIn" />}
             value={linkedinUrl}
             onChange={(e) => setLinkedinUrl(e.target.value)}
+            onBlur={(e) => handleUrlBlur(setLinkedinUrl, e.target.value)}
             placeholder="https://linkedin.com/in/..."
           />
           <Input
@@ -361,18 +380,21 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
             }
             value={websiteUrl}
             onChange={(e) => setWebsiteUrl(e.target.value)}
+            onBlur={(e) => handleUrlBlur(setWebsiteUrl, e.target.value)}
             placeholder="https://..."
           />
           <Input
             label={<SocialLabel icon="/logo/social/tiktok.svg" label="TikTok" />}
             value={tiktokUrl}
             onChange={(e) => setTiktokUrl(e.target.value)}
+            onBlur={(e) => handleUrlBlur(setTiktokUrl, e.target.value)}
             placeholder="https://tiktok.com/@..."
           />
           <Input
             label={<SocialLabel icon="/logo/social/youtube.svg" label="YouTube" />}
             value={youtubeUrl}
             onChange={(e) => setYoutubeUrl(e.target.value)}
+            onBlur={(e) => handleUrlBlur(setYoutubeUrl, e.target.value)}
             placeholder="https://youtube.com/..."
           />
         </div>
@@ -386,12 +408,14 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
             label={<SocialLabel icon="/logo/social/waze.svg" label="Waze" />}
             value={wazeLink}
             onChange={(e) => setWazeLink(e.target.value)}
+            onBlur={(e) => handleUrlBlur(setWazeLink, e.target.value)}
             placeholder="https://waze.com/ul/..."
           />
           <Input
             label={<SocialLabel icon="/logo/social/google_maps.svg" label="Google Maps" />}
             value={googleMapsLink}
             onChange={(e) => setGoogleMapsLink(e.target.value)}
+            onBlur={(e) => handleUrlBlur(setGoogleMapsLink, e.target.value)}
             placeholder="https://maps.google.com/..."
           />
         </div>

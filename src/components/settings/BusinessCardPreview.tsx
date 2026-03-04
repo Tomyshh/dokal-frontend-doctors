@@ -37,36 +37,35 @@ export default function BusinessCardPreview({
   const address = [practitioner.address_line, practitioner.city].filter(Boolean).join(', ');
   const hasEmail = !!practitioner.email?.trim();
   const hasPhone = !!practitioner.phone?.trim();
+  const hasLinkedin = !!practitioner.linkedin_url?.trim();
 
   return (
-    <div className="mx-auto w-full max-w-[370px]">
-      <p className="text-sm font-medium text-gray-700 mb-3">{t('cardPreviewLabel')}</p>
-      <div className="rounded-2xl shadow-lg overflow-hidden bg-white border border-border/40">
-        {/* Green gradient header */}
-        <div className="relative h-36 bg-gradient-to-br from-primary to-primary/80">
-          <div className="absolute top-3 left-3">
-            <div className="relative h-6 w-16">
-              <Image
-                src="/logo/Dokal.png"
-                alt="Dokal"
-                fill
-                className="object-contain object-left brightness-0 invert"
-              />
+    <div className="mx-auto w-full max-w-[390px]">
+      <p className="mb-3 text-sm font-medium text-gray-700">{t('cardPreviewLabel')}</p>
+      <div className="overflow-hidden rounded-[30px] border border-black/5 bg-[#f6f6f7] shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
+        {/* Header with gradient + bubbles + white wave */}
+        <div className="relative h-[260px] bg-gradient-to-br from-[#11a89c] via-[#22c7b5] to-[#73ddd1]">
+          <div className="absolute -left-8 -top-10 h-44 w-44 rounded-full bg-white/16" />
+          <div className="absolute left-8 top-24 h-20 w-20 rounded-full bg-white/12" />
+          <div className="absolute right-2 top-6 h-20 w-20 rounded-full bg-white/10" />
+          <div className="absolute right-8 top-32 h-16 w-16 rounded-full bg-white/10" />
+          <div className="absolute left-5 top-5">
+            <div className="flex h-12 items-center rounded-xl bg-white px-4 shadow-sm">
+              <span className="text-[36px] leading-none text-[#3f6f6e]">Dokal</span>
             </div>
           </div>
-          <div className="absolute top-3 right-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
-              <Share2 className="h-4 w-4 text-white" />
-            </div>
+          <div className="absolute right-5 top-5 flex h-12 w-12 items-center justify-center rounded-full bg-white/16">
+            <Share2 className="h-5 w-5 text-white" />
           </div>
+          <div className="absolute -bottom-8 left-[-8%] right-[-8%] h-20 rounded-[100%] bg-[#f6f6f7]" />
         </div>
 
-        {/* Avatar overlapping header */}
-        <div className="relative -mt-14 flex justify-center">
+        {/* Avatar */}
+        <div className="relative -mt-16 flex justify-center">
           <button
             type="button"
             onClick={onAvatarClick}
-            className="group relative rounded-full ring-4 ring-white"
+            className="group relative rounded-full"
             title={t('cardEditAvatar')}
           >
             <Avatar
@@ -74,71 +73,79 @@ export default function BusinessCardPreview({
               firstName={firstName}
               lastName={lastName}
               size="lg"
-              className="h-24 w-24 text-2xl"
+              className="h-40 w-40 border-[6px] border-[#f6f6f7] text-5xl shadow-[0_6px_16px_rgba(0,0,0,0.14)]"
             />
-            <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 group-hover:bg-black/30 transition-colors">
-              <Pencil className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/25">
+              <Pencil className="h-7 w-7 text-white opacity-0 transition-opacity group-hover:opacity-100" />
             </span>
           </button>
         </div>
 
-        {/* Card body */}
-        <div className="px-5 pt-3 pb-5 text-center space-y-3">
-          {/* Name */}
-          <div>
-            <h3 className="text-lg font-bold text-gray-900">
-              {fullName || '—'}
-            </h3>
-            {cardHeadline ? (
-              <p className="text-sm text-primary font-medium mt-0.5">{cardHeadline}</p>
-            ) : specialty ? (
-              <p className="text-sm text-primary font-medium mt-0.5">{specialty}</p>
-            ) : null}
-            {orgName && (
-              <p className="text-xs text-gray-500 mt-0.5">{orgName}</p>
-            )}
-          </div>
+        {/* Body */}
+        <div className="px-8 pb-8 pt-5 text-center">
+          <h3 className="text-[52px] font-bold leading-tight text-[#101828]">
+            {fullName || '—'}
+          </h3>
+          {cardHeadline ? (
+            <p className="mt-2 text-[42px] font-semibold text-[#198f84]">{cardHeadline}</p>
+          ) : specialty ? (
+            <p className="mt-2 text-[42px] font-semibold text-[#198f84]">{specialty}</p>
+          ) : null}
+          {orgName && (
+            <p className="mt-1 text-[34px] text-[#7a7f89]">{orgName}</p>
+          )}
 
-          {/* Contact icons */}
-          {(hasEmail || hasPhone) && (
-            <div className="flex items-center justify-center gap-6 pt-1">
-              {hasEmail && (
-                <div className="flex flex-col items-center gap-1">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Mail className="h-5 w-5" />
+          {/* Contact methods */}
+          {(hasLinkedin || hasEmail || hasPhone) && (
+            <div className="mx-auto mt-8 flex max-w-[560px] items-start justify-center gap-8">
+              {hasLinkedin && (
+                <div className="flex min-w-[120px] flex-col items-center gap-2">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#2f6fd6] bg-white">
+                    <Image src="/logo/social/linkedin.svg" alt="LinkedIn" width={28} height={28} />
                   </div>
-                  <span className="text-[11px] text-gray-500">{t('cardEmailLabel')}</span>
+                  <span className="text-[30px] leading-none text-[#5f6673]">LinkedIn</span>
+                </div>
+              )}
+              {hasEmail && (
+                <div className="flex min-w-[120px] flex-col items-center gap-2">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#d8b10d] bg-white text-[#d8b10d]">
+                    <Mail className="h-8 w-8" />
+                  </div>
+                  <span className="text-[30px] leading-none text-[#5f6673]">{t('cardEmailLabel')}</span>
                 </div>
               )}
               {hasPhone && (
-                <div className="flex flex-col items-center gap-1">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Phone className="h-5 w-5" />
+                <div className="flex min-w-[120px] flex-col items-center gap-2">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#d8b10d] bg-white text-[#d8b10d]">
+                    <Phone className="h-8 w-8" />
                   </div>
-                  <span className="text-[11px] text-gray-500">{t('cardPhoneLabel')}</span>
+                  <span className="text-[30px] leading-none text-[#5f6673]">{t('cardPhoneLabel')}</span>
                 </div>
               )}
             </div>
           )}
 
           {/* Save contact button */}
-          <div className="rounded-xl bg-primary text-white py-2.5 px-4 text-sm font-semibold flex items-center justify-center gap-2">
-            <UserPlus className="h-4 w-4" />
-            {t('cardSaveContact')}
+          <div className="mt-8 flex h-20 items-center justify-center gap-3 rounded-full bg-[#0f9b88] px-5 text-[34px] font-semibold text-white shadow-sm">
+            <span>{t('cardSaveContact')}</span>
+            <UserPlus className="h-7 w-7" />
           </div>
 
           {/* Address */}
           {address && (
-            <div className="flex items-start gap-2 text-sm text-gray-600 pt-1 justify-center">
-              <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-              <span>{address}</span>
+            <div className="mt-8 space-y-1 text-[#69707d]">
+              <div className="flex items-center justify-center gap-2 text-[32px] font-medium text-[#545b66]">
+                <span>{t('address')}</span>
+                <MapPin className="h-6 w-6 text-[#159a8a]" />
+              </div>
+              <p className="text-[31px]">{address}</p>
             </div>
           )}
 
           {/* Book appointment button */}
-          <div className="rounded-xl border-2 border-primary text-primary py-2 px-4 text-sm font-semibold flex items-center justify-center gap-2">
-            <ExternalLink className="h-4 w-4" />
-            {t('cardBookAppointment')}
+          <div className="mt-7 flex h-20 items-center justify-center gap-3 rounded-full border-[3px] border-[#0f9b88] bg-transparent px-5 text-[34px] font-semibold text-[#0f9b88]">
+            <span>{t('cardBookAppointment')}</span>
+            <ExternalLink className="h-7 w-7" />
           </div>
         </div>
       </div>
