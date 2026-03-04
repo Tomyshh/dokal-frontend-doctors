@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Cropper, { type Area } from 'react-easy-crop';
+import Image from 'next/image';
 import {
   Share2,
   Copy,
   Check,
   ExternalLink,
   CreditCard,
+  Globe,
 } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -19,6 +21,15 @@ import { useToast } from '@/providers/ToastProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import BusinessCardPreview from './BusinessCardPreview';
 import type { Practitioner } from '@/types';
+
+function SocialLabel({ icon, label }: { icon: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <Image src={icon} alt="" width={18} height={18} className="shrink-0" />
+      <span>{label}</span>
+    </span>
+  );
+}
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const OUTPUT_SIZE = 1024;
@@ -133,7 +144,6 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
   const [wazeLink, setWazeLink] = useState('');
   const [googleMapsLink, setGoogleMapsLink] = useState('');
   const [cardHeadline, setCardHeadline] = useState('');
-  const [cardSlug, setCardSlug] = useState('');
 
   useEffect(() => {
     if (practitioner) {
@@ -147,7 +157,6 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
       setWazeLink(practitioner.waze_link || '');
       setGoogleMapsLink(practitioner.google_maps_link || '');
       setCardHeadline(practitioner.card_headline || '');
-      setCardSlug(practitioner.card_slug || '');
     }
   }, [practitioner]);
 
@@ -164,7 +173,6 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
         waze_link: wazeLink || null,
         google_maps_link: googleMapsLink || null,
         card_headline: cardHeadline || null,
-        card_slug: cardSlug || null,
       });
       toast.success(t('saved'));
     } catch (err: unknown) {
@@ -173,7 +181,7 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
     }
   };
 
-  const cardUrl = getCardUrl(practitioner.id, cardSlug || practitioner.card_slug);
+  const cardUrl = getCardUrl(practitioner.id, practitioner.card_slug);
 
   const handleCopyLink = async () => {
     try {
@@ -307,21 +315,13 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
         </div>
 
         {/* Card customization */}
-        <div className="space-y-4">
-          <Input
-            label={t('cardHeadline')}
-            value={cardHeadline}
-            onChange={(e) => setCardHeadline(e.target.value)}
-            placeholder={t('cardHeadlinePlaceholder')}
-            maxLength={120}
-          />
-          <Input
-            label={t('cardSlug')}
-            value={cardSlug}
-            onChange={(e) => setCardSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-            placeholder="dr-prenom-nom"
-          />
-        </div>
+        <Input
+          label={t('cardHeadline')}
+          value={cardHeadline}
+          onChange={(e) => setCardHeadline(e.target.value)}
+          placeholder={t('cardHeadlinePlaceholder')}
+          maxLength={120}
+        />
 
         <div className="h-px bg-border/50" />
 
@@ -335,37 +335,42 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
             placeholder="+972501234567"
           />
           <Input
-            label="Facebook"
+            label={<SocialLabel icon="/logo/social/facebook.svg" label="Facebook" />}
             value={facebookUrl}
             onChange={(e) => setFacebookUrl(e.target.value)}
             placeholder="https://facebook.com/..."
           />
           <Input
-            label="Instagram"
+            label={<SocialLabel icon="/logo/social/instagram.svg" label="Instagram" />}
             value={instagramUrl}
             onChange={(e) => setInstagramUrl(e.target.value)}
             placeholder="https://instagram.com/..."
           />
           <Input
-            label="LinkedIn"
+            label={<SocialLabel icon="/logo/social/linkedin.svg" label="LinkedIn" />}
             value={linkedinUrl}
             onChange={(e) => setLinkedinUrl(e.target.value)}
             placeholder="https://linkedin.com/in/..."
           />
           <Input
-            label={t('website')}
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                <Globe className="h-[18px] w-[18px] shrink-0 text-muted-foreground" />
+                <span>{t('website')}</span>
+              </span>
+            }
             value={websiteUrl}
             onChange={(e) => setWebsiteUrl(e.target.value)}
             placeholder="https://..."
           />
           <Input
-            label="TikTok"
+            label={<SocialLabel icon="/logo/social/tiktok.svg" label="TikTok" />}
             value={tiktokUrl}
             onChange={(e) => setTiktokUrl(e.target.value)}
             placeholder="https://tiktok.com/@..."
           />
           <Input
-            label="YouTube"
+            label={<SocialLabel icon="/logo/social/youtube.svg" label="YouTube" />}
             value={youtubeUrl}
             onChange={(e) => setYoutubeUrl(e.target.value)}
             placeholder="https://youtube.com/..."
@@ -378,13 +383,13 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
         <h4 className="text-sm font-semibold text-gray-700">{t('navigationLinksTitle')}</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label="Waze"
+            label={<SocialLabel icon="/logo/social/waze.svg" label="Waze" />}
             value={wazeLink}
             onChange={(e) => setWazeLink(e.target.value)}
             placeholder="https://waze.com/ul/..."
           />
           <Input
-            label="Google Maps"
+            label={<SocialLabel icon="/logo/social/google_maps.svg" label="Google Maps" />}
             value={googleMapsLink}
             onChange={(e) => setGoogleMapsLink(e.target.value)}
             placeholder="https://maps.google.com/..."
