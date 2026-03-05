@@ -34,8 +34,8 @@ export default function MobileNav({ open, onClose }: MobileNavProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-50 transition-transform lg:hidden',
-          open ? 'translate-x-0' : '-translate-x-full'
+          'fixed inset-y-0 ltr:left-0 rtl:right-0 z-50 transition-transform lg:hidden',
+          open ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'
         )}
       >
         <Sidebar collapsed={false} onToggle={onClose} />

@@ -133,7 +133,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 z-40 h-screen bg-card border-r border-border/50 flex flex-col transition-all duration-300',
+        'fixed ltr:left-0 rtl:right-0 top-0 z-40 h-screen bg-card ltr:border-r rtl:border-l border-border/50 flex flex-col transition-all duration-300',
         collapsed ? 'w-[72px]' : 'w-[260px]'
       )}
     >
@@ -259,7 +259,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
           {/* Settings sub-links */}
           {!collapsed && settingsOpen && (
-            <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-border/50 pl-3 min-w-0 overflow-hidden">
+            <div className="ltr:ml-4 rtl:mr-4 mt-1 space-y-0.5 ltr:border-l-2 rtl:border-r-2 border-border/50 ltr:pl-3 rtl:pr-3 min-w-0 overflow-hidden">
               <Link
                 href="/settings"
                 className={cn(

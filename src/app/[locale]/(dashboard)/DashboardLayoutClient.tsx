@@ -86,7 +86,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="hidden lg:block fixed left-0 top-0 bottom-0 w-[260px] p-4">
+        <div className="hidden lg:block fixed ltr:left-0 rtl:right-0 top-0 bottom-0 w-[260px] p-4">
           <div className="h-full rounded-2xl border border-border bg-card p-4 space-y-4">
             <Skeleton className="h-10 w-32 rounded-xl" />
             <div className="space-y-2">
@@ -97,7 +97,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
           </div>
         </div>
 
-        <div className="lg:ml-[260px]">
+        <div className="ltr:lg:ml-[260px] rtl:lg:mr-[260px]">
           <div className="sticky top-0 z-10 bg-background border-b border-border">
             <div className="h-[72px] px-6 flex items-center justify-between">
               <Skeleton className="h-9 w-56 rounded-xl" />
@@ -245,7 +245,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
         <div
           className={cn(
             'transition-all duration-300',
-            sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]'
+            sidebarCollapsed ? 'ltr:lg:ml-[72px] rtl:lg:mr-[72px]' : 'ltr:lg:ml-[260px] rtl:lg:mr-[260px]'
           )}
         >
           <Topbar onMenuToggle={() => setMobileNavOpen(true)} />
