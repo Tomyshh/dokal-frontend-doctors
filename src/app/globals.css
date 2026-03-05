@@ -365,11 +365,6 @@
   }
 }
 
-/* RTL support */
-[dir='rtl'] .sidebar-link {
-  @apply flex-row-reverse;
-}
-
 /* Inverser les icônes flèche en hébreu (RTL) pour cohérence visuelle */
 [dir='rtl'] .rtl-flip-arrow {
   transform: scaleX(-1);
@@ -380,6 +375,8 @@
 
 [dir='rtl'] .stat-card {
   text-align: right;
+  border-left-width: 0;
+  border-right-width: 3px;
 }
 
 [dir='rtl'] .stat-card-row {

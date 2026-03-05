@@ -151,7 +151,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             src="/logo/Dokal.png"
             alt="Dokal"
             fill
-            className="object-contain object-left rounded-sm"
+            className="object-contain ltr:object-left rtl:object-right rounded-sm"
           />
         </div>
         <button
@@ -194,7 +194,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <span className="truncate">{link.label}</span>
                 {link.badge && (
                   <span
-                    className={cn('ml-auto shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white', badgeColor)}
+                    className={cn('ltr:ml-auto rtl:mr-auto shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white', badgeColor)}
                     aria-label={t('profileIncompleteBadge')}
                   >
                     {practitionerProfile?.completionPercent ?? 0}%
@@ -248,7 +248,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   />
                 )}
               </span>
-              <span className="truncate flex-1 text-left">{t('settings')}</span>
+              <span className="truncate flex-1 ltr:text-left rtl:text-right">{t('settings')}</span>
               {showSettingsBadge && (
                 <span
                   className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white', badgeColor)}

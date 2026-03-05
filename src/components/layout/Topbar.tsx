@@ -146,13 +146,13 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
               <span className="hidden sm:inline">{localeNames[locale]}</span>
             </button>
             {showLangMenu && (
-              <div className="absolute right-0 top-full mt-1 bg-card rounded-xl shadow-lg border border-border py-1 min-w-[140px] z-50">
+              <div className="absolute ltr:right-0 rtl:left-0 top-full mt-1 bg-card rounded-xl shadow-lg border border-border py-1 min-w-[140px] z-50">
                 {(Object.entries(localeNames) as [Locale, string][]).map(([loc, name]) => (
                   <button
                     key={loc}
                     onClick={() => void switchLocale(loc)}
                     className={cn(
-                      'w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors',
+                      'w-full ltr:text-left rtl:text-right px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors',
                       loc === locale && 'text-primary font-medium bg-primary-50'
                     )}
                   >
