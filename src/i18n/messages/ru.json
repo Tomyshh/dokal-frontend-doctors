@@ -475,7 +475,10 @@
     "cardBookAppointment": "Записаться на приём",
     "whatsapp": "Номер WhatsApp",
     "website": "Веб-сайт",
-    "linkCopied": "Ссылка скопирована"
+    "linkCopied": "Ссылка скопирована",
+    "notPublishedTitle": "Ваш профиль не опубликован",
+    "notPublishedDescription": "Пациенты не могут вас найти. Добавьте фото профиля, чтобы появиться в результатах поиска.",
+    "notPublishedAction": "Добавить фото"
   },
   "notifications": {
     "title": "Уведомления",

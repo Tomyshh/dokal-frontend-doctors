@@ -476,7 +476,10 @@
     "cardBookAppointment": "קבעו תור",
     "whatsapp": "מספר וואטסאפ",
     "website": "אתר אינטרנט",
-    "linkCopied": "הקישור הועתק"
+    "linkCopied": "הקישור הועתק",
+    "notPublishedTitle": "הפרופיל שלך לא מפורסם",
+    "notPublishedDescription": "מטופלים לא יכולים למצוא אותך. הוסיפו תמונת פרופיל כדי להופיע בתוצאות החיפוש.",
+    "notPublishedAction": "הוספת תמונה"
   },
   "notifications": {
     "title": "התראות",

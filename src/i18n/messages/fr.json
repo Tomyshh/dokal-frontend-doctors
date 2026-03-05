@@ -477,7 +477,10 @@
     "cardBookAppointment": "Prendre rendez-vous",
     "whatsapp": "Numéro WhatsApp",
     "website": "Site web",
-    "linkCopied": "Lien copié dans le presse-papiers"
+    "linkCopied": "Lien copié dans le presse-papiers",
+    "notPublishedTitle": "Votre profil n'est pas publié",
+    "notPublishedDescription": "Les patients ne peuvent pas vous trouver. Ajoutez votre photo de profil pour apparaître dans les résultats de recherche.",
+    "notPublishedAction": "Ajouter ma photo"
   },
   "notifications": {
     "title": "Notifications",

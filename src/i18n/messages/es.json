@@ -477,7 +477,10 @@
     "cardBookAppointment": "Reservar cita",
     "whatsapp": "WhatsApp number",
     "website": "Website",
-    "linkCopied": "Link copied to clipboard"
+    "linkCopied": "Link copied to clipboard",
+    "notPublishedTitle": "Tu perfil no está publicado",
+    "notPublishedDescription": "Los pacientes no pueden encontrarte. Añade tu foto de perfil para aparecer en los resultados de búsqueda.",
+    "notPublishedAction": "Añadir mi foto"
   },
   "notifications": {
     "title": "Notifications",

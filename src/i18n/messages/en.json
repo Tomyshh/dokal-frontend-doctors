@@ -477,7 +477,10 @@
     "cardBookAppointment": "Book appointment",
     "whatsapp": "WhatsApp number",
     "website": "Website",
-    "linkCopied": "Link copied to clipboard"
+    "linkCopied": "Link copied to clipboard",
+    "notPublishedTitle": "Your profile is not published",
+    "notPublishedDescription": "Patients cannot find you. Add your profile photo to appear in search results.",
+    "notPublishedAction": "Add my photo"
   },
   "notifications": {
     "title": "Notifications",

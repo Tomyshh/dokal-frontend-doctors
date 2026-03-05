@@ -136,6 +136,8 @@ export interface Practitioner {
   is_complete?: boolean;
   /** From GET /practitioners/me only: list of required fields not filled when is_complete is false */
   missing_fields?: string[];
+  /** From GET /practitioners/me only: true if practitioner has an avatar and is visible in patient search */
+  is_published?: boolean;
   latitude: number | null;
   longitude: number | null;
   about: string | null;

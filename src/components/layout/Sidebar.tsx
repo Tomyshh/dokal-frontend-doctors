@@ -44,12 +44,19 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const practitionerProfile = usePractitionerProfile();
 
   const isSecretary = profile?.role === 'secretary';
+  const isNotPublished = Boolean(
+    !isSecretary &&
+      practitionerProfile &&
+      !practitionerProfile.isLoading &&
+      !practitionerProfile.isPublished
+  );
   const showSettingsBadge = Boolean(
     !isSecretary &&
       practitionerProfile &&
       !practitionerProfile.isLoading &&
       practitionerProfile.completionPercent < 100
   );
+  const badgeColor = isNotPublished ? 'bg-red-500' : 'bg-amber-500';
 
   const pathnameWithoutLocale =
     pathname.startsWith(`/${locale}`) ? pathname.slice(`/${locale}`.length) || '/' : pathname;
@@ -177,7 +184,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <link.icon className="h-5 w-5 shrink-0" />
               {link.badge && collapsed && (
                 <span
-                  className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white"
+                  className={cn('absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white', badgeColor)}
                   aria-label={t('profileIncompleteBadge')}
                 />
               )}
@@ -187,7 +194,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <span className="truncate">{link.label}</span>
                 {link.badge && (
                   <span
-                    className="ml-auto shrink-0 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                    className={cn('ml-auto shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white', badgeColor)}
                     aria-label={t('profileIncompleteBadge')}
                   >
                     {practitionerProfile?.completionPercent ?? 0}%
@@ -220,7 +227,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <Settings className="h-5 w-5 shrink-0" />
                 {showSettingsBadge && (
                   <span
-                    className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white"
+                    className={cn('absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white', badgeColor)}
                     aria-label={t('profileIncompleteBadge')}
                   />
                 )}
@@ -236,7 +243,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <Settings className="h-5 w-5 shrink-0" />
                 {showSettingsBadge && (
                   <span
-                    className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white"
+                    className={cn('absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white', badgeColor)}
                     aria-label={t('profileIncompleteBadge')}
                   />
                 )}
@@ -244,7 +251,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <span className="truncate flex-1 text-left">{t('settings')}</span>
               {showSettingsBadge && (
                 <span
-                  className="shrink-0 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                  className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white', badgeColor)}
                   aria-label={t('profileIncompleteBadge')}
                 >
                   {practitionerProfile?.completionPercent ?? 0}%
@@ -283,7 +290,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   <span className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{link.label}</span>
                   {link.badge != null && link.badge > 0 && (
                     <span
-                      className="shrink-0 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                      className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white', badgeColor)}
                       aria-label={t('profileIncompleteBadge')}
                     >
                       {link.badge}

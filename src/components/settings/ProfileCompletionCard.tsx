@@ -110,7 +110,9 @@ export default function ProfileCompletionCard({
                         'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all duration-200',
                         isCompleted
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
-                          : 'bg-amber-50 text-amber-800 border border-amber-200/60 hover:bg-amber-100 hover:shadow-sm cursor-pointer'
+                          : item.key === 'avatar'
+                            ? 'bg-red-50 text-red-800 border border-red-300 hover:bg-red-100 hover:shadow-sm cursor-pointer animate-pulse'
+                            : 'bg-amber-50 text-amber-800 border border-amber-200/60 hover:bg-amber-100 hover:shadow-sm cursor-pointer'
                       )}
                     >
                       {isCompleted ? (

@@ -19,6 +19,7 @@ interface PractitionerProfileContextValue {
   profile: Profile | null | undefined;
   completionPercent: number;
   isComplete: boolean;
+  isPublished: boolean;
   completionItems: ReturnType<typeof getProfileCompletionItems>;
   businessCardCompletionItems: ReturnType<typeof getBusinessCardCompletionItems>;
   isLoading: boolean;
@@ -44,11 +45,13 @@ export function PractitionerProfileProvider({
     const completionItems = getProfileCompletionItems(practitioner, profile);
     const businessCardCompletionItems = getBusinessCardCompletionItems(practitioner);
     const isComplete = isPractitionerCompleteFromBackend(practitioner);
+    const isPublished = practitioner?.is_published ?? false;
     return {
       practitioner,
       profile,
       completionPercent,
       isComplete,
+      isPublished,
       completionItems,
       businessCardCompletionItems,
       isLoading,

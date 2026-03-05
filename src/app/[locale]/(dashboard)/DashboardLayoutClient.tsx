@@ -12,12 +12,42 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { Clock, X } from 'lucide-react';
+import { Clock, X, EyeOff } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useQuery } from '@tanstack/react-query';
 import { getMyPractitionerOrNull } from '@/lib/practitioner';
-import { PractitionerProfileProvider } from '@/providers/PractitionerProfileProvider';
+import { PractitionerProfileProvider, usePractitionerProfile } from '@/providers/PractitionerProfileProvider';
 import SubscriptionBlocker from '@/components/payment/SubscriptionBlocker';
+
+function NotPublishedBanner() {
+  const t = useTranslations('settings');
+  const practitionerProfile = usePractitionerProfile();
+
+  if (
+    !practitionerProfile ||
+    practitionerProfile.isLoading ||
+    practitionerProfile.isPublished
+  ) return null;
+
+  return (
+    <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-3 text-sm">
+      <div className="max-w-7xl mx-auto flex items-center gap-3">
+        <EyeOff className="h-5 w-5 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <span className="font-semibold">{t('notPublishedTitle')}</span>
+          <span className="mx-1.5 opacity-60">—</span>
+          <span className="opacity-90">{t('notPublishedDescription')}</span>
+        </div>
+        <Link
+          href="/settings/profile"
+          className="shrink-0 text-xs font-semibold bg-white/20 hover:bg-white/30 rounded-full px-4 py-1.5 transition-colors"
+        >
+          {t('notPublishedAction')}
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardLayoutClient({ children }: { children: ReactNode }) {
   const { loading, user, profile, subscriptionStatus, signOut } = useAuth();
@@ -170,6 +200,8 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
     >
       <SocketProvider>
         <div className="min-h-screen bg-background">
+          <NotPublishedBanner />
+
           {/* Trial Banner */}
           {showTrialBanner && subscriptionStatus?.trial && (
           <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2.5 text-sm">
