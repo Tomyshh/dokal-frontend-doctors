@@ -94,6 +94,7 @@ export default function TeamPage() {
   const removeMember = useRemoveOrganizationMember();
   const updateMember = useUpdateOrganizationMember();
   const updateLicenses = useUpdatePractitionerLicenses();
+  const activeMembers = (members ?? []).filter((m) => m.is_active !== false);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<InviteForm>(INITIAL_FORM);
@@ -108,7 +109,7 @@ export default function TeamPage() {
   const [editLicenseError, setEditLicenseError] = useState('');
 
   // Check if current user is owner or admin
-  const currentMember = members?.find((m) => m.user_id === profile?.id);
+  const currentMember = activeMembers.find((m) => m.user_id === profile?.id);
   const canManage = currentMember?.role === 'owner' || currentMember?.role === 'admin';
 
   const isTrial =
@@ -346,12 +347,8 @@ export default function TeamPage() {
   }
 
   // Seat counts for cost display
-  const practitionerCount = members?.filter(
-    (m) => m.staff_type === 'practitioner' && m.is_active !== false
-  ).length ?? 1;
-  const secretaryCount = members?.filter(
-    (m) => m.staff_type === 'secretary' && m.is_active !== false
-  ).length ?? 0;
+  const practitionerCount = activeMembers.filter((m) => m.staff_type === 'practitioner').length;
+  const secretaryCount = activeMembers.filter((m) => m.staff_type === 'secretary').length;
   const orgPlan = organization.type === 'enterprise' ? 'enterprise' as const
     : organization.type === 'clinic' ? 'clinic' as const
     : 'individual' as const;
@@ -406,12 +403,12 @@ export default function TeamPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            {t('members')} ({members?.length ?? 0})
+            {t('members')} ({activeMembers.length})
           </CardTitle>
         </CardHeader>
 
         <div className="divide-y divide-border">
-          {members?.map((member) => (
+          {activeMembers.map((member) => (
             <div key={member.id} className="flex items-center gap-4 p-4">
               <Avatar
                 src={member.profiles?.avatar_url}
@@ -483,7 +480,7 @@ export default function TeamPage() {
             </div>
           ))}
 
-          {(!members || members.length === 0) && (
+          {activeMembers.length === 0 && (
             <div className="p-8 text-center text-muted-foreground text-sm">
               {t('noMembers')}
             </div>
@@ -492,7 +489,7 @@ export default function TeamPage() {
       </Card>
 
       {/* Cost Recap (clinic plan) */}
-      {orgPlan === 'clinic' && members && members.length > 0 && (
+      {orgPlan === 'clinic' && activeMembers.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
