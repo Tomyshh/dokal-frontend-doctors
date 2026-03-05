@@ -228,6 +228,8 @@ export interface RegisterPractitionerRequest {
   // Optional: create a new clinic
   organization_name?: string;
   organization_type?: 'individual' | 'clinic' | 'enterprise';
+  // Admin referral tracking
+  referral_code?: string;
 }
 
 // ==========================================

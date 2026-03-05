@@ -9,6 +9,7 @@ import { defaultLocale } from '@/i18n/config';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
+  const ref = searchParams.get('ref');
   let next = searchParams.get('next') ?? `/${defaultLocale}`;
   if (!next.startsWith('/')) {
     next = `/${defaultLocale}`;
@@ -18,15 +19,17 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      const separator = next.includes('?') ? '&' : '?';
+      const finalNext = ref ? `${next}${separator}ref=${encodeURIComponent(ref)}` : next;
       const forwardedHost = request.headers.get('x-forwarded-host');
       const isLocalEnv = process.env.NODE_ENV === 'development';
       if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${origin}${finalNext}`);
       }
       if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+        return NextResponse.redirect(`https://${forwardedHost}${finalNext}`);
       }
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(`${origin}${finalNext}`);
     }
   }
 

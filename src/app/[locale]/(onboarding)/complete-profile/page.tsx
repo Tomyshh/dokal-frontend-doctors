@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import api from '@/lib/api';
 import type { RegisterPractitionerRequest } from '@/types/api';
@@ -110,7 +111,15 @@ export default function CompleteProfilePage() {
   const t = useTranslations('auth');
   const locale = useLocale();
   const rtl = isRtl(locale);
+  const searchParams = useSearchParams();
   const { user, profile, loading: authLoading, refreshUserData, signOut, loggingOut } = useAuth();
+
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) {
+      try { sessionStorage.setItem('referral_code', ref); } catch { /* ignore */ }
+    }
+  }, [searchParams]);
 
   const googleMeta = user?.user_metadata;
 
@@ -325,6 +334,9 @@ export default function CompleteProfilePage() {
     setLoading(true);
     try {
       const normalizedPhone = normalizeIsraelPhoneToE164(form.phone);
+      let storedRef: string | undefined;
+      try { storedRef = sessionStorage.getItem('referral_code') ?? undefined; } catch { /* ignore */ }
+
       const payload: RegisterPractitionerRequest = {
         first_name: form.firstName,
         last_name: form.lastName,
@@ -340,6 +352,7 @@ export default function CompleteProfilePage() {
         longitude: form.longitude ?? undefined,
         organization_name: `Cabinet Dr ${form.lastName}`.trim(),
         organization_type: 'individual',
+        referral_code: storedRef,
       };
 
       const { data: raw } = await api.post<unknown>('/practitioners/register', payload);

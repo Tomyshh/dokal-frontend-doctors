@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -14,6 +14,7 @@ export default function SignupPage() {
   const t = useTranslations('auth');
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,15 +23,24 @@ export default function SignupPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const loading = signupLoading || googleLoading;
 
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) {
+      try { sessionStorage.setItem('referral_code', ref); } catch { /* ignore */ }
+    }
+  }, [searchParams]);
+
   const handleGoogle = async () => {
     setError('');
     setGoogleLoading(true);
     try {
+      const ref = searchParams.get('ref') || '';
+      const refParam = ref ? `&ref=${encodeURIComponent(ref)}` : '';
       const supabase = createClient();
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/${locale}/complete-profile`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/${locale}/complete-profile${refParam}`,
           queryParams: { prompt: 'select_account' },
         },
       });
