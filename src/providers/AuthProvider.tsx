@@ -14,7 +14,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import type { Profile } from '@/types';
 import type { SubscriptionStatus } from '@/lib/subscription';
 import { getSubscriptionStatus } from '@/lib/subscription';
-import api from '@/lib/api';
+import api, { markAuthInitComplete } from '@/lib/api';
 import { getMyPractitionerOrNull } from '@/lib/practitioner';
 import { useLocale } from 'next-intl';
 import { LogoutScreen } from '@/components/LogoutScreen';
@@ -139,14 +139,15 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = createClient();
     let cancelled = false;
 
-    // Safety net: if everything takes too long, unblock the UI
     const timeout = setTimeout(() => {
-      if (!cancelled) setLoading(false);
+      if (!cancelled) {
+        setLoading(false);
+        markAuthInitComplete();
+      }
     }, INIT_TIMEOUT_MS);
 
     const init = async () => {
       try {
-        // getSession reads from the cookie/localStorage — fast, no network.
         const {
           data: { session: currentSession },
         } = await supabase.auth.getSession();
@@ -159,7 +160,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
           await fetchUserData();
         }
       } catch {
-        // If getSession itself fails, just clear everything
         setUser(null);
         setSession(null);
         setProfile(null);
@@ -168,6 +168,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         if (!cancelled) {
           clearTimeout(timeout);
           setLoading(false);
+          markAuthInitComplete();
         }
       }
     };
