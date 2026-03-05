@@ -58,6 +58,7 @@ export default function LoginPage() {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback?next=/${locale}`,
+          queryParams: { prompt: 'select_account' },
         },
       });
       if (authError) setError(authError.message);
