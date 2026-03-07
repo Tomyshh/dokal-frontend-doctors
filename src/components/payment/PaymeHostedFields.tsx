@@ -205,10 +205,11 @@ export default function PaymeHostedFields({
 
     try {
       const sale: PayMeSaleData = {
-        payerFirstName: buyerFirstName,
-        payerLastName: buyerLastName,
-        payerEmail: buyerEmail,
-        payerPhone: buyerPhone || undefined,
+        payerFirstName: buyerFirstName || 'N/A',
+        payerLastName: buyerLastName || 'N/A',
+        payerEmail: buyerEmail || 'noreply@dokal.pro',
+        payerPhone: buyerPhone || '0500000000',
+        payerSocialId: '000000000',
         total: {
           label: 'Dokal Subscription',
           amount: {
