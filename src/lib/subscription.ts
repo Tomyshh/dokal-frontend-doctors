@@ -93,7 +93,7 @@ export interface Subscription {
   practitioner_seats: number;
   secretary_seats: number;
   total_price_agorot: number;
-  price_agorot: number; // legacy — same as total_price_agorot
+  price_agorot: number;
   status: 'active' | 'trialing' | 'cancelled' | 'paused' | 'past_due' | 'expired';
   current_period_start: string;
   current_period_end: string;
@@ -102,6 +102,7 @@ export interface Subscription {
   trial_end: string | null;
   cancelled_at: string | null;
   paused_at: string | null;
+  payment_method_id: string | null;
 }
 
 export interface TrialInfo {
@@ -212,6 +213,16 @@ export async function listCards(): Promise<SubscriptionCard[]> {
 
 export async function deleteCard(id: string): Promise<void> {
   await api.delete(`${BASE}/cards/${id}`);
+}
+
+export interface TokenizeCardResponse {
+  sale_url: string;
+  payme_sale_id: string;
+}
+
+export async function tokenizeCard(): Promise<TokenizeCardResponse> {
+  const { data } = await api.post<TokenizeCardResponse>(`${BASE}/cards/tokenize`, {});
+  return data;
 }
 
 export async function subscribe(payload: SubscribePayload): Promise<SubscribeResponse> {

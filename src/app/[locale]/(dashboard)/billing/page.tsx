@@ -17,6 +17,9 @@ import {
   downgradePlan,
   listCards,
   deleteCard,
+  tokenizeCard,
+  subscribe,
+  cancelSubscription,
   createPaymentSession,
   BASE_PRICES_ILS,
   SEAT_PRICES_ILS,
@@ -39,6 +42,9 @@ import {
   Plus,
   Receipt,
   Users,
+  XCircle,
+  Lock,
+  ShieldCheck,
 } from 'lucide-react';
 
 function maskCardLabel(card: SubscriptionCard) {
@@ -191,12 +197,28 @@ export default function BillingPage() {
     card: null,
   });
 
+  // Cancel subscription state
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+
+  // Subscribe state (for trial/non-subscribed users)
+  const [subscribeDialogOpen, setSubscribeDialogOpen] = useState(false);
+  const [subscribeLoading, setSubscribeLoading] = useState(false);
+  const [subscribePlan, setSubscribePlan] = useState<PlanType>(currentPlan);
+  const [subscribeCardId, setSubscribeCardId] = useState<string>('');
+  const [subscribeError, setSubscribeError] = useState('');
+
+  const isActive = subscriptionStatus?.subscription?.status === 'active';
+  const isCancelled = subscriptionStatus?.subscription?.status === 'cancelled';
+  const canSubscribe = isTrial || isTrialing || (!isActive && !isCancelled);
+  const activePaymentMethodId = subscriptionStatus?.subscription?.payment_method_id;
+
   const handleAddCardViaPayme = async () => {
     setCardFormError('');
     setAddCardLoading(true);
     try {
-      const session = await createPaymentSession({ plan: currentPlan });
-      window.location.href = session.sale_url;
+      const result = await tokenizeCard();
+      window.location.href = result.sale_url;
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
       const msg = axiosError?.response?.data?.error?.message || tsub('genericError');
@@ -204,6 +226,54 @@ export default function BillingPage() {
       toast.error(tc('saveErrorTitle'), msg);
       setAddCardLoading(false);
     }
+  };
+
+  const handleCancelSubscription = async () => {
+    setCancelLoading(true);
+    try {
+      await cancelSubscription();
+      await refreshSubscription();
+      setCancelDialogOpen(false);
+      toast.success(tc('saveSuccess'));
+      window.location.reload();
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
+      const msg = axiosError?.response?.data?.error?.message || tsub('genericError');
+      toast.error(tc('saveErrorTitle'), msg);
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
+  const handleSubscribe = async () => {
+    setSubscribeError('');
+    setSubscribeLoading(true);
+    try {
+      if (subscribeCardId && cards?.some((c) => c.id === subscribeCardId)) {
+        await subscribe({ cardId: subscribeCardId, plan: subscribePlan });
+        await refreshSubscription();
+        setSubscribeDialogOpen(false);
+        toast.success(tc('saveSuccess'));
+        window.location.reload();
+      } else {
+        const session = await createPaymentSession({ plan: subscribePlan });
+        window.location.href = session.sale_url;
+      }
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
+      const msg = axiosError?.response?.data?.error?.message || tsub('genericError');
+      setSubscribeError(msg);
+      toast.error(tc('saveErrorTitle'), msg);
+    } finally {
+      setSubscribeLoading(false);
+    }
+  };
+
+  const openSubscribeDialog = () => {
+    setSubscribePlan(currentPlan);
+    setSubscribeCardId(cardsSorted.length > 0 ? cardsSorted[0].id : '');
+    setSubscribeError('');
+    setSubscribeDialogOpen(true);
   };
 
   const cardsSorted = useMemo(() => {
@@ -328,6 +398,15 @@ export default function BillingPage() {
 
                 <p className="text-xs text-muted-foreground">{t('planHint')}</p>
 
+                {(isTrial || isTrialing) && (
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <Button onClick={openSubscribeDialog} className="gap-2">
+                      <CreditCard className="h-4 w-4" />
+                      {tsub('subscribeNow')}
+                    </Button>
+                  </div>
+                )}
+
                 {!isTrial && !isTrialing && (
                   <div className="flex flex-wrap gap-3 pt-2">
                     {isIndividual && (
@@ -360,6 +439,16 @@ export default function BillingPage() {
                           {tsub('contactSales')}
                         </a>
                       </div>
+                    )}
+                    {isActive && (
+                      <Button
+                        variant="ghost"
+                        onClick={() => setCancelDialogOpen(true)}
+                        className="gap-2 text-gray-400 hover:text-red-600"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        {tsub('cancelSubscription')}
+                      </Button>
                     )}
                   </div>
                 )}
@@ -460,15 +549,22 @@ export default function BillingPage() {
                           {t('expires')}: {String(card.expiry_month).padStart(2, '0')}/{String(card.expiry_year).slice(-2)}
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteDialog({ open: true, card })}
-                        className="text-gray-500 hover:text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        {tc('delete')}
-                      </Button>
+                      {activePaymentMethodId === card.id ? (
+                        <span className="inline-flex items-center gap-1.5 text-xs text-primary font-medium px-2 py-1 rounded-lg bg-primary/5" title={tsub('cardLinkedToSubscription')}>
+                          <ShieldCheck className="h-3.5 w-3.5" />
+                          {tsub('activeCard')}
+                        </span>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeleteDialog({ open: true, card })}
+                          className="text-gray-500 hover:text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          {tc('delete')}
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -767,6 +863,131 @@ export default function BillingPage() {
             </div>
           </div>
         )}
+      </Dialog>
+
+      {/* ─── Cancel subscription dialog ─────────────────────────────── */}
+      <Dialog
+        open={cancelDialogOpen}
+        onClose={() => setCancelDialogOpen(false)}
+        title={tsub('cancelConfirmTitle')}
+      >
+        <div className="space-y-4">
+          <div className="rounded-xl bg-amber-50 border border-amber-200 p-4">
+            <div className="flex items-center gap-2 text-amber-700 mb-2">
+              <AlertTriangle className="h-5 w-5" />
+              <span className="font-semibold">{tsub('cancelConfirmTitle')}</span>
+            </div>
+            <p className="text-sm text-amber-600">{tsub('cancelConfirmText')}</p>
+          </div>
+
+          {subscriptionStatus?.subscription?.current_period_end && (
+            <div className="rounded-xl bg-gray-50 p-3 text-center">
+              <p className="text-sm text-gray-600">
+                {tsub('cancelAccessUntil', {
+                  date: new Date(subscriptionStatus.subscription.current_period_end).toLocaleDateString(),
+                })}
+              </p>
+            </div>
+          )}
+
+          <div className="flex gap-3 justify-end pt-2">
+            <Button variant="ghost" onClick={() => setCancelDialogOpen(false)}>
+              {tc('cancel')}
+            </Button>
+            <Button variant="destructive" onClick={handleCancelSubscription} loading={cancelLoading}>
+              <XCircle className="h-4 w-4" />
+              {tsub('cancelSubscription')}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* ─── Subscribe dialog (trial/non-subscribed) ────────────────── */}
+      <Dialog
+        open={subscribeDialogOpen}
+        onClose={() => setSubscribeDialogOpen(false)}
+        title={tsub('subscribeNow')}
+        className="max-w-xl"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">{tsub('subscribeNowDesc')}</p>
+
+          {/* Plan selector */}
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{tsub('choosePlan')}</p>
+            {(['individual', 'clinic'] as PlanType[]).map((plan) => (
+              <button
+                key={plan}
+                type="button"
+                onClick={() => setSubscribePlan(plan)}
+                className={`w-full flex items-center gap-3 rounded-xl p-3 text-left border-2 transition-all ${
+                  subscribePlan === plan
+                    ? 'border-primary bg-primary/5'
+                    : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${subscribePlan === plan ? 'border-primary' : 'border-gray-300'}`}>
+                  {subscribePlan === plan && <div className="w-2 h-2 rounded-full bg-primary" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm font-semibold text-gray-900">
+                    {plan === 'individual' ? tsub('planIndividual') : tsub('planClinic')}
+                  </span>
+                  <span className="text-xs text-gray-500 ml-2">
+                    {BASE_PRICES_ILS[plan]} ₪/{tsub('perMonth')}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Card selector (if cards available) */}
+          {cardsSorted.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{tsub('chooseCard')}</p>
+              {cardsSorted.map((card) => (
+                <button
+                  key={card.id}
+                  type="button"
+                  onClick={() => setSubscribeCardId(card.id)}
+                  className={`w-full flex items-center gap-3 rounded-xl p-3 text-left border-2 transition-all ${
+                    subscribeCardId === card.id
+                      ? 'border-primary bg-primary/5'
+                      : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${subscribeCardId === card.id ? 'border-primary' : 'border-gray-300'}`}>
+                    {subscribeCardId === card.id && <div className="w-2 h-2 rounded-full bg-primary" />}
+                  </div>
+                  <CreditCard className="h-4 w-4 text-gray-400 shrink-0" />
+                  <span className="text-sm font-semibold text-gray-900">{maskCardLabel(card)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {cardsSorted.length === 0 && (
+            <div className="rounded-xl bg-gray-50 border border-border/50 p-3 text-center">
+              <p className="text-xs text-gray-500">{tsub('noCardRedirectPayme')}</p>
+            </div>
+          )}
+
+          {subscribeError && (
+            <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {subscribeError}
+            </div>
+          )}
+
+          <div className="flex gap-3 justify-end pt-2">
+            <Button variant="ghost" onClick={() => setSubscribeDialogOpen(false)}>
+              {tc('cancel')}
+            </Button>
+            <Button onClick={handleSubscribe} loading={subscribeLoading} className="gap-2">
+              <Lock className="h-4 w-4" />
+              {cardsSorted.length > 0 ? tsub('subscribeWithCard') : tsub('payNow')} — {BASE_PRICES_ILS[subscribePlan]} ₪
+            </Button>
+          </div>
+        </div>
       </Dialog>
     </div>
   );

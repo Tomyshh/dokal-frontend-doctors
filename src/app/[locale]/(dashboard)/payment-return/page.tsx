@@ -2,22 +2,33 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { getSubscriptionStatus } from '@/lib/subscription';
-import { CheckCircle2, Lock, AlertTriangle, Loader2 } from 'lucide-react';
+import { CheckCircle2, Lock, AlertTriangle, Loader2, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export default function PaymentReturnPage() {
   const t = useTranslations('subscription');
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const { refreshSubscription } = useAuth();
 
+  const isTokenize = searchParams.get('type') === 'tokenize';
   const [status, setStatus] = useState<'loading' | 'success' | 'pending'>('loading');
   const polled = useRef(false);
 
   useEffect(() => {
     if (polled.current) return;
     polled.current = true;
+
+    if (isTokenize) {
+      setStatus('success');
+      setTimeout(() => {
+        window.location.assign(`/${locale}/billing`);
+      }, 2000);
+      return;
+    }
 
     let attempts = 0;
     const maxAttempts = 10;
@@ -47,7 +58,7 @@ export default function PaymentReturnPage() {
     };
 
     setTimeout(poll, 1500);
-  }, [refreshSubscription, locale]);
+  }, [refreshSubscription, locale, isTokenize]);
 
   if (status === 'loading') {
     return (
@@ -66,11 +77,15 @@ export default function PaymentReturnPage() {
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center space-y-6 max-w-md">
           <div className="mx-auto w-20 h-20 rounded-full bg-green-50 flex items-center justify-center">
-            <CheckCircle2 className="h-10 w-10 text-green-500" />
+            {isTokenize ? <CreditCard className="h-10 w-10 text-green-500" /> : <CheckCircle2 className="h-10 w-10 text-green-500" />}
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">{t('successTitle')}</h2>
-            <p className="text-sm text-gray-500 mt-2">{t('successMessage')}</p>
+            <h2 className="text-xl font-bold text-gray-900">
+              {isTokenize ? t('cardAddedSuccess') : t('successTitle')}
+            </h2>
+            <p className="text-sm text-gray-500 mt-2">
+              {isTokenize ? t('cardAddedSuccessDesc') : t('successMessage')}
+            </p>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
             <Lock className="h-3 w-3" />

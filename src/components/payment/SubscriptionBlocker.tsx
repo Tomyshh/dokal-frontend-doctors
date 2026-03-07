@@ -1,9 +1,16 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
-import { createPaymentSession, BASE_PRICES_ILS, type PlanType } from '@/lib/subscription';
+import {
+  createPaymentSession,
+  subscribe,
+  listCards,
+  BASE_PRICES_ILS,
+  type PlanType,
+  type SubscriptionCard,
+} from '@/lib/subscription';
 import { Button } from '@/components/ui/Button';
 import { Lock, AlertTriangle, CreditCard, CheckCircle2, Crown, Users, Building2, Globe, Clock, LogOut, EyeOff, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -96,6 +103,12 @@ function PlanOption({
   );
 }
 
+function maskCard(card: SubscriptionCard) {
+  const brand = card.brand ? card.brand.toUpperCase() : 'CARD';
+  const last4 = card.last4 ? `•••• ${card.last4}` : card.buyer_card_mask || '';
+  return `${brand} ${last4}`.trim();
+}
+
 export default function SubscriptionBlocker({ subscriptionStatus }: SubscriptionBlockerProps) {
   const t = useTranslations('subscription');
   const locale = useLocale();
@@ -105,6 +118,19 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [cards, setCards] = useState<SubscriptionCard[]>([]);
+  const [selectedCardId, setSelectedCardId] = useState<string>('');
+  const [cardsLoaded, setCardsLoaded] = useState(false);
+
+  useEffect(() => {
+    listCards()
+      .then((result) => {
+        setCards(result);
+        if (result.length > 0) setSelectedCardId(result[0].id);
+      })
+      .catch(() => {})
+      .finally(() => setCardsLoaded(true));
+  }, []);
 
   const reason = getBlockReason(subscriptionStatus);
   const selectedPrice = BASE_PRICES_ILS[selectedPlan];
@@ -113,14 +139,21 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
     setError('');
     setLoading(true);
     try {
-      const session = await createPaymentSession({ plan: selectedPlan });
-      window.location.href = session.sale_url;
+      if (selectedCardId && cards.some((c) => c.id === selectedCardId)) {
+        await subscribe({ cardId: selectedCardId, plan: selectedPlan });
+        await refreshSubscription();
+        setSuccess(true);
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        const session = await createPaymentSession({ plan: selectedPlan });
+        window.location.href = session.sale_url;
+      }
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
       setError(axiosError?.response?.data?.error?.message || t('genericError'));
       setLoading(false);
     }
-  }, [selectedPlan, t]);
+  }, [selectedPlan, selectedCardId, cards, t, refreshSubscription]);
 
   const getTitle = () => {
     switch (reason) {
@@ -198,6 +231,33 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
             <PlanOption plan="clinic" selected={selectedPlan === 'clinic'} onSelect={() => setSelectedPlan('clinic')} t={t} />
           </div>
 
+          {/* Saved cards */}
+          {cardsLoaded && cards.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('chooseCard')}</p>
+              {cards.map((card) => (
+                <button
+                  key={card.id}
+                  type="button"
+                  onClick={() => setSelectedCardId(card.id)}
+                  className={cn(
+                    'relative flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all w-full',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20',
+                    selectedCardId === card.id
+                      ? 'border-primary bg-primary/5 shadow-sm'
+                      : 'border-gray-200 hover:border-gray-300',
+                  )}
+                >
+                  <CreditCard className="h-4 w-4 text-gray-400 shrink-0" />
+                  <span className="text-sm font-semibold text-gray-900">{maskCard(card)}</span>
+                  <div className={cn('ml-auto w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0', selectedCardId === card.id ? 'border-primary' : 'border-gray-300')}>
+                    {selectedCardId === card.id && <div className="w-2 h-2 rounded-full bg-primary" />}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Error */}
           {error && (
             <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
@@ -205,7 +265,7 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
             </div>
           )}
 
-          {/* Pay now button — redirects to PayMe hosted page */}
+          {/* Pay now button */}
           <div className="pt-2">
             <Button
               type="button"
@@ -213,9 +273,18 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
               onClick={handlePayNow}
               loading={loading}
             >
-              <Lock className="h-4 w-4" />
-              {t('payNow')} — {selectedPrice} ₪/{t('perMonth')}
-              <ExternalLink className="h-3.5 w-3.5 ml-1 opacity-60" />
+              {cards.length > 0 && selectedCardId ? (
+                <>
+                  <CreditCard className="h-4 w-4" />
+                  {t('subscribeWithCard')} — {selectedPrice} ₪/{t('perMonth')}
+                </>
+              ) : (
+                <>
+                  <Lock className="h-4 w-4" />
+                  {t('payNow')} — {selectedPrice} ₪/{t('perMonth')}
+                  <ExternalLink className="h-3.5 w-3.5 ml-1 opacity-60" />
+                </>
+              )}
             </Button>
             <p className="text-[10px] text-gray-400 text-center mt-2">
               {t('securityNotice')}
