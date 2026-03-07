@@ -253,7 +253,19 @@
     "deletePaymentMethodConfirm": "¿Está seguro de que desea eliminar {card}?",
     "cardDeletedSuccess": "Tarjeta eliminada con éxito.",
     "organizationTitle": "Organización",
-    "organizationHint": "La configuración de su organización se gestiona desde la página del equipo."
+    "organizationHint": "La configuración de su organización se gestiona desde la página del equipo.",
+    "trialSubscribeCtaTitle": "Cambie ahora a un plan de pago",
+    "trialSubscribeCtaDescription": "Su primer pago de {price} ₪ se cobrará hoy. La primera renovación automática comenzará el {date}.",
+    "trialSubscribeCtaNote": "La prueba gratuita termina inmediatamente cuando se activa el plan de pago.",
+    "subscribeDialogHeroTitle": "Confirme su suscripción",
+    "subscribeDialogHeroDescription": "El primer mes se cobra inmediatamente y luego la suscripción mensual comienza automáticamente en la próxima fecha de renovación.",
+    "chargedTodayLabel": "Cobrado hoy",
+    "nextRenewalLabel": "Primera renovación",
+    "redirectToPaymeTitle": "Pago seguro en PayMe",
+    "savedCardChargeTitle": "Tarjeta guardada detectada",
+    "savedCardChargeDescription": "La tarjeta seleccionada se cobrará inmediatamente. Las renovaciones mensuales comenzarán el {date}.",
+    "subscribeAndChargeNow": "Activar y cobrar ahora",
+    "continueToPayme": "Continuar a PayMe"
   },
   "nav": {
     "menu": "Menu",

@@ -253,7 +253,19 @@
     "deletePaymentMethodConfirm": "Are you sure you want to delete {card}?",
     "cardDeletedSuccess": "Card deleted successfully.",
     "organizationTitle": "Organization",
-    "organizationHint": "Your organization settings can be managed from the team page."
+    "organizationHint": "Your organization settings can be managed from the team page.",
+    "trialSubscribeCtaTitle": "Switch to a paid plan now",
+    "trialSubscribeCtaDescription": "Your first payment of {price} ₪ will be charged today. The first automatic renewal will start on {date}.",
+    "trialSubscribeCtaNote": "Your free trial ends immediately once the paid plan is activated.",
+    "subscribeDialogHeroTitle": "Confirm your subscription",
+    "subscribeDialogHeroDescription": "The first month is charged immediately, then the monthly subscription starts automatically on the next renewal date.",
+    "chargedTodayLabel": "Charged today",
+    "nextRenewalLabel": "First renewal",
+    "redirectToPaymeTitle": "Secure payment on PayMe",
+    "savedCardChargeTitle": "Saved card detected",
+    "savedCardChargeDescription": "The selected card will be charged immediately. Monthly renewals will start on {date}.",
+    "subscribeAndChargeNow": "Activate and charge now",
+    "continueToPayme": "Continue to PayMe"
   },
   "nav": {
     "menu": "Menu",

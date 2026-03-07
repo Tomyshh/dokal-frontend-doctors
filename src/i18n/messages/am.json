@@ -253,7 +253,19 @@
     "deletePaymentMethodConfirm": "{card} መሰረዝ ይፈልጋሉ?",
     "cardDeletedSuccess": "ካርድ በተሳካ ሁኔታ ተሰርዟል።",
     "organizationTitle": "ድርጅት",
-    "organizationHint": "የድርጅትዎ ቅንብሮች ከቡድን ገጹ ይቆጣጠራሉ።"
+    "organizationHint": "የድርጅትዎ ቅንብሮች ከቡድን ገጹ ይቆጣጠራሉ።",
+    "trialSubscribeCtaTitle": "አሁን ወደ የሚከፈልበት እቅድ ይቀይሩ",
+    "trialSubscribeCtaDescription": "የመጀመሪያው ክፍያ {price} ₪ ዛሬ ይከፈላል። የመጀመሪያው ራስ-ሰር እድሳት በ {date} ይጀምራል።",
+    "trialSubscribeCtaNote": "የነጻ ሙከራው የሚከፈልበት እቅድ ሲነቃ ወዲያውኑ ይቆማል።",
+    "subscribeDialogHeroTitle": "ምዝገባዎን ያረጋግጡ",
+    "subscribeDialogHeroDescription": "የመጀመሪያው ወር ወዲያውኑ ይከፈላል፣ ከዚያም ወርሃዊ ምዝገባው በሚቀጥለው የእድሳት ቀን በራስ-ሰር ይጀምራል።",
+    "chargedTodayLabel": "ዛሬ የሚከፈል",
+    "nextRenewalLabel": "የመጀመሪያ እድሳት",
+    "redirectToPaymeTitle": "ደህንነቱ የተጠበቀ ክፍያ በ PayMe",
+    "savedCardChargeTitle": "የተቀመጠ ካርድ ተገኝቷል",
+    "savedCardChargeDescription": "የተመረጠው ካርድ ወዲያውኑ ይከፈላል። ወርሃዊ እድሳቶች በ {date} ይጀምራሉ።",
+    "subscribeAndChargeNow": "አሁን አንቃ እና ክፈል",
+    "continueToPayme": "ወደ PayMe ቀጥል"
   },
   "nav": {
     "menu": "Menu",

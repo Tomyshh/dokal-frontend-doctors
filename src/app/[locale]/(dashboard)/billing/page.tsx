@@ -53,6 +53,21 @@ function maskCardLabel(card: SubscriptionCard) {
   return `${brand} ${last4}`.trim();
 }
 
+function getNextBillingPreview(locale: string) {
+  const now = new Date();
+  const day = now.getDate();
+  const nextDate =
+    day <= 28
+      ? new Date(now.getFullYear(), now.getMonth() + 1, day)
+      : new Date(now.getFullYear(), now.getMonth() + 2, 1);
+
+  return nextDate.toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
 export default function BillingPage() {
   const t = useTranslations('billing');
   const tc = useTranslations('common');
@@ -212,6 +227,7 @@ export default function BillingPage() {
   const isCancelled = subscriptionStatus?.subscription?.status === 'cancelled';
   const canSubscribe = isTrial || isTrialing || (!isActive && !isCancelled);
   const activePaymentMethodId = subscriptionStatus?.subscription?.payment_method_id;
+  const nextBillingPreview = getNextBillingPreview(locale);
 
   const handleAddCardViaPayme = async () => {
     setCardFormError('');
@@ -399,11 +415,30 @@ export default function BillingPage() {
                 <p className="text-xs text-muted-foreground">{t('planHint')}</p>
 
                 {(isTrial || isTrialing) && (
-                  <div className="flex flex-wrap gap-3 pt-2">
-                    <Button onClick={openSubscribeDialog} className="gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      {tsub('subscribeNow')}
-                    </Button>
+                  <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-white to-primary/5 p-4 sm:p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-white shadow-sm">
+                        <CreditCard className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-gray-900">{t('trialSubscribeCtaTitle')}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {t('trialSubscribeCtaDescription', {
+                            price: BASE_PRICES_ILS[currentPlan],
+                            date: nextBillingPreview,
+                          })}
+                        </p>
+                        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                          <Button onClick={openSubscribeDialog} className="gap-2 rounded-full">
+                            <Lock className="h-4 w-4" />
+                            {tsub('payNow')} - {BASE_PRICES_ILS[currentPlan]} ₪/{tsub('perMonth')}
+                          </Button>
+                          <div className="inline-flex items-center rounded-full bg-white/80 px-3 py-2 text-xs text-gray-600 ring-1 ring-gray-200">
+                            {t('trialSubscribeCtaNote')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -907,10 +942,25 @@ export default function BillingPage() {
         open={subscribeDialogOpen}
         onClose={() => setSubscribeDialogOpen(false)}
         title={tsub('subscribeNow')}
-        className="max-w-xl"
+        className="max-w-2xl"
       >
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600">{tsub('subscribeNowDesc')}</p>
+        <div className="space-y-5">
+          <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
+            <p className="text-sm font-semibold text-gray-900">{t('subscribeDialogHeroTitle')}</p>
+            <p className="mt-1 text-sm text-gray-600">{t('subscribeDialogHeroDescription')}</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="rounded-xl bg-white px-3 py-2 ring-1 ring-gray-100">
+                <p className="text-[11px] uppercase tracking-wide text-gray-500">{t('chargedTodayLabel')}</p>
+                <p className="mt-1 text-sm font-semibold text-gray-900">
+                  {BASE_PRICES_ILS[subscribePlan]} ₪
+                </p>
+              </div>
+              <div className="rounded-xl bg-white px-3 py-2 ring-1 ring-gray-100">
+                <p className="text-[11px] uppercase tracking-wide text-gray-500">{t('nextRenewalLabel')}</p>
+                <p className="mt-1 text-sm font-semibold text-gray-900">{nextBillingPreview}</p>
+              </div>
+            </div>
+          </div>
 
           {/* Plan selector */}
           <div className="space-y-2">
@@ -930,12 +980,32 @@ export default function BillingPage() {
                   {subscribePlan === plan && <div className="w-2 h-2 rounded-full bg-primary" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-semibold text-gray-900">
-                    {plan === 'individual' ? tsub('planIndividual') : tsub('planClinic')}
-                  </span>
-                  <span className="text-xs text-gray-500 ml-2">
-                    {BASE_PRICES_ILS[plan]} ₪/{tsub('perMonth')}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-gray-900">
+                      {plan === 'individual' ? tsub('planIndividual') : tsub('planClinic')}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {BASE_PRICES_ILS[plan]} ₪/{tsub('perMonth')}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {plan === 'individual' ? tsub('planIndividualDesc') : tsub('planClinicDesc')}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-gray-600">
+                    <span className="rounded-full bg-white px-2 py-1 ring-1 ring-gray-200">
+                      {plan === 'individual' ? tsub('onePractitioner') : tsub('unlimitedTeam')}
+                    </span>
+                    {plan === 'clinic' && (
+                      <span className="rounded-full bg-white px-2 py-1 ring-1 ring-gray-200">
+                        {tsub('planFeatureTeam')}
+                      </span>
+                    )}
+                    {plan === 'clinic' && (
+                      <span className="rounded-full bg-white px-2 py-1 ring-1 ring-gray-200">
+                        {tsub('planFeatureOrgStats')}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </button>
             ))}
@@ -967,8 +1037,18 @@ export default function BillingPage() {
           )}
 
           {cardsSorted.length === 0 && (
-            <div className="rounded-xl bg-gray-50 border border-border/50 p-3 text-center">
-              <p className="text-xs text-gray-500">{tsub('noCardRedirectPayme')}</p>
+            <div className="rounded-xl border border-border/50 bg-gray-50 p-4 text-center">
+              <p className="text-sm font-medium text-gray-900">{t('redirectToPaymeTitle')}</p>
+              <p className="mt-1 text-xs text-gray-500">{tsub('noCardRedirectPayme')}</p>
+            </div>
+          )}
+
+          {cardsSorted.length > 0 && (
+            <div className="rounded-xl border border-border/50 bg-gray-50 p-4">
+              <p className="text-sm font-medium text-gray-900">{t('savedCardChargeTitle')}</p>
+              <p className="mt-1 text-xs text-gray-500">
+                {t('savedCardChargeDescription', { date: nextBillingPreview })}
+              </p>
             </div>
           )}
 
@@ -978,13 +1058,13 @@ export default function BillingPage() {
             </div>
           )}
 
-          <div className="flex gap-3 justify-end pt-2">
+          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
             <Button variant="ghost" onClick={() => setSubscribeDialogOpen(false)}>
               {tc('cancel')}
             </Button>
-            <Button onClick={handleSubscribe} loading={subscribeLoading} className="gap-2">
+            <Button onClick={handleSubscribe} loading={subscribeLoading} className="gap-2 rounded-full">
               <Lock className="h-4 w-4" />
-              {cardsSorted.length > 0 ? tsub('subscribeWithCard') : tsub('payNow')} — {BASE_PRICES_ILS[subscribePlan]} ₪
+              {cardsSorted.length > 0 ? t('subscribeAndChargeNow') : t('continueToPayme')} - {BASE_PRICES_ILS[subscribePlan]} ₪
             </Button>
           </div>
         </div>

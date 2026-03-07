@@ -253,7 +253,19 @@
     "deletePaymentMethodConfirm": "האם אתה בטוח שברצונך למחוק את {card}?",
     "cardDeletedSuccess": "הכרטיס נמחק בהצלחה.",
     "organizationTitle": "ארגון",
-    "organizationHint": "הגדרות הארגון שלך מנוהלות מדף הצוות."
+    "organizationHint": "הגדרות הארגון שלך מנוהלות מדף הצוות.",
+    "trialSubscribeCtaTitle": "עברו עכשיו למסלול בתשלום",
+    "trialSubscribeCtaDescription": "התשלום הראשון שלך בסך {price} ₪ יחויב היום. החידוש האוטומטי הראשון יתחיל ב-{date}.",
+    "trialSubscribeCtaNote": "תקופת הניסיון החינמית מסתיימת מיד לאחר הפעלת המסלול בתשלום.",
+    "subscribeDialogHeroTitle": "אשרו את המנוי שלכם",
+    "subscribeDialogHeroDescription": "החודש הראשון מחויב מיד, ולאחר מכן המנוי החודשי יתחיל אוטומטית בתאריך החידוש הבא.",
+    "chargedTodayLabel": "חיוב היום",
+    "nextRenewalLabel": "חידוש ראשון",
+    "redirectToPaymeTitle": "תשלום מאובטח ב-PayMe",
+    "savedCardChargeTitle": "זוהה כרטיס שמור",
+    "savedCardChargeDescription": "הכרטיס שנבחר יחויב מיד. החיובים החודשיים יתחילו ב-{date}.",
+    "subscribeAndChargeNow": "הפעל וחייב עכשיו",
+    "continueToPayme": "המשך ל-PayMe"
   },
   "nav": {
     "menu": "תפריט",

@@ -252,7 +252,19 @@
     "deletePaymentMethodConfirm": "Вы уверены, что хотите удалить {card}?",
     "cardDeletedSuccess": "Карта успешно удалена.",
     "organizationTitle": "Организация",
-    "organizationHint": "Настройки организации управляются на странице команды."
+    "organizationHint": "Настройки организации управляются на странице команды.",
+    "trialSubscribeCtaTitle": "Перейдите на платный тариф сейчас",
+    "trialSubscribeCtaDescription": "Первый платеж {price} ₪ будет списан сегодня. Первое автоматическое продление начнется {date}.",
+    "trialSubscribeCtaNote": "Бесплатный пробный период завершится сразу после активации платного тарифа.",
+    "subscribeDialogHeroTitle": "Подтвердите подписку",
+    "subscribeDialogHeroDescription": "Первый месяц списывается сразу, затем ежемесячная подписка начнется автоматически в следующую дату продления.",
+    "chargedTodayLabel": "Списывается сегодня",
+    "nextRenewalLabel": "Первое продление",
+    "redirectToPaymeTitle": "Безопасная оплата через PayMe",
+    "savedCardChargeTitle": "Обнаружена сохраненная карта",
+    "savedCardChargeDescription": "Выбранная карта будет списана сразу. Ежемесячные продления начнутся {date}.",
+    "subscribeAndChargeNow": "Активировать и списать сейчас",
+    "continueToPayme": "Перейти в PayMe"
   },
   "nav": {
     "menu": "Меню",

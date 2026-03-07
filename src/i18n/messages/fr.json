@@ -253,7 +253,19 @@
     "deletePaymentMethodConfirm": "Êtes-vous sûr de vouloir supprimer {card} ?",
     "cardDeletedSuccess": "Carte supprimée avec succès.",
     "organizationTitle": "Organisation",
-    "organizationHint": "Les paramètres de votre organisation sont gérés depuis la page équipe."
+    "organizationHint": "Les paramètres de votre organisation sont gérés depuis la page équipe.",
+    "trialSubscribeCtaTitle": "Passez au forfait payant dès maintenant",
+    "trialSubscribeCtaDescription": "Votre premier paiement de {price} ₪ sera débité aujourd'hui. Le prochain renouvellement automatique commencera le {date}.",
+    "trialSubscribeCtaNote": "Essai gratuit arrêté immédiatement après activation du forfait payant.",
+    "subscribeDialogHeroTitle": "Confirmez votre abonnement",
+    "subscribeDialogHeroDescription": "Le premier mois est débité immédiatement, puis l'abonnement mensuel démarre automatiquement à la prochaine date de renouvellement.",
+    "chargedTodayLabel": "Débité aujourd'hui",
+    "nextRenewalLabel": "Premier renouvellement",
+    "redirectToPaymeTitle": "Paiement sécurisé sur PayMe",
+    "savedCardChargeTitle": "Carte enregistrée détectée",
+    "savedCardChargeDescription": "La carte sélectionnée sera débitée immédiatement. Les renouvellements mensuels commenceront le {date}.",
+    "subscribeAndChargeNow": "Activer et débiter maintenant",
+    "continueToPayme": "Continuer vers PayMe"
   },
   "nav": {
     "menu": "Menu",
