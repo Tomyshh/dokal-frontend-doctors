@@ -200,6 +200,24 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
     >
       <SocketProvider>
         <div className="min-h-screen bg-background">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block">
+          <Sidebar
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
+        </div>
+
+        {/* Mobile Nav */}
+        <MobileNav open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
+
+        {/* Main Content (banners + topbar + main) — marge adaptative selon l'état du sidemenu */}
+        <div
+          className={cn(
+            'transition-all duration-300',
+            sidebarCollapsed ? 'ltr:lg:ml-[72px] rtl:lg:mr-[72px]' : 'ltr:lg:ml-[260px] rtl:lg:mr-[260px]'
+          )}
+        >
           <NotPublishedBanner />
 
           {/* Trial Banner */}
@@ -262,24 +280,6 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
           </div>
         )}
 
-        {/* Desktop Sidebar */}
-        <div className="hidden lg:block">
-          <Sidebar
-            collapsed={sidebarCollapsed}
-            onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-          />
-        </div>
-
-        {/* Mobile Nav */}
-        <MobileNav open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
-
-        {/* Main Content */}
-        <div
-          className={cn(
-            'transition-all duration-300',
-            sidebarCollapsed ? 'ltr:lg:ml-[72px] rtl:lg:mr-[72px]' : 'ltr:lg:ml-[260px] rtl:lg:mr-[260px]'
-          )}
-        >
           <Topbar onMenuToggle={() => setMobileNavOpen(true)} />
           <main className="p-6">{children}</main>
         </div>
