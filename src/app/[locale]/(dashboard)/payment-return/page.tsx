@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
+import { getSubscriptionStatus } from '@/lib/subscription';
 import { CheckCircle2, Lock, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -24,8 +25,9 @@ export default function PaymentReturnPage() {
     const poll = async () => {
       attempts++;
       try {
-        const sub = await refreshSubscription();
-        if (sub?.hasSubscription) {
+        const result = await getSubscriptionStatus();
+        if (result.hasSubscription) {
+          await refreshSubscription();
           setStatus('success');
           setTimeout(() => {
             window.location.assign(`/${locale}`);
