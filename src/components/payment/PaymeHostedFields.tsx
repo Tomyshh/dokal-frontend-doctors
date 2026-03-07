@@ -85,7 +85,7 @@ interface PaymeHostedFieldsProps {
   className?: string;
 }
 
-const PAYME_JSAPI_URL = 'https://cdn.payme.io/jsapi/v1/payme.js';
+const PAYME_JSAPI_URL = 'https://cdn.payme.io/hf/v1/hostedfields.js';
 
 export default function PaymeHostedFields({
   onTokenized,
