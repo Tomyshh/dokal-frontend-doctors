@@ -212,7 +212,12 @@
     "cancelledAccessUntil": "Your subscription has been cancelled. Access until {date}.",
     "trialDays": "{days} days",
     "notVisibleTitle": "Your profile is no longer visible",
-    "notVisibleDescription": "Patients can no longer find you or book appointments. Activate your subscription to reappear."
+    "notVisibleDescription": "Patients can no longer find you or book appointments. Activate your subscription to reappear.",
+    "paymentProcessing": "Processing your payment...",
+    "paymentProcessingDesc": "Please wait while we confirm your payment with PayMe.",
+    "paymentPendingTitle": "Payment pending",
+    "paymentPendingDesc": "Your payment is being processed. It may take a few moments. You can check your subscription status on your dashboard.",
+    "goToDashboard": "Go to dashboard"
   },
   "nav": {
     "menu": "Menu",

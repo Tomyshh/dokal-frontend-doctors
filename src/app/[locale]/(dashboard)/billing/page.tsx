@@ -17,7 +17,7 @@ import {
   downgradePlan,
   listCards,
   deleteCard,
-  subscribe,
+  createPaymentSession,
   BASE_PRICES_ILS,
   SEAT_PRICES_ILS,
   calculateMonthlyPriceILS,
@@ -40,7 +40,6 @@ import {
   Receipt,
   Users,
 } from 'lucide-react';
-import PaymeHostedFields from '@/components/payment/PaymeHostedFields';
 
 function maskCardLabel(card: SubscriptionCard) {
   const brand = card.brand ? card.brand.toUpperCase() : 'CARD';
@@ -192,21 +191,17 @@ export default function BillingPage() {
     card: null,
   });
 
-  const handleCardTokenized = async (buyerKey: string) => {
+  const handleAddCardViaPayme = async () => {
     setCardFormError('');
     setAddCardLoading(true);
     try {
-      await subscribe({ buyer_key: buyerKey, plan: currentPlan } as any);
-      queryClient.invalidateQueries({ queryKey: ['subscription', 'cards'] });
-      await refreshSubscription();
-      setAddCardOpen(false);
-      toast.success(t('cardAddedSuccess'));
+      const session = await createPaymentSession({ plan: currentPlan });
+      window.location.href = session.sale_url;
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
       const msg = axiosError?.response?.data?.error?.message || tsub('genericError');
       setCardFormError(msg);
       toast.error(tc('saveErrorTitle'), msg);
-    } finally {
       setAddCardLoading(false);
     }
   };
@@ -499,7 +494,7 @@ export default function BillingPage() {
         </div>
       </div>
 
-      {/* ─── Add card dialog (Hosted Fields) ─────────────────────────── */}
+      {/* ─── Add card / subscribe dialog ────────────────────────────── */}
       <Dialog
         open={addCardOpen}
         onClose={() => { setAddCardOpen(false); setCardFormError(''); }}
@@ -513,15 +508,19 @@ export default function BillingPage() {
             </div>
           )}
 
-          <PaymeHostedFields
-            onTokenized={handleCardTokenized}
-            onError={setCardFormError}
+          <p className="text-sm text-gray-600">
+            {t('paymentMethodsHint')}
+          </p>
+
+          <Button
+            type="button"
+            className="w-full rounded-full h-12 text-base"
+            onClick={handleAddCardViaPayme}
             loading={addCardLoading}
-            submitLabel={tc('confirm')}
-            buyerFirstName={profile?.first_name ?? ''}
-            buyerLastName={profile?.last_name ?? ''}
-            buyerEmail={profile?.email ?? ''}
-          />
+          >
+            <CreditCard className="h-4 w-4" />
+            {tc('confirm')}
+          </Button>
 
           <div className="flex justify-end pt-2">
             <Button variant="ghost" onClick={() => { setAddCardOpen(false); setCardFormError(''); }}>

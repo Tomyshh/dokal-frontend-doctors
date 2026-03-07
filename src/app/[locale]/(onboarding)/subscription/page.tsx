@@ -6,7 +6,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { Button } from '@/components/ui/Button';
 import Image from 'next/image';
 import {
-  subscribe,
+  createPaymentSession,
   startTrial,
   BASE_PRICES_ILS,
   SEAT_PRICES_ILS,
@@ -25,6 +25,7 @@ import {
   Building2,
   Globe,
   Phone,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -32,7 +33,6 @@ import { useRouter } from 'next/navigation';
 import { Spinner } from '@/components/ui/Spinner';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
 import { getMyPractitionerOrNull, isPractitionerOnboardingReady } from '@/lib/practitioner';
-import PaymeHostedFields from '@/components/payment/PaymeHostedFields';
 
 type View = 'plan-picker' | 'card-form';
 
@@ -371,23 +371,20 @@ export default function OnboardingSubscriptionPage() {
     }
   };
 
-  // ─── Subscribe with buyer_key from PayMe Hosted Fields ──────────────
-  const handleTokenized = async (buyerKey: string) => {
+  // ─── Subscribe via PayMe Hosted Payment Page ──────────────────────
+  const handleSubscribeNow = async () => {
     if (actionInFlightRef.current) return;
     actionInFlightRef.current = true;
 
     setError('');
     setLoading(true);
     try {
-      await subscribe({ buyer_key: buyerKey, plan: selectedPlan } as any);
-      await refreshSubscription();
-      setSuccess('subscribed');
-      setTimeout(hardRedirectToDashboard, 2000);
+      const session = await createPaymentSession({ plan: selectedPlan });
+      window.location.href = session.sale_url;
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
       setError(axiosError?.response?.data?.error?.message || t('genericError'));
       actionInFlightRef.current = false;
-    } finally {
       setLoading(false);
     }
   };
@@ -560,7 +557,7 @@ export default function OnboardingSubscriptionPage() {
     );
   }
 
-  // ─── Card Form View (Hosted Fields) ────────────────────────────────
+  // ─── Card Form View (Redirect to PayMe) ────────────────────────────
   return (
     <div className="max-w-2xl mx-auto">
       {/* Back to plan picker */}
@@ -589,18 +586,32 @@ export default function OnboardingSubscriptionPage() {
         </div>
       )}
 
-      {/* PayMe Hosted Fields */}
-      <PaymeHostedFields
-        onTokenized={handleTokenized}
-        onError={setError}
-        loading={loading}
-        submitLabel={t('subscribe')}
-        priceLabel={`${selectedPrice} ₪/${t('perMonth')}`}
-        buyerFirstName={profile?.first_name ?? ''}
-        buyerLastName={profile?.last_name ?? ''}
-        buyerEmail={profile?.email ?? ''}
-        amountILS={selectedPrice}
-      />
+      {/* Redirect to PayMe hosted payment page */}
+      <div className="space-y-4">
+        <div className="rounded-2xl bg-gray-50 border border-gray-200 p-5 text-center space-y-3">
+          <CreditCard className="h-8 w-8 text-primary mx-auto" />
+          <p className="text-sm text-gray-700">{t('securityNotice')}</p>
+          <p className="text-2xl font-bold text-gray-900">
+            {selectedPrice} ₪<span className="text-sm font-normal text-gray-500">/{t('perMonth')}</span>
+          </p>
+        </div>
+
+        <Button
+          type="button"
+          className="w-full rounded-full h-12 text-base"
+          onClick={handleSubscribeNow}
+          loading={loading}
+        >
+          <Lock className="h-4 w-4" />
+          {t('subscribe')} — {selectedPrice} ₪/{t('perMonth')}
+          <ExternalLink className="h-3.5 w-3.5 ml-1 opacity-60" />
+        </Button>
+
+        <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+          <Shield className="h-3 w-3" />
+          {t('securityNotice')}
+        </div>
+      </div>
     </div>
   );
 }

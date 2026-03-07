@@ -212,7 +212,12 @@
     "cancelledAccessUntil": "המנוי שלכם בוטל. גישה עד {date}.",
     "trialDays": "{days} ימים",
     "notVisibleTitle": "הפרופיל שלך כבר לא מוצג",
-    "notVisibleDescription": "מטופלים לא יכולים למצוא אותך או לקבוע תורים. הפעילו את המנוי כדי להופיע מחדש."
+    "notVisibleDescription": "מטופלים לא יכולים למצוא אותך או לקבוע תורים. הפעילו את המנוי כדי להופיע מחדש.",
+    "paymentProcessing": "...מעבד את התשלום שלך",
+    "paymentProcessingDesc": ".אנא המתן בזמן שאנו מאשרים את התשלום שלך עם PayMe",
+    "paymentPendingTitle": "תשלום בהמתנה",
+    "paymentPendingDesc": ".התשלום שלך בתהליך עיבוד. ייתכן שייקח כמה רגעים. ניתן לבדוק את מצב המנוי בלוח הבקרה",
+    "goToDashboard": "עבור ללוח הבקרה"
   },
   "nav": {
     "menu": "תפריט",

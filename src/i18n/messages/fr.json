@@ -212,7 +212,12 @@
     "cancelledAccessUntil": "Votre abonnement a été annulé. Accès jusqu'au {date}.",
     "trialDays": "{days} jours",
     "notVisibleTitle": "Votre profil n'est plus visible",
-    "notVisibleDescription": "Les patients ne peuvent plus vous trouver ni prendre rendez-vous. Activez votre abonnement pour réapparaître."
+    "notVisibleDescription": "Les patients ne peuvent plus vous trouver ni prendre rendez-vous. Activez votre abonnement pour réapparaître.",
+    "paymentProcessing": "Traitement de votre paiement...",
+    "paymentProcessingDesc": "Veuillez patienter pendant que nous confirmons votre paiement avec PayMe.",
+    "paymentPendingTitle": "Paiement en attente",
+    "paymentPendingDesc": "Votre paiement est en cours de traitement. Cela peut prendre quelques instants. Vous pouvez vérifier le statut de votre abonnement sur votre tableau de bord.",
+    "goToDashboard": "Aller au tableau de bord"
   },
   "nav": {
     "menu": "Menu",

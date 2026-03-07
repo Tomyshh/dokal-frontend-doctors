@@ -219,6 +219,24 @@ export async function subscribe(payload: SubscribePayload): Promise<SubscribeRes
   return data;
 }
 
+export interface PaymentSessionPayload {
+  plan?: PlanType;
+  practitioner_seats?: number;
+  secretary_seats?: number;
+}
+
+export interface PaymentSessionResponse {
+  sale_url: string;
+  payme_sale_id: string;
+  amount_agorot: number;
+  plan: PlanType;
+}
+
+export async function createPaymentSession(payload: PaymentSessionPayload): Promise<PaymentSessionResponse> {
+  const { data } = await api.post<PaymentSessionResponse>(`${BASE}/create-payment-session`, payload);
+  return data;
+}
+
 export async function cancelSubscription(): Promise<CancelResponse> {
   const { data } = await api.post<CancelResponse>(`${BASE}/cancel`, {});
   return data;

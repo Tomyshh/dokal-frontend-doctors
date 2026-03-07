@@ -3,13 +3,11 @@
 import { useState, useCallback } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
-import PaymeHostedFields from './PaymeHostedFields';
-import { subscribe, BASE_PRICES_ILS, type PlanType } from '@/lib/subscription';
+import { createPaymentSession, BASE_PRICES_ILS, type PlanType } from '@/lib/subscription';
 import { Button } from '@/components/ui/Button';
-import { Lock, AlertTriangle, CreditCard, CheckCircle2, Crown, Users, Building2, Globe, Clock, Sparkles, LogOut, EyeOff } from 'lucide-react';
+import { Lock, AlertTriangle, CreditCard, CheckCircle2, Crown, Users, Building2, Globe, Clock, LogOut, EyeOff, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SubscriptionStatus } from '@/lib/subscription';
-import Image from 'next/image';
 
 interface SubscriptionBlockerProps {
   subscriptionStatus: SubscriptionStatus | null;
@@ -111,23 +109,18 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
   const reason = getBlockReason(subscriptionStatus);
   const selectedPrice = BASE_PRICES_ILS[selectedPlan];
 
-  const handleTokenized = useCallback(async (buyerKey: string) => {
+  const handlePayNow = useCallback(async () => {
     setError('');
     setLoading(true);
     try {
-      await subscribe({ buyer_key: buyerKey, plan: selectedPlan } as any);
-      await refreshSubscription();
-      setSuccess(true);
-      setTimeout(() => {
-        window.location.assign(`/${locale}`);
-      }, 2000);
+      const session = await createPaymentSession({ plan: selectedPlan });
+      window.location.href = session.sale_url;
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: { message?: string } } } };
       setError(axiosError?.response?.data?.error?.message || t('genericError'));
-    } finally {
       setLoading(false);
     }
-  }, [selectedPlan, refreshSubscription, locale, t]);
+  }, [selectedPlan, t]);
 
   const getTitle = () => {
     switch (reason) {
@@ -212,23 +205,21 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
             </div>
           )}
 
-          {/* Hosted Fields */}
+          {/* Pay now button — redirects to PayMe hosted page */}
           <div className="pt-2">
-            <div className="flex items-center gap-2 mb-4">
-              <CreditCard className="h-4 w-4 text-gray-400" />
-              <span className="text-sm font-medium text-gray-700">{t('cardNumber')}</span>
-            </div>
-            <PaymeHostedFields
-              onTokenized={handleTokenized}
-              onError={setError}
+            <Button
+              type="button"
+              className="w-full rounded-full h-12 text-base"
+              onClick={handlePayNow}
               loading={loading}
-              submitLabel={t('payNow')}
-              priceLabel={`${selectedPrice} ₪/${t('perMonth')}`}
-              buyerFirstName={profile?.first_name ?? ''}
-              buyerLastName={profile?.last_name ?? ''}
-              buyerEmail={profile?.email ?? ''}
-              amountILS={selectedPrice}
-            />
+            >
+              <Lock className="h-4 w-4" />
+              {t('payNow')} — {selectedPrice} ₪/{t('perMonth')}
+              <ExternalLink className="h-3.5 w-3.5 ml-1 opacity-60" />
+            </Button>
+            <p className="text-[10px] text-gray-400 text-center mt-2">
+              {t('securityNotice')}
+            </p>
           </div>
 
           {/* Features */}
