@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import { getDayName, formatTime } from '@/lib/utils';
 import { useToast } from '@/providers/ToastProvider';
-import { Plus, Pencil, Trash2, CalendarOff, Coffee, Clock, Info, CalendarDays, Timer, Utensils, User, Users, GraduationCap, ArrowRight, Repeat, CalendarCheck } from 'lucide-react';
+import { Plus, Pencil, Trash2, CalendarOff, Coffee, Clock, Info, CalendarDays, Timer, Utensils, User, Users, GraduationCap, ArrowRight, Repeat, CalendarCheck, Copy } from 'lucide-react';
 import type { WeeklySchedule } from '@/types';
 
 function padTime(t: string) {
@@ -85,17 +85,33 @@ export default function SchedulePage() {
   const [breakDescription, setBreakDescription] = useState('');
   const [breakError, setBreakError] = useState('');
 
-  const dayOptions = Array.from({ length: 7 }, (_, i) => ({
-    value: String(i),
-    label: getDayName(i, locale),
-  }));
+  const usedDays = useMemo(
+    () => new Set((schedule ?? []).map((b) => b.day_of_week)),
+    [schedule],
+  );
+
+  const availableDayOptions = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) => ({
+        value: String(i),
+        label: getDayName(i, locale),
+      })).filter((opt) => !usedDays.has(Number(opt.value))),
+    [usedDays, locale],
+  );
+
+  const allDaysFilled = availableDayOptions.length === 0;
+
+  // "Also apply to" multi-day selector
+  const [alsoApplyDays, setAlsoApplyDays] = useState<number[]>([]);
 
   const openAddBlock = () => {
     setEditingBlock(null);
-    setBlockDay(0);
+    const firstAvailable = availableDayOptions[0];
+    setBlockDay(firstAvailable ? Number(firstAvailable.value) : 0);
     setBlockStart('09:00');
     setBlockEnd('17:00');
     setBlockDuration(30);
+    setAlsoApplyDays([]);
     setShowBlockDialog(true);
   };
 
@@ -108,25 +124,43 @@ export default function SchedulePage() {
     setShowBlockDialog(true);
   };
 
-  const handleSaveBlock = () => {
-    const onSuccess = () => {
-      setShowBlockDialog(false);
-      toast.success(tc('saveSuccess'));
-    };
+  const [isSavingMultiple, setIsSavingMultiple] = useState(false);
+
+  const handleSaveBlock = async () => {
     const onError = (err: unknown) => {
       const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
       toast.error(tc('saveErrorTitle'), msg);
     };
+
     if (editingBlock) {
       updateBlock.mutate(
         { id: editingBlock.id, data: { start_time: blockStart, end_time: blockEnd, slot_duration_minutes: blockDuration } },
-        { onSuccess, onError }
+        {
+          onSuccess: () => {
+            setShowBlockDialog(false);
+            toast.success(tc('saveSuccess'));
+          },
+          onError,
+        }
       );
-    } else {
-      addBlock.mutate(
-        { day_of_week: blockDay, start_time: blockStart, end_time: blockEnd, slot_duration_minutes: blockDuration },
-        { onSuccess, onError }
-      );
+      return;
+    }
+
+    const daysToCreate = [blockDay, ...alsoApplyDays];
+    setIsSavingMultiple(true);
+
+    try {
+      for (const day of daysToCreate) {
+        await addBlock.mutateAsync(
+          { day_of_week: day, start_time: blockStart, end_time: blockEnd, slot_duration_minutes: blockDuration },
+        );
+      }
+      setShowBlockDialog(false);
+      toast.success(tc('saveSuccess'));
+    } catch (err) {
+      onError(err);
+    } finally {
+      setIsSavingMultiple(false);
     }
   };
 
@@ -249,7 +283,7 @@ export default function SchedulePage() {
               </span>
             )}
           </div>
-          <Button size="sm" onClick={openAddBlock}>
+          <Button size="sm" onClick={openAddBlock} disabled={allDaysFilled} title={allDaysFilled ? t('allDaysFilled') : undefined}>
             <Plus className="h-4 w-4" />
             {t('addBlock')}
           </Button>
@@ -493,15 +527,60 @@ export default function SchedulePage() {
           </div>
 
           {!editingBlock && (
-            <div>
-              <Select
-                label={t('dayOfWeek')}
-                value={String(blockDay)}
-                onChange={(e) => setBlockDay(Number(e.target.value))}
-                options={dayOptions}
-              />
-              <p className="mt-1 text-[11px] text-muted-foreground">{t('dayOfWeekHint')}</p>
-            </div>
+            <>
+              <div>
+                <Select
+                  label={t('dayOfWeek')}
+                  value={String(blockDay)}
+                  onChange={(e) => {
+                    setBlockDay(Number(e.target.value));
+                    setAlsoApplyDays([]);
+                  }}
+                  options={availableDayOptions}
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">{t('dayOfWeekHint')}</p>
+              </div>
+
+              {availableDayOptions.length > 1 && (
+                <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 space-y-2.5">
+                  <div className="flex items-center gap-2">
+                    <Copy className="h-3.5 w-3.5 text-primary/70" />
+                    <span className="text-xs font-medium text-foreground">{t('applyToOtherDays')}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {availableDayOptions
+                      .filter((opt) => Number(opt.value) !== blockDay)
+                      .map((opt) => {
+                        const day = Number(opt.value);
+                        const isSelected = alsoApplyDays.includes(day);
+                        return (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() =>
+                              setAlsoApplyDays((prev) =>
+                                isSelected ? prev.filter((d) => d !== day) : [...prev, day],
+                              )
+                            }
+                            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                              isSelected
+                                ? 'bg-primary text-white shadow-sm'
+                                : 'bg-card border border-border text-muted-foreground hover:border-primary/30 hover:text-foreground'
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                  </div>
+                  {alsoApplyDays.length > 0 && (
+                    <p className="text-[11px] text-primary/80">
+                      {t('applyToOtherDaysCount', { count: alsoApplyDays.length + 1 })}
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
           )}
 
           <div>
@@ -538,7 +617,7 @@ export default function SchedulePage() {
             <Button variant="outline" onClick={() => setShowBlockDialog(false)}>
               {tc('cancel')}
             </Button>
-            <Button onClick={handleSaveBlock} loading={addBlock.isPending || updateBlock.isPending}>
+            <Button onClick={handleSaveBlock} loading={addBlock.isPending || updateBlock.isPending || isSavingMultiple}>
               {tc('save')}
             </Button>
           </div>
