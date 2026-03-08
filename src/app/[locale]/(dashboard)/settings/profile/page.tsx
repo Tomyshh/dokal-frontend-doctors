@@ -276,8 +276,8 @@ export default function ProfileSettingsPage() {
         />
       )}
 
-      {/* Photo & Identity */}
-      <Card className={cn('settings-section', !isSectionComplete('avatar') && 'border-l-4 border-l-amber-400')} id="profile-section-avatar">
+      {/* Photo & Identity - relative z-10 pour que le dropdown spécialité passe au-dessus de la section À propos */}
+      <Card className={cn('settings-section relative z-10', !isSectionComplete('avatar') && 'border-l-4 border-l-amber-400')} id="profile-section-avatar">
         <SectionHeader
           icon={User}
           title={t('avatarTitle')}

@@ -9,6 +9,7 @@ CREATE TABLE public.appointment_instructions (
   is_active boolean NOT NULL DEFAULT true,
   sort_order integer NOT NULL DEFAULT 0,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
+  translations jsonb DEFAULT '{}'::jsonb,
   CONSTRAINT appointment_instructions_pkey PRIMARY KEY (id),
   CONSTRAINT appointment_instructions_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id)
 );
@@ -19,6 +20,10 @@ CREATE TABLE public.appointment_questionnaires (
   answers jsonb,
   completed_at timestamp with time zone,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
+  pre_visit_instructions jsonb NOT NULL DEFAULT '[]'::jsonb,
+  pre_visit_instructions_translations jsonb DEFAULT '{}'::jsonb,
+  answers_translations jsonb,
+  instructions_read_at timestamp with time zone,
   CONSTRAINT appointment_questionnaires_pkey PRIMARY KEY (id),
   CONSTRAINT appointment_questionnaires_appointment_id_fkey FOREIGN KEY (appointment_id) REFERENCES public.appointments(id)
 );
@@ -33,6 +38,12 @@ CREATE TABLE public.appointment_reasons (
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT appointment_reasons_pkey PRIMARY KEY (id),
   CONSTRAINT appointment_reasons_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id)
+);
+CREATE TABLE public.appointment_reminder_sent (
+  appointment_id uuid NOT NULL,
+  reminder_type text NOT NULL CHECK (reminder_type = ANY (ARRAY['2d'::text, '1d'::text, '2h'::text])),
+  sent_at timestamp with time zone,
+  CONSTRAINT appointment_reminder_sent_pkey PRIMARY KEY (appointment_id, reminder_type)
 );
 CREATE TABLE public.appointments (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -65,13 +76,13 @@ CREATE TABLE public.appointments (
   external_description text,
   external_location text,
   CONSTRAINT appointments_pkey PRIMARY KEY (id),
-  CONSTRAINT appointments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
-  CONSTRAINT appointments_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id),
-  CONSTRAINT appointments_relative_id_fkey FOREIGN KEY (relative_id) REFERENCES public.relatives(id),
-  CONSTRAINT appointments_reason_id_fkey FOREIGN KEY (reason_id) REFERENCES public.appointment_reasons(id),
   CONSTRAINT appointments_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id),
-  CONSTRAINT appointments_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.organization_sites(id),
-  CONSTRAINT appointments_patient_record_id_fkey FOREIGN KEY (patient_record_id) REFERENCES public.patients(id)
+  CONSTRAINT appointments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
+  CONSTRAINT appointments_patient_record_id_fkey FOREIGN KEY (patient_record_id) REFERENCES public.patients(id),
+  CONSTRAINT appointments_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id),
+  CONSTRAINT appointments_reason_id_fkey FOREIGN KEY (reason_id) REFERENCES public.appointment_reasons(id),
+  CONSTRAINT appointments_relative_id_fkey FOREIGN KEY (relative_id) REFERENCES public.relatives(id),
+  CONSTRAINT appointments_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.organization_sites(id)
 );
 CREATE TABLE public.audit_log (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -92,9 +103,25 @@ CREATE TABLE public.conversations (
   last_message_at timestamp with time zone,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT conversations_pkey PRIMARY KEY (id),
+  CONSTRAINT conversations_appointment_id_fkey FOREIGN KEY (appointment_id) REFERENCES public.appointments(id),
   CONSTRAINT conversations_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.profiles(id),
-  CONSTRAINT conversations_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id),
-  CONSTRAINT conversations_appointment_id_fkey FOREIGN KEY (appointment_id) REFERENCES public.appointments(id)
+  CONSTRAINT conversations_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id)
+);
+CREATE TABLE public.crm_breaks (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  practitioner_id uuid NOT NULL,
+  title text NOT NULL DEFAULT ''::text,
+  description text,
+  is_recurring boolean NOT NULL DEFAULT false,
+  date date,
+  recurring_days ARRAY,
+  start_time time without time zone NOT NULL,
+  end_time time without time zone NOT NULL,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT crm_breaks_pkey PRIMARY KEY (id),
+  CONSTRAINT crm_breaks_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id)
 );
 CREATE TABLE public.crm_external_events (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -112,6 +139,19 @@ CREATE TABLE public.crm_external_events (
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT crm_external_events_pkey PRIMARY KEY (id),
   CONSTRAINT crm_external_events_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id)
+);
+CREATE TABLE public.earlier_slot_alerts (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  appointment_id uuid NOT NULL,
+  practitioner_id uuid NOT NULL,
+  appointment_date date NOT NULL,
+  start_time time without time zone NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT earlier_slot_alerts_pkey PRIMARY KEY (id),
+  CONSTRAINT earlier_slot_alerts_appointment_id_fkey FOREIGN KEY (appointment_id) REFERENCES public.appointments(id),
+  CONSTRAINT earlier_slot_alerts_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
+  CONSTRAINT earlier_slot_alerts_practitioner_id_fkey FOREIGN KEY (practitioner_id) REFERENCES public.practitioners(id)
 );
 CREATE TABLE public.google_calendar_connections (
   user_id uuid NOT NULL,
@@ -147,10 +187,12 @@ CREATE TABLE public.google_calendar_event_links (
   crm_external_event_id uuid,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  crm_break_id uuid,
   CONSTRAINT google_calendar_event_links_pkey PRIMARY KEY (id),
-  CONSTRAINT google_calendar_event_links_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
   CONSTRAINT google_calendar_event_links_crm_appointment_id_fkey FOREIGN KEY (crm_appointment_id) REFERENCES public.appointments(id),
-  CONSTRAINT google_calendar_event_links_crm_external_event_id_fkey FOREIGN KEY (crm_external_event_id) REFERENCES public.crm_external_events(id)
+  CONSTRAINT google_calendar_event_links_crm_external_event_id_fkey FOREIGN KEY (crm_external_event_id) REFERENCES public.crm_external_events(id),
+  CONSTRAINT google_calendar_event_links_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
+  CONSTRAINT google_calendar_event_links_crm_break_id_fkey FOREIGN KEY (crm_break_id) REFERENCES public.crm_breaks(id)
 );
 CREATE TABLE public.health_allergies (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -239,8 +281,8 @@ CREATE TABLE public.messages (
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT messages_pkey PRIMARY KEY (id),
   CONSTRAINT messages_conversation_id_fkey FOREIGN KEY (conversation_id) REFERENCES public.conversations(id),
-  CONSTRAINT messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.profiles(id),
-  CONSTRAINT messages_recipient_id_fkey FOREIGN KEY (recipient_id) REFERENCES public.profiles(id)
+  CONSTRAINT messages_recipient_id_fkey FOREIGN KEY (recipient_id) REFERENCES public.profiles(id),
+  CONSTRAINT messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.notifications (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -265,10 +307,10 @@ CREATE TABLE public.organization_members (
   is_active boolean NOT NULL DEFAULT true,
   site_id uuid,
   CONSTRAINT organization_members_pkey PRIMARY KEY (id),
-  CONSTRAINT organization_members_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id),
-  CONSTRAINT organization_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
   CONSTRAINT organization_members_invited_by_fkey FOREIGN KEY (invited_by) REFERENCES public.profiles(id),
-  CONSTRAINT organization_members_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.organization_sites(id)
+  CONSTRAINT organization_members_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id),
+  CONSTRAINT organization_members_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.organization_sites(id),
+  CONSTRAINT organization_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.organization_sites (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -358,9 +400,9 @@ CREATE TABLE public.payment_transactions (
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT payment_transactions_pkey PRIMARY KEY (id),
-  CONSTRAINT payment_transactions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
+  CONSTRAINT payment_transactions_payment_method_id_fkey FOREIGN KEY (payment_method_id) REFERENCES public.payment_methods(id),
   CONSTRAINT payment_transactions_subscription_id_fkey FOREIGN KEY (subscription_id) REFERENCES public.subscriptions(id),
-  CONSTRAINT payment_transactions_payment_method_id_fkey FOREIGN KEY (payment_method_id) REFERENCES public.payment_methods(id)
+  CONSTRAINT payment_transactions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.practitioner_schedule_overrides (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -417,11 +459,28 @@ CREATE TABLE public.practitioners (
   specialization_license text,
   price_min_agorot integer,
   price_max_agorot integer,
+  teudat_zehut_encrypted text,
+  teudat_zehut_hash text,
+  default_questionnaire_fields jsonb NOT NULL DEFAULT '[]'::jsonb,
+  website_url text,
+  facebook_url text,
+  instagram_url text,
+  whatsapp_number text,
+  linkedin_url text,
+  tiktok_url text,
+  youtube_url text,
+  waze_link text,
+  google_maps_link text,
+  card_slug text UNIQUE,
+  card_headline text,
+  card_theme text DEFAULT 'default'::text,
+  invited_by_admin_id uuid,
   CONSTRAINT practitioners_pkey PRIMARY KEY (id),
   CONSTRAINT practitioners_id_fkey FOREIGN KEY (id) REFERENCES public.profiles(id),
-  CONSTRAINT practitioners_specialty_id_fkey FOREIGN KEY (specialty_id) REFERENCES public.specialties(id),
   CONSTRAINT practitioners_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id),
-  CONSTRAINT practitioners_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.organization_sites(id)
+  CONSTRAINT practitioners_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.organization_sites(id),
+  CONSTRAINT practitioners_specialty_id_fkey FOREIGN KEY (specialty_id) REFERENCES public.specialties(id),
+  CONSTRAINT practitioners_invited_by_admin_id_fkey FOREIGN KEY (invited_by_admin_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.profiles (
   id uuid NOT NULL,
@@ -436,6 +495,7 @@ CREATE TABLE public.profiles (
   role USER-DEFINED NOT NULL DEFAULT 'patient'::user_role,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  referral_code text UNIQUE,
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
@@ -490,6 +550,17 @@ CREATE TABLE public.specialties (
   name_es text,
   CONSTRAINT specialties_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.subscription_event_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  subscription_id uuid,
+  user_id uuid NOT NULL,
+  event_type text NOT NULL CHECK (event_type = ANY (ARRAY['trial_started'::text, 'trial_expired'::text, 'subscription_created'::text, 'subscription_activated'::text, 'payment_success'::text, 'payment_failed'::text, 'subscription_cancelled'::text, 'subscription_paused'::text, 'subscription_resumed'::text, 'subscription_expired'::text, 'plan_changed'::text, 'price_updated'::text, 'webhook_received'::text, 'card_added'::text, 'card_removed'::text])),
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT subscription_event_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT subscription_event_logs_subscription_id_fkey FOREIGN KEY (subscription_id) REFERENCES public.subscriptions(id),
+  CONSTRAINT subscription_event_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.subscription_plans (
   id text NOT NULL,
   name text NOT NULL,
@@ -527,8 +598,8 @@ CREATE TABLE public.subscriptions (
   trial_end timestamp with time zone,
   CONSTRAINT subscriptions_pkey PRIMARY KEY (id),
   CONSTRAINT subscriptions_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id),
-  CONSTRAINT subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
-  CONSTRAINT subscriptions_payment_method_id_fkey FOREIGN KEY (payment_method_id) REFERENCES public.payment_methods(id)
+  CONSTRAINT subscriptions_payment_method_id_fkey FOREIGN KEY (payment_method_id) REFERENCES public.payment_methods(id),
+  CONSTRAINT subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.user_settings (
   user_id uuid NOT NULL,

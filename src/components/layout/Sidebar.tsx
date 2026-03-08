@@ -8,6 +8,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
 import { usePractitionerProfile } from '@/providers/PractitionerProfileProvider';
 import { useCrmOrganization } from '@/hooks/useOrganization';
+import { useWeeklySchedule } from '@/hooks/useSchedule';
 import { Avatar } from '@/components/ui/Avatar';
 import { cn } from '@/lib/utils';
 import {
@@ -42,6 +43,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { profile, signOut } = useAuth();
   const { data: organization } = useCrmOrganization();
   const practitionerProfile = usePractitionerProfile();
+  const { data: weeklySchedule, isLoading: scheduleLoading } = useWeeklySchedule();
 
   const isSecretary = profile?.role === 'secretary';
   const isNotPublished = Boolean(
@@ -64,12 +66,20 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const isSettingsSection = pathnameWithoutLocale.startsWith('/settings');
   const [settingsOpen, setSettingsOpen] = useState(isSettingsSection);
 
+  const hasNoAvailability = Boolean(
+    !scheduleLoading &&
+      weeklySchedule &&
+      weeklySchedule.filter((b) => b.is_active).length === 0
+  );
+  const showScheduleBadge = !isSecretary && hasNoAvailability;
+
   type SidebarLink = {
     href: string;
     icon: typeof LayoutDashboard;
     label: string;
     exact?: boolean;
     badge?: boolean;
+    incompleteBadge?: number;
   };
 
   const mainLinks = useMemo(() => {
@@ -78,7 +88,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     ];
 
     if (!isSecretary) {
-      links.push({ href: '/schedule', icon: CalendarDays, label: t('schedule') });
+      links.push({
+        href: '/schedule',
+        icon: CalendarDays,
+        label: t('schedule'),
+        incompleteBadge: showScheduleBadge ? 1 : undefined,
+      });
     }
 
     links.push(
@@ -97,7 +112,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     }
 
     return links;
-  }, [t, isSecretary]);
+  }, [t, isSecretary, showScheduleBadge]);
 
   const profileIncompleteCount = practitionerProfile?.completionItems
     ? practitionerProfile.completionItems.filter((i) => !i.completed).length
@@ -182,9 +197,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           >
             <span className="relative">
               <link.icon className="h-5 w-5 shrink-0" />
-              {link.badge && collapsed && (
+              {(link.badge || link.incompleteBadge) && collapsed && (
                 <span
-                  className={cn('absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white', badgeColor)}
+                  className={cn('absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white', link.incompleteBadge ? 'bg-amber-500' : badgeColor)}
                   aria-label={t('profileIncompleteBadge')}
                 />
               )}
@@ -198,6 +213,14 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     aria-label={t('profileIncompleteBadge')}
                   >
                     {practitionerProfile?.completionPercent ?? 0}%
+                  </span>
+                )}
+                {link.incompleteBadge != null && link.incompleteBadge > 0 && (
+                  <span
+                    className={cn('ltr:ml-auto rtl:mr-auto shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white bg-amber-500')}
+                    aria-label={t('profileIncompleteBadge')}
+                  >
+                    {link.incompleteBadge}
                   </span>
                 )}
               </>
