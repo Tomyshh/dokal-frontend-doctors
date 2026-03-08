@@ -788,15 +788,6 @@ UPDATE public.specialties SET
 WHERE name = 'Orthodontics';
 
 UPDATE public.specialties SET
-  name_he = 'כירורגיה פה ולסת',
-  name_fr = 'Chirurgie orale et maxillo-faciale',
-  name_ru = 'Челюстно-лицевая хирургия',
-  name_es = 'Oral and maxillofacial surgery',
-  name_am = 'Oral and maxillofacial surgery',
-  name_en = 'Oral and maxillofacial surgery'
-WHERE name = 'Oral and maxillofacial surgery';
-
-UPDATE public.specialties SET
   name_he = 'פריודונטיה',
   name_fr = 'Parodontologie',
   name_ru = 'Пародонтология',
@@ -1254,6 +1245,24 @@ UPDATE public.specialties SET
   name_am = 'Other',
   name_en = 'Other'
 WHERE name = 'Other';
+
+UPDATE public.specialties SET
+  name_he = 'אלרגולוגיה',
+  name_fr = 'Allergologie',
+  name_ru = 'Аллергология',
+  name_es = 'Allergology',
+  name_am = 'Allergology',
+  name_en = 'Allergology'
+WHERE name = 'Allergy & Immunology';
+
+UPDATE public.specialties SET
+  name_he = 'כירורגיית חזה',
+  name_fr = 'Chirurgie thoracique',
+  name_ru = 'Торакальная хирургия',
+  name_es = 'Thoracic surgery',
+  name_am = 'Thoracic surgery',
+  name_en = 'Thoracic surgery'
+WHERE name = 'Cardiothoracic Surgery';
 
 COMMIT;
 

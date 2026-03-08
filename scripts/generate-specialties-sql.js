@@ -13,6 +13,12 @@ const path = require('path');
 const LOCALES = ['en', 'he', 'fr', 'ru', 'es', 'am'];
 const DB_COLUMNS = ['name_he', 'name_fr', 'name_ru', 'name_es', 'name_am', 'name_en'];
 
+// Map DB names that differ from en.json keys (db_name -> i18n_key)
+const DB_NAME_TO_KEY = {
+  'Allergy & Immunology': 'allergology',
+  'Cardiothoracic Surgery': 'thoracicSurgery',
+};
+
 function sqlEscape(str) {
   if (str == null || str === '') return null;
   return String(str).replace(/'/g, "''");
@@ -52,8 +58,12 @@ function main() {
     en: 'name_en',
   };
 
+  const processed = new Set();
+
   for (const [key, nameEn] of Object.entries(enSpecialties)) {
     if (typeof nameEn !== 'string') continue;
+    if (processed.has(nameEn)) continue;
+    processed.add(nameEn);
 
     const values = {};
     for (const locale of LOCALES) {
@@ -70,6 +80,28 @@ function main() {
     updates.push(`UPDATE public.specialties SET`);
     updates.push(setClauses);
     updates.push(`WHERE name = '${whereName}';`);
+    updates.push('');
+  }
+
+  for (const [dbName, i18nKey] of Object.entries(DB_NAME_TO_KEY)) {
+    if (processed.has(dbName)) continue;
+    const nameEn = enSpecialties[i18nKey];
+    if (!nameEn) continue;
+
+    const values = {};
+    for (const locale of LOCALES) {
+      const col = localeToColumn[locale];
+      const val = data[locale]?.[i18nKey];
+      values[col] = typeof val === 'string' ? val : nameEn;
+    }
+
+    const setClauses = DB_COLUMNS.map(
+      (col) => `  ${col} = '${sqlEscape(values[col])}'`
+    ).join(',\n');
+
+    updates.push(`UPDATE public.specialties SET`);
+    updates.push(setClauses);
+    updates.push(`WHERE name = '${sqlEscape(dbName)}';`);
     updates.push('');
   }
 
