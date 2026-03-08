@@ -16,6 +16,7 @@ import { Clock, X, EyeOff } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useQuery } from '@tanstack/react-query';
 import { getMyPractitionerOrNull } from '@/lib/practitioner';
+import { useAppointmentsRealtime } from '@/hooks/useAppointmentsRealtime';
 import { PractitionerProfileProvider, usePractitionerProfile } from '@/providers/PractitionerProfileProvider';
 import SubscriptionBlocker from '@/components/payment/SubscriptionBlocker';
 
@@ -51,6 +52,7 @@ function NotPublishedBanner() {
 
 export default function DashboardLayoutClient({ children }: { children: ReactNode }) {
   const { loading, user, profile, subscriptionStatus, signOut } = useAuth();
+  useAppointmentsRealtime();
   const t = useTranslations('auth');
   const ts = useTranslations('subscription');
   const locale = useLocale();
