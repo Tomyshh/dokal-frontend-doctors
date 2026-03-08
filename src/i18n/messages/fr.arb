@@ -659,7 +659,13 @@
     "googleCalendarAiPromptPlaceholder": "Ex: Considérer les événements avec un nom de personne comme des RDV…",
     "googleCalendarError": "Erreur de synchronisation",
     "googleCalendarConfigSaved": "Configuration enregistrée",
-    "googleCalendarConnecting": "Redirection vers Google…"
+    "googleCalendarConnecting": "Redirection vers Google…",
+    "googleCalendarPromptTitle": "Synchronisez votre agenda",
+    "googleCalendarPromptDescription": "Connectez Google Calendar pour centraliser tous vos rendez-vous en un seul endroit.",
+    "googleCalendarPromptFeature1": "Synchronisation bidirectionnelle en temps réel",
+    "googleCalendarPromptFeature2": "Vos événements Google apparaissent dans Dokal",
+    "googleCalendarPromptFeature3": "Évitez les conflits et les doubles réservations",
+    "googleCalendarPromptLater": "Plus tard"
   },
   "billing": {
     "title": "Facturation",

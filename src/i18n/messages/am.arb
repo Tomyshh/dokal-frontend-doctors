@@ -672,7 +672,13 @@
     "googleCalendarAiPromptPlaceholder": "E.g.: Consider events with a person's name as appointments…",
     "googleCalendarError": "Sync error",
     "googleCalendarConfigSaved": "Configuration saved",
-    "googleCalendarConnecting": "Redirecting to Google…"
+    "googleCalendarConnecting": "Redirecting to Google…",
+    "googleCalendarPromptTitle": "Sync your calendar",
+    "googleCalendarPromptDescription": "Connect Google Calendar to centralize all your appointments in one place.",
+    "googleCalendarPromptFeature1": "Real-time bidirectional sync",
+    "googleCalendarPromptFeature2": "Your Google events appear in Dokal",
+    "googleCalendarPromptFeature3": "Avoid conflicts and double bookings",
+    "googleCalendarPromptLater": "Later"
   },
   "billing": {
     "title": "Billing",

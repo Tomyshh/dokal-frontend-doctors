@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Calendar, ArrowRightLeft, Clock, X } from 'lucide-react';
 import { Dialog } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
@@ -15,6 +16,7 @@ interface GoogleCalendarPromptProps {
 }
 
 export default function GoogleCalendarPrompt({ open, onDismiss }: GoogleCalendarPromptProps) {
+  const t = useTranslations('settings');
   const connectMutation = useStartGoogleCalendarConnect();
   const [connecting, setConnecting] = useState(false);
 
@@ -52,7 +54,7 @@ export default function GoogleCalendarPrompt({ open, onDismiss }: GoogleCalendar
 
           <div className="relative mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-lg shadow-blue-100/50 ring-1 ring-black/[0.04]">
             <Image
-              src="/logo/google_logo.png"
+              src="/logo/Google_Calendar.png"
               alt="Google Calendar"
               width={44}
               height={44}
@@ -61,10 +63,10 @@ export default function GoogleCalendarPrompt({ open, onDismiss }: GoogleCalendar
           </div>
 
           <h2 className="text-xl font-bold text-gray-900 tracking-tight">
-            Synchronisez votre agenda
+            {t('googleCalendarPromptTitle')}
           </h2>
           <p className="mt-2 text-sm text-gray-500 leading-relaxed max-w-xs mx-auto">
-            Connectez Google Calendar pour centraliser tous vos rendez-vous en un seul endroit.
+            {t('googleCalendarPromptDescription')}
           </p>
         </div>
 
@@ -72,15 +74,15 @@ export default function GoogleCalendarPrompt({ open, onDismiss }: GoogleCalendar
         <div className="px-8 py-5 space-y-3">
           <Feature
             icon={<ArrowRightLeft className="h-4 w-4 text-blue-500" />}
-            text="Synchronisation bidirectionnelle en temps réel"
+            text={t('googleCalendarPromptFeature1')}
           />
           <Feature
             icon={<Calendar className="h-4 w-4 text-emerald-500" />}
-            text="Vos événements Google apparaissent dans Dokal"
+            text={t('googleCalendarPromptFeature2')}
           />
           <Feature
             icon={<Clock className="h-4 w-4 text-amber-500" />}
-            text="Évitez les conflits et les doubles réservations"
+            text={t('googleCalendarPromptFeature3')}
           />
         </div>
 
@@ -92,20 +94,20 @@ export default function GoogleCalendarPrompt({ open, onDismiss }: GoogleCalendar
             className="w-full h-12 text-base gap-2.5 rounded-xl shadow-md shadow-primary/20"
           >
             <Image
-              src="/logo/google_logo.png"
+              src="/logo/Google_Calendar.png"
               alt=""
               width={18}
               height={18}
               className="h-[18px] w-[18px]"
               aria-hidden
             />
-            Connecter Google Calendar
+            {t('googleCalendarConnect')}
           </Button>
           <button
             onClick={handleDismiss}
             className="w-full text-center text-sm text-gray-400 hover:text-gray-600 transition-colors py-1"
           >
-            Plus tard
+            {t('googleCalendarPromptLater')}
           </button>
         </div>
       </div>

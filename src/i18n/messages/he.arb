@@ -672,7 +672,13 @@
     "googleCalendarAiPromptPlaceholder": "לדוגמה: התייחסו לאירועים עם שם אדם כפגישות…",
     "googleCalendarError": "שגיאת סנכרון",
     "googleCalendarConfigSaved": "ההגדרות נשמרו",
-    "googleCalendarConnecting": "מפנה ל-Google…"
+    "googleCalendarConnecting": "מפנה ל-Google…",
+    "googleCalendarPromptTitle": "סנכרנו את היומן שלכם",
+    "googleCalendarPromptDescription": "חברו את Google Calendar כדי לרכז את כל הפגישות שלכם במקום אחד.",
+    "googleCalendarPromptFeature1": "סנכרון דו-כיווני בזמן אמת",
+    "googleCalendarPromptFeature2": "אירועי Google שלכם מופיעים ב-Dokal",
+    "googleCalendarPromptFeature3": "הימנעו מקונפליקטים והזמנות כפולות",
+    "googleCalendarPromptLater": "אחר כך"
   },
   "billing": {
     "title": "חיוב",

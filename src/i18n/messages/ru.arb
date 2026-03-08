@@ -672,7 +672,13 @@
     "googleCalendarAiPromptPlaceholder": "Например: считать события с именем человека приёмами…",
     "googleCalendarError": "Ошибка синхронизации",
     "googleCalendarConfigSaved": "Конфигурация сохранена",
-    "googleCalendarConnecting": "Перенаправление в Google…"
+    "googleCalendarConnecting": "Перенаправление в Google…",
+    "googleCalendarPromptTitle": "Синхронизируйте календарь",
+    "googleCalendarPromptDescription": "Подключите Google Calendar, чтобы централизовать все записи в одном месте.",
+    "googleCalendarPromptFeature1": "Двусторонняя синхронизация в реальном времени",
+    "googleCalendarPromptFeature2": "События Google отображаются в Dokal",
+    "googleCalendarPromptFeature3": "Избегайте конфликтов и двойных бронирований",
+    "googleCalendarPromptLater": "Позже"
   },
   "billing": {
     "title": "Оплата",
