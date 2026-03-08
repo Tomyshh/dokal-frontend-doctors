@@ -238,7 +238,17 @@ export default function SchedulePage() {
       {/* Weekly Schedule */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('weeklySchedule')}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle>{t('weeklySchedule')}</CardTitle>
+            {!isLoading && schedule && schedule.filter((b) => b.is_active).length === 0 && (
+              <span
+                className="shrink-0 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                aria-label={t('weeklySchedule')}
+              >
+                1
+              </span>
+            )}
+          </div>
           <Button size="sm" onClick={openAddBlock}>
             <Plus className="h-4 w-4" />
             {t('addBlock')}
