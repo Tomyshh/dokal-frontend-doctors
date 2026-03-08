@@ -2013,6 +2013,11 @@ paths:
                         practitioner_notes: { type: string, nullable: true }
                         source: { type: string, nullable: true }
                       required: [id, appointment_date, start_time, end_time, status]
+                  health_profile:
+                    oneOf:
+                      - { $ref: "#/components/schemas/HealthProfile" }
+                      - { type: "null" }
+                    description: "Profil santé du patient (teudat_zehut déchiffré). Présent pour les patients linked (auth_user_id). Source de vérité pour teudat depuis health_profiles."
                 required: [patient, appointment_history]
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
