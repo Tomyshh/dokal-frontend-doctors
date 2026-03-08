@@ -26,10 +26,11 @@ import type { InviteMemberRequest } from '@/types/api';
 import type { OrganizationMember } from '@/types';
 import { useRouter } from '@/i18n/routing';
 import {
-  SEAT_PRICES_ILS,
-  BASE_PRICES_ILS,
   calculateMonthlyPriceILS,
+  getPlanBasePriceILS,
+  getSeatPriceILS,
 } from '@/lib/subscription';
+import { usePlanPricing } from '@/hooks/usePlanPricing';
 import {
   UserPlus,
   Users,
@@ -87,6 +88,7 @@ export default function TeamPage() {
   const tsub = useTranslations('subscription');
   const locale = useLocale();
   const { profile, subscriptionStatus } = useAuth();
+  const { pricingMap } = usePlanPricing();
   const router = useRouter();
   const { data: organization, isLoading: loadingOrg } = useCrmOrganization();
   const { data: members, isLoading: loadingMembers } = useOrganizationMembers(organization?.id);
@@ -275,7 +277,7 @@ export default function TeamPage() {
         <div className="flex items-center gap-1.5">
           <Badge className="bg-purple-100 text-purple-800"><ClipboardPen className="h-3 w-3 mr-1" />{t('secretary')}</Badge>
           {orgPlan === 'clinic' && !showTrialNotice && (
-            <Badge className="bg-gray-50 text-gray-500 text-[10px]">{SEAT_PRICES_ILS.secretary} ₪/{t('perMonth')}</Badge>
+            <Badge className="bg-gray-50 text-gray-500 text-[10px]">{getSeatPriceILS('secretary', pricingMap)} ₪/{t('perMonth')}</Badge>
           )}
           {orgPlan === 'clinic' && showTrialNotice && (
             <Badge className="bg-amber-100 text-amber-800 text-[10px]">{tsub('trialBadge')}</Badge>
@@ -287,7 +289,7 @@ export default function TeamPage() {
       <div className="flex items-center gap-1.5">
         <Badge className="bg-primary/10 text-primary"><Stethoscope className="h-3 w-3 mr-1" />{t('practitioner')}</Badge>
         {orgPlan === 'clinic' && !showTrialNotice && (
-          <Badge className="bg-gray-50 text-gray-500 text-[10px]">{SEAT_PRICES_ILS.practitioner} ₪/{t('perMonth')}</Badge>
+          <Badge className="bg-gray-50 text-gray-500 text-[10px]">{getSeatPriceILS('practitioner', pricingMap)} ₪/{t('perMonth')}</Badge>
         )}
         {orgPlan === 'clinic' && showTrialNotice && (
           <Badge className="bg-amber-100 text-amber-800 text-[10px]">{tsub('trialBadge')}</Badge>
@@ -352,7 +354,7 @@ export default function TeamPage() {
   const orgPlan = organization.type === 'enterprise' ? 'enterprise' as const
     : organization.type === 'clinic' ? 'clinic' as const
     : 'individual' as const;
-  const totalMonthlyCost = calculateMonthlyPriceILS(orgPlan, practitionerCount, secretaryCount);
+  const totalMonthlyCost = calculateMonthlyPriceILS(orgPlan, practitionerCount, secretaryCount, pricingMap);
 
   // Show upgrade prompt for individual organizations — redirect to Settings
   if (organization.type !== 'clinic' && organization.type !== 'enterprise') {
@@ -522,7 +524,7 @@ export default function TeamPage() {
                     <p className="text-xs text-muted-foreground">{t('afterTrialPricingTitle')}</p>
                     <div className="flex justify-between">
                       <span className="text-gray-600">{t('basePlan')}</span>
-                      <span className="font-medium">{BASE_PRICES_ILS.clinic} ₪</span>
+                      <span className="font-medium">{getPlanBasePriceILS('clinic', pricingMap)} ₪</span>
                     </div>
                     {practitionerCount > 1 && (
                       <div className="flex justify-between">
@@ -530,7 +532,7 @@ export default function TeamPage() {
                           {practitionerCount - 1} {t('extraPractitioners')}
                         </span>
                         <span className="font-medium">
-                          {(practitionerCount - 1) * SEAT_PRICES_ILS.practitioner} ₪
+                          {(practitionerCount - 1) * getSeatPriceILS('practitioner', pricingMap)} ₪
                         </span>
                       </div>
                     )}
@@ -540,7 +542,7 @@ export default function TeamPage() {
                           {secretaryCount} {t('secretariesLabel')}
                         </span>
                         <span className="font-medium">
-                          {secretaryCount * SEAT_PRICES_ILS.secretary} ₪
+                          {secretaryCount * getSeatPriceILS('secretary', pricingMap)} ₪
                         </span>
                       </div>
                     )}
@@ -555,7 +557,7 @@ export default function TeamPage() {
               <>
                 <div className="flex justify-between">
                   <span className="text-gray-600">{t('basePlan')}</span>
-                  <span className="font-medium">{BASE_PRICES_ILS.clinic} ₪</span>
+                  <span className="font-medium">{getPlanBasePriceILS('clinic', pricingMap)} ₪</span>
                 </div>
                 {practitionerCount > 1 && (
                   <div className="flex justify-between">
@@ -563,7 +565,7 @@ export default function TeamPage() {
                       {practitionerCount - 1} {t('extraPractitioners')}
                     </span>
                     <span className="font-medium">
-                      {(practitionerCount - 1) * SEAT_PRICES_ILS.practitioner} ₪
+                      {(practitionerCount - 1) * getSeatPriceILS('practitioner', pricingMap)} ₪
                     </span>
                   </div>
                 )}
@@ -573,7 +575,7 @@ export default function TeamPage() {
                       {secretaryCount} {t('secretariesLabel')}
                     </span>
                     <span className="font-medium">
-                      {secretaryCount * SEAT_PRICES_ILS.secretary} ₪
+                      {secretaryCount * getSeatPriceILS('secretary', pricingMap)} ₪
                     </span>
                   </div>
                 )}

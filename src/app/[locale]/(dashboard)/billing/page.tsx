@@ -21,12 +21,13 @@ import {
   subscribe,
   cancelSubscription,
   createPaymentSession,
-  BASE_PRICES_ILS,
-  SEAT_PRICES_ILS,
   calculateMonthlyPriceILS,
+  getPlanBasePriceILS,
+  getSeatPriceILS,
   type PlanType,
   type SubscriptionCard,
 } from '@/lib/subscription';
+import { usePlanPricing } from '@/hooks/usePlanPricing';
 import type { OrganizationMember } from '@/types';
 import { localeNames, type Locale } from '@/i18n/config';
 import {
@@ -80,6 +81,7 @@ export default function BillingPage() {
   const { profile, subscriptionStatus, refreshSubscription } = useAuth();
   const { data: organization } = useCrmOrganization();
   const { data: members } = useOrganizationMembers(organization?.id);
+  const { pricingMap } = usePlanPricing();
 
   // ─── Plan state ────────────────────────────────────────────────────
   const currentPlan: PlanType =
@@ -92,7 +94,12 @@ export default function BillingPage() {
 
   const practitionerSeats = subscriptionStatus?.subscription?.practitioner_seats ?? 1;
   const secretarySeats = subscriptionStatus?.subscription?.secretary_seats ?? 0;
-  const totalMonthly = calculateMonthlyPriceILS(currentPlan, practitionerSeats, secretarySeats);
+  const totalMonthly = calculateMonthlyPriceILS(currentPlan, practitionerSeats, secretarySeats, pricingMap);
+  const currentBasePrice = getPlanBasePriceILS(currentPlan, pricingMap);
+  const clinicBasePrice = getPlanBasePriceILS('clinic', pricingMap);
+  const individualBasePrice = getPlanBasePriceILS('individual', pricingMap);
+  const practitionerSeatPrice = getSeatPriceILS('practitioner', pricingMap);
+  const secretarySeatPrice = getSeatPriceILS('secretary', pricingMap);
 
   const practitionerMembers =
     members?.filter((m) => m.staff_type === 'practitioner' && m.is_active !== false) || [];
@@ -383,7 +390,7 @@ export default function BillingPage() {
                   <div className="rounded-xl bg-gray-50 p-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">{tsub('basePlan')}</span>
-                      <span className="font-medium">{BASE_PRICES_ILS[currentPlan]} ₪</span>
+                      <span className="font-medium">{currentBasePrice} ₪</span>
                     </div>
                     {isClinic && practitionerSeats > 1 && (
                       <div className="flex justify-between text-sm">
@@ -391,7 +398,7 @@ export default function BillingPage() {
                           {practitionerSeats - 1} {tsub('extraPractitioners')}
                         </span>
                         <span className="font-medium">
-                          {(practitionerSeats - 1) * SEAT_PRICES_ILS.practitioner} ₪
+                          {(practitionerSeats - 1) * practitionerSeatPrice} ₪
                         </span>
                       </div>
                     )}
@@ -400,7 +407,7 @@ export default function BillingPage() {
                         <span className="text-gray-600">
                           {secretarySeats} {tsub('secretaries')}
                         </span>
-                        <span className="font-medium">{secretarySeats * SEAT_PRICES_ILS.secretary} ₪</span>
+                        <span className="font-medium">{secretarySeats * secretarySeatPrice} ₪</span>
                       </div>
                     )}
                     <div className="border-t border-gray-200 pt-2 flex justify-between text-sm font-semibold">
@@ -424,14 +431,14 @@ export default function BillingPage() {
                         <p className="text-sm font-semibold text-gray-900">{t('trialSubscribeCtaTitle')}</p>
                         <p className="mt-1 text-sm text-muted-foreground">
                           {t('trialSubscribeCtaDescription', {
-                            price: BASE_PRICES_ILS[currentPlan],
+                            price: currentBasePrice,
                             date: nextBillingPreview,
                           })}
                         </p>
                         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                           <Button onClick={openSubscribeDialog} className="gap-2 rounded-full">
                             <Lock className="h-4 w-4" />
-                            {tsub('payNow')} - {BASE_PRICES_ILS[currentPlan]} ₪/{tsub('perMonth')}
+                            {tsub('payNow')} - {currentBasePrice} ₪/{tsub('perMonth')}
                           </Button>
                           <div className="inline-flex items-center rounded-full bg-white/80 px-3 py-2 text-xs text-gray-600 ring-1 ring-gray-200">
                             {t('trialSubscribeCtaNote')}
@@ -711,16 +718,16 @@ export default function BillingPage() {
               <Building2 className="h-5 w-5 text-primary" />
               <span className="font-semibold text-gray-900">{tsub('planClinic')}</span>
               <Badge className="bg-primary/10 text-primary text-xs">
-                {BASE_PRICES_ILS.clinic} ₪/{tsub('perMonth')}
+                {clinicBasePrice} ₪/{tsub('perMonth')}
               </Badge>
             </div>
             <p className="text-sm text-gray-600">{tsub('upgradeConfirmText')}</p>
             <div className="mt-3 space-y-1 text-xs text-gray-500">
               <p>
-                + {SEAT_PRICES_ILS.practitioner} ₪/{tsub('perPractitioner')}
+                + {practitionerSeatPrice} ₪/{tsub('perPractitioner')}
               </p>
               <p>
-                + {SEAT_PRICES_ILS.secretary} ₪/{tsub('perSecretary')}
+                + {secretarySeatPrice} ₪/{tsub('perSecretary')}
               </p>
               <p className="text-primary/70">{tsub('basePriceIncludes')}</p>
             </div>
@@ -877,7 +884,7 @@ export default function BillingPage() {
 
             <div className="rounded-xl bg-gray-50 p-3 text-center">
               <p className="text-sm text-gray-600">
-                {tsub('planIndividual')} — {BASE_PRICES_ILS.individual} ₪/{tsub('perMonth')}
+                {tsub('planIndividual')} — {individualBasePrice} ₪/{tsub('perMonth')}
               </p>
             </div>
 
@@ -952,7 +959,7 @@ export default function BillingPage() {
               <div className="rounded-xl bg-white px-3 py-2 ring-1 ring-gray-100">
                 <p className="text-[11px] uppercase tracking-wide text-gray-500">{t('chargedTodayLabel')}</p>
                 <p className="mt-1 text-sm font-semibold text-gray-900">
-                  {BASE_PRICES_ILS[subscribePlan]} ₪
+                  {getPlanBasePriceILS(subscribePlan, pricingMap)} ₪
                 </p>
               </div>
               <div className="rounded-xl bg-white px-3 py-2 ring-1 ring-gray-100">
@@ -985,7 +992,7 @@ export default function BillingPage() {
                       {plan === 'individual' ? tsub('planIndividual') : tsub('planClinic')}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {BASE_PRICES_ILS[plan]} ₪/{tsub('perMonth')}
+                      {getPlanBasePriceILS(plan, pricingMap)} ₪/{tsub('perMonth')}
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-gray-500">
@@ -1064,7 +1071,7 @@ export default function BillingPage() {
             </Button>
             <Button onClick={handleSubscribe} loading={subscribeLoading} className="gap-2 rounded-full">
               <Lock className="h-4 w-4" />
-              {cardsSorted.length > 0 ? t('subscribeAndChargeNow') : t('continueToPayme')} - {BASE_PRICES_ILS[subscribePlan]} ₪
+              {cardsSorted.length > 0 ? t('subscribeAndChargeNow') : t('continueToPayme')} - {getPlanBasePriceILS(subscribePlan, pricingMap)} ₪
             </Button>
           </div>
         </div>

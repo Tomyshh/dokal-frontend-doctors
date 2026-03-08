@@ -8,8 +8,8 @@ import Image from 'next/image';
 import {
   createPaymentSession,
   startTrial,
-  BASE_PRICES_ILS,
-  SEAT_PRICES_ILS,
+  getPlanBasePriceILS,
+  getSeatPriceILS,
   TRIAL_DURATION_DAYS,
   type PlanType,
 } from '@/lib/subscription';
@@ -33,6 +33,7 @@ import { useRouter } from 'next/navigation';
 import { Spinner } from '@/components/ui/Spinner';
 import { ApiErrorCallout } from '@/components/ui/ApiErrorCallout';
 import { getMyPractitionerOrNull, isPractitionerOnboardingReady } from '@/lib/practitioner';
+import { usePlanPricing } from '@/hooks/usePlanPricing';
 
 type View = 'plan-picker' | 'card-form';
 
@@ -40,12 +41,14 @@ type View = 'plan-picker' | 'card-form';
 
 function PlanCard({
   plan,
+  pricingMap,
   selected,
   onSelect,
   t,
   highlighted,
 }: {
   plan: PlanType;
+  pricingMap?: import('@/lib/subscription').PlanPricingMap;
   selected: boolean;
   onSelect: () => void;
   t: ReturnType<typeof useTranslations<'subscription'>>;
@@ -55,7 +58,9 @@ function PlanCard({
   const isEnterprise = plan === 'enterprise';
   const isIndividual = plan === 'individual';
 
-  const price = BASE_PRICES_ILS[plan];
+  const price = getPlanBasePriceILS(plan, pricingMap);
+  const practitionerSeatPrice = getSeatPriceILS('practitioner', pricingMap);
+  const secretarySeatPrice = getSeatPriceILS('secretary', pricingMap);
 
   const getFeatures = () => {
     if (isIndividual) {
@@ -176,10 +181,10 @@ function PlanCard({
             <span className="text-[11px] text-gray-400 ml-1">/{t('perMonth')}</span>
             <div className="mt-1 space-y-0.5">
               <p className="text-[10px] text-gray-500">
-                + {SEAT_PRICES_ILS.practitioner} ₪/{t('perPractitioner')}
+                + {practitionerSeatPrice} ₪/{t('perPractitioner')}
               </p>
               <p className="text-[10px] text-gray-500">
-                + {SEAT_PRICES_ILS.secretary} ₪/{t('perSecretary')}
+                + {secretarySeatPrice} ₪/{t('perSecretary')}
               </p>
             </div>
             <p className="text-[10px] text-primary/70 mt-1">{t('basePriceIncludes')}</p>
@@ -210,8 +215,9 @@ export default function OnboardingSubscriptionPage() {
   const [trialLoading, setTrialLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState<'subscribed' | 'trial' | null>(null);
+  const { pricingMap } = usePlanPricing();
 
-  const selectedPrice = BASE_PRICES_ILS[selectedPlan];
+  const selectedPrice = getPlanBasePriceILS(selectedPlan, pricingMap);
 
   // Enforce profile completion before plan selection
   const {
@@ -449,12 +455,14 @@ export default function OnboardingSubscriptionPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 items-stretch">
           <PlanCard
             plan="individual"
+            pricingMap={pricingMap}
             selected={selectedPlan === 'individual'}
             onSelect={() => setSelectedPlan('individual')}
             t={t}
           />
           <PlanCard
             plan="clinic"
+            pricingMap={pricingMap}
             selected={selectedPlan === 'clinic'}
             onSelect={() => setSelectedPlan('clinic')}
             t={t}
@@ -462,6 +470,7 @@ export default function OnboardingSubscriptionPage() {
           />
           <PlanCard
             plan="enterprise"
+            pricingMap={pricingMap}
             selected={selectedPlan === 'enterprise'}
             onSelect={() => setSelectedPlan('enterprise')}
             t={t}
@@ -485,7 +494,7 @@ export default function OnboardingSubscriptionPage() {
                 onClick={() => setView('card-form')}
               >
                 <CreditCard className="h-4 w-4" />
-                {t('subscribeNowTitle')} — {BASE_PRICES_ILS.enterprise} ₪/{t('perMonth')}
+                {t('subscribeNowTitle')} — {getPlanBasePriceILS('enterprise', pricingMap)} ₪/{t('perMonth')}
               </Button>
 
               <div className="rounded-2xl bg-primary/5 border border-primary/20 p-4 text-center">
@@ -532,8 +541,8 @@ export default function OnboardingSubscriptionPage() {
               {/* Price footnote */}
               <p className="text-[10px] text-gray-400 text-center mt-5 leading-relaxed">
                 {t('priceFootnote', {
-                  individualPrice: BASE_PRICES_ILS.individual,
-                  clinicPrice: BASE_PRICES_ILS.clinic,
+                  individualPrice: getPlanBasePriceILS('individual', pricingMap),
+                  clinicPrice: getPlanBasePriceILS('clinic', pricingMap),
                 })}
               </p>
 

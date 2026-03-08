@@ -7,7 +7,7 @@ import {
   createPaymentSession,
   subscribe,
   listCards,
-  BASE_PRICES_ILS,
+  getPlanBasePriceILS,
   type PlanType,
   type SubscriptionCard,
 } from '@/lib/subscription';
@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/Button';
 import { Lock, AlertTriangle, CreditCard, CheckCircle2, Crown, Users, Building2, Globe, Clock, LogOut, EyeOff, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SubscriptionStatus } from '@/lib/subscription';
+import { usePlanPricing } from '@/hooks/usePlanPricing';
 
 interface SubscriptionBlockerProps {
   subscriptionStatus: SubscriptionStatus | null;
@@ -44,16 +45,18 @@ function getBlockReason(status: SubscriptionStatus | null): BlockReason {
 
 function PlanOption({
   plan,
+  pricingMap,
   selected,
   onSelect,
   t,
 }: {
   plan: PlanType;
+  pricingMap?: import('@/lib/subscription').PlanPricingMap;
   selected: boolean;
   onSelect: () => void;
   t: ReturnType<typeof useTranslations<'subscription'>>;
 }) {
-  const price = BASE_PRICES_ILS[plan];
+  const price = getPlanBasePriceILS(plan, pricingMap);
   const isClinic = plan === 'clinic';
   const isEnterprise = plan === 'enterprise';
 
@@ -121,6 +124,7 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
   const [cards, setCards] = useState<SubscriptionCard[]>([]);
   const [selectedCardId, setSelectedCardId] = useState<string>('');
   const [cardsLoaded, setCardsLoaded] = useState(false);
+  const { pricingMap } = usePlanPricing();
 
   useEffect(() => {
     listCards()
@@ -133,7 +137,7 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
   }, []);
 
   const reason = getBlockReason(subscriptionStatus);
-  const selectedPrice = BASE_PRICES_ILS[selectedPlan];
+  const selectedPrice = getPlanBasePriceILS(selectedPlan, pricingMap);
 
   const handlePayNow = useCallback(async () => {
     setError('');
@@ -227,8 +231,8 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
           {/* Plan selector */}
           <div className="space-y-2">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('planPickerChoose')}</p>
-            <PlanOption plan="individual" selected={selectedPlan === 'individual'} onSelect={() => setSelectedPlan('individual')} t={t} />
-            <PlanOption plan="clinic" selected={selectedPlan === 'clinic'} onSelect={() => setSelectedPlan('clinic')} t={t} />
+            <PlanOption plan="individual" pricingMap={pricingMap} selected={selectedPlan === 'individual'} onSelect={() => setSelectedPlan('individual')} t={t} />
+            <PlanOption plan="clinic" pricingMap={pricingMap} selected={selectedPlan === 'clinic'} onSelect={() => setSelectedPlan('clinic')} t={t} />
           </div>
 
           {/* Saved cards */}

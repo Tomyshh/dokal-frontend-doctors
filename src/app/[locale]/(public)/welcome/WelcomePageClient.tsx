@@ -34,10 +34,15 @@ import {
   Star,
   Smartphone,
 } from 'lucide-react';
-import { BASE_PRICES_ILS, SEAT_PRICES_ILS, TRIAL_DURATION_DAYS } from '@/lib/subscription';
+import {
+  getPlanBasePriceILS,
+  getSeatPriceILS,
+  TRIAL_DURATION_DAYS,
+} from '@/lib/subscription';
 import { company } from '@/config/company';
 import axios from 'axios';
 import { isRtl } from '@/i18n/config';
+import { usePlanPricing } from '@/hooks/usePlanPricing';
 
 export default function WelcomePageClient() {
   const t = useTranslations('landing');
@@ -50,6 +55,7 @@ export default function WelcomePageClient() {
   const pathname = usePathname();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { pricingMap } = usePlanPricing();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -521,7 +527,7 @@ export default function WelcomePageClient() {
                 <p className="text-sm text-muted-foreground mt-1">{t('pricingIndividualDesc')}</p>
               </div>
               <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">{BASE_PRICES_ILS.individual}</span>
+                <span className="text-4xl font-bold text-gray-900">{getPlanBasePriceILS('individual', pricingMap)}</span>
                 <span className="text-lg text-gray-500 ml-1">₪/{t('pricingPerMonth')}</span>
               </div>
               <ul className="space-y-3 flex-1 mb-8">
@@ -556,12 +562,12 @@ export default function WelcomePageClient() {
                 <p className="text-sm text-muted-foreground mt-1">{t('pricingClinicDesc')}</p>
               </div>
               <div className="mb-2">
-                <span className="text-4xl font-bold text-gray-900">{BASE_PRICES_ILS.clinic}</span>
+                <span className="text-4xl font-bold text-gray-900">{getPlanBasePriceILS('clinic', pricingMap)}</span>
                 <span className="text-lg text-gray-500 ml-1">₪/{t('pricingPerMonth')}</span>
               </div>
               <div className="mb-6 space-y-1">
-                <p className="text-xs text-gray-500">+ {SEAT_PRICES_ILS.practitioner} ₪/{t('pricingPerPractitioner')}</p>
-                <p className="text-xs text-gray-500">+ {SEAT_PRICES_ILS.secretary} ₪/{t('pricingPerSecretary')}</p>
+                <p className="text-xs text-gray-500">+ {getSeatPriceILS('practitioner', pricingMap)} ₪/{t('pricingPerPractitioner')}</p>
+                <p className="text-xs text-gray-500">+ {getSeatPriceILS('secretary', pricingMap)} ₪/{t('pricingPerSecretary')}</p>
                 <p className="text-xs text-primary/70">{t('pricingClinicIncludes')}</p>
               </div>
               <ul className="space-y-3 flex-1 mb-8">
@@ -591,7 +597,7 @@ export default function WelcomePageClient() {
               </div>
               <div className="mb-6">
                 <span className="text-lg font-semibold text-gray-700">{t('pricingFrom')}</span>
-                <span className="text-4xl font-bold text-gray-900 ml-1">{BASE_PRICES_ILS.enterprise}</span>
+                <span className="text-4xl font-bold text-gray-900 ml-1">{getPlanBasePriceILS('enterprise', pricingMap)}</span>
                 <span className="text-lg text-gray-500 ml-1">₪/{t('pricingPerMonth')}</span>
               </div>
               <ul className="space-y-3 flex-1 mb-8">

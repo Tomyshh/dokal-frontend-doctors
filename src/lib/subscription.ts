@@ -44,6 +44,44 @@ export interface PlanPricing {
   trial_duration_days: number;
 }
 
+export type PlanPricingMap = Record<PlanType, PlanPricing>;
+
+const DEFAULT_PLAN_PRICING: PlanPricingMap = {
+  individual: {
+    id: 'individual',
+    name: 'Individual',
+    base_price_agorot: BASE_PRICES_AGOROT.individual,
+    base_price_ils: BASE_PRICES_ILS.individual,
+    practitioner_seat_price_agorot: SEAT_PRICES_AGOROT.practitioner,
+    practitioner_seat_price_ils: SEAT_PRICES_ILS.practitioner,
+    secretary_seat_price_agorot: SEAT_PRICES_AGOROT.secretary,
+    secretary_seat_price_ils: SEAT_PRICES_ILS.secretary,
+    trial_duration_days: TRIAL_DURATION_DAYS,
+  },
+  clinic: {
+    id: 'clinic',
+    name: 'Clinic',
+    base_price_agorot: BASE_PRICES_AGOROT.clinic,
+    base_price_ils: BASE_PRICES_ILS.clinic,
+    practitioner_seat_price_agorot: SEAT_PRICES_AGOROT.practitioner,
+    practitioner_seat_price_ils: SEAT_PRICES_ILS.practitioner,
+    secretary_seat_price_agorot: SEAT_PRICES_AGOROT.secretary,
+    secretary_seat_price_ils: SEAT_PRICES_ILS.secretary,
+    trial_duration_days: TRIAL_DURATION_DAYS,
+  },
+  enterprise: {
+    id: 'enterprise',
+    name: 'Enterprise',
+    base_price_agorot: BASE_PRICES_AGOROT.enterprise,
+    base_price_ils: BASE_PRICES_ILS.enterprise,
+    practitioner_seat_price_agorot: SEAT_PRICES_AGOROT.practitioner,
+    practitioner_seat_price_ils: SEAT_PRICES_ILS.practitioner,
+    secretary_seat_price_agorot: SEAT_PRICES_AGOROT.secretary,
+    secretary_seat_price_ils: SEAT_PRICES_ILS.secretary,
+    trial_duration_days: TRIAL_DURATION_DAYS,
+  },
+};
+
 export async function fetchPlanPricing(): Promise<Record<PlanType, PlanPricing>> {
   const response = await api.get<{ plans: PlanPricing[] }>('/subscription/plans');
   const plans: Record<string, PlanPricing> = {};
@@ -60,6 +98,28 @@ export async function fetchPlanPricing(): Promise<Record<PlanType, PlanPricing>>
   return plans as Record<PlanType, PlanPricing>;
 }
 
+export function getPlanPricingMapOrDefault(pricingMap?: Partial<PlanPricingMap> | null): PlanPricingMap {
+  return {
+    individual: pricingMap?.individual ?? DEFAULT_PLAN_PRICING.individual,
+    clinic: pricingMap?.clinic ?? DEFAULT_PLAN_PRICING.clinic,
+    enterprise: pricingMap?.enterprise ?? DEFAULT_PLAN_PRICING.enterprise,
+  };
+}
+
+export function getPlanBasePriceILS(plan: PlanType, pricingMap?: Partial<PlanPricingMap> | null): number {
+  return getPlanPricingMapOrDefault(pricingMap)[plan].base_price_ils;
+}
+
+export function getSeatPriceILS(
+  seatType: 'practitioner' | 'secretary',
+  pricingMap?: Partial<PlanPricingMap> | null,
+): number {
+  const clinicPricing = getPlanPricingMapOrDefault(pricingMap).clinic;
+  return seatType === 'practitioner'
+    ? clinicPricing.practitioner_seat_price_ils
+    : clinicPricing.secretary_seat_price_ils;
+}
+
 // ─── Price Calculation ───────────────────────────────────────────────
 
 /**
@@ -73,17 +133,21 @@ export function calculateMonthlyPriceAgorot(
   plan: PlanType,
   practitionerSeats: number,
   secretarySeats: number,
+  pricingMap?: Partial<PlanPricingMap> | null,
 ): number {
-  const base = BASE_PRICES_AGOROT[plan];
+  const pricing = getPlanPricingMapOrDefault(pricingMap);
+  const base = pricing[plan].base_price_agorot;
 
   if (plan === 'individual') return base;
 
   if (plan === 'clinic') {
+    const practitionerSeatPrice = pricing.clinic.practitioner_seat_price_agorot;
+    const secretarySeatPrice = pricing.clinic.secretary_seat_price_agorot;
     const extraPractitioners = Math.max(0, practitionerSeats - 1); // first included
     return (
       base +
-      extraPractitioners * SEAT_PRICES_AGOROT.practitioner +
-      secretarySeats * SEAT_PRICES_AGOROT.secretary
+      extraPractitioners * practitionerSeatPrice +
+      secretarySeats * secretarySeatPrice
     );
   }
 
@@ -95,8 +159,9 @@ export function calculateMonthlyPriceILS(
   plan: PlanType,
   practitionerSeats: number,
   secretarySeats: number,
+  pricingMap?: Partial<PlanPricingMap> | null,
 ): number {
-  return calculateMonthlyPriceAgorot(plan, practitionerSeats, secretarySeats) / 100;
+  return calculateMonthlyPriceAgorot(plan, practitionerSeats, secretarySeats, pricingMap) / 100;
 }
 
 // Keep legacy aliases for backward-compat during transition
