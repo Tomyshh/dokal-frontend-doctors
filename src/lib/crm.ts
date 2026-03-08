@@ -50,6 +50,20 @@ export function getCrmAppointmentPatientDisplayName(appt: Appointment): string {
   return fromProfile || '-';
 }
 
+export function getCrmAppointmentPatientAvatarInfo(appt: Appointment): {
+  avatarUrl: string | null;
+  firstName: string | null;
+  lastName: string | null;
+} {
+  const p = pickPatientLike(appt);
+  const prof = appt.profiles;
+  return {
+    avatarUrl: p?.avatar_url || prof?.avatar_url || null,
+    firstName: p?.first_name || prof?.first_name || null,
+    lastName: p?.last_name || prof?.last_name || null,
+  };
+}
+
 export function getCrmAppointmentPatientPhone(appt: Appointment): string | null {
   const p = pickPatientLike(appt);
   if (p?.phone) return p.phone;

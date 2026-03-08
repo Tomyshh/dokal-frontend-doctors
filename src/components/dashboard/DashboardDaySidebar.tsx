@@ -7,7 +7,7 @@ import { fr, enUS, he, ru, es } from 'date-fns/locale';
 import { X, CalendarX, ExternalLink } from 'lucide-react';
 import { cn, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
-import { getCrmAppointmentPatientDisplayName } from '@/lib/crm';
+import { getCrmAppointmentPatientDisplayName, getCrmAppointmentPatientAvatarInfo } from '@/lib/crm';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -15,19 +15,8 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Link } from '@/i18n/routing';
 import { useCalendarAppointments, groupAppointmentsByDate } from '@/hooks/useCalendarAppointments';
-import type { Appointment } from '@/types';
 
 const localeMap: Record<string, import('date-fns').Locale> = { fr, en: enUS, he, ru, es, am: enUS };
-
-function getPatientAvatarInfo(appt: Appointment) {
-  const pr = appt.patient_record;
-  const prof = appt.profiles;
-  return {
-    avatarUrl: pr?.avatar_url || prof?.avatar_url || null,
-    firstName: pr?.first_name || prof?.first_name || null,
-    lastName: pr?.last_name || prof?.last_name || null,
-  };
-}
 
 interface DashboardDaySidebarProps {
   date: Date;
@@ -116,7 +105,7 @@ export default function DashboardDaySidebar({ date, onClose }: DashboardDaySideb
             <div className="space-y-2">
               {appointments.map((appt) => {
                 const patientName = getCrmAppointmentPatientDisplayName(appt);
-                const { avatarUrl, firstName, lastName } = getPatientAvatarInfo(appt);
+                const { avatarUrl, firstName, lastName } = getCrmAppointmentPatientAvatarInfo(appt);
 
                 const reasonLabel =
                   locale === 'he'

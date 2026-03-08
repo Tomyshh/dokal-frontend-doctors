@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import { useRouter, usePathname } from '@/i18n/routing';
@@ -63,6 +63,28 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
     user?.email ||
     '';
 
+  // Format date selon la locale (ex: FR "Lundi 9 Mars 2026", EN "Monday, March 9, 2026")
+  const localeToBcp47: Record<Locale, string> = {
+    he: 'he-IL',
+    en: 'en',
+    fr: 'fr-FR',
+    ru: 'ru-RU',
+    am: 'am-ET',
+    es: 'es-ES',
+  };
+  const { todayFormatted, todayIso } = useMemo(() => {
+    const d = new Date();
+    return {
+      todayFormatted: new Intl.DateTimeFormat(localeToBcp47[locale], {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }).format(d),
+      todayIso: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
+    };
+  }, [locale]);
+
   const handleGoogleCalendarClick = async () => {
     if (gcalStatusLoading || gcalConnectMutation.isPending) return;
 
@@ -99,6 +121,12 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
             <div className="truncate text-sm sm:text-base font-semibold text-foreground">
               {displayName ? t('helloName', { name: displayName }) : t('hello')}
             </div>
+            <time
+              dateTime={todayIso}
+              className="block text-xs text-muted-foreground font-medium truncate"
+            >
+              {todayFormatted}
+            </time>
           </div>
         </div>
 
