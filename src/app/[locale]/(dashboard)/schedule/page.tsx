@@ -12,7 +12,7 @@ import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
-import { getDayName, formatTime } from '@/lib/utils';
+import { getDayName, formatTime, formatDate } from '@/lib/utils';
 import { useToast } from '@/providers/ToastProvider';
 import { Plus, Pencil, Trash2, CalendarOff, Coffee, Clock, Info, CalendarDays, Timer, Utensils, User, Users, GraduationCap, ArrowRight, Repeat, CalendarCheck, Copy } from 'lucide-react';
 import type { WeeklySchedule } from '@/types';
@@ -397,7 +397,7 @@ export default function SchedulePage() {
                       {(brk.recurring_days ?? []).map((d) => getDayName(d, locale)).join(', ')}
                     </span>
                   ) : (
-                    <span className="text-sm font-medium text-gray-900">{brk.date}</span>
+                    <span className="text-sm font-medium text-gray-900">{formatDate(brk.date, 'dd/MM/yyyy', locale)}</span>
                   )}
                   <span className="text-sm text-gray-600 shrink-0">
                     <Clock className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
