@@ -9,6 +9,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { usePractitionerProfile } from '@/providers/PractitionerProfileProvider';
 import { useCrmOrganization } from '@/hooks/useOrganization';
 import { useWeeklySchedule } from '@/hooks/useSchedule';
+import { useGoogleCalendarStatus } from '@/hooks/useGoogleCalendarIntegration';
 import { Avatar } from '@/components/ui/Avatar';
 import { cn } from '@/lib/utils';
 import {
@@ -28,6 +29,7 @@ import {
   ClipboardCheck,
   User,
   Palette,
+  RefreshCw,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -38,12 +40,14 @@ interface SidebarProps {
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const t = useTranslations('nav');
   const ta = useTranslations('auth');
+  const tc = useTranslations('common');
   const pathname = usePathname();
   const locale = useLocale();
   const { profile, signOut } = useAuth();
   const { data: organization } = useCrmOrganization();
   const practitionerProfile = usePractitionerProfile();
   const { data: weeklySchedule, isLoading: scheduleLoading } = useWeeklySchedule();
+  const { data: gcalStatus } = useGoogleCalendarStatus();
 
   const isSecretary = profile?.role === 'secretary';
   const isNotPublished = Boolean(
@@ -311,6 +315,18 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 >
                   <link.icon className="h-4 w-4 shrink-0" />
                   <span className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{link.label}</span>
+                  {link.href === '/settings/google-calendar' && (
+                    <RefreshCw
+                      className={cn(
+                        'h-3.5 w-3.5 shrink-0',
+                        gcalStatus?.connected && !gcalStatus?.last_error
+                          ? 'text-emerald-500'
+                          : 'text-red-500'
+                      )}
+                      title={gcalStatus?.connected && !gcalStatus?.last_error ? tc('gcalSyncEnabledManageInSettings') : tc('gcalSyncDisabledEnable')}
+                      aria-label={gcalStatus?.connected && !gcalStatus?.last_error ? tc('gcalSyncEnabledManageInSettings') : tc('gcalSyncDisabledEnable')}
+                    />
+                  )}
                   {link.badge != null && link.badge > 0 && (
                     <span
                       className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white', badgeColor)}
