@@ -50,7 +50,7 @@ export function formatDateTime(date: string | Date, locale: string = 'fr') {
 export function getInitials(firstName?: string | null, lastName?: string | null): string {
   const f = firstName?.charAt(0)?.toUpperCase() || '';
   const l = lastName?.charAt(0)?.toUpperCase() || '';
-  return f + l || '?';
+  return f + l;
 }
 
 export function getStatusColor(status: string): string {

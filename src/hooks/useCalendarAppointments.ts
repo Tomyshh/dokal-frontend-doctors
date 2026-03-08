@@ -52,6 +52,7 @@ export function useCalendarAppointments({
       return data;
     },
     enabled: !!from && !!to,
+    refetchInterval: 15_000,
   });
 }
 

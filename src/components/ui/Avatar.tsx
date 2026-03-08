@@ -1,4 +1,5 @@
 import { cn, getInitials } from '@/lib/utils';
+import { User } from 'lucide-react';
 import Image from 'next/image';
 
 interface AvatarProps {
@@ -14,6 +15,13 @@ const sizeClasses = {
   sm: 'h-8 w-8 text-xs',
   md: 'h-10 w-10 text-sm',
   lg: 'h-12 w-12 text-base',
+};
+
+const iconSizeClasses = {
+  xs: 'h-3 w-3',
+  sm: 'h-4 w-4',
+  md: 'h-5 w-5',
+  lg: 'h-6 w-6',
 };
 
 export function Avatar({ src, firstName, lastName, size = 'md', className }: AvatarProps) {
@@ -40,7 +48,7 @@ export function Avatar({ src, firstName, lastName, size = 'md', className }: Ava
         className
       )}
     >
-      {initials}
+      {initials || <User className={iconSizeClasses[size]} />}
     </div>
   );
 }

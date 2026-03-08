@@ -1,26 +1,47 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
+import type { RealtimeChannel } from '@supabase/supabase-js';
+
+const INVALIDATION_KEYS = [
+  ['calendar-appointments'],
+  ['crm-appointments'],
+  ['crm-organization-appointments'],
+  ['appointment'],
+] as const;
 
 /**
- * Subscribes to Supabase Realtime changes on the `appointments` table.
- * On INSERT, UPDATE, or DELETE, invalidates calendar and appointments queries
- * so React Query refetches and the UI updates in real time.
+ * Subscribes to Supabase Realtime on the `appointments` table.
+ * When any row changes, invalidates React Query caches so the calendar
+ * and appointment lists update without a page refresh.
  *
- * Requires: Supabase Realtime enabled on the `appointments` table
- * (see Database > Publications > supabase_realtime).
+ * Prerequisites on Supabase:
+ *  1. `appointments` added to the `supabase_realtime` publication
+ *  2. RLS SELECT policy allowing `auth.uid()` to read their rows
  */
 export function useAppointmentsRealtime() {
   const queryClient = useQueryClient();
   const { session } = useAuth();
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
-    if (!session?.access_token) return;
+    const token = session?.access_token;
+    if (!token) return;
 
     const supabase = createClient();
+
+    // Ensure the Realtime WebSocket authenticates with the user's JWT
+    // (the @supabase/ssr client may not propagate it automatically).
+    supabase.realtime.setAuth(token);
+
+    // Clean up previous channel if any
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
+
     const channel = supabase
       .channel('appointments-realtime')
       .on(
@@ -30,17 +51,28 @@ export function useAppointmentsRealtime() {
           schema: 'public',
           table: 'appointments',
         },
-        () => {
-          // Invalidate all appointment-related queries so they refetch
-          queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
-          queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
-          queryClient.invalidateQueries({ queryKey: ['crm-organization-appointments'] });
+        (payload) => {
+          if (process.env.NODE_ENV === 'development') {
+            // eslint-disable-next-line no-console
+            console.log('[Realtime] appointments change:', payload.eventType, payload);
+          }
+          for (const key of INVALIDATION_KEYS) {
+            queryClient.invalidateQueries({ queryKey: [...key] });
+          }
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (process.env.NODE_ENV === 'development') {
+          // eslint-disable-next-line no-console
+          console.log('[Realtime] subscription status:', status, err ?? '');
+        }
+      });
+
+    channelRef.current = channel;
 
     return () => {
       supabase.removeChannel(channel);
+      channelRef.current = null;
     };
   }, [session?.access_token, queryClient]);
 }
