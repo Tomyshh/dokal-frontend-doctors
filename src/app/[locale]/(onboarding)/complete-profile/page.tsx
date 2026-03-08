@@ -347,7 +347,7 @@ export default function CompleteProfilePage() {
         license_number: form.licenseNumber,
         specialization_license: form.specializationLicense || undefined,
         address_line: form.addressLine,
-        zip_code: form.zipCode || '',
+        zip_code: form.zipCode || undefined,
         latitude: form.latitude ?? undefined,
         longitude: form.longitude ?? undefined,
         organization_name: `Cabinet Dr ${form.lastName}`.trim(),
@@ -373,8 +373,17 @@ export default function CompleteProfilePage() {
 
       window.location.assign(`/${locale}/subscription`);
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { error?: { message?: string } } } };
-      setError(axiosErr?.response?.data?.error?.message || t('registrationBackendError'));
+      const axiosErr = err as { response?: { data?: { error?: { code?: string; message?: string; details?: { fieldErrors?: Record<string, string[]> } } } } };
+      const errBody = axiosErr?.response?.data?.error;
+      if (errBody?.code === 'validation_error' && errBody.details?.fieldErrors) {
+        const fields = errBody.details.fieldErrors;
+        const msgs = Object.entries(fields)
+          .map(([field, errs]) => `${field}: ${(errs as string[]).join(', ')}`)
+          .join(' | ');
+        setError(msgs || t('registrationBackendError'));
+      } else {
+        setError(errBody?.message || t('registrationBackendError'));
+      }
     } finally {
       setLoading(false);
     }

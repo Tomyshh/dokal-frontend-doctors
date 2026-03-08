@@ -220,7 +220,7 @@ export interface RegisterPractitionerRequest {
   license_number: string;
   specialization_license?: string;
   address_line: string;
-  zip_code: string;
+  zip_code?: string;
   latitude?: number;
   longitude?: number;
   // Optional: join existing clinic
