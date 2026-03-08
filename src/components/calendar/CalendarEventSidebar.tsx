@@ -11,11 +11,12 @@ import { getItemColors } from './CalendarEventCard';
 import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { getAppointmentStatusLabel } from '@/lib/appointmentStatus';
 import { getItemStartTime, getItemEndTime } from '@/hooks/useCalendarAppointments';
-import { X, User, Clock, FileText, Stethoscope, ExternalLink, Globe, Trash2, Repeat, CalendarMinus } from 'lucide-react';
+import { X, User, Clock, FileText, Stethoscope, ExternalLink, Globe, Trash2, Repeat, CalendarMinus, CalendarPlus, AlertTriangle, Ban } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import type { CalendarItem } from '@/types';
-import { useDeleteExternalEvent } from '@/hooks/useExternalEvents';
+import { useDeleteExternalEvent, useDismissExternalEvent } from '@/hooks/useExternalEvents';
+import { ConvertToAppointmentDialog } from './ConvertToAppointmentDialog';
 import { useDeleteBreak, useUpdateBreak } from '@/hooks/useBreaks';
 import { Dialog } from '@/components/ui/Dialog';
 import { useEffect, useMemo, useState } from 'react';
@@ -86,9 +87,11 @@ export default function CalendarEventSidebar({
 
   // Tous les hooks doivent être appelés inconditionnellement (règles des hooks React)
   const deleteExternalMutation = useDeleteExternalEvent();
+  const dismissMutation = useDismissExternalEvent();
   const deleteBreakMutation = useDeleteBreak();
   const updateBreakMutation = useUpdateBreak();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [convertDialogOpen, setConvertDialogOpen] = useState(false);
   const updateMutation = useUpdateCrmAppointment();
   const updateOrgMutation = useUpdateCrmOrganizationAppointment();
   const updateMetaMutation = isOrgActor ? updateOrgMutation : updateMutation;
@@ -126,6 +129,7 @@ export default function CalendarEventSidebar({
   // ─── External event sidebar ──────────────────────────────────────────
   if (item.kind === 'external_event') {
     const evt = item.data;
+    const isPendingReview = evt.type_detected === 'pending_review';
     const linkedBreakId = extractBreakId(evt.description);
     const isRecurring = isRecurringBreak(evt.description);
     const canDelete = evt.source === 'manual' || !!linkedBreakId;
@@ -134,6 +138,17 @@ export default function CalendarEventSidebar({
     const eventDayOfWeek = getDayOfWeekFromDate(evt.date);
 
     const isDeleting = deleteBreakMutation.isPending || deleteExternalMutation.isPending || updateBreakMutation.isPending;
+
+    const handleDismiss = async () => {
+      try {
+        await dismissMutation.mutateAsync(evt.id);
+        onClose();
+        toast.success(tc('saveSuccess'));
+      } catch (err: unknown) {
+        const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || tc('saveError');
+        toast.error(tc('saveErrorTitle'), msg);
+      }
+    };
 
     const handleDeleteAll = async () => {
       try {
@@ -177,7 +192,9 @@ export default function CalendarEventSidebar({
         {/* Header */}
         <div className={cn('px-5 py-4 border-b border-border flex items-center justify-between', colors.bg)}>
           <div>
-            <h3 className="text-sm font-semibold text-foreground">{t('externalEvent')}</h3>
+            <h3 className="text-sm font-semibold text-foreground">
+              {isPendingReview ? t('pendingReview') : t('externalEvent')}
+            </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
               {formatDate(evt.date, 'EEEE d MMMM yyyy', locale)}
             </p>
@@ -192,6 +209,19 @@ export default function CalendarEventSidebar({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          {/* Pending review banner */}
+          {isPendingReview && (
+            <div className="rounded-xl border border-orange-300 bg-orange-50 px-4 py-3">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-orange-900">{t('pendingReviewBannerTitle')}</p>
+                  <p className="text-xs text-orange-800 mt-0.5">{t('pendingReviewBannerDesc')}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Title */}
           <div>
             <p className="text-lg font-semibold text-foreground">{displayTitle}</p>
@@ -238,14 +268,18 @@ export default function CalendarEventSidebar({
                 <p className="text-xs text-muted-foreground">{t('type')}</p>
                 <Badge
                   className={
-                    evt.type_detected === 'appointment'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'bg-slate-100 text-slate-700'
+                    isPendingReview
+                      ? 'bg-orange-100 text-orange-700'
+                      : evt.type_detected === 'appointment'
+                        ? 'bg-blue-50 text-blue-700'
+                        : 'bg-slate-100 text-slate-700'
                   }
                 >
-                  {evt.type_detected === 'appointment'
-                    ? t('detectedAppointment')
-                    : t('detectedBusy')}
+                  {isPendingReview
+                    ? t('pendingReview')
+                    : evt.type_detected === 'appointment'
+                      ? t('detectedAppointment')
+                      : t('detectedBusy')}
                 </Badge>
               </div>
             </div>
@@ -264,21 +298,64 @@ export default function CalendarEventSidebar({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-border p-4 flex items-center justify-between gap-3">
-          <Button variant="outline" size="sm" onClick={onClose}>
-            {tc('close')}
-          </Button>
-          {canDelete && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setDeleteDialogOpen(true)}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              {t('deleteExternalEvent')}
-            </Button>
+        <div className="border-t border-border p-4 space-y-3">
+          {isPendingReview ? (
+            <>
+              <Button
+                className="w-full"
+                size="sm"
+                onClick={() => setConvertDialogOpen(true)}
+              >
+                <CalendarPlus className="h-3.5 w-3.5" />
+                {t('convertToAppointment')}
+              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  loading={dismissMutation.isPending}
+                  onClick={handleDismiss}
+                >
+                  <Ban className="h-3.5 w-3.5" />
+                  {t('dismissAsUnavailable')}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={onClose}>
+                  {tc('close')}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-between gap-3">
+              <Button variant="outline" size="sm" onClick={onClose}>
+                {tc('close')}
+              </Button>
+              {canDelete && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setDeleteDialogOpen(true)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  {t('deleteExternalEvent')}
+                </Button>
+              )}
+            </div>
           )}
         </div>
+
+        {/* Convert to appointment dialog */}
+        {isPendingReview && (
+          <ConvertToAppointmentDialog
+            open={convertDialogOpen}
+            onClose={() => setConvertDialogOpen(false)}
+            event={evt}
+            onConverted={() => {
+              setConvertDialogOpen(false);
+              onClose();
+            }}
+          />
+        )}
 
         {/* Delete dialog */}
         <Dialog

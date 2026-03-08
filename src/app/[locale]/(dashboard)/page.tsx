@@ -8,8 +8,10 @@ import AppointmentChart from '@/components/dashboard/AppointmentChart';
 import UpcomingAppointments from '@/components/dashboard/UpcomingAppointments';
 import DashboardCalendarWidget from '@/components/dashboard/DashboardCalendarWidget';
 import DashboardDaySidebar from '@/components/dashboard/DashboardDaySidebar';
-import { Users, CalendarCheck, Clock, XCircle } from 'lucide-react';
+import { Users, CalendarCheck, Clock, XCircle, AlertTriangle } from 'lucide-react';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { usePendingReviewCount } from '@/hooks/useExternalEvents';
+import { Link } from '@/i18n/routing';
 
 function getGreeting(t: (key: string) => string): string {
   const hour = new Date().getHours();
@@ -26,6 +28,7 @@ export default function DashboardPage() {
   const to = format(endOfMonth(now), 'yyyy-MM-dd');
 
   const { data: stats } = useCrmStats({ from, to });
+  const { data: pendingReviewCount } = usePendingReviewCount();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const totalAppointments = stats
@@ -47,7 +50,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="dashboard-fade-in" style={{ animationDelay: '50ms' }}>
           <StatCard
             title={t('todayAppointments')}
@@ -89,6 +92,20 @@ export default function DashboardPage() {
             accentColor="border-l-red-500"
           />
         </div>
+        {(pendingReviewCount ?? 0) > 0 && (
+          <div className="dashboard-fade-in" style={{ animationDelay: '250ms' }}>
+            <Link href="/calendar">
+              <StatCard
+                title={t('pendingReviewCount')}
+                value={pendingReviewCount ?? 0}
+                icon={AlertTriangle}
+                iconBg="bg-orange-50"
+                iconColor="text-orange-600"
+                accentColor="border-l-orange-500"
+              />
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Charts and Calendar */}

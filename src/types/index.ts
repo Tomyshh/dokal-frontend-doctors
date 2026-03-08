@@ -452,7 +452,28 @@ export interface UserSettings {
 // Google Calendar Integration
 // ==========================================
 
-export type ExternalEventType = 'appointment' | 'busy';
+export type ExternalEventType = 'appointment' | 'busy' | 'pending_review';
+
+export interface ExtractedPatientInfo {
+  first_name: string | null;
+  last_name: string | null;
+  phone: string | null;
+  email: string | null;
+  confidence: number;
+  raw_text_used: string;
+}
+
+export interface ConvertToAppointmentPayload {
+  patient_record_id?: string | null;
+  patient?: {
+    first_name: string;
+    last_name: string;
+    phone?: string | null;
+    email?: string | null;
+  } | null;
+  reason_id?: string | null;
+  notes?: string | null;
+}
 
 export interface GoogleCalendarStatus {
   connected: boolean;

@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
-import type { ExternalEvent } from '@/types';
+import type { ExternalEvent, ExtractedPatientInfo, ConvertToAppointmentPayload } from '@/types';
 import type { CreateExternalEventRequest } from '@/types/api';
 
 export interface ExternalEventsResponse {
@@ -83,6 +83,72 @@ export function useDeleteExternalEvent() {
       queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
     },
+  });
+}
+
+export function useExtractPatientInfo() {
+  return useMutation({
+    mutationFn: async (eventId: string) => {
+      const { data } = await api.post<ExtractedPatientInfo>(
+        `/crm/external-events/${eventId}/extract-patient-info`,
+      );
+      return data;
+    },
+  });
+}
+
+export function useConvertExternalEventToAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      eventId,
+      payload,
+    }: {
+      eventId: string;
+      payload: ConvertToAppointmentPayload;
+    }) => {
+      const { data } = await api.post<{ appointment_id: string }>(
+        `/crm/external-events/${eventId}/convert-to-appointment`,
+        payload,
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['external-events'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-patients'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-patient-search'] });
+    },
+  });
+}
+
+export function useDismissExternalEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (eventId: string) => {
+      await api.patch(`/crm/external-events/${eventId}`, {
+        type_detected: 'busy',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['external-events'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-appointments'] });
+    },
+  });
+}
+
+export function usePendingReviewCount() {
+  return useQuery({
+    queryKey: ['pending-review-count'],
+    queryFn: async () => {
+      const { data } = await api.get<{ count: number }>(
+        '/crm/external-events/pending-review-count',
+      );
+      return data.count;
+    },
+    refetchInterval: 30_000,
   });
 }
 

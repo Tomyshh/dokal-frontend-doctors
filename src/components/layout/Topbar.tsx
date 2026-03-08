@@ -4,8 +4,9 @@ import { useState, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import { useRouter, usePathname } from '@/i18n/routing';
-import { Bell, Globe, Menu, Loader2 } from 'lucide-react';
+import { Bell, Globe, Menu, Loader2, AlertTriangle } from 'lucide-react';
 import { useUnreadCount } from '@/hooks/useNotifications';
+import { usePendingReviewCount } from '@/hooks/useExternalEvents';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { localeNames, type Locale } from '@/i18n/config';
@@ -27,6 +28,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { data: unreadCount } = useUnreadCount();
+  const { data: pendingReviewCount } = usePendingReviewCount();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const { profile, user } = useAuth();
   const updateSettings = useUpdateSettings();
@@ -132,6 +134,18 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
 
         {/* Right: Google Calendar sync, language, notifications */}
         <div className="flex items-center gap-2">
+          {/* Pending review events badge */}
+          {(pendingReviewCount ?? 0) > 0 && (
+            <Link
+              href="/calendar"
+              className="relative h-10 px-2.5 rounded-xl flex items-center gap-1.5 text-orange-600 hover:bg-orange-50 transition-colors"
+              title={t('pendingReviewTooltip')}
+            >
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-xs font-semibold">{pendingReviewCount}</span>
+            </Link>
+          )}
+
           {/* Google Calendar Sync Indicator (format paysage) */}
           <button
             type="button"

@@ -53,7 +53,7 @@ const statusColors: Record<string, { bg: string; border: string; text: string; d
 };
 
 /** Colors for Google Calendar external events */
-export const externalEventColors = {
+export const externalEventColors: Record<string, { bg: string; border: string; text: string; dot: string }> = {
   appointment: {
     bg: 'bg-blue-50',
     border: 'border-blue-300',
@@ -65,6 +65,12 @@ export const externalEventColors = {
     border: 'border-slate-400',
     text: 'text-slate-700',
     dot: 'bg-slate-400',
+  },
+  pending_review: {
+    bg: 'bg-orange-50',
+    border: 'border-orange-400',
+    text: 'text-orange-900',
+    dot: 'bg-orange-500',
   },
 };
 
@@ -103,6 +109,8 @@ export default function CalendarEventCard({
   const startTime = getItemStartTime(item);
   const endTime = getItemEndTime(item);
   const isExternal = item.kind === 'external_event';
+  const isPendingReview =
+    isExternal && item.data.type_detected === 'pending_review';
   const isDraft =
     item.kind === 'crm_appointment' ? isDraftPatientAppointment(item.data) : false;
   const isMissing =
@@ -124,7 +132,8 @@ export default function CalendarEventCard({
         title={`${formatTime(startTime)} ${title}`}
       >
         <span className="font-medium">{formatTime(startTime)}</span>{' '}
-        {isExternal && <span className="opacity-60">[G] </span>}
+        {isPendingReview && <span className="opacity-80">[?] </span>}
+        {isExternal && !isPendingReview && <span className="opacity-60">[G] </span>}
         {!isExternal && sourceShort && <span className="opacity-60">[{sourceShort}] </span>}
         {!isExternal && isDraft && <span className="opacity-60">[D] </span>}
         {!isExternal && isMissing && <span className="opacity-60">[!] </span>}
@@ -149,7 +158,12 @@ export default function CalendarEventCard({
         <span className="text-xs font-semibold truncate">
           {formatTime(startTime)} - {formatTime(endTime)}
         </span>
-        {isExternal && (
+        {isPendingReview && (
+          <span className="text-[9px] font-medium px-1 py-0 rounded bg-orange-200/80 text-orange-800 shrink-0">
+            ?
+          </span>
+        )}
+        {isExternal && !isPendingReview && (
           <span className="text-[9px] font-medium px-1 py-0 rounded bg-white/60 shrink-0">
             G
           </span>
