@@ -397,7 +397,7 @@ export default function SchedulePage() {
                       {(brk.recurring_days ?? []).map((d) => getDayName(d, locale)).join(', ')}
                     </span>
                   ) : (
-                    <span className="text-sm font-medium text-gray-900">{formatDate(brk.date, 'dd/MM/yyyy', locale)}</span>
+                    <span className="text-sm font-medium text-gray-900">{brk.date ? formatDate(brk.date, 'dd/MM/yyyy', locale) : '-'}</span>
                   )}
                   <span className="text-sm text-gray-600 shrink-0">
                     <Clock className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
