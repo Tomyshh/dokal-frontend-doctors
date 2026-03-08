@@ -30,6 +30,36 @@ export const SEAT_PRICES_ILS = {
 
 export const TRIAL_DURATION_DAYS = 60;
 
+// ─── Plan Pricing from API ───────────────────────────────────────────
+
+export interface PlanPricing {
+  id: string;
+  name: string;
+  base_price_agorot: number;
+  base_price_ils: number;
+  practitioner_seat_price_agorot: number;
+  practitioner_seat_price_ils: number;
+  secretary_seat_price_agorot: number;
+  secretary_seat_price_ils: number;
+  trial_duration_days: number;
+}
+
+export async function fetchPlanPricing(): Promise<Record<PlanType, PlanPricing>> {
+  const response = await api.get<{ plans: PlanPricing[] }>('/subscription/plans');
+  const plans: Record<string, PlanPricing> = {};
+  
+  for (const plan of response.data.plans) {
+    plans[plan.id] = {
+      ...plan,
+      base_price_ils: Math.round(plan.base_price_agorot / 100),
+      practitioner_seat_price_ils: Math.round(plan.practitioner_seat_price_agorot / 100),
+      secretary_seat_price_ils: Math.round(plan.secretary_seat_price_agorot / 100),
+    };
+  }
+  
+  return plans as Record<PlanType, PlanPricing>;
+}
+
 // ─── Price Calculation ───────────────────────────────────────────────
 
 /**
