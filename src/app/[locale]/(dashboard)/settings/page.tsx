@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/providers/AuthProvider';
 import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
@@ -25,6 +26,7 @@ import { localeNames, type Locale } from '@/i18n/config';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { usePractitionerProfile } from '@/providers/PractitionerProfileProvider';
 import { useToast } from '@/providers/ToastProvider';
+import { useManualGoogleCalendarSync } from '@/hooks/useGoogleCalendarIntegration';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
@@ -46,11 +48,38 @@ export default function SettingsPage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
 
+  const searchParams = useSearchParams();
+  const syncMutation = useManualGoogleCalendarSync();
+  const initialSyncTriggered = useRef(false);
+
   const [orgName, setOrgName] = useState('');
   const [orgDescription, setOrgDescription] = useState('');
   const [orgWebsite, setOrgWebsite] = useState('');
   const [orgPhone, setOrgPhone] = useState('');
   const [orgEmail, setOrgEmail] = useState('');
+
+  useEffect(() => {
+    if (searchParams.get('googleCalendar') === 'connected' && !initialSyncTriggered.current) {
+      initialSyncTriggered.current = true;
+      syncMutation.mutateAsync()
+        .then(() => {
+          toast.success(
+            'Google Calendar Synchronisée',
+            'Votre calendrier est maintenant synchronisé avec Google Calendar'
+          );
+        })
+        .catch(() => {
+          toast.error(
+            tc('saveErrorTitle'),
+            'La synchronisation initiale a échoué'
+          );
+        })
+        .finally(() => {
+          router.replace(pathname, { locale });
+        });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   useEffect(() => {
     if (settings) {

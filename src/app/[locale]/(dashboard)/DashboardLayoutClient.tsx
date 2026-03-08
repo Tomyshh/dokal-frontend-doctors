@@ -19,6 +19,8 @@ import { getMyPractitionerOrNull } from '@/lib/practitioner';
 import { useAppointmentsRealtime } from '@/hooks/useAppointmentsRealtime';
 import { PractitionerProfileProvider, usePractitionerProfile } from '@/providers/PractitionerProfileProvider';
 import SubscriptionBlocker from '@/components/payment/SubscriptionBlocker';
+import { useGoogleCalendarStatus } from '@/hooks/useGoogleCalendarIntegration';
+import GoogleCalendarPrompt from '@/components/onboarding/GoogleCalendarPrompt';
 
 function NotPublishedBanner() {
   const t = useTranslations('settings');
@@ -60,6 +62,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [gcalPromptOpen, setGcalPromptOpen] = useState(false);
 
   const hasAccess = useMemo(() => {
     if (!subscriptionStatus) return false;
@@ -96,6 +99,19 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
     enabled: !!profile?.id && (profile?.role === 'practitioner' || profile?.role === 'admin'),
     retry: 1,
   });
+
+  const { data: gcalStatus, isLoading: gcalStatusLoading } = useGoogleCalendarStatus();
+
+  useEffect(() => {
+    if (loading || gcalStatusLoading || !profile) return;
+    if (profile.role !== 'practitioner' && profile.role !== 'admin') return;
+    if (!hasAccess) return;
+    if (gcalStatus?.connected) return;
+    try {
+      if (localStorage.getItem('dokal-gcal-prompt-dismissed')) return;
+    } catch { /* SSR guard */ }
+    setGcalPromptOpen(true);
+  }, [loading, gcalStatusLoading, gcalStatus, profile, hasAccess]);
 
   // Redirect to onboarding: only when user has no practitioner profile at all (not yet registered)
   // No longer redirect when profile is incomplete — user completes via Settings with live progress
@@ -283,6 +299,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
         )}
 
           <Topbar onMenuToggle={() => setMobileNavOpen(true)} />
+          <GoogleCalendarPrompt open={gcalPromptOpen} onDismiss={() => setGcalPromptOpen(false)} />
           <main className="p-6">{children}</main>
         </div>
       </div>
