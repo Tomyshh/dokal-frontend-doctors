@@ -363,6 +363,7 @@
     "timelineNoSchedule": "No hay horario de trabajo definido para este día",
     "timelineFree": "Libre",
     "timelineBusy": "Ocupado",
+    "timelineBreak": "Pausa",
     "noAppointments": "No appointments",
     "statusLabel": {
       "pending": "Pending",

@@ -363,6 +363,7 @@
     "timelineNoSchedule": "Рабочие часы для этого дня не заданы",
     "timelineFree": "Свободно",
     "timelineBusy": "Занято",
+    "timelineBreak": "Перерыв",
     "noAppointments": "Приёмов нет",
     "statusLabel": {
       "pending": "В ожидании",

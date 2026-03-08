@@ -363,6 +363,7 @@
     "timelineNoSchedule": "לא הוגדרו שעות עבודה ליום זה",
     "timelineFree": "פנוי",
     "timelineBusy": "תפוס",
+    "timelineBreak": "הפסקה",
     "noAppointments": "אין פגישות",
     "statusLabel": {
       "pending": "ממתין",

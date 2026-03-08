@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { cn, formatTime } from '@/lib/utils';
 import { useCrmAppointments } from '@/hooks/useAppointments';
+import { useBreaks } from '@/hooks/useBreaks';
 import { useWeeklySchedule } from '@/hooks/useSchedule';
 import { Clock, CalendarDays, Loader2 } from 'lucide-react';
 import type { Appointment } from '@/types';
@@ -35,7 +36,7 @@ function getDayOfWeek(dateStr: string): number {
 interface TimeSlot {
   start: number;
   end: number;
-  type: 'free' | 'booked' | 'selected';
+  type: 'free' | 'booked' | 'break' | 'selected';
   appointment?: Appointment;
   patientName?: string;
 }
@@ -47,8 +48,21 @@ export function DayTimeline({ date, selectedStart, selectedEnd, slotDurationMinu
     date,
     limit: 100,
   });
+  const { data: breaksData, isLoading: loadingBreaks } = useBreaks();
 
   const dayOfWeek = useMemo(() => getDayOfWeek(date), [date]);
+
+  const applicableBreaks = useMemo(() => {
+    if (!breaksData) return [];
+    return breaksData.filter((brk) => {
+      if (!brk.is_active) return false;
+      if (brk.is_recurring) {
+        const days = brk.recurring_days ?? [];
+        return days.includes(dayOfWeek);
+      }
+      return brk.date === date;
+    });
+  }, [breaksData, date, dayOfWeek]);
 
   const scheduleBlock = useMemo(() => {
     if (!schedule) return null;
@@ -87,6 +101,12 @@ export function DayTimeline({ date, selectedStart, selectedEnd, slotDurationMinu
         return aStart < slotEnd && aEnd > m;
       });
 
+      const overlappingBreak = applicableBreaks.find((brk) => {
+        const bStart = toMinutes(brk.start_time);
+        const bEnd = toMinutes(brk.end_time);
+        return bStart < slotEnd && bEnd > m;
+      });
+
       const isSelected = selectedStartMin >= 0 && selectedEndMin > 0 && m >= selectedStartMin && m < selectedEndMin;
 
       if (isSelected) {
@@ -98,14 +118,16 @@ export function DayTimeline({ date, selectedStart, selectedEnd, slotDurationMinu
             ? `${overlapping.profiles.first_name || ''} ${overlapping.profiles.last_name || ''}`.trim()
             : '';
         result.push({ start: m, end: slotEnd, type: 'booked', appointment: overlapping, patientName: name });
+      } else if (overlappingBreak) {
+        result.push({ start: m, end: slotEnd, type: 'break' });
       } else {
         result.push({ start: m, end: slotEnd, type: 'free' });
       }
     }
     return result;
-  }, [scheduleBlock, appointments, selectedStart, selectedEnd, effectiveSlotDuration]);
+  }, [scheduleBlock, appointments, applicableBreaks, selectedStart, selectedEnd, effectiveSlotDuration]);
 
-  const isLoading = loadingSchedule || loadingAppointments;
+  const isLoading = loadingSchedule || loadingAppointments || loadingBreaks;
 
   if (isLoading) {
     return (
@@ -132,6 +154,7 @@ export function DayTimeline({ date, selectedStart, selectedEnd, slotDurationMinu
   const totalMinutes = scheduleBlock.end - scheduleBlock.start;
 
   const bookedCount = slots.filter((s) => s.type === 'booked').length;
+  const breakCount = slots.filter((s) => s.type === 'break').length;
   const freeCount = slots.filter((s) => s.type === 'free').length;
 
   return (
@@ -150,6 +173,12 @@ export function DayTimeline({ date, selectedStart, selectedEnd, slotDurationMinu
             <span className="inline-block h-2.5 w-2.5 rounded-sm bg-red-100 border border-red-300" />
             {t('timelineBusy')} ({bookedCount})
           </span>
+          {breakCount > 0 && (
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block h-2.5 w-2.5 rounded-sm bg-amber-100 border border-amber-200/60" />
+              {t('timelineBreak')} ({breakCount})
+            </span>
+          )}
         </div>
       </div>
 
@@ -166,9 +195,9 @@ export function DayTimeline({ date, selectedStart, selectedEnd, slotDurationMinu
               <button
                 key={slot.start}
                 type="button"
-                disabled={slot.type === 'booked'}
+                disabled={slot.type === 'booked' || slot.type === 'break'}
                 onClick={() => {
-                  if (slot.type !== 'booked' && onSlotSelect) {
+                  if ((slot.type === 'free' || slot.type === 'selected') && onSlotSelect) {
                     onSlotSelect(fromMinutes(slot.start), fromMinutes(slot.end));
                   }
                 }}
@@ -181,6 +210,7 @@ export function DayTimeline({ date, selectedStart, selectedEnd, slotDurationMinu
                   'relative h-9 transition-all group',
                   slot.type === 'free' && 'bg-emerald-50 hover:bg-emerald-100 border-y border-emerald-200/60 cursor-pointer',
                   slot.type === 'booked' && 'bg-red-100/80 border-y border-red-200/60 cursor-not-allowed',
+                  slot.type === 'break' && 'bg-amber-100/80 border-y border-amber-200/60 cursor-not-allowed',
                   slot.type === 'selected' && 'bg-primary/15 border-y border-primary/30 ring-1 ring-primary/20 cursor-pointer',
                 )}
                 style={{ width: `${widthPercent}%`, minWidth: '2px' }}

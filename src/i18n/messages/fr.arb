@@ -350,6 +350,7 @@
     "timelineNoSchedule": "Pas d'horaires de travail définis pour ce jour",
     "timelineFree": "Libre",
     "timelineBusy": "Occupé",
+    "timelineBreak": "Pause",
     "noAppointments": "Aucun rendez-vous",
     "statusLabel": {
       "pending": "En attente",
