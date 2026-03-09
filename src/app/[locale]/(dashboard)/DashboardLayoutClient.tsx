@@ -72,8 +72,10 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
 
     const subStatus = subscriptionStatus.subscription?.status;
 
-    // past_due = grace period, still allow access
-    if (subStatus === 'past_due') return true;
+    // past_due = accès uniquement si période payée pas encore terminée
+    if (subStatus === 'past_due' && subscriptionStatus.subscription?.current_period_end) {
+      return new Date(subscriptionStatus.subscription.current_period_end) > new Date();
+    }
 
     // Active trial
     if (
