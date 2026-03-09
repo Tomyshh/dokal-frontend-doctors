@@ -316,16 +316,20 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   <link.icon className="h-4 w-4 shrink-0" />
                   <span className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{link.label}</span>
                   {link.href === '/settings/google-calendar' && (
-                    <RefreshCw
-                      className={cn(
-                        'h-3.5 w-3.5 shrink-0',
-                        gcalStatus?.connected && !gcalStatus?.last_error
-                          ? 'text-emerald-500'
-                          : 'text-red-500'
-                      )}
+                    <span
                       title={gcalStatus?.connected && !gcalStatus?.last_error ? tc('gcalSyncEnabledManageInSettings') : tc('gcalSyncDisabledEnable')}
                       aria-label={gcalStatus?.connected && !gcalStatus?.last_error ? tc('gcalSyncEnabledManageInSettings') : tc('gcalSyncDisabledEnable')}
-                    />
+                      className="shrink-0"
+                    >
+                      <RefreshCw
+                        className={cn(
+                          'h-3.5 w-3.5',
+                          gcalStatus?.connected && !gcalStatus?.last_error
+                            ? 'text-emerald-500'
+                            : 'text-red-500'
+                        )}
+                      />
+                    </span>
                   )}
                   {link.badge != null && link.badge > 0 && (
                     <span
