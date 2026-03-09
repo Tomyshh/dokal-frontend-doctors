@@ -67,20 +67,25 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
   const hasAccess = useMemo(() => {
     if (!subscriptionStatus) return false;
 
-    // Active subscription
+    // Active subscription (backend includes active, past_due, trialing w/ active trial, cancelled w/ remaining period)
     if (subscriptionStatus.hasSubscription) return true;
+
+    const subStatus = subscriptionStatus.subscription?.status;
+
+    // past_due = grace period, still allow access
+    if (subStatus === 'past_due') return true;
 
     // Active trial
     if (
-      subscriptionStatus.subscription?.status === 'trialing' &&
+      subStatus === 'trialing' &&
       subscriptionStatus.trial?.isActive &&
       (subscriptionStatus.trial.daysRemaining ?? 0) > 0
     ) return true;
 
     // Cancelled but still within paid period
     if (
-      subscriptionStatus.subscription?.status === 'cancelled' &&
-      subscriptionStatus.subscription.current_period_end
+      subStatus === 'cancelled' &&
+      subscriptionStatus.subscription?.current_period_end
     ) {
       return new Date(subscriptionStatus.subscription.current_period_end) > new Date();
     }
