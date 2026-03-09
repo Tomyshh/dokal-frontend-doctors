@@ -221,7 +221,7 @@ export default function WelcomePageClient() {
                         type="button"
                         onClick={() => switchLocale(loc)}
                         className={[
-                          'w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors',
+                          'w-full text-start px-4 py-2 text-sm hover:bg-muted transition-colors',
                           loc === locale ? 'text-primary font-medium bg-primary-50' : 'text-gray-700',
                         ].join(' ')}
                       >
@@ -311,7 +311,7 @@ export default function WelcomePageClient() {
             </div>
 
             {/* Dashboard image */}
-            <div className="relative lg:ml-8">
+            <div className="relative lg:ms-8">
               <button
                 type="button"
                 onClick={() => setLightboxIndex(0)}
@@ -528,7 +528,7 @@ export default function WelcomePageClient() {
               </div>
               <div className="mb-6">
                 <span className="text-4xl font-bold text-gray-900">{getPlanBasePriceILS('individual', pricingMap)}</span>
-                <span className="text-lg text-gray-500 ml-1">₪/{t('pricingPerMonth')}</span>
+                <span className="text-lg text-gray-500 ms-1">₪/{t('pricingPerMonth')}</span>
               </div>
               <ul className="space-y-3 flex-1 mb-8">
                 {['pricingFeature1', 'pricingFeature2', 'pricingFeature3', 'pricingFeature4'].map((key) => (
@@ -563,7 +563,7 @@ export default function WelcomePageClient() {
               </div>
               <div className="mb-2">
                 <span className="text-4xl font-bold text-gray-900">{getPlanBasePriceILS('clinic', pricingMap)}</span>
-                <span className="text-lg text-gray-500 ml-1">₪/{t('pricingPerMonth')}</span>
+                <span className="text-lg text-gray-500 ms-1">₪/{t('pricingPerMonth')}</span>
               </div>
               <div className="mb-6 space-y-1">
                 <p className="text-xs text-gray-500">+ {getSeatPriceILS('practitioner', pricingMap)} ₪/{t('pricingPerPractitioner')}</p>
@@ -597,8 +597,8 @@ export default function WelcomePageClient() {
               </div>
               <div className="mb-6">
                 <span className="text-lg font-semibold text-gray-700">{t('pricingFrom')}</span>
-                <span className="text-4xl font-bold text-gray-900 ml-1">{getPlanBasePriceILS('enterprise', pricingMap)}</span>
-                <span className="text-lg text-gray-500 ml-1">₪/{t('pricingPerMonth')}</span>
+                <span className="text-4xl font-bold text-gray-900 ms-1">{getPlanBasePriceILS('enterprise', pricingMap)}</span>
+                <span className="text-lg text-gray-500 ms-1">₪/{t('pricingPerMonth')}</span>
               </div>
               <ul className="space-y-3 flex-1 mb-8">
                 {['pricingFeature1', 'pricingFeature2', 'pricingFeature3', 'pricingFeature4', 'pricingFeatureTeam', 'pricingFeatureMultiPractitioner', 'pricingFeatureOrgStats', 'pricingFeatureMultiSite'].map((key) => (

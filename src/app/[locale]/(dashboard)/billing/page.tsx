@@ -772,7 +772,7 @@ export default function BillingPage() {
                     key={member.id}
                     type="button"
                     onClick={() => setSelectedPractitionerId(practId)}
-                    className={`w-full flex items-center gap-3 rounded-xl p-3 text-left transition-all border-2 ${
+                    className={`w-full flex items-center gap-3 rounded-xl p-3 text-start transition-all border-2 ${
                       isSelected
                         ? 'border-primary bg-primary/5'
                         : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
@@ -801,7 +801,7 @@ export default function BillingPage() {
                     </div>
                     {member.role === 'owner' && (
                       <Badge className="bg-amber-100 text-amber-800 text-xs">
-                        <Crown className="h-3 w-3 mr-1" />
+                        <Crown className="h-3 w-3 me-1" />
                         {ts('organizationOwner')}
                       </Badge>
                     )}
@@ -977,7 +977,7 @@ export default function BillingPage() {
                 key={plan}
                 type="button"
                 onClick={() => setSubscribePlan(plan)}
-                className={`w-full flex items-center gap-3 rounded-xl p-3 text-left border-2 transition-all ${
+                className={`w-full flex items-center gap-3 rounded-xl p-3 text-start border-2 transition-all ${
                   subscribePlan === plan
                     ? 'border-primary bg-primary/5'
                     : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
@@ -1027,7 +1027,7 @@ export default function BillingPage() {
                   key={card.id}
                   type="button"
                   onClick={() => setSubscribeCardId(card.id)}
-                  className={`w-full flex items-center gap-3 rounded-xl p-3 text-left border-2 transition-all ${
+                  className={`w-full flex items-center gap-3 rounded-xl p-3 text-start border-2 transition-all ${
                     subscribeCardId === card.id
                       ? 'border-primary bg-primary/5'
                       : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'

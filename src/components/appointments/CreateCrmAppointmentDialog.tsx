@@ -498,7 +498,7 @@ export function CreateCrmAppointmentDialog({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="ml-auto"
+                  className="ms-auto"
                   onClick={() => setStep('patient')}
                   disabled={submitting}
                 >

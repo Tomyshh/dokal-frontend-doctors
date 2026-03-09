@@ -173,12 +173,12 @@ function PlanCard({
         {isEnterprise ? (
           <div>
             <span className="text-lg font-bold text-gray-900">{t('fromPrice', { price })}</span>
-            <span className="text-[11px] text-gray-400 ml-1">/{t('perMonth')}</span>
+            <span className="text-[11px] text-gray-400 ms-1">/{t('perMonth')}</span>
           </div>
         ) : isClinic ? (
           <div>
             <span className="text-lg font-bold text-gray-900">{price} ₪</span>
-            <span className="text-[11px] text-gray-400 ml-1">/{t('perMonth')}</span>
+            <span className="text-[11px] text-gray-400 ms-1">/{t('perMonth')}</span>
             <div className="mt-1 space-y-0.5">
               <p className="text-[10px] text-gray-500">
                 + {practitionerSeatPrice} ₪/{t('perPractitioner')}
@@ -192,7 +192,7 @@ function PlanCard({
         ) : (
           <div>
             <span className="text-lg font-bold text-gray-900">{price} ₪</span>
-            <span className="text-[11px] text-gray-400 ml-1">/{t('perMonth')}</span>
+            <span className="text-[11px] text-gray-400 ms-1">/{t('perMonth')}</span>
           </div>
         )}
       </div>
@@ -613,7 +613,7 @@ export default function OnboardingSubscriptionPage() {
         >
           <Lock className="h-4 w-4" />
           {t('subscribe')} — {selectedPrice} ₪/{t('perMonth')}
-          <ExternalLink className="h-3.5 w-3.5 ml-1 opacity-60" />
+          <ExternalLink className="h-3.5 w-3.5 ms-1 opacity-60" />
         </Button>
 
         <div className="flex items-center justify-center gap-2 text-xs text-gray-400">

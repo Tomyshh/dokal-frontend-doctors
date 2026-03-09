@@ -124,7 +124,7 @@ export default function CalendarEventCard({
         type="button"
         onClick={() => onClick?.(item)}
         className={cn(
-          'w-full text-left px-1.5 py-0.5 rounded text-[11px] leading-tight truncate border-l-2 transition-all hover:opacity-80',
+          'w-full text-start px-1.5 py-0.5 rounded text-[11px] leading-tight truncate border-s-2 transition-all hover:opacity-80',
           colors.bg,
           colors.border,
           colors.text
@@ -147,7 +147,7 @@ export default function CalendarEventCard({
       type="button"
       onClick={() => onClick?.(item)}
       className={cn(
-        'w-full text-left px-2 py-1.5 rounded-lg border-l-[3px] transition-all hover:shadow-sm cursor-pointer group',
+        'w-full text-start px-2 py-1.5 rounded-lg border-s-[3px] transition-all hover:shadow-sm cursor-pointer group',
         colors.bg,
         colors.border,
         colors.text

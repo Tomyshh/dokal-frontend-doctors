@@ -5,6 +5,7 @@ import OneSignalProvider from '@/providers/OneSignalProvider';
 import QueryProvider from '@/providers/QueryProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import IntlProvider from '@/providers/IntlProvider';
+import RtlSync from '@/components/RtlSync';
 import ThemePaletteProvider from '@/providers/ThemePaletteProvider';
 import type { Metadata } from 'next';
 import { buildDefaultMetadata, normalizeLocale } from '@/lib/seo';
@@ -71,7 +72,18 @@ export default async function LocaleLayout({
             })();
           `}
         </Script>
+        <Script id="rtl-sync-init" strategy="beforeInteractive">
+          {`
+            (function() {
+              var segs = (typeof window !== 'undefined' && window.location.pathname) ? window.location.pathname.split('/').filter(Boolean) : [];
+              var locale = segs[0] || 'he';
+              var rtlLocales = ['he'];
+              document.documentElement.setAttribute('dir', rtlLocales.includes(locale) ? 'rtl' : 'ltr');
+            })();
+          `}
+        </Script>
         <IntlProvider locale={locale} messages={messages}>
+          <RtlSync />
           <QueryProvider>
             <AuthProvider>
               <OneSignalProvider>

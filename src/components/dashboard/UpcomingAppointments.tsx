@@ -42,16 +42,16 @@ export default function UpcomingAppointments() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-2">
+                <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-2">
                   {ta('patient')}
                 </th>
-                <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-2">
+                <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-2">
                   {ta('time')}
                 </th>
-                <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-2">
+                <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-2">
                   {ta('reason')}
                 </th>
-                <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-2">
+                <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-2">
                   {ta('status')}
                 </th>
               </tr>

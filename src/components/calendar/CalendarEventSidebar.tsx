@@ -188,7 +188,7 @@ export default function CalendarEventSidebar({
     ];
 
     return (
-      <div className="fixed inset-y-0 right-0 z-30 w-full sm:w-[380px] bg-card border-l border-border shadow-xl flex flex-col transition-transform duration-200">
+      <div className="fixed inset-y-0 ltr:right-0 rtl:left-0 z-30 w-full sm:w-[380px] bg-card ltr:border-l rtl:border-r border-border shadow-xl flex flex-col transition-transform duration-200">
         {/* Header */}
         <div className={cn('px-5 py-4 border-b border-border flex items-center justify-between', colors.bg)}>
           <div>
@@ -375,7 +375,7 @@ export default function CalendarEventSidebar({
                   type="button"
                   onClick={handleDeleteThisDay}
                   disabled={isDeleting}
-                  className="w-full rounded-xl border border-border p-4 text-left hover:bg-muted/50 transition-colors disabled:opacity-50 group"
+                  className="w-full rounded-xl border border-border p-4 text-start hover:bg-muted/50 transition-colors disabled:opacity-50 group"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-amber-100 text-amber-700 shrink-0">
@@ -397,7 +397,7 @@ export default function CalendarEventSidebar({
                   type="button"
                   onClick={handleDeleteAll}
                   disabled={isDeleting}
-                  className="w-full rounded-xl border border-red-200 p-4 text-left hover:bg-red-50/50 transition-colors disabled:opacity-50 group"
+                  className="w-full rounded-xl border border-red-200 p-4 text-start hover:bg-red-50/50 transition-colors disabled:opacity-50 group"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-red-100 text-red-600 shrink-0">
@@ -464,7 +464,7 @@ export default function CalendarEventSidebar({
         : appointment.appointment_reasons?.label;
 
   return (
-    <div className="fixed inset-y-0 right-0 z-30 w-full sm:w-[380px] bg-card border-l border-border shadow-xl flex flex-col transition-transform duration-200">
+    <div className="fixed inset-y-0 ltr:right-0 rtl:left-0 z-30 w-full sm:w-[380px] bg-card ltr:border-l rtl:border-r border-border shadow-xl flex flex-col transition-transform duration-200">
       {/* Header */}
       <div className={cn('px-5 py-4 border-b border-border flex items-center justify-between', colors.bg)}>
         <div>

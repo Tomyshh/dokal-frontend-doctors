@@ -140,7 +140,7 @@ export default function ReviewsPage() {
 
                 {/* Practitioner Reply */}
                 {review.practitioner_reply && (
-                  <div className="mt-3 ml-8 p-3 rounded-xl bg-primary-50 border border-primary-100">
+                  <div className="mt-3 ms-8 p-3 rounded-xl bg-primary-50 border border-primary-100">
                     <p className="text-xs font-medium text-primary mb-1">
                       {t('yourReply')}
                     </p>

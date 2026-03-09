@@ -112,7 +112,7 @@ export default function InstructionsPage() {
                     </div>
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{instruction.content}</p>
                   </div>
-                  <Button size="icon-sm" variant="ghost" onClick={() => openEdit(instruction)} className="ml-2 shrink-0">
+                  <Button size="icon-sm" variant="ghost" onClick={() => openEdit(instruction)} className="ms-2 shrink-0">
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </div>

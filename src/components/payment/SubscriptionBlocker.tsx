@@ -71,7 +71,7 @@ function PlanOption({
       type="button"
       onClick={onSelect}
       className={cn(
-        'relative flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all w-full',
+        'relative flex items-center gap-3 rounded-xl border-2 p-3 text-start transition-all w-full',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20',
         selected
           ? 'border-primary bg-primary/5 shadow-sm'
@@ -245,7 +245,7 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
                   type="button"
                   onClick={() => setSelectedCardId(card.id)}
                   className={cn(
-                    'relative flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all w-full',
+                    'relative flex items-center gap-3 rounded-xl border-2 p-3 text-start transition-all w-full',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20',
                     selectedCardId === card.id
                       ? 'border-primary bg-primary/5 shadow-sm'
@@ -254,7 +254,7 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
                 >
                   <CreditCard className="h-4 w-4 text-gray-400 shrink-0" />
                   <span className="text-sm font-semibold text-gray-900">{maskCard(card)}</span>
-                  <div className={cn('ml-auto w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0', selectedCardId === card.id ? 'border-primary' : 'border-gray-300')}>
+                  <div className={cn('ms-auto w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0', selectedCardId === card.id ? 'border-primary' : 'border-gray-300')}>
                     {selectedCardId === card.id && <div className="w-2 h-2 rounded-full bg-primary" />}
                   </div>
                 </button>
@@ -286,7 +286,7 @@ export default function SubscriptionBlocker({ subscriptionStatus }: Subscription
                 <>
                   <Lock className="h-4 w-4" />
                   {t('payNow')} — {selectedPrice} ₪/{t('perMonth')}
-                  <ExternalLink className="h-3.5 w-3.5 ml-1 opacity-60" />
+                  <ExternalLink className="h-3.5 w-3.5 ms-1 opacity-60" />
                 </>
               )}
             </Button>

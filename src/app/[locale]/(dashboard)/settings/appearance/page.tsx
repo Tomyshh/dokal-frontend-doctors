@@ -106,7 +106,7 @@ export default function AppearancePage() {
                   type="button"
                   onClick={() => setPaletteId(palette.id)}
                   className={cn(
-                    'rounded-xl border text-left p-3 transition-colors',
+                    'rounded-xl border text-start p-3 transition-colors',
                     isActive
                       ? 'border-primary bg-primary/5 shadow-sm'
                       : 'border-border hover:border-primary/40 hover:bg-primary/5'

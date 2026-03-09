@@ -111,25 +111,25 @@ export default function PatientsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+                    <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
                       {tc('patient')}
                     </th>
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+                    <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
                       {t('teudatZehut')}
                     </th>
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+                    <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
                       {tc('phone')}
                     </th>
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+                    <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
                       {tc('email')}
                     </th>
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+                    <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
                       {t('registration')}
                     </th>
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+                    <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
                       {t('toComplete')}
                     </th>
-                    <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+                    <th className="text-end text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
                       {tc('actions')}
                     </th>
                   </tr>
@@ -187,7 +187,7 @@ export default function PatientsPage() {
                             '-'
                           )}
                         </td>
-                        <td className="py-3 px-3 text-right">
+                        <td className="py-3 px-3 text-end">
                           <div className="flex items-center justify-end gap-1.5">
                             <Button
                               size="sm"

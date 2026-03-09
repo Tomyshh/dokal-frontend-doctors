@@ -263,9 +263,9 @@ export default function TeamPage() {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'owner':
-        return <Badge className="bg-amber-100 text-amber-800"><Crown className="h-3 w-3 mr-1" />{ts('organizationOwner')}</Badge>;
+        return <Badge className="bg-amber-100 text-amber-800"><Crown className="h-3 w-3 me-1" />{ts('organizationOwner')}</Badge>;
       case 'admin':
-        return <Badge className="bg-blue-100 text-blue-800"><ShieldCheck className="h-3 w-3 mr-1" />{ts('organizationAdmin')}</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800"><ShieldCheck className="h-3 w-3 me-1" />{ts('organizationAdmin')}</Badge>;
       default:
         return <Badge className="bg-gray-100 text-gray-700">{ts('organizationMember')}</Badge>;
     }
@@ -275,7 +275,7 @@ export default function TeamPage() {
     if (staffType === 'secretary') {
       return (
         <div className="flex items-center gap-1.5">
-          <Badge className="bg-purple-100 text-purple-800"><ClipboardPen className="h-3 w-3 mr-1" />{t('secretary')}</Badge>
+          <Badge className="bg-purple-100 text-purple-800"><ClipboardPen className="h-3 w-3 me-1" />{t('secretary')}</Badge>
           {orgPlan === 'clinic' && !showTrialNotice && (
             <Badge className="bg-gray-50 text-gray-500 text-[10px]">{getSeatPriceILS('secretary', pricingMap)} ₪/{t('perMonth')}</Badge>
           )}
@@ -287,7 +287,7 @@ export default function TeamPage() {
     }
     return (
       <div className="flex items-center gap-1.5">
-        <Badge className="bg-primary/10 text-primary"><Stethoscope className="h-3 w-3 mr-1" />{t('practitioner')}</Badge>
+        <Badge className="bg-primary/10 text-primary"><Stethoscope className="h-3 w-3 me-1" />{t('practitioner')}</Badge>
         {orgPlan === 'clinic' && !showTrialNotice && (
           <Badge className="bg-gray-50 text-gray-500 text-[10px]">{getSeatPriceILS('practitioner', pricingMap)} ₪/{t('perMonth')}</Badge>
         )}

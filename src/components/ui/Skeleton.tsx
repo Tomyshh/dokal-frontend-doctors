@@ -25,7 +25,7 @@ export function TableSkeleton({
             <tr className="border-b border-border">
               {Array.from({ length: columns }).map((_, i) => (
                 <th key={i} className="py-3 px-3">
-                  <Skeleton className={cn('h-3 w-24 rounded-md', i === columns - 1 && 'ml-auto w-16')} />
+                  <Skeleton className={cn('h-3 w-24 rounded-md', i === columns - 1 && 'ms-auto w-16')} />
                 </th>
               ))}
             </tr>
@@ -39,7 +39,7 @@ export function TableSkeleton({
                   <Skeleton
                     className={cn(
                       'h-4 rounded-md',
-                      c === 0 ? 'w-56' : c === columns - 1 ? 'ml-auto w-20' : 'w-32'
+                      c === 0 ? 'w-56' : c === columns - 1 ? 'ms-auto w-20' : 'w-32'
                     )}
                   />
                 </td>

@@ -400,13 +400,13 @@ export default function SchedulePage() {
                     <span className="text-sm font-medium text-gray-900">{brk.date ? formatDate(brk.date, 'dd/MM/yyyy', locale) : '-'}</span>
                   )}
                   <span className="text-sm text-gray-600 shrink-0">
-                    <Clock className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
+                    <Clock className="inline h-3.5 w-3.5 me-1 -mt-0.5" />
                     {formatTime(brk.start_time)} - {formatTime(brk.end_time)}
                   </span>
                   <Badge variant="secondary">{brk.title}</Badge>
                   {brk.is_recurring ? (
                     <Badge variant="success" className="shrink-0">
-                      <Repeat className="h-3 w-3 mr-1" />
+                      <Repeat className="h-3 w-3 me-1" />
                       {t('breakRecurringBadge')}
                     </Badge>
                   ) : (
@@ -731,7 +731,7 @@ export default function SchedulePage() {
               <span className="flex items-center justify-center h-5 w-5 rounded-full bg-primary text-[10px] font-bold text-white">1</span>
               <h3 className="text-sm font-semibold text-foreground">{t('breakStepType')}</h3>
             </div>
-            <p className="text-xs text-muted-foreground mb-3 ml-7">
+            <p className="text-xs text-muted-foreground mb-3 ms-7">
               {t('breakPresetsHint')}
             </p>
             <div className="grid grid-cols-2 gap-2">
@@ -792,7 +792,7 @@ export default function SchedulePage() {
                   placeholder={t('breakTitlePlaceholder')}
                   required
                 />
-                <p className="mt-1 text-[11px] text-muted-foreground ml-0.5">{t('breakTitleHint')}</p>
+                <p className="mt-1 text-[11px] text-muted-foreground ms-0.5">{t('breakTitleHint')}</p>
               </div>
 
               {/* Mode: One-time vs Recurring */}
@@ -857,7 +857,7 @@ export default function SchedulePage() {
                       );
                     })}
                   </div>
-                  <p className="mt-1.5 text-[11px] text-muted-foreground ml-0.5">{t('breakSelectDaysHint')}</p>
+                  <p className="mt-1.5 text-[11px] text-muted-foreground ms-0.5">{t('breakSelectDaysHint')}</p>
                 </div>
               ) : (
                 <div>
@@ -869,7 +869,7 @@ export default function SchedulePage() {
                     min={todayStr}
                     required
                   />
-                  <p className="mt-1 text-[11px] text-muted-foreground ml-0.5">{t('breakDateHint')}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground ms-0.5">{t('breakDateHint')}</p>
                 </div>
               )}
 
@@ -892,7 +892,7 @@ export default function SchedulePage() {
                   />
                 </div>
                 <div className="flex items-center justify-between mt-1.5">
-                  <p className="text-[11px] text-muted-foreground ml-0.5">{t('breakTimeHint')}</p>
+                  <p className="text-[11px] text-muted-foreground ms-0.5">{t('breakTimeHint')}</p>
                   {breakStartTime && breakEndTime && toMinutes(breakEndTime) > toMinutes(breakStartTime) && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary">
                       <Timer className="h-3 w-3" />
@@ -911,7 +911,7 @@ export default function SchedulePage() {
                   placeholder={t('breakDescriptionPlaceholder')}
                   rows={2}
                 />
-                <p className="mt-1 text-[11px] text-muted-foreground ml-0.5">{t('breakDescriptionHint')}</p>
+                <p className="mt-1 text-[11px] text-muted-foreground ms-0.5">{t('breakDescriptionHint')}</p>
               </div>
             </div>
           </div>

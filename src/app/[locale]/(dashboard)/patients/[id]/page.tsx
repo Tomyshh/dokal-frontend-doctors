@@ -333,7 +333,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               {t('missingFields')}
             </CardTitle>
           </CardHeader>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+          <ul className="list-disc ps-5 space-y-1 text-sm text-gray-700">
             {missingFields.map((f) => (
               <li key={f}>{formatMissingFieldLabel(tcal, f)}</li>
             ))}
@@ -439,10 +439,10 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('date')}</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('time')}</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('status')}</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('notes')}</th>
+                  <th className="text-start text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('date')}</th>
+                  <th className="text-start text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('time')}</th>
+                  <th className="text-start text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('status')}</th>
+                  <th className="text-start text-xs font-medium text-muted-foreground uppercase py-3 px-2">{tc('notes')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">

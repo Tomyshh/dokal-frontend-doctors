@@ -88,7 +88,7 @@ export default function CalendarMonthView({
               type="button"
               onClick={() => onDayClick(day)}
               className={cn(
-                'relative min-h-[100px] sm:min-h-[120px] p-1.5 sm:p-2 border-b border-r border-border/50 text-left transition-colors group',
+                'relative min-h-[100px] sm:min-h-[120px] p-1.5 sm:p-2 border-b ltr:border-r rtl:border-l border-border/50 text-start transition-colors group',
                 'hover:bg-muted/30',
                 !isCurrentMonth && 'bg-gray-50/50',
                 (index + 1) % 7 === 0 && 'border-r-0'
@@ -148,7 +148,7 @@ export default function CalendarMonthView({
                   );
                 })}
                 {hasMore && (
-                  <div className="text-[10px] text-muted-foreground font-medium pl-1.5">
+                  <div className="text-[10px] text-muted-foreground font-medium ps-1.5">
                     {t('moreEvents', { count: dayItems.length - MAX_VISIBLE_EVENTS })}
                   </div>
                 )}

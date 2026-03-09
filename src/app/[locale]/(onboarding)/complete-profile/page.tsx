@@ -453,7 +453,7 @@ export default function CompleteProfilePage() {
         <div
           className={cn(
             'transition-all duration-300',
-            step === 0 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
+            step === 0 ? `block animate-in fade-in ${rtl ? 'slide-in-from-left-4' : 'slide-in-from-right-4'} duration-300` : 'hidden',
           )}
         >
           <div className="space-y-5">
@@ -501,7 +501,7 @@ export default function CompleteProfilePage() {
         <div
           className={cn(
             'transition-all duration-300',
-            step === 1 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
+            step === 1 ? `block animate-in fade-in ${rtl ? 'slide-in-from-left-4' : 'slide-in-from-right-4'} duration-300` : 'hidden',
           )}
         >
           <div className="space-y-5">
@@ -552,7 +552,7 @@ export default function CompleteProfilePage() {
         <div
           className={cn(
             'transition-all duration-300',
-            step === 2 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden',
+            step === 2 ? `block animate-in fade-in ${rtl ? 'slide-in-from-left-4' : 'slide-in-from-right-4'} duration-300` : 'hidden',
           )}
         >
           <div className="space-y-5">

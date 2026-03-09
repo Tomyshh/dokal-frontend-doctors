@@ -35,30 +35,30 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
       <table className="w-full">
         <thead>
           <tr className="border-b border-border">
-            <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+            <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
               {t('patient')}
             </th>
             {showPractitionerColumn && (
-              <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+              <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
                 {t('practitioner')}
               </th>
             )}
-            <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+            <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
               {t('date')}
             </th>
-            <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+            <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
               {t('time')}
             </th>
-            <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+            <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
               {t('reason')}
             </th>
-            <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+            <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
               {tc('source')}
             </th>
-            <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+            <th className="text-start text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
               {t('status')}
             </th>
-            <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
+            <th className="text-end text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-3">
               {t('actions')}
             </th>
           </tr>
@@ -137,7 +137,7 @@ export default function AppointmentTable({ appointments }: AppointmentTableProps
                   {getAppointmentStatusLabel(t, appt.status)}
                 </Badge>
               </td>
-              <td className="py-3 px-3 text-right">
+              <td className="py-3 px-3 text-end">
                 <AppointmentActions appointmentId={appt.id} status={appt.status} />
               </td>
             </tr>

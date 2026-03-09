@@ -245,7 +245,7 @@ export function ConvertToAppointmentDialog({
                     key={p.id}
                     type="button"
                     onClick={() => setSelectedPatient(p)}
-                    className={`w-full text-left px-3 py-2 flex items-center gap-3 hover:bg-muted/50 transition-colors ${
+                    className={`w-full text-start px-3 py-2 flex items-center gap-3 hover:bg-muted/50 transition-colors ${
                       selectedPatient?.id === p.id
                         ? 'bg-primary-50 border-l-2 border-l-primary'
                         : ''

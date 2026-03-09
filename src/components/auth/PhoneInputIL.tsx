@@ -67,7 +67,7 @@ export function PhoneInputIL({ id, label, value, onChange, required, error }: Ph
           id={id}
           type="tel"
           className={cn(
-            'flex-1 h-full bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary text-left',
+            'flex-1 h-full bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary text-start',
             error && 'focus-visible:ring-destructive/20'
           )}
           dir="ltr"

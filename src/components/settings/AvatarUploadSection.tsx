@@ -231,7 +231,7 @@ export default function AvatarUploadSection({
           type="button"
           onClick={() => hasAvatar && setPreviewDialogOpen(true)}
           className={cn(
-            'flex items-center gap-4 w-full sm:w-auto text-left',
+            'flex items-center gap-4 w-full sm:w-auto text-start',
             hasAvatar && 'cursor-pointer hover:opacity-90 transition-opacity'
           )}
           disabled={!hasAvatar}
@@ -313,7 +313,7 @@ export default function AvatarUploadSection({
                 disabled={isBusy}
               />
             </div>
-            <div className="text-xs text-muted-foreground sm:text-right truncate" title={fileName}>
+            <div className="text-xs text-muted-foreground sm:text-end truncate" title={fileName}>
               {fileName}
             </div>
           </div>

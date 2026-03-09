@@ -48,7 +48,7 @@ export default function MessagesPage() {
                     key={conv.id}
                     onClick={() => setSelectedId(conv.id)}
                     className={cn(
-                      'w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors text-left border-b border-border/50',
+                      'w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors text-start border-b border-border/50',
                       selectedId === conv.id && 'bg-primary-50'
                     )}
                   >
@@ -72,7 +72,7 @@ export default function MessagesPage() {
                           {conv.last_message?.content || '...'}
                         </p>
                         {conv.unread_count && conv.unread_count > 0 ? (
-                          <Badge variant="default" className="ml-2 shrink-0">
+                          <Badge variant="default" className="ms-2 shrink-0">
                             {conv.unread_count}
                           </Badge>
                         ) : null}

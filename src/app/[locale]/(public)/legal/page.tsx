@@ -94,7 +94,7 @@ export default async function LegalPage() {
                       >
                         <dt className="text-sm font-medium text-gray-900">{row.label}</dt>
                         <dd
-                          className="text-sm text-gray-700 sm:text-right"
+                          className="text-sm text-gray-700 sm:text-end"
                           dir={row.ltr ? 'ltr' : undefined}
                         >
                           {row.value}
