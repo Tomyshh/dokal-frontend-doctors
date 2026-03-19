@@ -40,11 +40,22 @@ export interface OneSignalSDK {
   };
 }
 
+function isUsableOneSignalSdk(sdk: unknown): sdk is OneSignalSDK {
+  if (!sdk || typeof sdk !== 'object') return false;
+  const o = sdk as OneSignalSDK;
+  return typeof o.logout === 'function' && typeof o.login === 'function';
+}
+
 export function runWhenOneSignalReady(fn: (OneSignal: OneSignalSDK) => void | Promise<void>): void {
   if (typeof window === 'undefined') return;
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   window.OneSignalDeferred.push(async (OneSignal) => {
-    await fn(OneSignal);
+    try {
+      if (!isUsableOneSignalSdk(OneSignal)) return;
+      await fn(OneSignal);
+    } catch {
+      // Init refusée (domaine non autorisé), SDK partiel, etc.
+    }
   });
 }
 

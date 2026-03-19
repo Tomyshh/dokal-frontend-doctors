@@ -43,6 +43,8 @@ import { company } from '@/config/company';
 import axios from 'axios';
 import { isRtl } from '@/i18n/config';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
+import { WelcomeHero } from '@/components/landing/WelcomeHero';
+import { WelcomeFeaturesGrid } from '@/components/landing/WelcomeFeaturesGrid';
 
 export default function WelcomePageClient() {
   const t = useTranslations('landing');
@@ -249,122 +251,30 @@ export default function WelcomePageClient() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary to-primary-700 min-h-[100svh] flex items-stretch">
-        {/* Background decorations */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-primary-400/10 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-primary-300/10 blur-3xl" />
-        </div>
+      <WelcomeHero
+        badge={
+          <>
+            <Shield className="w-4 h-4 shrink-0" />
+            {t('badge')}
+          </>
+        }
+        headline={t('headline')}
+        subtitle={t('subtitle')}
+        cta={t('cta')}
+        learnMore={t('learnMore')}
+        rotatingHighlights={features.map((f) => f.title)}
+        stats={stats}
+        screenshotSrc="/images/presentation-crm.png"
+        screenshotAlt={t('screenshotAlt')}
+        openImageAriaLabel={t('openImage')}
+        onScreenshotClick={() => setLightboxIndex(0)}
+      />
 
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full flex items-center pt-28 pb-20 lg:pt-32 lg:pb-28">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
-            {/* Text content */}
-            <div className="max-w-xl">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-sm text-primary-100 mb-8 backdrop-blur-sm">
-                <Shield className="w-4 h-4" />
-                {t('badge')}
-              </div>
-
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
-                {t('headline')}
-              </h1>
-
-              <p className="mt-6 text-lg text-primary-100/90 leading-relaxed">
-                {t('subtitle')}
-              </p>
-
-              <div className="mt-10 flex flex-wrap gap-4">
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white text-primary font-semibold text-sm hover:bg-primary-50 transition-all duration-300 shadow-lg shadow-black/10"
-                >
-                  {t('cta')}
-                  <ArrowRight className="w-4 h-4 rtl-flip-arrow" />
-                </Link>
-                <button
-                  onClick={() =>
-                    document
-                      .getElementById('features')
-                      ?.scrollIntoView({ behavior: 'smooth' })
-                  }
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-white/20 text-white font-semibold text-sm hover:bg-white/10 transition-all duration-300"
-                >
-                  {t('learnMore')}
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Stats */}
-              <div className="mt-16 grid grid-cols-3 gap-8">
-                {stats.map((stat, i) => (
-                  <div key={i}>
-                    <div className="text-3xl sm:text-4xl font-bold text-white">
-                      {stat.value}
-                    </div>
-                    <div className="mt-1 text-sm text-primary-200">
-                      {stat.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Dashboard image */}
-            <div className="relative lg:ms-8">
-              <button
-                type="button"
-                onClick={() => setLightboxIndex(0)}
-                className="relative w-full rounded-2xl overflow-hidden shadow-2xl shadow-black/30 border border-white/10 hover:scale-[1.01] transition-transform duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-                aria-label={t('openImage')}
-              >
-                <Image
-                  src="/images/presentation-crm.png"
-                  alt={t('screenshotAlt')}
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto"
-                  priority
-                />
-              </button>
-              <div className="absolute -inset-4 -z-10 rounded-3xl bg-white/5 blur-xl" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="py-24 lg:py-32 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
-              {t('featuresTitle')}
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              {t('featuresSubtitle')}
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, i) => (
-              <div
-                key={i}
-                className="group bg-white rounded-2xl p-8 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
-                  <feature.icon className="w-6 h-6 text-primary group-hover:text-white transition-colors duration-300" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <WelcomeFeaturesGrid
+        title={t('featuresTitle')}
+        subtitle={t('featuresSubtitle')}
+        features={features}
+      />
 
       {/* Patient App Section */}
       <section className="relative overflow-hidden py-24 lg:py-32 bg-white">

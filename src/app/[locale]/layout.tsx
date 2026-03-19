@@ -11,9 +11,15 @@ import type { Metadata } from 'next';
 import { buildDefaultMetadata, normalizeLocale } from '@/lib/seo';
 import Script from 'next/script';
 import '../globals.css';
+import { DEFAULT_THEME_MODE, DEFAULT_THEME_PALETTE_ID } from '@/lib/themePalettes';
 
 const ONESIGNAL_APP_ID =
   process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID ?? 'c109050b-74e4-44e6-baa8-ebafa66216ba';
+
+/** OneSignal est restreint au domaine prod ; évite erreurs console / SDK sur localhost. */
+const loadOneSignal =
+  process.env.NEXT_PUBLIC_ONESIGNAL_ENABLED === 'true' ||
+  (process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_ONESIGNAL_ENABLED !== 'false');
 
 export async function generateMetadata({
   params,
@@ -37,20 +43,30 @@ export default async function LocaleLayout({
   const rtl = isRtl(locale);
 
   return (
-    <html lang={locale} dir={rtl ? 'rtl' : 'ltr'}>
+    <html
+      lang={locale}
+      dir={rtl ? 'rtl' : 'ltr'}
+      data-theme-palette={DEFAULT_THEME_PALETTE_ID}
+      data-theme-mode={DEFAULT_THEME_MODE}
+      suppressHydrationWarning
+    >
       <body>
-        <Script
-          src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
-          strategy="beforeInteractive"
-        />
-        <Script id="onesignal-init" strategy="beforeInteractive">
-          {`
+        {loadOneSignal ? (
+          <>
+            <Script
+              src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+              strategy="beforeInteractive"
+            />
+            <Script id="onesignal-init" strategy="beforeInteractive">
+              {`
             window.OneSignalDeferred = window.OneSignalDeferred || [];
             OneSignalDeferred.push(async function(OneSignal) {
               await OneSignal.init({ appId: "${ONESIGNAL_APP_ID}" });
             });
           `}
-        </Script>
+            </Script>
+          </>
+        ) : null}
         <Script id="theme-palette-init" strategy="beforeInteractive">
           {`
             (function() {
