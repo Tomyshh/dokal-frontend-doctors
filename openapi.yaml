@@ -2621,6 +2621,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         address_line: { type: string, nullable: true }
+        street_number: { type: string, nullable: true }
         zip_code: { type: string, nullable: true }
         city: { type: string, nullable: true }
         latitude: { type: number, nullable: true }
@@ -2692,6 +2693,7 @@ components:
           nullable: true
           description: "Teoudat Zehout masquée (jamais renvoyée en clair). Présent uniquement sur GET /practitioners/me."
         address_line: { type: string, nullable: true }
+        street_number: { type: string, nullable: true, description: "Numéro de rue (séparé)" }
         zip_code: { type: string, nullable: true }
         city: { type: string, nullable: true }
         latitude: { type: number, nullable: true }
@@ -3047,6 +3049,7 @@ components:
           description: "Teoudat Zehout (9 chiffres). Stockée chiffrée + hashée; jamais renvoyée en clair."
         is_accepting_new_patients: { type: boolean }
         address_line: { type: string, nullable: true }
+        street_number: { type: string, nullable: true, description: "Numéro de rue (séparé de la voie)" }
         zip_code: { type: string, nullable: true }
         city: { type: string, nullable: true }
         latitude:
@@ -3089,7 +3092,8 @@ components:
           pattern: '^\d{1,6}$'
           nullable: true
           description: "Numéro de licence de spécialité (optionnel)"
-        address_line: { type: string, minLength: 1 }
+        address_line: { type: string, minLength: 1, description: "Nom de la voie sans numéro" }
+        street_number: { type: string, minLength: 1, description: "Numéro de rue" }
         zip_code: { type: string, minLength: 1 }
         latitude:
           type: number
@@ -3108,7 +3112,7 @@ components:
           description: Nom pour une nouvelle organisation (optionnel)
         organization_type:
           $ref: "#/components/schemas/OrganizationType"
-      required: [first_name, last_name, email, phone, city, specialty_id, license_number, address_line, zip_code]
+      required: [first_name, last_name, email, phone, city, specialty_id, license_number, address_line, street_number, zip_code]
 
     # ── Organizations ──────────────────────────────────────────────────
 
@@ -3239,6 +3243,7 @@ components:
           description: Required when staff_type=practitioner
           pattern: '^\d{1,6}$'
         address_line: { type: string, nullable: true }
+        street_number: { type: string, nullable: true }
         zip_code: { type: string, nullable: true }
         city: { type: string, nullable: true }
       required: [email, first_name, last_name, staff_type]

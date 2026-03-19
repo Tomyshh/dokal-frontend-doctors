@@ -130,6 +130,8 @@ export interface Practitioner {
   license_number: string | null;
   specialization_license: string | null;
   address_line: string | null;
+  /** Numéro de rue séparé de la voie (Google Places + saisie). Absent si API pas encore migrée. */
+  street_number?: string | null;
   zip_code: string | null;
   city: string | null;
   /** From GET /practitioners/me only: true if profile is complete, false otherwise */

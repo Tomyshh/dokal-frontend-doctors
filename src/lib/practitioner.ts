@@ -1,5 +1,15 @@
 import api from '@/lib/api';
 import type { Practitioner, Profile } from '@/types';
+import { hasStreetNumberInCombinedLine } from '@/lib/addressStreet';
+
+/** Adresse « complète » : voie + numéro (champ dédié ou ancienne donnée tout-en-un). */
+export function isPractitionerAddressComplete(p: Practitioner | null | undefined): boolean {
+  const line = p?.address_line?.trim() ?? '';
+  if (!line) return false;
+  const num = p?.street_number?.trim() ?? '';
+  if (num.length > 0) return true;
+  return hasStreetNumberInCombinedLine(line);
+}
 
 function getHttpStatus(err: unknown): number | undefined {
   return (err as { response?: { status?: number } })?.response?.status;
@@ -90,7 +100,7 @@ const PROFILE_COMPLETION_FIELDS = [
   (p: Practitioner | null) => !!(p?.languages?.length),
   (p: Practitioner | null) => !!(p?.phone?.trim()),
   (p: Practitioner | null) => !!(p?.email?.trim()),
-  (p: Practitioner | null) => !!(p?.address_line?.trim()),
+  (p: Practitioner | null) => isPractitionerAddressComplete(p),
   (p: Practitioner | null) => !!(p?.zip_code?.trim()),
   (p: Practitioner | null) => !!(p?.city?.trim()),
   (p: Practitioner | null) => p?.price_min_agorot != null,
@@ -157,7 +167,7 @@ export function getProfileCompletionItems(
     { key: 'languages', completed: !!(p?.languages?.length), section: 'about' },
     { key: 'phone', completed: !!(p?.phone?.trim()), section: 'contact' },
     { key: 'email', completed: !!(p?.email?.trim()), section: 'contact' },
-    { key: 'address_line', completed: !!(p?.address_line?.trim()), section: 'address' },
+    { key: 'address_line', completed: isPractitionerAddressComplete(p), section: 'address' },
     { key: 'zip_code', completed: !!(p?.zip_code?.trim()), section: 'address' },
     { key: 'city', completed: !!(p?.city?.trim()), section: 'address' },
     { key: 'price_min', completed: p?.price_min_agorot != null, section: 'pricing' },

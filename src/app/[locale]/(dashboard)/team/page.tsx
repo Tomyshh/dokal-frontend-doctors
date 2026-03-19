@@ -61,6 +61,7 @@ interface InviteForm {
   licenseNumber: string;
   specializationLicense: string;
   addressLine: string;
+  streetNumber: string;
   zipCode: string;
   city: string;
 }
@@ -76,6 +77,7 @@ const INITIAL_FORM: InviteForm = {
   licenseNumber: '',
   specializationLicense: '',
   addressLine: '',
+  streetNumber: '',
   zipCode: '',
   city: '',
 };
@@ -151,6 +153,7 @@ export default function TeamPage() {
         license_number: form.licenseNumber,
         specialization_license: form.specializationLicense || undefined,
         address_line: form.addressLine || undefined,
+        street_number: form.streetNumber || undefined,
         zip_code: form.zipCode || undefined,
         city: form.city || undefined,
       };
@@ -696,30 +699,35 @@ export default function TeamPage() {
                   placeholder="123456"
                 />
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2">
-                  <Input
-                    id="invAddress"
-                    label={t('addressLine')}
-                    value={form.addressLine}
-                    onChange={(e) => handleChange('addressLine', e.target.value)}
-                    placeholder={t('addressAutoOrg')}
-                  />
-                </div>
+              <Input
+                id="invAddress"
+                label={t('addressLine')}
+                value={form.addressLine}
+                onChange={(e) => handleChange('addressLine', e.target.value)}
+                placeholder={t('addressAutoOrg')}
+              />
+              <Input
+                id="invStreetNumber"
+                label={ts('streetNumber')}
+                value={form.streetNumber}
+                onChange={(e) => handleChange('streetNumber', e.target.value)}
+                placeholder={ts('streetNumberPlaceholder')}
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Input
                   id="invZip"
                   label={t('zipCode')}
                   value={form.zipCode}
                   onChange={(e) => handleChange('zipCode', e.target.value)}
                 />
+                <Input
+                  id="invCity"
+                  label={t('city')}
+                  value={form.city}
+                  onChange={(e) => handleChange('city', e.target.value)}
+                  placeholder={t('addressAutoOrg')}
+                />
               </div>
-              <Input
-                id="invCity"
-                label={t('city')}
-                value={form.city}
-                onChange={(e) => handleChange('city', e.target.value)}
-                placeholder={t('addressAutoOrg')}
-              />
             </>
           )}
 

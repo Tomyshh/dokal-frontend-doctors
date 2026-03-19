@@ -36,7 +36,11 @@ export default function BusinessCardPreview({
   const fullName = `${firstName} ${lastName}`.trim();
   const specialty = practitioner.specialties?.name_fr || practitioner.specialties?.name || '';
   const orgName = practitioner.organizations?.name || '';
-  const address = [practitioner.address_line, practitioner.city].filter(Boolean).join(', ');
+  const line = [practitioner.street_number, practitioner.address_line]
+    .map((x) => (x || '').trim())
+    .filter(Boolean)
+    .join(' ');
+  const address = [line, practitioner.city].filter(Boolean).join(', ');
   const hasEmail = !!practitioner.email?.trim();
   const hasPhone = !!practitioner.phone?.trim();
   const hasLinkedin = !!practitioner.linkedin_url?.trim();

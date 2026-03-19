@@ -18,6 +18,7 @@ import { filterOnboardingOptionalMissingFields, getMyPractitionerOrNull, isPract
 import { isRtl } from '@/i18n/config';
 import { LogOut, ArrowLeft, ArrowRight, User, Stethoscope, MapPin, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { extractStreetNumberFromLine } from '@/lib/addressStreet';
 
 type FormState = {
   firstName: string;
@@ -28,20 +29,13 @@ type FormState = {
   licenseNumber: string;
   specializationLicense: string;
   addressLine: string;
+  streetNumber: string;
   zipCode: string;
   latitude: number | null;
   longitude: number | null;
 };
 
 const TOTAL_STEPS = 3;
-
-function hasStreetNumber(address: string) {
-  const s = (address || '').trim();
-  if (!s) return false;
-  if (/^\d+\s+\S+/.test(s)) return true;
-  if (/\S+\s+\d+[a-zA-Z]?$/.test(s)) return true;
-  return /\d/.test(s);
-}
 
 function StepIndicator({
   currentStep,
@@ -133,6 +127,7 @@ export default function CompleteProfilePage() {
     licenseNumber: '',
     specializationLicense: '',
     addressLine: '',
+    streetNumber: '',
     zipCode: '',
     latitude: null,
     longitude: null,
@@ -174,18 +169,31 @@ export default function CompleteProfilePage() {
           ((dataObj.specialties as Record<string, unknown>)?.id as string) ||
           (Array.isArray(dataObj.specialties) && (dataObj.specialties[0] as Record<string, unknown>)?.id as string) ||
           '';
-        setForm((prev) => ({
-          ...prev,
-          phone: prev.phone || (data.phone ? data.phone.replace(/\D/g, '') : ''),
-          city: prev.city || data.city || '',
-          specialtyId: prev.specialtyId || specialtyId || '',
-          addressLine: prev.addressLine || data.address_line || '',
-          zipCode: prev.zipCode || data.zip_code || '',
-          latitude: prev.latitude ?? data.latitude ?? null,
-          longitude: prev.longitude ?? data.longitude ?? null,
-          licenseNumber: prev.licenseNumber || data.license_number || '',
-          specializationLicense: prev.specializationLicense || data.specialization_license || '',
-        }));
+        setForm((prev) => {
+          let addr = prev.addressLine || data.address_line || '';
+          let sn =
+            (typeof data.street_number === 'string' ? data.street_number : '') || prev.streetNumber || '';
+          if (!sn.trim() && addr) {
+            const parsed = extractStreetNumberFromLine(addr);
+            if (parsed.streetNumber) {
+              addr = parsed.streetLine;
+              sn = parsed.streetNumber;
+            }
+          }
+          return {
+            ...prev,
+            phone: prev.phone || (data.phone ? data.phone.replace(/\D/g, '') : ''),
+            city: prev.city || data.city || '',
+            specialtyId: prev.specialtyId || specialtyId || '',
+            addressLine: addr,
+            streetNumber: sn.trim(),
+            zipCode: prev.zipCode || data.zip_code || '',
+            latitude: prev.latitude ?? data.latitude ?? null,
+            longitude: prev.longitude ?? data.longitude ?? null,
+            licenseNumber: prev.licenseNumber || data.license_number || '',
+            specializationLicense: prev.specializationLicense || data.specialization_license || '',
+          };
+        });
       } catch {
         // practitioner may not exist yet
       }
@@ -202,6 +210,7 @@ export default function CompleteProfilePage() {
     phone: t('phone'),
     city: t('city'),
     address_line: t('addressLine'),
+    street_number: t('streetNumber'),
     zip_code: t('zipCode'),
     specialty_id: t('specialty'),
     license_number: t('licenseNumber'),
@@ -278,7 +287,7 @@ export default function CompleteProfilePage() {
           setStepErrors((prev) => ({ ...prev, [s]: t('addressSelectHint') }));
           return false;
         }
-        if (!hasStreetNumber(form.addressLine)) {
+        if (!form.streetNumber.trim()) {
           setStepErrors((prev) => ({ ...prev, [s]: t('addressMustIncludeStreetNumber') }));
           return false;
         }
@@ -337,6 +346,10 @@ export default function CompleteProfilePage() {
       let storedRef: string | undefined;
       try { storedRef = sessionStorage.getItem('referral_code') ?? undefined; } catch { /* ignore */ }
 
+      const parsedAddr = extractStreetNumberFromLine(form.addressLine.trim());
+      const address_line = parsedAddr.streetLine || form.addressLine.trim();
+      const street_number = (form.streetNumber.trim() || parsedAddr.streetNumber).trim();
+
       const payload: RegisterPractitionerRequest = {
         first_name: form.firstName,
         last_name: form.lastName,
@@ -346,7 +359,8 @@ export default function CompleteProfilePage() {
         specialty_id: form.specialtyId,
         license_number: form.licenseNumber,
         specialization_license: form.specializationLicense || undefined,
-        address_line: form.addressLine,
+        address_line,
+        street_number,
         zip_code: form.zipCode || undefined,
         latitude: form.latitude ?? undefined,
         longitude: form.longitude ?? undefined,
@@ -574,18 +588,15 @@ export default function CompleteProfilePage() {
               required
               error={addressFieldError}
               onChange={(data: AddressResult) => {
-                const nextAddress = (data.address_line || '').trim();
-                if (!hasStreetNumber(nextAddress)) {
-                  setAddressFieldError(t('addressMustIncludeStreetNumber'));
-                  return;
-                }
                 if (!data.city?.trim()) {
                   setAddressFieldError(t('addressMustIncludeCity'));
                   return;
                 }
 
                 setAddressFieldError(undefined);
-                handleChange('addressLine', nextAddress);
+                handleChange('addressLine', (data.address_line || '').trim());
+                const sn = (data.street_number || '').trim();
+                if (sn) handleChange('streetNumber', sn);
                 handleChange('zipCode', data.zip_code);
                 handleChange('city', data.city);
                 setForm((prev) => ({
@@ -594,13 +605,28 @@ export default function CompleteProfilePage() {
                   longitude: data.longitude,
                 }));
               }}
+              onStreetPartsChange={(line, extractedNum) => {
+                handleChange('addressLine', line);
+                if (extractedNum) handleChange('streetNumber', extractedNum);
+              }}
               onClear={() => {
                 setAddressFieldError(undefined);
                 handleChange('addressLine', '');
+                handleChange('streetNumber', '');
                 handleChange('zipCode', '');
                 handleChange('city', '');
                 setForm((prev) => ({ ...prev, latitude: null, longitude: null }));
               }}
+            />
+
+            <Input
+              id="streetNumber"
+              label={t('streetNumber')}
+              value={form.streetNumber}
+              onChange={(e) => handleChange('streetNumber', e.target.value)}
+              required
+              autoComplete="off"
+              placeholder={t('streetNumberPlaceholder')}
             />
 
             <div className="grid grid-cols-2 gap-4">

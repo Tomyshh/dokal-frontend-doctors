@@ -434,6 +434,7 @@ CREATE TABLE public.practitioners (
   id uuid NOT NULL,
   specialty_id uuid,
   address_line text,
+  street_number text,
   zip_code text,
   city text,
   latitude double precision,

@@ -3,9 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { extractStreetNumberFromLine } from '@/lib/addressStreet';
 
 export interface AddressResult {
+  /** Nom de voie sans numéro (ex. « Sderot Chicago »). */
   address_line: string;
+  street_number: string;
   zip_code: string;
   city: string;
   latitude: number;
@@ -17,6 +20,8 @@ export interface AddressAutocompleteProps {
   label: string;
   value: string;
   onChange: (data: AddressResult) => void;
+  /** Saisie manuelle : numéro extrait de la voie est poussé ici (ne pas effacer le numéro si chaîne vide). */
+  onStreetPartsChange?: (streetLine: string, extractedStreetNumber: string) => void;
   onClear?: () => void;
   required?: boolean;
   placeholder?: string;
@@ -30,6 +35,7 @@ export function AddressAutocomplete({
   label,
   value,
   onChange,
+  onStreetPartsChange,
   onClear,
   required,
   placeholder,
@@ -105,11 +111,21 @@ export function AddressAutocomplete({
         );
         const data = (await res.json()) as AddressResult & { formatted_address?: string };
         if (data.address_line && data.latitude != null && data.longitude != null) {
-          setInputValue(data.address_line);
+          let line = (data.address_line || '').trim();
+          let sn = (data.street_number ?? '').trim();
+          if (!sn) {
+            const parsed = extractStreetNumberFromLine(line);
+            if (parsed.streetNumber) {
+              sn = parsed.streetNumber;
+              line = parsed.streetLine;
+            }
+          }
+          setInputValue(line);
           setPredictions([]);
           setOpen(false);
           onChange({
-            address_line: data.address_line,
+            address_line: line,
+            street_number: sn,
             zip_code: data.zip_code || '',
             city: data.city || '',
             latitude: data.latitude,
@@ -152,9 +168,14 @@ export function AddressAutocomplete({
           value={inputValue}
           onChange={(e) => {
             const v = e.target.value;
-            setInputValue(v);
             setOpen(true);
-            if (!v) handleClear();
+            if (!v.trim()) {
+              handleClear();
+              return;
+            }
+            const parsed = extractStreetNumberFromLine(v);
+            setInputValue(parsed.streetLine);
+            onStreetPartsChange?.(parsed.streetLine, parsed.streetNumber);
           }}
           onFocus={handleFocus}
           onBlur={handleBlur}

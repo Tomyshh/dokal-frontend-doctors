@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { extractStreetNumberFromLine } from '@/lib/addressStreet';
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
@@ -65,13 +66,28 @@ export async function GET(request: NextRequest) {
     const postalCode = getComponent(address_components, 'postal_code');
     const sublocality = getComponent(address_components, 'sublocality');
 
-    const addressLine = [streetNumber, route].filter(Boolean).join(' ') || formatted_address;
+    let addressLine = route.trim();
+    let streetNumberOut = streetNumber.trim();
+
+    if (!addressLine && formatted_address) {
+      const parsed = extractStreetNumberFromLine(formatted_address);
+      addressLine = parsed.streetLine;
+      if (!streetNumberOut && parsed.streetNumber) {
+        streetNumberOut = parsed.streetNumber;
+      }
+    }
+
+    if (!addressLine) {
+      addressLine = formatted_address;
+    }
+
     const city = locality || sublocality || '';
     const zipCode = postalCode || '';
     const { lat, lng } = geometry.location;
 
     return NextResponse.json({
       address_line: addressLine,
+      street_number: streetNumberOut,
       zip_code: zipCode,
       city,
       latitude: lat,

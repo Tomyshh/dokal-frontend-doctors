@@ -108,6 +108,7 @@ export interface UpdatePractitionerProfileRequest {
   teudat_zehut?: string | null;
   is_accepting_new_patients?: boolean;
   address_line?: string | null;
+  street_number?: string | null;
   zip_code?: string | null;
   city?: string | null;
   latitude?: number | null;
@@ -220,6 +221,7 @@ export interface RegisterPractitionerRequest {
   license_number: string;
   specialization_license?: string;
   address_line: string;
+  street_number: string;
   zip_code?: string;
   latitude?: number;
   longitude?: number;
@@ -306,6 +308,7 @@ export interface InvitePractitionerRequest {
   license_number: string;
   specialization_license?: string;
   address_line?: string;
+  street_number?: string;
   zip_code?: string;
   city?: string;
 }

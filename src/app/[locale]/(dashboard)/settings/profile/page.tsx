@@ -31,6 +31,7 @@ import { SpecialtyCombobox } from '@/components/auth/SpecialtyCombobox';
 import { useGenerateAboutWithAI, useGenerateEducationWithAI } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { extractStreetNumberFromLine } from '@/lib/addressStreet';
 
 function SectionHeader({ icon: Icon, title, subtitle, badge }: {
   icon: LucideIcon;
@@ -85,6 +86,7 @@ export default function ProfileSettingsPage() {
   const [specialtyId, setSpecialtyId] = useState('');
   const [teudatZehut, setTeudatZehut] = useState('');
   const [addressLine, setAddressLine] = useState('');
+  const [streetNumber, setStreetNumber] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [city, setCity] = useState('');
   const [latitude, setLatitude] = useState<number | null>(null);
@@ -97,11 +99,11 @@ export default function ProfileSettingsPage() {
 
   const currentProfileKey = useMemo(() => JSON.stringify({
     firstName, lastName, about, education, languages, phone, email, specialtyId,
-    addressLine, zipCode, city, acceptingPatients,
+    addressLine, streetNumber, zipCode, city, acceptingPatients,
     priceMinShekels, priceMaxShekels, consultationDurationMinutes,
     teudatZehut: teudatZehut.trim(),
   }), [firstName, lastName, about, education, languages, phone, email, specialtyId, teudatZehut,
-    addressLine, zipCode, city, acceptingPatients, priceMinShekels,
+    addressLine, streetNumber, zipCode, city, acceptingPatients, priceMinShekels,
     priceMaxShekels, consultationDurationMinutes]);
 
   const [savedProfileKey, setSavedProfileKey] = useState<string | null>(null);
@@ -129,7 +131,17 @@ export default function ProfileSettingsPage() {
       setPhone(practitioner.phone || '');
       setEmail(practitioner.email || '');
       setSpecialtyId(practitioner.specialty_id || '');
-      setAddressLine(practitioner.address_line || '');
+      let addr = practitioner.address_line || '';
+      let sn = (practitioner.street_number || '').trim();
+      if (!sn && addr) {
+        const parsed = extractStreetNumberFromLine(addr);
+        if (parsed.streetNumber) {
+          addr = parsed.streetLine;
+          sn = parsed.streetNumber;
+        }
+      }
+      setAddressLine(addr);
+      setStreetNumber(sn);
       setZipCode(practitioner.zip_code || '');
       setCity(practitioner.city || '');
       setLatitude(practitioner.latitude ?? null);
@@ -152,7 +164,8 @@ export default function ProfileSettingsPage() {
         phone: practitioner.phone || '',
         email: practitioner.email || '',
         specialtyId: practitioner.specialty_id || '',
-        addressLine: practitioner.address_line || '',
+        addressLine: addr,
+        streetNumber: sn,
         zipCode: practitioner.zip_code || '',
         city: practitioner.city || '',
         acceptingPatients: practitioner.is_accepting_new_patients,
@@ -182,6 +195,10 @@ export default function ProfileSettingsPage() {
       return;
     }
     try {
+      const addrParsed = extractStreetNumberFromLine(addressLine.trim());
+      const normalizedAddressLine = (addrParsed.streetLine || addressLine.trim()) || null;
+      const normalizedStreetNumber = (streetNumber.trim() || addrParsed.streetNumber) || null;
+
       const payload: Parameters<typeof updateProfile.mutateAsync>[0] = {
         first_name: firstName.trim() || null,
         last_name: lastName.trim() || null,
@@ -190,7 +207,8 @@ export default function ProfileSettingsPage() {
         languages: languages.length > 0 ? languages : null,
         phone: phone || null,
         email: email || null,
-        address_line: addressLine || null,
+        address_line: normalizedAddressLine,
+        street_number: normalizedStreetNumber,
         zip_code: zipCode || null,
         city: city || null,
         latitude: latitude ?? null,
@@ -207,7 +225,7 @@ export default function ProfileSettingsPage() {
       await refreshUserData();
       setSavedProfileKey(JSON.stringify({
         firstName, lastName, about, education, languages, phone, email, specialtyId,
-        addressLine, zipCode, city, acceptingPatients,
+        addressLine, streetNumber, zipCode, city, acceptingPatients,
         priceMinShekels, priceMaxShekels, consultationDurationMinutes,
         teudatZehut: '',
       }));
@@ -421,18 +439,32 @@ export default function ProfileSettingsPage() {
             placeholder={t('addressSelectHint')}
             onChange={(data: AddressResult) => {
               setAddressLine(data.address_line);
+              const sn = (data.street_number || '').trim();
+              if (sn) setStreetNumber(sn);
               setZipCode(data.zip_code);
               setCity(data.city);
               setLatitude(data.latitude);
               setLongitude(data.longitude);
             }}
+            onStreetPartsChange={(line, extractedNum) => {
+              setAddressLine(line);
+              if (extractedNum) setStreetNumber(extractedNum);
+            }}
             onClear={() => {
               setAddressLine('');
+              setStreetNumber('');
               setZipCode('');
               setCity('');
               setLatitude(null);
               setLongitude(null);
             }}
+          />
+          <Input
+            label={t('streetNumber')}
+            value={streetNumber}
+            onChange={(e) => setStreetNumber(e.target.value)}
+            autoComplete="off"
+            placeholder={t('streetNumberPlaceholder')}
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input label={t('zipCode')} value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
