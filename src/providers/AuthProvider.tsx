@@ -130,6 +130,15 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onSubscriptionRequired = () => {
+      void refreshSubscription();
+    };
+    window.addEventListener('dokal:subscription-required', onSubscriptionRequired);
+    return () => window.removeEventListener('dokal:subscription-required', onSubscriptionRequired);
+  }, [refreshSubscription]);
+
   // ─── Init: resolve session once, then listen to changes ──────────
 
   useEffect(() => {

@@ -180,7 +180,9 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
   const showBlocker =
     !loading &&
     profile &&
-    (profile.role === 'practitioner' || profile.role === 'admin') &&
+    (profile.role === 'practitioner' ||
+      profile.role === 'secretary' ||
+      profile.role === 'admin') &&
     subscriptionStatus !== null &&
     !hasAccess;
 

@@ -59,6 +59,13 @@ let handling401 = false;
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    if (error.response?.status === 403 && typeof window !== 'undefined') {
+      const code = (error.response?.data as { error?: { code?: string } } | undefined)?.error?.code;
+      if (code === 'subscription_required') {
+        window.dispatchEvent(new CustomEvent('dokal:subscription-required'));
+      }
+    }
+
     if (error.response?.status === 401 && typeof window !== 'undefined' && !handling401) {
       // During initial auth loading, tokens may not be restored yet.
       // Reject the error but don't sign out — AuthProvider will handle the state.
