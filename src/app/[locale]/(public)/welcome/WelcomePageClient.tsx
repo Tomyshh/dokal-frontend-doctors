@@ -45,6 +45,8 @@ import { isRtl } from '@/i18n/config';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { WelcomeHero } from '@/components/landing/WelcomeHero';
 import { WelcomeFeaturesGrid } from '@/components/landing/WelcomeFeaturesGrid';
+import { WelcomeLandingSeamlessBg } from '@/components/landing/WelcomeLandingSeamlessBg';
+import { ContentHaloWrap } from '@/components/landing/ContentHaloWrap';
 
 export default function WelcomePageClient() {
   const t = useTranslations('landing');
@@ -179,13 +181,13 @@ export default function WelcomePageClient() {
   };
 
   return (
-    <div className="min-h-screen bg-primary-900">
+    <div className="min-h-screen bg-primary-950">
       {/* Header */}
       <header
         className={[
           'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
           scrolled
-            ? 'bg-primary-900/80 backdrop-blur-xl shadow-lg shadow-black/10'
+            ? 'bg-primary-950/85 backdrop-blur-xl shadow-lg shadow-black/10'
             : 'bg-transparent',
         ].join(' ')}
       >
@@ -270,27 +272,21 @@ export default function WelcomePageClient() {
         onScreenshotClick={() => setLightboxIndex(0)}
       />
 
-      <WelcomeFeaturesGrid
-        title={t('featuresTitle')}
-        subtitle={t('featuresSubtitle')}
-        features={features}
-      />
+      <WelcomeLandingSeamlessBg>
+        <WelcomeFeaturesGrid
+          title={t('featuresTitle')}
+          subtitle={t('featuresSubtitle')}
+          features={features}
+        />
 
-      {/* Patient App Section */}
-      <section className="relative overflow-hidden py-24 lg:py-32 bg-white">
-        {/* Background decorations */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-[560px] h-[560px] rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-[560px] h-[560px] rounded-full bg-primary/10 blur-3xl" />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        {/* Patient App Section */}
+        <section className="relative overflow-hidden bg-transparent py-24 lg:py-32">
+          <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             {/* Phone mockup */}
             <div className="order-2 lg:order-1">
-              <div className="relative mx-auto max-w-[380px]">
-                <div className="absolute -inset-10 -z-10 rounded-[3.25rem] bg-gradient-to-br from-primary/20 via-primary/10 to-transparent blur-2xl" />
-                <div className="relative w-full aspect-[9/19] drop-shadow-2xl">
+              <ContentHaloWrap rounded="rounded-[3.25rem]" className="mx-auto max-w-[380px]">
+                <div className="relative aspect-[9/19] w-full drop-shadow-2xl">
                   <Image
                     src="/images/app-pres.png"
                     alt={t('patientAppTitle')}
@@ -300,56 +296,56 @@ export default function WelcomePageClient() {
                     priority
                   />
                 </div>
-              </div>
+              </ContentHaloWrap>
             </div>
 
             {/* Copy */}
-            <div className="order-1 lg:order-2 max-w-xl">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
+            <div className="order-1 max-w-xl lg:order-2">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-sm font-semibold text-primary-100 backdrop-blur-sm">
                 <Smartphone className="h-4 w-4" />
                 {t('patientAppBadge')}
               </div>
 
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 {t('patientAppTitle')}
               </h2>
-              <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+              <p className="mt-4 text-lg leading-relaxed text-primary-200/90">
                 {t('patientAppSubtitle')}
               </p>
 
               <div className="mt-10 grid gap-4">
-                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-md shadow-[0_12px_40px_-16px_rgba(0,0,0,0.35)]">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary-400/20 text-primary-100">
                       <MapPin className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">{t('patientAppPointFindTitle')}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{t('patientAppPointFindDesc')}</p>
+                      <p className="font-semibold text-white">{t('patientAppPointFindTitle')}</p>
+                      <p className="mt-1 text-sm text-primary-200/85">{t('patientAppPointFindDesc')}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-md shadow-[0_12px_40px_-16px_rgba(0,0,0,0.35)]">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary-400/20 text-primary-100">
                       <CalendarCheck className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">{t('patientAppPointBookTitle')}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{t('patientAppPointBookDesc')}</p>
+                      <p className="font-semibold text-white">{t('patientAppPointBookTitle')}</p>
+                      <p className="mt-1 text-sm text-primary-200/85">{t('patientAppPointBookDesc')}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-md shadow-[0_12px_40px_-16px_rgba(0,0,0,0.35)]">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary-400/20 text-primary-100">
                       <Star className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">{t('patientAppPointReviewTitle')}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{t('patientAppPointReviewDesc')}</p>
+                      <p className="font-semibold text-white">{t('patientAppPointReviewTitle')}</p>
+                      <p className="mt-1 text-sm text-primary-200/85">{t('patientAppPointReviewDesc')}</p>
                     </div>
                   </div>
                 </div>
@@ -358,77 +354,68 @@ export default function WelcomePageClient() {
               <div className="mt-10 flex flex-wrap gap-4">
                 <Link
                   href="/signup"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-primary text-white font-semibold text-sm hover:bg-primary/90 transition-all duration-300 shadow-sm"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-primary shadow-lg shadow-primary-950/40 transition-all duration-300 hover:bg-primary-50"
                 >
                   {t('cta')}
-                  <ArrowRight className="w-4 h-4 rtl-flip-arrow" />
+                  <ArrowRight className="h-4 w-4 rtl-flip-arrow" />
                 </Link>
                 <button
                   type="button"
                   onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-gray-200 text-gray-900 font-semibold text-sm hover:bg-gray-50 transition-all duration-300"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/25 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10"
                 >
                   {t('seePricing')}
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="h-4 w-4" />
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Screenshots Gallery */}
-      <section className="relative overflow-hidden py-24 lg:py-32 bg-gradient-to-br from-primary-900 via-primary to-primary-700">
-        {/* Background decorations */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-primary-400/10 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-primary-300/10 blur-3xl" />
-        </div>
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="relative text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              {t('screenshotsTitle')}
-            </h2>
-            <p className="mt-4 text-lg text-primary-100/90">
-              {t('screenshotsSubtitle')}
-            </p>
-          </div>
-
-          <div className="relative grid md:grid-cols-3 gap-8">
-            {screenshots.map((shot, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setLightboxIndex(i + 1)}
-                className="group rounded-2xl overflow-hidden border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-                aria-label={t('openImage')}
-              >
-                <Image src={shot.src} alt={shot.alt} width={800} height={500} className="w-full h-auto" />
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="py-24 lg:py-32 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
-              {t('pricingTitle')}
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              {t('pricingSubtitle')}
-            </p>
-            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold">
-              <Clock className="h-4 w-4" />
-              {t('pricingTrialBadge', { days: TRIAL_DURATION_DAYS })}
             </div>
           </div>
+        </section>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        {/* Screenshots Gallery */}
+        <section className="relative overflow-hidden bg-transparent py-24 lg:py-32">
+          <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="relative mx-auto mb-16 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                {t('screenshotsTitle')}
+              </h2>
+              <p className="mt-4 text-lg text-primary-100/90">{t('screenshotsSubtitle')}</p>
+            </div>
+
+            <div className="relative grid gap-10 md:grid-cols-3 md:gap-8">
+              {screenshots.map((shot, i) => (
+                <ContentHaloWrap key={i} rounded="rounded-2xl" className="min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => setLightboxIndex(i + 1)}
+                    className="group relative z-0 w-full overflow-hidden rounded-2xl border border-white/10 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                    aria-label={t('openImage')}
+                  >
+                    <Image src={shot.src} alt={shot.alt} width={800} height={500} className="h-auto w-full" />
+                  </button>
+                </ContentHaloWrap>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section id="pricing" className="relative bg-transparent py-24 lg:py-32">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mx-auto mb-16 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">{t('pricingTitle')}</h2>
+              <p className="mt-4 text-lg text-primary-200/85">{t('pricingSubtitle')}</p>
+              <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-primary-100 backdrop-blur-sm">
+                <Clock className="h-4 w-4" />
+                {t('pricingTrialBadge', { days: TRIAL_DURATION_DAYS })}
+              </div>
+            </div>
+
+            <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-3 md:gap-8">
             {/* Individual */}
-            <div className="rounded-2xl bg-white border border-gray-200 p-8 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col">
+            <ContentHaloWrap rounded="rounded-2xl" className="min-w-0">
+            <div className="relative z-0 flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-card transition-all duration-300 hover:shadow-card-hover">
               <div className="mb-6">
                 <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-gray-600" />
@@ -455,9 +442,11 @@ export default function WelcomePageClient() {
                 {t('pricingStartTrial')}
               </Link>
             </div>
+            </ContentHaloWrap>
 
             {/* Clinic — highlighted */}
-            <div className="relative rounded-2xl bg-white border-2 border-primary p-8 shadow-card-hover flex flex-col">
+            <ContentHaloWrap rounded="rounded-2xl" className="min-w-0">
+            <div className="relative z-0 flex flex-col rounded-2xl border-2 border-primary bg-white p-8 shadow-card-hover">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-primary rounded-full px-4 py-1.5">
                   <Crown className="h-3.5 w-3.5" />
@@ -495,9 +484,11 @@ export default function WelcomePageClient() {
                 {t('pricingStartTrial')}
               </Link>
             </div>
+            </ContentHaloWrap>
 
             {/* Enterprise */}
-            <div className="rounded-2xl bg-white border border-gray-200 p-8 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col">
+            <ContentHaloWrap rounded="rounded-2xl" className="min-w-0">
+            <div className="relative z-0 flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-card transition-all duration-300 hover:shadow-card-hover">
               <div className="mb-6">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
                   <Globe className="h-6 w-6 text-primary" />
@@ -525,223 +516,243 @@ export default function WelcomePageClient() {
                 {t('pricingContactSales')}
               </a>
             </div>
+            </ContentHaloWrap>
           </div>
         </div>
-      </section>
+        </section>
 
-      {/* Lead Contact Form */}
-      <section id="contact-form" className="py-24 lg:py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
-                {t('contactFormTitle')}
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                {t('contactFormSubtitle')}
-              </p>
-            </div>
-
-            {leadSuccess ? (
-              <div className="text-center py-12">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/10 mb-6">
-                  <CheckCircle className="w-8 h-8 text-success" />
-                </div>
-                <p className="text-lg font-medium text-gray-900">
-                  {t('contactFormSuccess')}
-                </p>
+        {/* Lead Contact Form */}
+        <section id="contact-form" className="relative bg-transparent py-24 lg:py-32">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl">
+              <div className="mb-12 text-center">
+                <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                  {t('contactFormTitle')}
+                </h2>
+                <p className="mt-4 text-lg text-primary-200/85">{t('contactFormSubtitle')}</p>
               </div>
-            ) : (
-              <form onSubmit={handleLeadSubmit} className="space-y-6">
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <Input
-                    id="lead-name"
-                    label={t('contactFormName')}
-                    value={leadForm.full_name}
-                    onChange={(e) =>
-                      setLeadForm((prev) => ({ ...prev, full_name: e.target.value }))
-                    }
-                    placeholder={t('contactFormNamePlaceholder')}
-                    required
-                  />
-                  <Input
-                    id="lead-email"
-                    type="email"
-                    label={t('contactFormEmail')}
-                    value={leadForm.email}
-                    onChange={(e) =>
-                      setLeadForm((prev) => ({ ...prev, email: e.target.value }))
-                    }
-                    placeholder={t('contactFormEmailPlaceholder')}
-                    required
-                  />
-                </div>
 
-                <Input
-                  id="lead-phone"
-                  type="tel"
-                  label={t('contactFormPhone')}
-                  value={leadForm.phone}
-                  onChange={(e) =>
-                    setLeadForm((prev) => ({ ...prev, phone: e.target.value }))
-                  }
-                  placeholder={t('contactFormPhonePlaceholder')}
-                />
-
-                <Textarea
-                  id="lead-message"
-                  label={t('contactFormMessage')}
-                  value={leadForm.message}
-                  onChange={(e) =>
-                    setLeadForm((prev) => ({ ...prev, message: e.target.value }))
-                  }
-                  placeholder={t('contactFormMessagePlaceholder')}
-                  rows={4}
-                />
-
-                {leadError && (
-                  <div className="text-center p-4 rounded-xl bg-destructive/10 text-destructive text-sm">
-                    {t('contactFormError')}
+              <div className="rounded-3xl border border-white/15 bg-white p-8 shadow-2xl shadow-primary-950/35 sm:p-10">
+                {leadSuccess ? (
+                  <div className="py-12 text-center">
+                    <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
+                      <CheckCircle className="h-8 w-8 text-success" />
+                    </div>
+                    <p className="text-lg font-medium text-gray-900">{t('contactFormSuccess')}</p>
                   </div>
+                ) : (
+                  <form onSubmit={handleLeadSubmit} className="space-y-6">
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <Input
+                        id="lead-name"
+                        label={t('contactFormName')}
+                        value={leadForm.full_name}
+                        onChange={(e) =>
+                          setLeadForm((prev) => ({ ...prev, full_name: e.target.value }))
+                        }
+                        placeholder={t('contactFormNamePlaceholder')}
+                        required
+                      />
+                      <Input
+                        id="lead-email"
+                        type="email"
+                        label={t('contactFormEmail')}
+                        value={leadForm.email}
+                        onChange={(e) =>
+                          setLeadForm((prev) => ({ ...prev, email: e.target.value }))
+                        }
+                        placeholder={t('contactFormEmailPlaceholder')}
+                        required
+                      />
+                    </div>
+
+                    <Input
+                      id="lead-phone"
+                      type="tel"
+                      label={t('contactFormPhone')}
+                      value={leadForm.phone}
+                      onChange={(e) =>
+                        setLeadForm((prev) => ({ ...prev, phone: e.target.value }))
+                      }
+                      placeholder={t('contactFormPhonePlaceholder')}
+                    />
+
+                    <Textarea
+                      id="lead-message"
+                      label={t('contactFormMessage')}
+                      value={leadForm.message}
+                      onChange={(e) =>
+                        setLeadForm((prev) => ({ ...prev, message: e.target.value }))
+                      }
+                      placeholder={t('contactFormMessagePlaceholder')}
+                      rows={4}
+                    />
+
+                    {leadError && (
+                      <div className="rounded-xl bg-destructive/10 p-4 text-center text-sm text-destructive">
+                        {t('contactFormError')}
+                      </div>
+                    )}
+
+                    <div className="pt-2 text-center">
+                      <Button type="submit" size="lg" loading={leadSubmitting}>
+                        {t('contactFormSubmit')}
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </form>
                 )}
-
-                <div className="text-center pt-2">
-                  <Button type="submit" size="lg" loading={leadSubmitting}>
-                    {t('contactFormSubmit')}
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-            {/* Brand */}
-            <div className="md:col-span-1">
-              <Image
-                src="/branding/fulllogo.png"
-                alt="Dokal"
-                width={120}
-                height={40}
-              />
-              <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-                {t('footerDescription')}
-              </p>
-            </div>
-
-            {/* Product */}
-            <div>
-              <h4 className="text-sm font-semibold text-gray-900 mb-4">
-                {t('footerProduct')}
-              </h4>
-              <ul className="space-y-3">
-                <li>
-                  <button
-                    onClick={() =>
-                      document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
-                    }
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    {t('featuresTitle')}
-                  </button>
-                </li>
-                <li>
-                  <Link href="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {t('login')}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/signup" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {t('signup')}
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h4 className="text-sm font-semibold text-gray-900 mb-4">
-                {t('footerLegal')}
-              </h4>
-              <ul className="space-y-3">
-                <li>
-                  <Link href="/legal" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {t('legalNotice')}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {t('privacyPolicy')}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {t('termsOfService')}
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h4 className="text-sm font-semibold text-gray-900 mb-4">
-                {t('footerContact')}
-              </h4>
-              <ul className="space-y-3">
-                <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="w-4 h-4" />
-                  <a href={`mailto:${company.email}`} className="hover:text-primary transition-colors" dir="ltr">
-                    {company.email}
-                  </a>
-                </li>
-                <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span dir="ltr">{company.address}</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Lock className="w-4 h-4" />
-                  {t('secureData')}
-                </li>
-                <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <FileText className="w-4 h-4" />
-                  {t('gdprCompliant')}
-                </li>
-                <li>
-                  <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {t('contactPage')}
-                  </Link>
-                </li>
-              </ul>
+              </div>
             </div>
           </div>
+        </section>
 
-          {/* Bottom bar */}
-          <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
-              {t('footer')}
-            </p>
-            <div className="flex items-center gap-6">
-              <Link href="/contact" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                {t('contactPage')}
-              </Link>
-              <Link href="/legal" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                {t('legalNotice')}
-              </Link>
-              <Link href="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                {t('privacyPolicy')}
-              </Link>
-              <Link href="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                {t('termsOfService')}
-              </Link>
+        {/* Footer */}
+        <footer className="border-t border-white/10 bg-primary-950/45 backdrop-blur-md">
+          <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+            <div className="grid grid-cols-1 gap-12 md:grid-cols-4">
+              {/* Brand */}
+              <div className="md:col-span-1">
+                <Image src="/branding/fulllogo.png" alt="Dokal" width={120} height={40} />
+                <p className="mt-4 text-sm leading-relaxed text-primary-200/75">{t('footerDescription')}</p>
+              </div>
+
+              {/* Product */}
+              <div>
+                <h4 className="mb-4 text-sm font-semibold text-white">{t('footerProduct')}</h4>
+                <ul className="space-y-3">
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+                      }
+                      className="text-sm text-primary-200/80 transition-colors hover:text-white"
+                    >
+                      {t('featuresTitle')}
+                    </button>
+                  </li>
+                  <li>
+                    <Link
+                      href="/login"
+                      className="text-sm text-primary-200/80 transition-colors hover:text-white"
+                    >
+                      {t('login')}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/signup"
+                      className="text-sm text-primary-200/80 transition-colors hover:text-white"
+                    >
+                      {t('signup')}
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Legal */}
+              <div>
+                <h4 className="mb-4 text-sm font-semibold text-white">{t('footerLegal')}</h4>
+                <ul className="space-y-3">
+                  <li>
+                    <Link
+                      href="/legal"
+                      className="text-sm text-primary-200/80 transition-colors hover:text-white"
+                    >
+                      {t('legalNotice')}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/privacy"
+                      className="text-sm text-primary-200/80 transition-colors hover:text-white"
+                    >
+                      {t('privacyPolicy')}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/terms"
+                      className="text-sm text-primary-200/80 transition-colors hover:text-white"
+                    >
+                      {t('termsOfService')}
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Contact */}
+              <div>
+                <h4 className="mb-4 text-sm font-semibold text-white">{t('footerContact')}</h4>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm text-primary-200/80">
+                    <Mail className="h-4 w-4 shrink-0" />
+                    <a
+                      href={`mailto:${company.email}`}
+                      className="transition-colors hover:text-white"
+                      dir="ltr"
+                    >
+                      {company.email}
+                    </a>
+                  </li>
+                  <li className="flex items-start gap-2 text-sm text-primary-200/80">
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span dir="ltr">{company.address}</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-primary-200/80">
+                    <Lock className="h-4 w-4 shrink-0" />
+                    {t('secureData')}
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-primary-200/80">
+                    <FileText className="h-4 w-4 shrink-0" />
+                    {t('gdprCompliant')}
+                  </li>
+                  <li>
+                    <Link
+                      href="/contact"
+                      className="text-sm text-primary-200/80 transition-colors hover:text-white"
+                    >
+                      {t('contactPage')}
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom bar */}
+            <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
+              <p className="text-sm text-primary-200/70">{t('footer')}</p>
+              <div className="flex items-center gap-6">
+                <Link
+                  href="/contact"
+                  className="text-xs text-primary-200/70 transition-colors hover:text-white"
+                >
+                  {t('contactPage')}
+                </Link>
+                <Link
+                  href="/legal"
+                  className="text-xs text-primary-200/70 transition-colors hover:text-white"
+                >
+                  {t('legalNotice')}
+                </Link>
+                <Link
+                  href="/privacy"
+                  className="text-xs text-primary-200/70 transition-colors hover:text-white"
+                >
+                  {t('privacyPolicy')}
+                </Link>
+                <Link
+                  href="/terms"
+                  className="text-xs text-primary-200/70 transition-colors hover:text-white"
+                >
+                  {t('termsOfService')}
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </WelcomeLandingSeamlessBg>
 
       {/* Lightbox */}
       <Dialog

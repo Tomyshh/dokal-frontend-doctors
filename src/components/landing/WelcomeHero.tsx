@@ -249,7 +249,7 @@ export function WelcomeHero({
   return (
     <section
       ref={containerRef}
-      className="relative overflow-hidden min-h-[100svh] flex items-stretch bg-primary-900"
+      className="relative z-10 overflow-hidden min-h-[100svh] flex items-stretch bg-primary-950"
       aria-label={headline}
     >
       <canvas
@@ -260,6 +260,11 @@ export function WelcomeHero({
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" aria-hidden />
       <div
         className="absolute inset-0 z-[2] pointer-events-none bg-gradient-to-br from-white/[0.06] via-transparent to-primary-950/50"
+        aria-hidden
+      />
+      {/* Fondue bas : fusion avec primary-950 du bloc suivant — pas de saut perceptible */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[min(52vh,560px)] bg-gradient-to-b from-transparent from-0% via-primary-950/12 via-[28%] via-primary-950/45 via-[55%] via-primary-950/78 via-[82%] to-primary-950 to-100%"
         aria-hidden
       />
 
@@ -359,7 +364,7 @@ export function WelcomeHero({
             <button
               type="button"
               onClick={onScreenshotClick}
-              className="relative w-full rounded-2xl overflow-hidden shadow-2xl shadow-primary-950/50 border border-white/15 hover:border-white/25 hover:scale-[1.01] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-200/80"
+              className="relative z-0 w-full overflow-hidden rounded-2xl border border-white/15 shadow-2xl shadow-primary-950/50 transition-all duration-300 hover:scale-[1.01] hover:border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-200/80"
               aria-label={openImageAriaLabel}
             >
               <Image
@@ -371,8 +376,9 @@ export function WelcomeHero({
                 priority
               />
             </button>
-            <div className="absolute -inset-4 -z-10 rounded-3xl bg-primary-300/25 blur-3xl" />
-            <div className="absolute -inset-4 -z-10 rounded-3xl bg-primary-400/10 blur-2xl" />
+            <div className="absolute -inset-10 -z-10 rounded-[2rem] bg-gradient-to-br from-primary-400/30 via-primary-500/16 to-transparent blur-3xl" />
+            <div className="absolute -inset-6 -z-10 rounded-[1.75rem] bg-primary-300/24 blur-2xl" />
+            <div className="absolute -inset-3 -z-10 rounded-2xl bg-primary-400/12 blur-xl" />
           </motion.div>
         </div>
       </div>

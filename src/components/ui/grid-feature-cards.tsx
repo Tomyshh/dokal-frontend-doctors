@@ -11,6 +11,8 @@ export type GridFeatureItem = {
 
 type FeatureCardProps = React.ComponentProps<'div'> & {
   feature: GridFeatureItem;
+  /** Texte clair sur dégradé primary (landing) */
+  tone?: 'default' | 'onPrimary';
 };
 
 /** Motif stable par titre (évite décalage SSR/CSR avec Math.random). */
@@ -28,27 +30,52 @@ function patternFromSeed(seed: string, length = 5): number[][] {
   });
 }
 
-export function FeatureCard({ feature, className, ...props }: FeatureCardProps) {
+export function FeatureCard({ feature, className, tone = 'default', ...props }: FeatureCardProps) {
   const pattern = React.useMemo(() => patternFromSeed(feature.title), [feature.title]);
   const Icon = feature.icon;
+  const onPrimary = tone === 'onPrimary';
 
   return (
     <div className={cn('relative overflow-hidden p-6 md:p-8', className)} {...props}>
       <div className="pointer-events-none absolute top-0 left-1/2 -mt-2 -ml-20 h-full w-full [mask-image:linear-gradient(white,transparent)]">
-        <div className="from-foreground/5 to-foreground/1 absolute inset-0 bg-gradient-to-r [mask-image:radial-gradient(farthest-side_at_top,white,transparent)] opacity-100">
+        <div
+          className={cn(
+            'absolute inset-0 bg-gradient-to-r [mask-image:radial-gradient(farthest-side_at_top,white,transparent)] opacity-100',
+            onPrimary ? 'from-white/10 to-white/[0.02]' : 'from-foreground/5 to-foreground/1'
+          )}
+        >
           <GridPattern
             width={20}
             height={20}
             x="-12"
             y="4"
             squares={pattern}
-            className="fill-foreground/5 stroke-foreground/25 absolute inset-0 h-full w-full mix-blend-overlay"
+            className={cn(
+              'absolute inset-0 h-full w-full mix-blend-overlay',
+              onPrimary ? 'fill-white/10 stroke-white/20' : 'fill-foreground/5 stroke-foreground/25'
+            )}
           />
         </div>
       </div>
-      <Icon className="text-primary size-6 md:size-7" strokeWidth={1.25} aria-hidden />
-      <h3 className="mt-8 text-base font-semibold text-foreground md:mt-10 md:text-lg">{feature.title}</h3>
-      <p className="text-muted-foreground relative z-20 mt-2 text-xs font-light leading-relaxed md:text-sm">
+      <Icon
+        className={cn('size-6 md:size-7', onPrimary ? 'text-primary-200' : 'text-primary')}
+        strokeWidth={1.25}
+        aria-hidden
+      />
+      <h3
+        className={cn(
+          'mt-8 text-base font-semibold md:mt-10 md:text-lg',
+          onPrimary ? 'text-primary-50' : 'text-foreground'
+        )}
+      >
+        {feature.title}
+      </h3>
+      <p
+        className={cn(
+          'relative z-20 mt-2 text-xs font-light leading-relaxed md:text-sm',
+          onPrimary ? 'text-primary-200/85' : 'text-muted-foreground'
+        )}
+      >
         {feature.description}
       </p>
     </div>
