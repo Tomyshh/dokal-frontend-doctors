@@ -94,6 +94,7 @@ function needsAppointmentFetch(type: string): boolean {
 
 export default function NotificationsPage() {
   const t = useTranslations('notifications');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
   const router = useRouter();
   const { data: notifications, isLoading } = useNotifications();
@@ -147,7 +148,7 @@ export default function NotificationsPage() {
 
       <Card padding={false}>
         {isLoading ? (
-          <div className="p-4 space-y-3" aria-label="Chargement">
+          <div className="p-4 space-y-3" aria-label={tCommon('loading')}>
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex items-start gap-4 p-4">
                 <Skeleton className="h-10 w-10 rounded-xl" />

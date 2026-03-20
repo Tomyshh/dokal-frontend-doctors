@@ -334,7 +334,7 @@ export default function BillingPage() {
             </CardHeader>
 
             {!subscriptionStatus ? (
-              <div className="space-y-4 py-2" aria-label="Chargement">
+              <div className="space-y-4 py-2" aria-label={tc('loading')}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
                     <Skeleton className="h-12 w-12 rounded-xl" />
@@ -542,7 +542,7 @@ export default function BillingPage() {
               <p className="text-sm text-muted-foreground">{t('paymentMethodsHint')}</p>
 
               {cardsLoading ? (
-                <div className="space-y-2" aria-label="Chargement">
+                <div className="space-y-2" aria-label={tc('loading')}>
                   {Array.from({ length: 4 }).map((_, i) => (
                     <div key={i} className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-white p-4">
                       <div className="min-w-0 space-y-2">

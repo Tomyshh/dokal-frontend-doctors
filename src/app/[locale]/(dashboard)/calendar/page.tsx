@@ -35,6 +35,7 @@ import { CreateCrmAppointmentDialog } from '@/components/appointments/CreateCrmA
 export default function CalendarPage() {
   const t = useTranslations('calendar');
   const ta = useTranslations('appointments');
+  const tCommon = useTranslations('common');
   const { profile } = useAuth();
   const { data: organization } = useCrmOrganization();
 
@@ -195,7 +196,7 @@ export default function CalendarPage() {
       {isError ? (
         <ApiErrorCallout error={error} />
       ) : isLoading ? (
-        <div className="space-y-4" aria-label="Chargement">
+        <div className="space-y-4" aria-label={tCommon('loading')}>
           <div className="grid grid-cols-7 gap-2">
             {Array.from({ length: 7 }).map((_, i) => (
               <Skeleton key={i} className="h-5 w-full rounded-md" />

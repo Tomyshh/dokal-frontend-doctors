@@ -297,7 +297,7 @@ export default function SettingsPage() {
               label={t('organizationWebsite')}
               value={orgWebsite}
               onChange={(e) => setOrgWebsite(e.target.value)}
-              placeholder="https://"
+              placeholder={t('organizationWebsitePlaceholder')}
             />
             {organization.license_number && (
               <div className="text-sm text-muted-foreground">

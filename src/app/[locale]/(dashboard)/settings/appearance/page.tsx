@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Palette, Moon, Sun } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
@@ -9,27 +9,7 @@ import { useThemePalette } from '@/providers/ThemePaletteProvider';
 
 export default function AppearancePage() {
   const t = useTranslations('settings');
-  const locale = useLocale();
   const { mode, setMode, paletteId, setPaletteId } = useThemePalette();
-
-  const appearanceTitle = locale === 'fr' ? 'Apparence' : locale === 'he' ? 'מראה' : locale === 'ru' ? 'Оформление' : 'Appearance';
-  const appearanceHint = locale === 'fr'
-    ? 'Passez entre thème clair et dark.'
-    : locale === 'he' ? 'מעבר בין ערכת נושא בהירה לכהה.'
-    : locale === 'ru' ? 'Переключение между светлой и тёмной темой.'
-    : 'Switch between light and dark theme.';
-
-  const paletteSectionTitle = locale === 'fr' ? 'Palette de couleurs' : locale === 'he' ? 'לוח צבעים' : locale === 'ru' ? 'Цветовая палитра' : 'Color palette';
-  const paletteSectionHint = locale === 'fr'
-    ? 'Choisissez le style visuel de votre CRM. Modifiable à tout moment.'
-    : locale === 'he' ? 'בחרו את הסגנון החזותי של ה-CRM שלכם. ניתן לשנות בכל עת.'
-    : locale === 'ru' ? 'Выберите визуальный стиль CRM. Можно изменить в любое время.'
-    : 'Choose your CRM visual style. You can change it anytime.';
-  const paletteSavedHint = locale === 'fr'
-    ? 'Préférence enregistrée sur cet appareil.'
-    : locale === 'he' ? 'ההעדפה נשמרה במכשיר זה.'
-    : locale === 'ru' ? 'Предпочтение сохранено на этом устройстве.'
-    : 'Preference saved on this device.';
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
@@ -50,7 +30,7 @@ export default function AppearancePage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
               {mode === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </div>
-            {appearanceTitle}
+            {t('appearanceThemeSectionTitle')}
           </CardTitle>
         </CardHeader>
         <div className="space-y-4">
@@ -66,7 +46,7 @@ export default function AppearancePage() {
               )}
             >
               <Sun className="h-4 w-4" />
-              {locale === 'fr' ? 'Clair' : locale === 'he' ? 'בהיר' : locale === 'ru' ? 'Светлая' : 'Light'}
+              {t('appearanceThemeLight')}
             </button>
             <button
               type="button"
@@ -79,10 +59,10 @@ export default function AppearancePage() {
               )}
             >
               <Moon className="h-4 w-4" />
-              {locale === 'fr' ? 'Sombre' : locale === 'he' ? 'כהה' : locale === 'ru' ? 'Тёмная' : 'Dark'}
+              {t('appearanceThemeDark')}
             </button>
           </div>
-          <p className="text-xs text-muted-foreground">{appearanceHint}</p>
+          <p className="text-xs text-muted-foreground">{t('appearanceThemeHint')}</p>
         </div>
       </Card>
 
@@ -93,7 +73,7 @@ export default function AppearancePage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Palette className="h-4 w-4" />
             </div>
-            {paletteSectionTitle}
+            {t('appearancePaletteSectionTitle')}
           </CardTitle>
         </CardHeader>
         <div className="space-y-4">
@@ -122,15 +102,17 @@ export default function AppearancePage() {
                     ))}
                   </div>
                   <p className={cn('text-sm font-semibold', isActive ? 'text-primary' : 'text-gray-800')}>
-                    {palette.label}
+                    {t(`themePalettes.${palette.id}.label` as Parameters<typeof t>[0])}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{palette.description}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t(`themePalettes.${palette.id}.description` as Parameters<typeof t>[0])}
+                  </p>
                 </button>
               );
             })}
           </div>
-          <p className="text-xs text-muted-foreground">{paletteSectionHint}</p>
-          <p className="text-xs text-primary">{paletteSavedHint}</p>
+          <p className="text-xs text-muted-foreground">{t('appearancePaletteSectionHint')}</p>
+          <p className="text-xs text-primary">{t('appearancePaletteSavedHint')}</p>
         </div>
       </Card>
     </div>

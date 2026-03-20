@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 export interface PhoneInputILProps {
@@ -10,6 +11,8 @@ export interface PhoneInputILProps {
   onChange: (value: string) => void;
   required?: boolean;
   error?: string;
+  /** Overrides default translated placeholder */
+  placeholder?: string;
 }
 
 function normalizeDigits(s: string) {
@@ -31,7 +34,8 @@ export function normalizeIsraelPhoneToE164(input: string) {
   return `+972${digits}`;
 }
 
-export function PhoneInputIL({ id, label, value, onChange, required, error }: PhoneInputILProps) {
+export function PhoneInputIL({ id, label, value, onChange, required, error, placeholder }: PhoneInputILProps) {
+  const tc = useTranslations('common');
   const displayDigits = useMemo(() => {
     let digits = normalizeDigits(value);
     if (digits.startsWith('972')) digits = digits.slice(3);
@@ -79,7 +83,7 @@ export function PhoneInputIL({ id, label, value, onChange, required, error }: Ph
           }}
           inputMode="tel"
           autoComplete="tel"
-          placeholder="0584268519"
+          placeholder={placeholder ?? tc('phoneIlPlaceholder')}
           required={required}
         />
       </div>

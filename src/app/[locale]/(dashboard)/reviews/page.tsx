@@ -75,7 +75,7 @@ export default function ReviewsPage() {
         </CardHeader>
 
         {isLoading ? (
-          <div className="space-y-4" aria-label="Chargement">
+          <div className="space-y-4" aria-label={tc('loading')}>
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="border border-border/50 rounded-xl p-4">
                 <div className="flex items-start justify-between">

@@ -31,6 +31,7 @@ const RANGE_DAYS = 60;
 export default function AppointmentsPage() {
   const t = useTranslations('appointments');
   const tc = useTranslations('calendar');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
   const [status, setStatus] = useState<string>('upcoming'); // default: show upcoming
   const [createExternalOpen, setCreateExternalOpen] = useState(false);
@@ -105,7 +106,7 @@ export default function AppointmentsPage() {
         {isError ? (
           <ApiErrorCallout error={error} />
         ) : isLoading ? (
-          <div className="space-y-6" aria-label="Chargement">
+          <div className="space-y-6" aria-label={tCommon('loading')}>
             {Array.from({ length: 3 }).map((_, g) => (
               <div key={g} className="space-y-2">
                 <Skeleton className="h-4 w-40 rounded-md" />

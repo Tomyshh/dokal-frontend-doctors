@@ -40,7 +40,7 @@ function readUtf8(filePath) {
 }
 
 function loadLocaleMessages(locale) {
-  const filePath = path.join(MESSAGES_DIR, `${locale}.arb`);
+  const filePath = path.join(MESSAGES_DIR, `${locale}.json`);
   const raw = readUtf8(filePath);
   return JSON.parse(raw);
 }
@@ -48,8 +48,8 @@ function loadLocaleMessages(locale) {
 function getAvailableLocales() {
   return fs
     .readdirSync(MESSAGES_DIR)
-    .filter((f) => f.endsWith('.arb'))
-    .map((f) => f.replace(/\.arb$/, ''))
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => f.replace(/\.json$/, ''))
     .sort();
 }
 
@@ -99,7 +99,7 @@ function collectUsedTranslationKeys() {
 function main() {
   const locales = getAvailableLocales();
   if (locales.length === 0) {
-    console.error('No locale files found in src/i18n/messages/*.arb');
+    console.error('No locale files found in src/i18n/messages/*.json');
     process.exit(1);
   }
 

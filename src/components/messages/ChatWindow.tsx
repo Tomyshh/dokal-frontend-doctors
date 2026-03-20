@@ -22,6 +22,7 @@ interface ChatWindowProps {
 
 export default function ChatWindow({ conversationId, patientName, patientAvatar }: ChatWindowProps) {
   const t = useTranslations('messages');
+  const tc = useTranslations('common');
   const { user } = useAuth();
   const { socket } = useSocket();
   const queryClient = useQueryClient();
@@ -80,7 +81,7 @@ export default function ChatWindow({ conversationId, patientName, patientAvatar 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {isLoading ? (
-          <div className="space-y-3" aria-label="Chargement">
+          <div className="space-y-3" aria-label={tc('loading')}>
             {Array.from({ length: 10 }).map((_, i) => (
               <div
                 key={i}

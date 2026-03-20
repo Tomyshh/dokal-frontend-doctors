@@ -18,7 +18,7 @@ export default function MessageDetailPage({ params }: { params: Promise<{ id: st
 
   if (isLoading) {
     return (
-      <div className="space-y-4" aria-label="Chargement">
+      <div className="space-y-4" aria-label={tc('loading')}>
         <Skeleton className="h-8 w-24 rounded-lg" />
         <div className="h-[calc(100vh-220px)]">
           <div className="h-full rounded-2xl border border-border bg-card overflow-hidden">

@@ -178,7 +178,7 @@ function AcceptInviteContent() {
           id="password"
           type="password"
           label={t('password')}
-          placeholder="••••••••"
+          placeholder={t('passwordPlaceholder')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -191,7 +191,7 @@ function AcceptInviteContent() {
           id="confirmPassword"
           type="password"
           label={t('confirmPassword')}
-          placeholder="••••••••"
+          placeholder={t('passwordPlaceholder')}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required

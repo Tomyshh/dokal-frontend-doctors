@@ -79,7 +79,7 @@ export default function InstructionsPage() {
 
       <Card>
         {isLoading ? (
-          <div className="space-y-3" aria-label="Chargement">
+          <div className="space-y-3" aria-label={tc('loading')}>
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="border border-border/50 rounded-xl p-4">
                 <div className="flex items-start justify-between gap-4">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 
@@ -68,6 +69,7 @@ function ToastItem({
   const duration = toast.duration ?? 5000;
   const config = variantConfig[toast.variant];
   const Icon = config.icon;
+  const tc = useTranslations('common');
 
   // Enter animation
   useEffect(() => {
@@ -138,7 +140,7 @@ function ToastItem({
         <button
           onClick={handleDismiss}
           className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          aria-label="Close"
+          aria-label={tc('close')}
         >
           <X className="h-4 w-4" />
         </button>
@@ -165,11 +167,12 @@ export function ToastContainer({
   toasts: ToastData[];
   onDismiss: (id: string) => void;
 }) {
+  const tn = useTranslations('notifications');
   if (toasts.length === 0) return null;
 
   return (
     <div
-      aria-label="Notifications"
+      aria-label={tn('title')}
       className="fixed top-4 ltr:right-4 rtl:left-4 z-[9999] flex flex-col gap-3 pointer-events-none"
     >
       {toasts.map((toast) => (

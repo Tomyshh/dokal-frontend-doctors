@@ -349,28 +349,28 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
             label={t('whatsapp')}
             value={whatsappNumber}
             onChange={(e) => setWhatsappNumber(e.target.value)}
-            placeholder="+972501234567"
+            placeholder={t('placeholderWhatsapp')}
           />
           <Input
             label={<SocialLabel icon="/logo/social/facebook.svg" label="Facebook" />}
             value={facebookUrl}
             onChange={(e) => setFacebookUrl(e.target.value)}
             onBlur={(e) => handleUrlBlur(setFacebookUrl, e.target.value)}
-            placeholder="https://facebook.com/..."
+            placeholder={t('placeholderSocialFacebook')}
           />
           <Input
             label={<SocialLabel icon="/logo/social/instagram.svg" label="Instagram" />}
             value={instagramUrl}
             onChange={(e) => setInstagramUrl(e.target.value)}
             onBlur={(e) => handleUrlBlur(setInstagramUrl, e.target.value)}
-            placeholder="https://instagram.com/..."
+            placeholder={t('placeholderSocialInstagram')}
           />
           <Input
             label={<SocialLabel icon="/logo/social/linkedin.svg" label="LinkedIn" />}
             value={linkedinUrl}
             onChange={(e) => setLinkedinUrl(e.target.value)}
             onBlur={(e) => handleUrlBlur(setLinkedinUrl, e.target.value)}
-            placeholder="https://linkedin.com/in/..."
+            placeholder={t('placeholderSocialLinkedin')}
           />
           <Input
             label={
@@ -382,21 +382,21 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
             value={websiteUrl}
             onChange={(e) => setWebsiteUrl(e.target.value)}
             onBlur={(e) => handleUrlBlur(setWebsiteUrl, e.target.value)}
-            placeholder="https://..."
+            placeholder={t('placeholderWebsiteUrl')}
           />
           <Input
             label={<SocialLabel icon="/logo/social/tiktok.svg" label="TikTok" />}
             value={tiktokUrl}
             onChange={(e) => setTiktokUrl(e.target.value)}
             onBlur={(e) => handleUrlBlur(setTiktokUrl, e.target.value)}
-            placeholder="https://tiktok.com/@..."
+            placeholder={t('placeholderSocialTiktok')}
           />
           <Input
             label={<SocialLabel icon="/logo/social/youtube.svg" label="YouTube" />}
             value={youtubeUrl}
             onChange={(e) => setYoutubeUrl(e.target.value)}
             onBlur={(e) => handleUrlBlur(setYoutubeUrl, e.target.value)}
-            placeholder="https://youtube.com/..."
+            placeholder={t('placeholderSocialYoutube')}
           />
         </div>
 
@@ -410,14 +410,14 @@ export default function SocialLinksSection({ practitioner, avatarUrl, t, tc }: S
             value={wazeLink}
             onChange={(e) => setWazeLink(e.target.value)}
             onBlur={(e) => handleUrlBlur(setWazeLink, e.target.value)}
-            placeholder="https://waze.com/ul/..."
+            placeholder={t('placeholderWaze')}
           />
           <Input
             label={<SocialLabel icon="/logo/social/google_maps.svg" label="Google Maps" />}
             value={googleMapsLink}
             onChange={(e) => setGoogleMapsLink(e.target.value)}
             onBlur={(e) => handleUrlBlur(setGoogleMapsLink, e.target.value)}
-            placeholder="https://maps.google.com/..."
+            placeholder={t('placeholderGoogleMaps')}
           />
         </div>
 

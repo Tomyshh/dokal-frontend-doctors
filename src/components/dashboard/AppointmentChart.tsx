@@ -12,6 +12,7 @@ type ChartRow = { status: string; value: number };
 
 export default function AppointmentChart() {
   const t = useTranslations('dashboard');
+  const tc = useTranslations('common');
   const locale = useLocale();
   const rtl = locale === 'he';
   const now = new Date();
@@ -69,7 +70,7 @@ export default function AppointmentChart() {
         {isError ? (
           <ApiErrorCallout error={error} />
         ) : isLoading ? (
-          <div className="h-full flex flex-col justify-center gap-4 px-4" aria-label="Chargement">
+          <div className="h-full flex flex-col justify-center gap-4 px-4" aria-label={tc('loading')}>
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3">
                 <Skeleton className="h-3 w-28 rounded-md" />

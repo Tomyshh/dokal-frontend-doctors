@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
             id="email"
             type="email"
             label={t('email')}
-            placeholder="docteur@example.com"
+            placeholder={t('emailPlaceholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

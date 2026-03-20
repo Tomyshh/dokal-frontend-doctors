@@ -110,6 +110,10 @@ export default function WelcomePageClient() {
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const lightboxOpen = lightboxIndex !== null;
+  const lightboxCounterLabel =
+    lightboxIndex !== null
+      ? t('lightboxCounter', { current: lightboxIndex + 1, total: galleryItems.length })
+      : '';
 
   const closeLightbox = () => setLightboxIndex(null);
   const prev = () => {
@@ -195,7 +199,7 @@ export default function WelcomePageClient() {
           <div className="flex items-center justify-between h-20">
             <Image
               src="/branding/icononly_transparent.png"
-              alt="Dokal"
+              alt={company.name}
               width={120}
               height={120}
               priority
@@ -203,7 +207,7 @@ export default function WelcomePageClient() {
             />
 
             <span className="absolute left-1/2 -translate-x-1/2 text-xl font-bold tracking-widest text-white uppercase select-none">
-              Dokal
+              {company.name}
             </span>
             <div className="flex items-center gap-3">
               {/* Language Switcher */}
@@ -212,7 +216,7 @@ export default function WelcomePageClient() {
                   type="button"
                   onClick={() => setShowLangMenu(!showLangMenu)}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-white hover:bg-white/10 transition-all duration-300"
-                  aria-label={t('login')}
+                  aria-label={tc('language')}
                 >
                   <Globe className="h-4 w-4" />
                   <span className="hidden sm:inline">{localeNames[locale]}</span>
@@ -280,7 +284,7 @@ export default function WelcomePageClient() {
         />
 
         {/* Patient App Section */}
-        <section className="relative overflow-hidden bg-transparent py-24 lg:py-32">
+        <section className="relative overflow-hidden bg-transparent pt-24 pb-10 lg:pt-32 lg:pb-14">
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
             <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             {/* Phone mockup */}
@@ -374,9 +378,9 @@ export default function WelcomePageClient() {
         </section>
 
         {/* Screenshots Gallery */}
-        <section className="relative overflow-hidden bg-transparent py-24 lg:py-32">
+        <section className="relative overflow-hidden bg-transparent pt-10 pb-24 lg:pt-14 lg:pb-32">
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="relative mx-auto mb-16 max-w-2xl text-center">
+            <div className="relative mx-auto mb-12 max-w-2xl text-center lg:mb-14">
               <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 {t('screenshotsTitle')}
               </h2>
@@ -401,21 +405,20 @@ export default function WelcomePageClient() {
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="relative bg-transparent py-24 lg:py-32">
+        <section id="pricing" className="relative bg-white py-24 lg:py-32">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto mb-16 max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">{t('pricingTitle')}</h2>
-              <p className="mt-4 text-lg text-primary-200/85">{t('pricingSubtitle')}</p>
-              <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-primary-100 backdrop-blur-sm">
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{t('pricingTitle')}</h2>
+              <p className="mt-4 text-lg text-muted-foreground">{t('pricingSubtitle')}</p>
+              <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
                 <Clock className="h-4 w-4" />
                 {t('pricingTrialBadge', { days: TRIAL_DURATION_DAYS })}
               </div>
             </div>
 
-            <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-3 md:gap-8">
+            <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-3">
             {/* Individual */}
-            <ContentHaloWrap rounded="rounded-2xl" className="min-w-0">
-            <div className="relative z-0 flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-card transition-all duration-300 hover:shadow-card-hover">
+            <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-card transition-all duration-300 hover:shadow-card-hover">
               <div className="mb-6">
                 <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-gray-600" />
@@ -442,11 +445,9 @@ export default function WelcomePageClient() {
                 {t('pricingStartTrial')}
               </Link>
             </div>
-            </ContentHaloWrap>
 
             {/* Clinic — highlighted */}
-            <ContentHaloWrap rounded="rounded-2xl" className="min-w-0">
-            <div className="relative z-0 flex flex-col rounded-2xl border-2 border-primary bg-white p-8 shadow-card-hover">
+            <div className="relative flex flex-col rounded-2xl border-2 border-primary bg-white p-8 shadow-card-hover">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-primary rounded-full px-4 py-1.5">
                   <Crown className="h-3.5 w-3.5" />
@@ -484,11 +485,9 @@ export default function WelcomePageClient() {
                 {t('pricingStartTrial')}
               </Link>
             </div>
-            </ContentHaloWrap>
 
             {/* Enterprise */}
-            <ContentHaloWrap rounded="rounded-2xl" className="min-w-0">
-            <div className="relative z-0 flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-card transition-all duration-300 hover:shadow-card-hover">
+            <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-card transition-all duration-300 hover:shadow-card-hover">
               <div className="mb-6">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
                   <Globe className="h-6 w-6 text-primary" />
@@ -516,7 +515,6 @@ export default function WelcomePageClient() {
                 {t('pricingContactSales')}
               </a>
             </div>
-            </ContentHaloWrap>
           </div>
         </div>
         </section>
@@ -613,7 +611,7 @@ export default function WelcomePageClient() {
             <div className="grid grid-cols-1 gap-12 md:grid-cols-4">
               {/* Brand */}
               <div className="md:col-span-1">
-                <Image src="/branding/fulllogo.png" alt="Dokal" width={120} height={40} />
+                <Image src="/branding/fulllogo.png" alt={company.name} width={120} height={40} />
                 <p className="mt-4 text-sm leading-relaxed text-primary-200/75">{t('footerDescription')}</p>
               </div>
 
@@ -769,9 +767,9 @@ export default function WelcomePageClient() {
               <div
                 className="text-sm text-white tabular-nums font-medium px-2.5 py-1 rounded-full bg-black/45 border border-white/15 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
                 dir="ltr"
-                aria-label={`${lightboxIndex + 1} / ${galleryItems.length}`}
+                aria-label={lightboxCounterLabel}
               >
-                {lightboxIndex + 1} / {galleryItems.length}
+                {lightboxCounterLabel}
               </div>
               <button
                 type="button"

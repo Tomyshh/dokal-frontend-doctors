@@ -1,3 +1,6 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 type SkeletonProps = React.HTMLAttributes<HTMLDivElement>;
@@ -17,8 +20,9 @@ export function TableSkeleton({
   showHeader?: boolean;
   className?: string;
 }) {
+  const t = useTranslations('common');
   return (
-    <div className={cn('overflow-x-auto', className)} aria-label="Chargement">
+    <div className={cn('overflow-x-auto', className)} aria-label={t('loading')}>
       <table className="w-full">
         {showHeader && (
           <thead>
@@ -59,8 +63,9 @@ export function ListSkeleton({
   items?: number;
   className?: string;
 }) {
+  const t = useTranslations('common');
   return (
-    <div className={cn('space-y-3', className)} aria-label="Chargement">
+    <div className={cn('space-y-3', className)} aria-label={t('loading')}>
       {Array.from({ length: items }).map((_, i) => (
         <div key={i} className="flex items-center gap-3">
           <Skeleton className="h-10 w-10 rounded-full" />

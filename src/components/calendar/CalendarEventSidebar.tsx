@@ -289,7 +289,7 @@ export default function CalendarEventSidebar({
               <div className="flex items-start gap-3">
                 <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Location</p>
+                  <p className="text-xs text-muted-foreground">{t('externalLocation')}</p>
                   <p className="text-sm text-foreground/90">{evt.location}</p>
                 </div>
               </div>
@@ -616,7 +616,7 @@ export default function CalendarEventSidebar({
             <div className="flex items-start gap-3">
               <User className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-muted-foreground">Praticien</p>
+                <p className="text-xs text-muted-foreground">{ta('practitioner')}</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <Avatar
                     src={appointment.practitioners?.profiles?.avatar_url}

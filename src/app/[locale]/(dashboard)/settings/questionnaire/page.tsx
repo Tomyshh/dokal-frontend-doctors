@@ -63,7 +63,7 @@ export default function QuestionnairePage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 max-w-3xl" aria-label="Chargement">
+      <div className="space-y-6 max-w-3xl" aria-label={tc('loading')}>
         <Skeleton className="h-8 w-80 rounded-lg" />
         <Skeleton className="h-5 w-[90%] rounded-md" />
         <Card><div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-xl" />)}</div></Card>

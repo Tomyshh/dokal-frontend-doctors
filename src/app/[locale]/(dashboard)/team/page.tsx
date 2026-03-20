@@ -311,7 +311,7 @@ export default function TeamPage() {
 
   if (loadingOrg || loadingMembers) {
     return (
-      <div className="space-y-6 max-w-4xl" aria-label="Chargement">
+      <div className="space-y-6 max-w-4xl" aria-label={tc('loading')}>
         <div className="flex items-center justify-between">
           <div className="space-y-2">
             <Skeleton className="h-8 w-40 rounded-md" />
@@ -344,7 +344,7 @@ export default function TeamPage() {
 
   if (!organization) {
     return (
-      <div className="space-y-4 max-w-4xl" aria-label="Chargement">
+      <div className="space-y-4 max-w-4xl" aria-label={tc('loading')}>
         <Skeleton className="h-8 w-40 rounded-md" />
         <Skeleton className="h-48 w-full rounded-2xl" />
       </div>
@@ -637,7 +637,7 @@ export default function TeamPage() {
             value={form.email}
             onChange={(e) => handleChange('email', e.target.value)}
             required
-            placeholder="membre@example.com"
+            placeholder={t('inviteEmailPlaceholder')}
           />
 
           <PhoneInputIL
@@ -683,7 +683,7 @@ export default function TeamPage() {
                   inputMode="numeric"
                   pattern="[0-9]{1,6}"
                   maxLength={6}
-                  placeholder="123456"
+                  placeholder={t('licenseNumberPlaceholder')}
                 />
                 <Input
                   id="invSpecLicense"
@@ -696,7 +696,7 @@ export default function TeamPage() {
                   inputMode="numeric"
                   pattern="[0-9]{0,6}"
                   maxLength={6}
-                  placeholder="123456"
+                  placeholder={t('licenseNumberPlaceholder')}
                 />
               </div>
               <Input
@@ -802,7 +802,7 @@ export default function TeamPage() {
             inputMode="numeric"
             pattern="[0-9]{0,6}"
             maxLength={6}
-            placeholder="123456"
+            placeholder={t('licenseNumberPlaceholder')}
           />
 
           <Input
@@ -817,7 +817,7 @@ export default function TeamPage() {
             inputMode="numeric"
             pattern="[0-9]{0,6}"
             maxLength={6}
-            placeholder="123456"
+            placeholder={t('licenseNumberPlaceholder')}
           />
 
           {editLicenseError && (

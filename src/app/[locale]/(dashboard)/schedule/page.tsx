@@ -290,7 +290,7 @@ export default function SchedulePage() {
         </CardHeader>
 
         {isLoading ? (
-          <div className="space-y-2" aria-label="Chargement">
+          <div className="space-y-2" aria-label={tc('loading')}>
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="flex items-center justify-between py-3 px-4 rounded-xl bg-muted/50">
                 <div className="flex items-center gap-4">
@@ -364,7 +364,7 @@ export default function SchedulePage() {
         </CardHeader>
 
         {loadingBreaks ? (
-          <div className="space-y-2" aria-label="Chargement">
+          <div className="space-y-2" aria-label={tc('loading')}>
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex items-center justify-between py-3 px-4 rounded-xl bg-muted/50">
                 <div className="flex items-center gap-4">
@@ -451,7 +451,7 @@ export default function SchedulePage() {
         </CardHeader>
 
         {loadingOverrides ? (
-          <div className="space-y-2" aria-label="Chargement">
+          <div className="space-y-2" aria-label={tc('loading')}>
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex items-center justify-between py-3 px-4 rounded-xl bg-muted/50">
                 <div className="flex items-center gap-4">

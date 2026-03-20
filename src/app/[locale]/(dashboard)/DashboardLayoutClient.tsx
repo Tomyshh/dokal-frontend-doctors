@@ -23,7 +23,7 @@ import { useGoogleCalendarStatus } from '@/hooks/useGoogleCalendarIntegration';
 import GoogleCalendarPrompt from '@/components/onboarding/GoogleCalendarPrompt';
 
 function NotPublishedBanner() {
-  const t = useTranslations('settings');
+  const tSettings = useTranslations('settings');
   const practitionerProfile = usePractitionerProfile();
 
   if (
@@ -37,15 +37,15 @@ function NotPublishedBanner() {
       <div className="max-w-7xl mx-auto flex items-center gap-3">
         <EyeOff className="h-5 w-5 shrink-0" />
         <div className="flex-1 min-w-0">
-          <span className="font-semibold">{t('notPublishedTitle')}</span>
+          <span className="font-semibold">{tSettings('notPublishedTitle')}</span>
           <span className="mx-1.5 opacity-60">—</span>
-          <span className="opacity-90">{t('notPublishedDescription')}</span>
+          <span className="opacity-90">{tSettings('notPublishedDescription')}</span>
         </div>
         <Link
           href="/settings/profile"
           className="shrink-0 text-xs font-semibold bg-white/20 hover:bg-white/30 rounded-full px-4 py-1.5 transition-colors"
         >
-          {t('notPublishedAction')}
+          {tSettings('notPublishedAction')}
         </Link>
       </div>
     </div>
@@ -56,6 +56,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
   const { loading, user, profile, subscriptionStatus, signOut } = useAuth();
   useAppointmentsRealtime();
   const t = useTranslations('auth');
+  const tc = useTranslations('common');
   const ts = useTranslations('subscription');
   const locale = useLocale();
   const router = useRouter();
@@ -162,7 +163,7 @@ export default function DashboardLayoutClient({ children }: { children: ReactNod
               </div>
             </div>
           </div>
-          <main className="p-6 space-y-4" aria-label="Chargement">
+          <main className="p-6 space-y-4" aria-label={tc('loading')}>
             <Skeleton className="h-8 w-64 rounded-md" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Skeleton className="h-40 w-full rounded-2xl" />

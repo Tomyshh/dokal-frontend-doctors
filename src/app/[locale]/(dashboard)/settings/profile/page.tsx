@@ -490,7 +490,7 @@ export default function ProfileSettingsPage() {
               max={240}
               value={consultationDurationMinutes}
               onChange={(e) => setConsultationDurationMinutes(Number(e.target.value) || 30)}
-              placeholder="30"
+              placeholder={t('consultationDurationMinutesPlaceholder')}
             />
           </div>
 
@@ -520,7 +520,7 @@ export default function ProfileSettingsPage() {
                 step={1}
                 value={priceMinShekels}
                 onChange={(e) => setPriceMinShekels(e.target.value)}
-                placeholder="150"
+                placeholder={t('priceMinPlaceholder')}
               />
               <Input
                 label={t('priceMax')}
@@ -529,7 +529,7 @@ export default function ProfileSettingsPage() {
                 step={1}
                 value={priceMaxShekels}
                 onChange={(e) => setPriceMaxShekels(e.target.value)}
-                placeholder="300"
+                placeholder={t('priceMaxPlaceholder')}
               />
             </div>
           </div>

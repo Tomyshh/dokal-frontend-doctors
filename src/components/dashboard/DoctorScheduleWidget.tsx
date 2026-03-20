@@ -9,6 +9,7 @@ import { Clock } from 'lucide-react';
 
 export default function DoctorScheduleWidget() {
   const t = useTranslations('dashboard');
+  const tc = useTranslations('common');
   const locale = useLocale();
   const { data: schedule, isLoading } = useWeeklySchedule();
 
@@ -21,7 +22,7 @@ export default function DoctorScheduleWidget() {
       </CardHeader>
 
       {isLoading ? (
-        <div className="space-y-3" aria-label="Chargement">
+        <div className="space-y-3" aria-label={tc('loading')}>
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between py-2 px-3 rounded-xl bg-muted/50">
               <div className="flex items-center gap-3">

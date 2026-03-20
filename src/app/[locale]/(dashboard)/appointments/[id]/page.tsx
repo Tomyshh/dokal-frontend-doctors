@@ -79,7 +79,7 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
 
   if (isLoading) {
     return (
-      <div className="space-y-6 max-w-3xl" aria-label="Chargement">
+      <div className="space-y-6 max-w-3xl" aria-label={tc('loading')}>
         <Skeleton className="h-8 w-44 rounded-lg" />
         <Card>
           <CardHeader>
@@ -224,9 +224,11 @@ export default function AppointmentDetailPage({ params }: { params: Promise<{ id
               <div className="flex items-center gap-2 text-sm">
                 <FileText className="h-4 w-4 text-muted-foreground" />
                 <span>
-                  {locale === 'fr'
-                    ? appointment.appointment_reasons.label_fr || appointment.appointment_reasons.label
-                    : appointment.appointment_reasons.label}
+                  {locale === 'he'
+                    ? appointment.appointment_reasons.label_he || appointment.appointment_reasons.label
+                    : locale === 'fr'
+                      ? appointment.appointment_reasons.label_fr || appointment.appointment_reasons.label
+                      : appointment.appointment_reasons.label}
                 </span>
               </div>
             )}

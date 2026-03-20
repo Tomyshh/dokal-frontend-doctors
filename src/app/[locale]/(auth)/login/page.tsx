@@ -136,7 +136,7 @@ export default function LoginPage() {
           id="email"
           type="email"
           label={t('email')}
-          placeholder="docteur@example.com"
+          placeholder={t('emailPlaceholder')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -147,7 +147,7 @@ export default function LoginPage() {
           id="password"
           type="password"
           label={t('password')}
-          placeholder="••••••••"
+          placeholder={t('passwordPlaceholder')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required

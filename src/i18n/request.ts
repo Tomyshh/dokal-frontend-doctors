@@ -9,12 +9,10 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale = routing.defaultLocale;
   }
 
-  // With Turbopack, `.arb` files are imported as raw strings (via raw-loader).
-  // ARB is JSON, so we parse it to get the messages object expected by next-intl.
-  const raw = (await import(`./messages/${locale}.arb`)).default as string;
+  const messages = (await import(`./messages/${locale}.json`)).default as Record<string, unknown>;
 
   return {
     locale,
-    messages: JSON.parse(raw) as Record<string, unknown>,
+    messages,
   };
 });
