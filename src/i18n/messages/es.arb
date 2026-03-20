@@ -196,7 +196,7 @@
     "planDescription": "Full access to all features",
     "perMonth": "month",
     "feature1": "Appointment management",
-    "feature2": "Patient records",
+    "feature2": "Historial de citas por paciente",
     "feature3": "Secure messaging",
     "feature4": "Smart scheduling",
     "trialTitle": "Prueba gratis — 60 días",
@@ -739,7 +739,7 @@
     "subtitle": "A modern SaaS experience to manage your appointments, patients and schedule.",
     "bullet1": "Clear and fast dashboard",
     "bullet2": "Daily appointment organization",
-    "bullet3": "Centralized messaging and patient records",
+    "bullet3": "Mensajería centralizada e historial de citas por paciente",
     "dashboardAlt": "Dokal dashboard preview",
     "helpTitle": "Need help?",
     "helpSubtitle": "Contact us and we’ll get back to you quickly.",
@@ -768,8 +768,8 @@
         "description": "Communicate with your patients securely and centrally, directly from the platform."
       },
       "patients": {
-        "title": "Patient records",
-        "description": "Access health profiles, appointment histories and medical information in one click."
+        "title": "Historial por paciente",
+        "description": "Consulte en un solo lugar el historial de citas pasadas y futuras de cada paciente para mantener un seguimiento coherente."
       }
     },
     "patientAppBadge": "App móvil para pacientes",
@@ -832,7 +832,7 @@
     "pricingStartTrial": "Iniciar prueba gratis",
     "pricingContactSales": "Contactar ventas",
     "pricingFeature1": "Gestión de citas",
-    "pricingFeature2": "Historial de pacientes",
+    "pricingFeature2": "Historial de citas por paciente",
     "pricingFeature3": "Mensajería segura",
     "pricingFeature4": "Programación inteligente",
     "pricingFeatureTeam": "Gestión de equipo ilimitada",
@@ -913,7 +913,7 @@
     "lastUpdated": "Last updated: February 8, 2026",
     "intro": "These Terms of Service govern access to and use of the Dokal platform. By signing up, you unconditionally accept these Terms.",
     "section1Title": "1. Purpose",
-    "section1Content": "Dokal is a SaaS platform designed for healthcare practitioners, enabling the management of appointments, patient records, scheduling and messaging.",
+    "section1Content": "Dokal es una plataforma SaaS para profesionales sanitarios que permite gestionar citas, el historial de citas por paciente, la agenda y la mensajería.",
     "section2Title": "2. Registration and Access",
     "section2Content": "Access to Dokal is restricted to healthcare professionals. When registering, you certify that you are a practicing professional and provide accurate information. You are responsible for keeping your login credentials confidential.",
     "section3Title": "3. Use of the Service",

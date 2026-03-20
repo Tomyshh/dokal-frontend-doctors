@@ -196,7 +196,7 @@
     "planDescription": "Accès complet à toutes les fonctionnalités",
     "perMonth": "mois",
     "feature1": "Gestion des rendez-vous",
-    "feature2": "Dossiers patients",
+    "feature2": "Historique des rendez-vous patients",
     "feature3": "Messagerie sécurisée",
     "feature4": "Planning intelligent",
     "trialTitle": "Essai gratuit — 60 jours",
@@ -726,7 +726,7 @@
     "subtitle": "Une expérience SaaS moderne pour gérer vos rendez-vous, vos patients et votre planning.",
     "bullet1": "Tableau de bord clair et rapide",
     "bullet2": "Organisation des rendez-vous au quotidien",
-    "bullet3": "Messagerie et dossiers patients centralisés",
+    "bullet3": "Messagerie centralisée et historique des rendez-vous par patient",
     "dashboardAlt": "Aperçu du dashboard Dokal",
     "helpTitle": "Besoin d’aide ?",
     "helpSubtitle": "Contactez-nous et nous vous répondrons rapidement.",
@@ -755,8 +755,8 @@
         "description": "Communiquez avec vos patients de manière sécurisée et centralisée directement depuis la plateforme."
       },
       "patients": {
-        "title": "Dossiers patients",
-        "description": "Accédez aux profils santé, historiques de rendez-vous et informations médicales en un clic."
+        "title": "Historique par patient",
+        "description": "Consultez pour chaque patient l'historique de ses rendez-vous passés et à venir, pour garder le fil de vos consultations."
       }
     },
     "patientAppBadge": "Application mobile patient",
@@ -819,7 +819,7 @@
     "pricingStartTrial": "Commencer l'essai gratuit",
     "pricingContactSales": "Nous contacter",
     "pricingFeature1": "Gestion des rendez-vous",
-    "pricingFeature2": "Dossiers patients",
+    "pricingFeature2": "Historique des rendez-vous patients",
     "pricingFeature3": "Messagerie sécurisée",
     "pricingFeature4": "Planning intelligent",
     "pricingFeatureTeam": "Gestion d'équipe illimitée",
@@ -900,7 +900,7 @@
     "lastUpdated": "Dernière mise à jour : 8 février 2026",
     "intro": "Les présentes conditions générales d'utilisation (CGU) régissent l'accès et l'utilisation de la plateforme Dokal. En vous inscrivant, vous acceptez sans réserve les présentes CGU.",
     "section1Title": "1. Objet",
-    "section1Content": "Dokal est une plateforme SaaS destinée aux praticiens de santé, permettant la gestion des rendez-vous, des dossiers patients, du planning et de la messagerie.",
+    "section1Content": "Dokal est une plateforme SaaS destinée aux praticiens de santé, permettant la gestion des rendez-vous, l'historique des rendez-vous par patient, le planning et la messagerie.",
     "section2Title": "2. Inscription et accès",
     "section2Content": "L'accès à Dokal est réservé aux professionnels de santé. Lors de votre inscription, vous certifiez être un praticien en exercice et fournir des informations exactes. Vous êtes responsable de la confidentialité de vos identifiants de connexion.",
     "section3Title": "3. Utilisation du service",
